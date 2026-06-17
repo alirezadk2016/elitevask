@@ -8,6 +8,12 @@ const manrope = Manrope({
   variable: "--font-manrope",
 });
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+};
+
 export const metadata = {
   title: "Elite Vask – Mobil bil dampvask på Sjælland | Vi kører til dig",
   description: "Elite Vask – mobil bil dampvask på Sjælland. Rent, effektivt og miljøvenligt. Vælg biltype, se pris og book tid online. Vi kører til dig.",
