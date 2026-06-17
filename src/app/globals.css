@@ -36,7 +36,9 @@ section{position:relative}
 .nav-links a:hover{color:#fff}
 .nav-right{display:flex;align-items:center;gap:13px}
 .lang{display:flex;gap:2px;background:var(--surface);border:1px solid var(--line);border-radius:99px;padding:3px}
-.lang button{background:none;border:none;cursor:pointer;font-family:inherit;font-size:12.5px;font-weight:600;color:var(--muted);padding:5px 8px;border-radius:99px;transition:.15s;display:flex;align-items:center;justify-content:center;line-height:1}
+.lang-mobile{display:none}
+.lang button{background:none;border:none;cursor:pointer;font-family:inherit;font-size:11px;font-weight:700;color:var(--muted);padding:5px 9px;border-radius:99px;transition:.15s;display:flex;align-items:center;gap:5px;line-height:1}
+.lang button svg{flex-shrink:0;border-radius:2px}
 .lang button.on{background:var(--green);color:#062313}
 .nav-phone{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;background:var(--surface);border:1px solid var(--line);transition:.15s}
 .nav-phone:hover{border-color:var(--green)}
@@ -402,7 +404,7 @@ section{position:relative}
 .extra-item .ex-price{font-size:13px;color:var(--green);font-weight:700}
 .extra-item .ex-desc{font-size:11.5px;color:var(--muted-2)}
 @media(max-width:880px){
-  .nav-links{display:none}.nav-phone{display:none}.menu-toggle{display:block}
+  .nav-links{display:none}.nav-phone{display:none}.menu-toggle{display:block}.lang:not(.lang-mobile){display:none}.lang-mobile{display:flex}
   .car-grid{grid-template-columns:repeat(2,1fr)}
   .calc-zip{margin-left:0;width:100%;justify-content:space-between}
   .pkgs{grid-template-columns:1fr}.pkg{border-right:none;border-bottom:1px solid var(--line)}.pkg:last-child{border-bottom:none}
@@ -420,7 +422,7 @@ section{position:relative}
   .plate-btn{width:100%}
   .plate-dk input{font-size:22px;letter-spacing:3px}
   .hero.hero-img{padding:0;min-height:100svh;display:flex;align-items:center;overflow:hidden}
-  .hero-bg-img{object-fit:cover;object-position:center center;height:120%;top:-10%;width:100%;will-change:transform}
+  .hero-bg-img{position:absolute;top:-10%;bottom:auto;left:0;right:0;width:100%;height:120%;object-fit:cover;object-position:center center;will-change:transform}
   .hero-overlay{background:linear-gradient(to bottom,rgba(8,16,12,.6) 0%,rgba(8,16,12,.45) 50%,rgba(8,16,12,.85) 100%)}
   .hero-inner{padding:100px 0 80px;width:100%}
   .hero h1{font-size:clamp(28px,7vw,44px);letter-spacing:-1px}
