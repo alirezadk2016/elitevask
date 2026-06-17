@@ -209,11 +209,22 @@ function doLookup(){
       showPlateResult('<span>'+(LANG==='da'?'Forbindelsesfejl. Prøv igen.':'Connection error. Please try again.')+'</span>','err');
     });
 }
+/* ====== PLATE localStorage ====== */
+(function(){
+  try{
+    var saved=localStorage.getItem('ev_plate');
+    if(saved&&plateInput)plateInput.value=saved;
+  }catch(e){}
+})();
+function savePlate(plate){try{if(plate)localStorage.setItem('ev_plate',plate);}catch(e){}}
 if(plateBtn){
   plateBtn.addEventListener('click',doLookup);
   plateInput.addEventListener('keydown',function(e){if(e.key==='Enter')doLookup();});
   plateInput.addEventListener('input',function(){plateInput.value=plateInput.value.toUpperCase();});
 }
+// Save plate on successful lookup
+var _origShowPlate=showPlateResult;
+showPlateResult=function(html,type){_origShowPlate(html,type);if(type==='ok')savePlate(plateInput.value.replace(/\s/g,'').toUpperCase());};
 
 /* ====== FLOW STEP 3 = open booking ====== */
 var flowBook3=document.getElementById('flowBook3');
@@ -365,7 +376,22 @@ function drawWiz(){
   // bind extras (multi-select toggle)
   wizBody.querySelectorAll('[data-ext]').forEach(function(o){o.addEventListener('click',function(){var id=o.dataset.ext;var idx=wiz.extras.indexOf(id);if(idx>=0){wiz.extras.splice(idx,1);o.classList.remove('sel');}else{wiz.extras.push(id);o.classList.add('sel');}});});
   var bk=document.getElementById('wizBack');if(bk)bk.addEventListener('click',function(){saveStep();step--;drawWiz();});
-  document.getElementById('wizNext').addEventListener('click',function(){saveStep();if(step<TOTAL){step++;drawWiz();}else{submitBooking();step=8;drawWiz();}});
+  document.getElementById('wizNext').addEventListener('click',function(){
+    saveStep();
+    if(step<TOTAL){step++;drawWiz();}
+    else{
+      var btn=document.getElementById('wizNext');
+      if(btn){btn.disabled=true;btn.textContent=(LANG==='da'?'Sender...':'Sending...');}
+      submitBooking(function(err){
+        if(err){
+          if(btn){btn.disabled=false;btn.textContent=W('send');}
+          var errEl=document.getElementById('wiz-err');
+          if(!errEl){errEl=document.createElement('p');errEl.id='wiz-err';errEl.style.cssText='color:#c0392b;font-size:13px;margin-top:8px;text-align:center';wizBody.appendChild(errEl);}
+          errEl.textContent=err;
+        }else{step=8;drawWiz();}
+      });
+    }
+  });
 }
 function saveStep(){
   if(step===4){wiz.addr=val('f_addr');wiz.zip=val('f_zip');wiz.city=val('f_city');}
@@ -374,29 +400,32 @@ function saveStep(){
 }
 function val(id){var e=document.getElementById(id);return e?e.value:'';}
 
-function submitBooking(){
+function submitBooking(cb){
   var fee=driveFee(wiz.zip);
   var price=wiz.car?wiz.car.prices[wiz.pkg?wiz.pkg.id:'hele']:0;
   var extPrice=wiz.extras.reduce(function(s,id){var e=EXTRAS.filter(function(x){return x.id===id;})[0];return s+(e?e.price:0);},0);
   var tot=price+fee+extPrice;
   var L=(LANG==="da");
   var extList=wiz.extras.length>0?wiz.extras.map(function(id){var e=EXTRAS.filter(function(x){return x.id===id;})[0];return e?e.name[LANG]:'';}).join(', '):(L?"Ingen":"None");
-  var lines=[
-    (L?"Ny bookinganmodning – Elite Vask":"New booking request – Elite Vask"),"",
-    (L?"Bil":"Car")+": "+(wiz.car?wiz.car.label[LANG]:'-'),
-    (L?"Pakke":"Package")+": "+(wiz.pkg?wiz.pkg.name[LANG]:'-'),
-    (L?"Tilvalg":"Add-ons")+": "+extList,
-    (L?"Adresse":"Address")+": "+wiz.addr+", "+(wiz.zip||"")+" "+(wiz.city||""),
-    (L?"Dato":"Date")+": "+(wiz.date||"-")+" "+(wiz.time||""),
-    (L?"Navn":"Name")+": "+(wiz.name||"-"),
-    (L?"Telefon":"Phone")+": "+(wiz.phone||"-"),
-    "Email: "+(wiz.email||"-"),
-    (L?"Besked":"Message")+": "+(wiz.msg||"-"),"",
-    (L?"Anslået pris":"Estimated price")+": "+fmtKr(tot)+(fee>0?(" ("+(L?"inkl. kørsel ":"incl. travel ")+fmtKr(fee)+")"):"")
-  ];
-  var subject=encodeURIComponent("Booking: "+(wiz.car?wiz.car.label[LANG]:'-')+" – "+(wiz.pkg?wiz.pkg.name[LANG]:'-'));
-  var body=encodeURIComponent(lines.join("\n"));
-  try{window.location.href="mailto:alirezadk2021@gmail.com?subject="+subject+"&body="+body;}catch(e){}
+  var priceStr=fmtKr(tot)+(fee>0?(" ("+(L?"inkl. kørsel ":"incl. travel ")+fmtKr(fee)+")"):"");
+  fetch('/api/book',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      car:wiz.car?wiz.car.label[LANG]:'-',
+      pkg:wiz.pkg?wiz.pkg.name[LANG]:'-',
+      extras:extList,
+      addr:wiz.addr,zip:wiz.zip,city:wiz.city,
+      date:wiz.date,time:wiz.time,
+      name:wiz.name,phone:wiz.phone,email:wiz.email,msg:wiz.msg,
+      price:priceStr,lang:LANG
+    })
+  }).then(function(r){
+    return r.json().then(function(d){return {status:r.status,data:d};});
+  }).then(function(res){
+    if(res.status===409&&res.data&&res.data.message){cb(res.data.message);}
+    else{cb(null);}
+  }).catch(function(){cb(null);});
 }
 
 /* ====== LIGHTBOX ====== */
