@@ -58,6 +58,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="da" className={manrope.variable}>
       <head>
+        <meta name="trustpilot-one-time-domain-verification-id" content="3c40dbdd-ba69-4e5f-94e9-55aa98bd97b7" />
         {JSONLD.map((obj, i) => (
           <script
             key={i}
