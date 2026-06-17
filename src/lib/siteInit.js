@@ -546,7 +546,7 @@ function submitBooking(cb){
       {keys:['leasing','lease','aflevering'],ans:'Ja! Vi tilbyder Returklargøring specielt til aflevering af leasingbiler. Ring til os for en aftale.'},
       {keys:['motor','motorrens'],ans:'Ja, vi tilbyder motorrens som tilvalg (+300 kr). Det kan tilføjes til enhver pakke.'},
       {keys:['hjem','hjemme','arbejde'],ans:'Ja, vi er 100% mobile. Vi kører ud til din adresse – hjemme, på arbejdet eller hvad der passer dig.'},
-      {keys:['kontakt','ring','telefon','nummer'],ans:'Du kan ringe til os på <a href="tel:+4524440321">+45 24 44 03 21</a> eller skrive til alirezadk2021@gmail.com'},
+      {keys:['kontakt','ring','telefon','nummer'],ans:'Du kan ringe til os på <a href="tel:+4524440321">+45 24 44 03 21</a> eller skrive til elitevask.info@gmail.com'},
       {keys:['firma','adresse','kontor','søborg'],ans:'Firmaadresse: Høje Gladsaxe 17, 2860 Søborg. Men vi kører ud til dig – du behøver ikke komme til os!'},
     ],
     en:[
@@ -558,7 +558,7 @@ function submitBooking(cb){
       {keys:['lease','leasing','return'],ans:'Yes! We offer a Lease Return package specially made for returning lease cars.'},
       {keys:['engine','engine clean'],ans:'Yes, we offer engine cleaning as an add-on (+300 kr). Can be added to any package.'},
       {keys:['home','address','workplace'],ans:'Yes, we are 100% mobile. We drive to your address – at home, at work, wherever suits you.'},
-      {keys:['contact','call','phone','number'],ans:'You can call us at <a href="tel:+4524440321">+45 24 44 03 21</a> or email alirezadk2021@gmail.com'},
+      {keys:['contact','call','phone','number'],ans:'You can call us at <a href="tel:+4524440321">+45 24 44 03 21</a> or email elitevask.info@gmail.com'},
       {keys:['office','address','company','søborg'],ans:'Company address: Høje Gladsaxe 17, 2860 Søborg. But we drive to you – you don\'t need to come to us!'},
     ]
   };
