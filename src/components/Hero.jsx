@@ -1,17 +1,17 @@
 const HTML = `<!-- HERO -->
-<section class="hero"><div class="wrap hero-inner">
+<section class="hero hero-img"><div class="hero-overlay"></div><div class="wrap hero-inner">
   <div class="badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg><span data-i18n="hero_badge">Vi kører til dig – hele Sjælland</span></div>
   <h1><span data-i18n="hero_h1a">Vi kører til dig</span><br><em data-i18n="hero_h1b">og vasker din bil</em></h1>
   <p data-i18n="hero_p">Mobil bil dampvask med premium produkter. Rent, effektivt og miljøvenligt – uden at du forlader hjemmet.</p>
   <div class="hero-flow">
-    <span class="flow-step"><span class="fn">1</span><span data-i18n="flow1">Vælg biltype</span></span>
+    <span class="flow-step"><span class="fn">1</span><span data-i18n="flow1">Indtast nummerplade</span></span>
     <span class="flow-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
     <span class="flow-step"><span class="fn">2</span><span data-i18n="flow2">Se pris</span></span>
     <span class="flow-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
     <span class="flow-step"><span class="fn">3</span><span data-i18n="flow3">Book tid</span></span>
   </div>
   <div class="hero-cta">
-    <a href="#vaelg" class="btn btn-green btn-lg"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2v-4c0-1-.7-1.8-1.5-2L16 10l-2.2-2.3c-.4-.4-1-.7-1.7-.7H5c-.6 0-1.1.4-1.4 1L2 11v6h2"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg><span data-i18n="hero_cta1">Vælg din biltype</span></a>
+    <a href="#vaelg" class="btn btn-green btn-lg"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2v-4c0-1-.7-1.8-1.5-2L16 10l-2.2-2.3c-.4-.4-1-.7-1.7-.7H5c-.6 0-1.1.4-1.4 1L2 11v6h2"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg><span data-i18n="hero_cta1">Slå nummerplade op</span></a>
     <button class="btn btn-ghost btn-lg" data-book data-i18n="hero_cta2">Book med det samme</button>
   </div>
 </div></section>`;
