@@ -260,6 +260,10 @@ section{position:relative}
 .lightbox img{max-width:100%;max-height:88vh;border-radius:var(--r);box-shadow:0 20px 60px rgba(0,0,0,.6)}
 .lightbox .lb-close{position:absolute;top:18px;right:20px;background:rgba(255,255,255,.1);border:1px solid var(--line-2);color:#fff;width:42px;height:42px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center}
 .lightbox .lb-close svg{width:22px;height:22px}
+.lb-prev,.lb-next{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;width:48px;height:48px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.15s;z-index:1}
+.lb-prev{left:16px}.lb-next{right:16px}
+.lb-prev:hover,.lb-next:hover{background:rgba(255,255,255,.25)}
+.lb-prev svg,.lb-next svg{width:24px;height:24px}
 /* FAQ */
 .faq{max-width:760px;margin:44px auto 0}
 .qa{border-bottom:1px solid var(--line)}

@@ -516,13 +516,36 @@ function submitBooking(cb){
 /* ====== LIGHTBOX ====== */
 (function(){
   var lb=document.getElementById('lightbox'),img=document.getElementById('lbImg');
-  document.querySelectorAll('.gitem').forEach(function(g){
-    g.addEventListener('click',function(){img.src=g.dataset.full;lb.classList.add('open');document.body.style.overflow='hidden';});
-  });
+  var items=[],cur=0;
+  function open(idx){
+    cur=idx;img.src=items[cur];lb.classList.add('open');document.body.style.overflow='hidden';
+    document.getElementById('lbPrev').style.display=items.length>1?'':'none';
+    document.getElementById('lbNext').style.display=items.length>1?'':'none';
+  }
   function close(){lb.classList.remove('open');document.body.style.overflow='';img.src='';}
+  function prev(){cur=(cur-1+items.length)%items.length;img.src=items[cur];}
+  function next(){cur=(cur+1)%items.length;img.src=items[cur];}
+  document.querySelectorAll('.gitem').forEach(function(g,i){
+    items.push(g.dataset.full||g.querySelector('img')?.src||'');
+    g.addEventListener('click',function(){open(i);});
+  });
   document.getElementById('lbClose').addEventListener('click',close);
+  document.getElementById('lbPrev').addEventListener('click',function(e){e.stopPropagation();prev();});
+  document.getElementById('lbNext').addEventListener('click',function(e){e.stopPropagation();next();});
   lb.addEventListener('click',function(e){if(e.target===lb)close();});
-  document.addEventListener('keydown',function(e){if(e.key==='Escape')close();});
+  document.addEventListener('keydown',function(e){
+    if(!lb.classList.contains('open'))return;
+    if(e.key==='Escape')close();
+    if(e.key==='ArrowLeft')prev();
+    if(e.key==='ArrowRight')next();
+  });
+  // swipe support
+  var tx=0;
+  lb.addEventListener('touchstart',function(e){tx=e.touches[0].clientX;},{passive:true});
+  lb.addEventListener('touchend',function(e){
+    var dx=e.changedTouches[0].clientX-tx;
+    if(Math.abs(dx)>50){dx<0?next():prev();}
+  });
 })();
 
 /* ====== CHATBOT ====== */
