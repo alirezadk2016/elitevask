@@ -21,9 +21,12 @@ function slotKey(date, time) {
 function buildTransport() {
   const user = process.env.GMAIL_USER || COMPANY_EMAIL;
   const pass = process.env.GMAIL_PASS;
+  console.log('[book] GMAIL_USER:', user, '| GMAIL_PASS set:', !!pass);
   if (!pass) return null;
   return nodemailer.createTransport({
-    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true,
     auth: { user, pass },
   });
 }
@@ -121,6 +124,7 @@ export async function POST(request) {
     }
   }
 
+  console.warn('[book] No SMTP configured — GMAIL_PASS missing. Booking logged only.');
   console.log('BOOKING (no SMTP):\n' + text);
   return Response.json({ ok: true, warn: 'no_smtp' });
 }
