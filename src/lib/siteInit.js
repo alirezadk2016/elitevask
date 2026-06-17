@@ -177,12 +177,30 @@ function showPlateResult(html,type){
   plateResult.className='plate-result plate-result-'+type;
   plateResult.innerHTML=html;
 }
+function fetchPlate(plate){
+  // Try client-side direct fetch first (bypasses Vercel network restrictions)
+  return fetch('https://www.tjekbil.dk/api/v3/dmr/plate/'+plate,{headers:{'Accept':'application/json'}})
+    .then(function(r){if(!r.ok)throw new Error('tjekbil '+r.status);return r.json();})
+    .then(function(d){
+      if(!d||d.error||(!d.make&&!d.mærke&&!d.brand))throw new Error('no data');
+      // normalize client-side
+      var make=d.make||d.brand||d.mærke||d.maerke||'';
+      var model=d.model||d.modelBetegnelse||d.Model||'';
+      var w=Number(d.totalWeight||d.totalVaegt||d.tekniskTotalvægt||0);
+      var usage=d.usageCode||d.anvBeskrivelse||d.anvendelsesBeskrivelse||'';
+      return {make:make,model:model,variant:d.variant||'',firstRegistration:d.firstRegistration||d.registreringsDato||d.foersteRegistreringsDato||'',totalWeight:w,usageCode:usage};
+    })
+    .catch(function(){
+      // Fall back to our server proxy
+      return fetch('/api/plate?plate='+encodeURIComponent(plate)).then(function(r){return r.json();});
+    });
+}
 function doLookup(){
   var plate=plateInput.value.replace(/\s/g,'').toUpperCase();
   if(plate.length<2){showPlateResult('<span>'+(LANG==='da'?'Indtast en gyldig nummerplade':'Enter a valid plate number')+'</span>','err');return;}
   plateBtn.disabled=true;
   plateBtn.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="spin"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg><span>'+(LANG==='da'?'Søger...':'Searching...')+'</span>';
-  fetch('/api/plate?plate='+encodeURIComponent(plate))
+  fetchPlate(plate)
     .then(function(r){return r.json();})
     .then(function(data){
       plateBtn.disabled=false;
@@ -277,8 +295,7 @@ function doWizPlateLookup(inputEl,resultEl,btnEl){
   if(plate.length<2){resultEl.style.display='block';resultEl.className='wiz-plate-result err';resultEl.innerHTML=LANG==='da'?'Indtast en gyldig nummerplade':'Enter a valid plate number';return;}
   btnEl.disabled=true;
   btnEl.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" class="spin"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>';
-  fetch('/api/plate?plate='+encodeURIComponent(plate))
-    .then(function(r){return r.json();})
+  fetchPlate(plate)
     .then(function(data){
       btnEl.disabled=false;btnEl.textContent=W('plate_search');
       if(data.error){resultEl.style.display='block';resultEl.className='wiz-plate-result err';resultEl.innerHTML=LANG==='da'?'Bil ikke fundet. Vælg manuelt.':'Car not found. Select manually.';return;}
@@ -334,9 +351,20 @@ function drawWiz(){
     h+='<div class="field"><label>'+W('addr')+'</label><input id="f_addr" value="'+wiz.addr+'" placeholder="Vejnavn 12"></div>';
     h+='<div class="field"><div class="row2"><div><label>'+W('zip')+'</label><input id="f_zip" inputmode="numeric" maxlength="4" value="'+(wiz.zip||"")+'" placeholder="4700"></div><div><label>'+W('city')+'</label><input id="f_city" value="'+wiz.city+'" placeholder="Næstved"></div></div></div>';
   }else if(step===5){
+    var minD=(function(){var d=new Date();d.setDate(d.getDate()+1);return d.toISOString().split('T')[0];})();
     h+='<div class="wiz-q">'+W('s5')+'</div>';
-    h+='<div class="field"><label>'+W('date')+'</label><input id="f_date" type="date" value="'+wiz.date+'"></div>';
-    h+='<div class="field"><label>'+W('time')+'</label><input id="f_time" type="time" value="'+wiz.time+'"></div>';
+    h+='<div class="field"><label>'+W('date')+'</label><input id="f_date" type="date" value="'+wiz.date+'" min="'+minD+'"></div>';
+    h+='<div class="field"><label>'+(LANG==='da'?'Vælg tidspunkt':'Choose time')+'</label>';
+    h+='<div class="slot-grid" id="slotGrid">';
+    var SLOTS=['08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00'];
+    if(!wiz.date){
+      h+='<div class="slot-hint">'+(LANG==='da'?'Vælg dato først':'Choose date first')+'</div>';
+    }else{
+      SLOTS.forEach(function(s){
+        h+='<button class="slot'+(wiz.time===s?' sel':'')+'" data-slot="'+s+'">'+s+'</button>';
+      });
+    }
+    h+='</div></div>';
   }else if(step===6){
     h+='<div class="wiz-q">'+W('s6')+'</div>';
     h+='<div class="field"><label>'+W('name')+'</label><input id="f_name" value="'+wiz.name+'" placeholder="Dit navn"></div>';
@@ -383,6 +411,19 @@ function drawWiz(){
     if(wpi)wpi.addEventListener('input',function(){wpi.value=wpi.value.toUpperCase();});
     if(wpb){wpb.addEventListener('click',function(){doWizPlateLookup(wpi,wpr,wpb);});wpi.addEventListener('keydown',function(e){if(e.key==='Enter')doWizPlateLookup(wpi,wpr,wpb);});}
   }
+  // bind step 5 date+slot
+  if(step===5){
+    var fd=document.getElementById('f_date');
+    if(fd){
+      fd.addEventListener('change',function(){wiz.date=fd.value;wiz.time='';loadSlots(fd.value);});
+      if(wiz.date)loadSlots(wiz.date);
+    }
+    document.addEventListener('click',function slotClick(e){
+      var s=e.target.closest('.slot');if(!s||s.classList.contains('booked'))return;
+      document.querySelectorAll('#slotGrid .slot').forEach(function(x){x.classList.remove('sel');});
+      s.classList.add('sel');wiz.time=s.dataset.slot;
+    },{once:false});
+  }
   // bind car options
   wizBody.querySelectorAll('[data-car]').forEach(function(o){o.addEventListener('click',function(){wiz.car=CARS.filter(function(c){return c.id===o.dataset.car;})[0];wizBody.querySelectorAll('[data-car]').forEach(function(x){x.classList.remove('sel');});o.classList.add('sel');});});
   // bind package options
@@ -409,8 +450,41 @@ function drawWiz(){
 }
 function saveStep(){
   if(step===4){wiz.addr=val('f_addr');wiz.zip=val('f_zip');wiz.city=val('f_city');}
-  if(step===5){wiz.date=val('f_date');wiz.time=val('f_time');}
+  if(step===5){wiz.date=val('f_date');}// time saved on slot click
   if(step===6){wiz.name=val('f_name');wiz.phone=val('f_phone');wiz.email=val('f_email');wiz.msg=val('f_msg');}
+}
+function loadSlots(date){
+  var grid=document.getElementById('slotGrid');if(!grid)return;
+  var SLOTS=['08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00'];
+  grid.innerHTML='<div class="slot-hint" style="grid-column:1/-1">'+(LANG==='da'?'Henter ledige tider…':'Loading available times…')+'</div>';
+  fetch('/api/book?date='+encodeURIComponent(date))
+    .then(function(r){return r.json();})
+    .then(function(res){
+      var booked=(res.booked||[]);
+      grid.innerHTML=SLOTS.map(function(s){
+        var isBooked=booked.indexOf(s)>=0;
+        var isSel=wiz.time===s;
+        return '<button class="slot'+(isBooked?' booked':isSel?' sel':'')+'" data-slot="'+s+'"'+(isBooked?' disabled title="'+(LANG==='da'?'Optaget':'Booked')+'"':'')+'>'+s+(isBooked?' 🔴':'')+'</button>';
+      }).join('');
+      grid.querySelectorAll('.slot:not(.booked)').forEach(function(btn){
+        btn.addEventListener('click',function(){
+          grid.querySelectorAll('.slot').forEach(function(x){x.classList.remove('sel');});
+          btn.classList.add('sel');wiz.time=btn.dataset.slot;
+        });
+      });
+    })
+    .catch(function(){
+      grid.innerHTML=SLOTS.map(function(s){
+        var isSel=wiz.time===s;
+        return '<button class="slot'+(isSel?' sel':'')+'" data-slot="'+s+'">'+s+'</button>';
+      }).join('');
+      grid.querySelectorAll('.slot').forEach(function(btn){
+        btn.addEventListener('click',function(){
+          grid.querySelectorAll('.slot').forEach(function(x){x.classList.remove('sel');});
+          btn.classList.add('sel');wiz.time=btn.dataset.slot;
+        });
+      });
+    });
 }
 function val(id){var e=document.getElementById(id);return e?e.value:'';}
 

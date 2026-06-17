@@ -2,16 +2,49 @@ import nodemailer from 'nodemailer';
 
 const COMPANY_EMAIL = 'alirezadk2021@gmail.com';
 
+// In-memory fallback (works within same serverless instance)
+const memSlots = new Map();
+
 let kvClient = null;
 async function getKV() {
   if (kvClient) return kvClient;
   try {
     const { kv } = await import('@vercel/kv');
+    // Test that env vars exist before returning
+    if (!process.env.KV_REST_API_URL) return null;
     kvClient = kv;
     return kv;
   } catch {
     return null;
   }
+}
+
+async function isSlotBooked(key) {
+  try {
+    const kv = await getKV();
+    if (kv) return !!(await kv.get(key));
+  } catch {}
+  return memSlots.has(key);
+}
+
+async function bookSlot(key, value) {
+  try {
+    const kv = await getKV();
+    if (kv) { await kv.set(key, value, { ex: 60 * 60 * 24 * 30 }); return; }
+  } catch {}
+  memSlots.set(key, value);
+}
+
+async function getBookedSlots(date) {
+  try {
+    const kv = await getKV();
+    if (kv) {
+      const keys = await kv.keys(`slot:${date}:*`);
+      return keys.map((k) => k.split(':').slice(2).join(':'));
+    }
+  } catch {}
+  const prefix = `slot:${date}:`;
+  return [...memSlots.keys()].filter(k => k.startsWith(prefix)).map(k => k.slice(prefix.length));
 }
 
 function slotKey(date, time) {
@@ -35,12 +68,8 @@ export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const date = searchParams.get('date');
   if (!date) return Response.json({ booked: [] });
-
   try {
-    const kv = await getKV();
-    if (!kv) return Response.json({ booked: [] });
-    const keys = await kv.keys(`slot:${date}:*`);
-    const times = keys.map((k) => k.split(':').slice(2).join(':'));
+    const times = await getBookedSlots(date);
     return Response.json({ booked: times });
   } catch {
     return Response.json({ booked: [] });
@@ -56,25 +85,18 @@ export async function POST(request) {
   const { car, pkg, extras, addr, zip, city, date, time, name, phone, email, msg, price, lang } = body;
 
   if (date && time) {
-    try {
-      const kv = await getKV();
-      if (kv) {
-        const key = slotKey(date, time);
-        const existing = await kv.get(key);
-        if (existing) {
-          const L = lang !== 'en';
-          return Response.json({
-            error: 'slot_taken',
-            message: L
-              ? 'Dette tidspunkt er desværre allerede booket. Vælg venligst et andet tidspunkt.'
-              : 'This time slot is already booked. Please choose a different time.',
-          }, { status: 409 });
-        }
-        await kv.set(key, { name: name || 'unknown', bookedAt: new Date().toISOString() }, { ex: 60 * 60 * 24 * 30 });
-      }
-    } catch (kvErr) {
-      console.error('KV error:', kvErr.message);
+    const key = slotKey(date, time);
+    const taken = await isSlotBooked(key);
+    if (taken) {
+      const L = lang !== 'en';
+      return Response.json({
+        error: 'slot_taken',
+        message: L
+          ? 'Dette tidspunkt er desværre allerede booket. Vælg venligst et andet tidspunkt.'
+          : 'This time slot is already booked. Please choose a different time.',
+      }, { status: 409 });
     }
+    await bookSlot(key, { name: name || 'unknown', bookedAt: new Date().toISOString() });
   }
 
   const L = lang !== 'en';

@@ -328,6 +328,13 @@ section{position:relative}
 .summary .tot .v{color:var(--green)}
 .wiz-nav{display:flex;gap:10px;margin-top:18px}
 .wiz-nav .btn{flex:1}
+.slot-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
+.slot-hint{grid-column:1/-1;color:var(--muted);font-size:13px;text-align:center;padding:8px}
+.slot{padding:10px 6px;border-radius:8px;text-align:center;font-weight:700;font-size:14px;cursor:pointer;border:2px solid var(--green);color:var(--green);background:transparent;transition:all .15s;font-family:inherit}
+.slot:hover:not(.booked){background:var(--green);color:#fff}
+.slot.sel{background:var(--green);color:#fff}
+.slot.booked{border-color:#e74c3c;color:#e74c3c;cursor:not-allowed;opacity:.65}
+.slot.booked:hover{background:transparent}
 .wiz-back{background:var(--surface-2);color:#fff;border:1px solid var(--line)}
 .wiz-done{text-align:center;padding:20px 6px}
 .wiz-done .chk{width:64px;height:64px;border-radius:50%;background:var(--green-soft);display:flex;align-items:center;justify-content:center;margin:0 auto 16px}
