@@ -111,6 +111,7 @@ section{position:relative}
 .car:hover svg.cs,.car.on svg.cs{color:var(--green)}
 .car .nm{font-size:14.5px;font-weight:700;color:#fff}
 .car .ex{font-size:12px;color:var(--muted-2);margin-top:3px}
+.car .car-price{font-size:12px;color:var(--green);font-weight:700;margin-top:5px}
 
 /* PRICE CALCULATOR */
 .calc{margin-top:26px;border:1px solid var(--line-2);border-radius:var(--r);overflow:hidden;display:none;background:var(--surface)}
@@ -435,13 +436,14 @@ section{position:relative}
   .gallery{grid-template-columns:repeat(2,1fr)}
   .contact-grid{grid-template-columns:1fr;gap:32px}
   .footer-grid{grid-template-columns:1fr 1fr;gap:30px}.footer .fb{grid-column:1/-1}
+  html,body{overflow-x:clip}
   .mobile-cta{display:flex}
   .hero-flow{display:none}
   .plate-field{flex-direction:column}
   .plate-btn{width:100%}
   .plate-dk input{font-size:22px;letter-spacing:3px}
-  .hero.hero-img{padding:0;min-height:100svh;display:flex;align-items:center;overflow:hidden}
-  .hero-bg-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 30%}
+  .hero.hero-img{padding:0;min-height:100vh;min-height:100svh;display:flex;align-items:center;overflow:hidden}
+  .hero-bg-img{position:absolute;top:0;left:0;right:0;bottom:0;width:100%;height:100%;object-fit:cover;object-position:center 30%}
   .hero-overlay{background:linear-gradient(to bottom,rgba(8,16,12,.7) 0%,rgba(8,16,12,.5) 50%,rgba(8,16,12,.85) 100%)}
   .hero-inner{padding:80px 0 100px;width:100%}
   .hero h1{font-size:clamp(28px,7vw,44px);letter-spacing:-1px}
@@ -459,8 +461,8 @@ section{position:relative}
   .wiz-plate-lookup{width:100%}
 }
 @media(max-width:520px){
-  html,body{overflow-x:hidden;max-width:100vw}
-  *{max-width:100%}
+  html,body{overflow-x:clip;max-width:100vw}
+  *{box-sizing:border-box;max-width:100%}
   .wrap{padding:0 16px}
   .car-grid{grid-template-columns:1fr 1fr;gap:11px}.car svg.cs{width:84px;height:46px}
   .work-grid{grid-template-columns:1fr 1fr}

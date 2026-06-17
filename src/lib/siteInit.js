@@ -63,7 +63,8 @@ function renderCars(){
   CARS.forEach(function(c){
     var d=document.createElement('div');d.className='car';d.dataset.id=c.id;
     if(selCar&&selCar.id===c.id)d.classList.add('on');
-    d.innerHTML='<svg class="cs" viewBox="0 0 120 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">'+c.svg+'</svg><div class="nm">'+c.label[LANG]+'</div><div class="ex">'+c.ex[LANG]+'</div>';
+    var minPrice=Math.min(c.prices.udv,c.prices.indv,c.prices.hele);
+    d.innerHTML='<svg class="cs" viewBox="0 0 120 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">'+c.svg+'</svg><div class="nm">'+c.label[LANG]+'</div><div class="ex">'+c.ex[LANG]+'</div><div class="car-price">'+(LANG==='da'?'Fra ':'From ')+fmtKr(minPrice)+'</div>';
     d.addEventListener('click',function(){selCar=c;renderCars();renderCalc();var cal=document.getElementById('calc');cal.classList.add('show');setTimeout(function(){cal.scrollIntoView({behavior:'smooth',block:'nearest'});},60);});
     g.appendChild(d);
   });
@@ -639,13 +640,13 @@ function submitBooking(cb){
   });
 })();
 
-/* ====== MOBILE PARALLAX ====== */
-if(window.innerWidth<=880){
+/* ====== DESKTOP PARALLAX ONLY ====== */
+if(window.innerWidth>880){
   var heroBg=document.querySelector('.hero-bg-img');
   if(heroBg){
     window.addEventListener('scroll',function(){
       var y=window.scrollY;
-      heroBg.style.transform='translateY('+Math.round(y*0.35)+'px)';
+      heroBg.style.transform='translateY('+Math.round(y*0.25)+'px)';
     },{passive:true});
   }
 }
