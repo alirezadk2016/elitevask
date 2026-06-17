@@ -1,6 +1,6 @@
 import nodemailer from 'nodemailer';
 
-const COMPANY_EMAIL = 'elitevask01@gmail.com';
+const COMPANY_EMAIL = 'alirezadk2021@gmail.com';
 
 let kvClient = null;
 async function getKV() {
