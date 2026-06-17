@@ -477,5 +477,17 @@ function submitBooking(){
 
 /* ====== MENU + INIT ====== */
 document.getElementById('menuBtn').addEventListener('click',function(){document.getElementById('vaelg').scrollIntoView({behavior:'smooth'});});
+
+/* ====== MOBILE PARALLAX ====== */
+if(window.innerWidth<=880){
+  var heroBg=document.querySelector('.hero-bg-img');
+  if(heroBg){
+    window.addEventListener('scroll',function(){
+      var y=window.scrollY;
+      heroBg.style.transform='translateY('+Math.round(y*0.35)+'px)';
+    },{passive:true});
+  }
+}
+
 applyLang();
 }
