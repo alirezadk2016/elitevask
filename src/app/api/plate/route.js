@@ -11,6 +11,7 @@ export async function GET(request) {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
   };
 
+  // Try multiple APIs in order
   const apis = [
     () => fetchSynsbasen(clean, HEADERS),
     () => fetchTjekbil(clean, HEADERS),
@@ -28,7 +29,7 @@ export async function GET(request) {
 
 async function fetchSynsbasen(plate, headers) {
   const res = await fetch(`https://api.synsbasen.dk/v1/vehicles/registration/${plate}`, {
-    headers,
+    headers: { ...headers, 'Accept': 'application/json' },
     next: { revalidate: 300 }
   });
   if (!res.ok) return null;
