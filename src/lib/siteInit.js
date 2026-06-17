@@ -190,7 +190,7 @@ function doLookup(){
       if(data.error){showPlateResult('<span>'+(LANG==='da'?'Bilen blev ikke fundet. Prøv igen eller vælg manuelt.':'Car not found. Try again or select manually.')+'</span>','err');return;}
       var make=data.make||'';var model=data.model||'';var variant=data.variant||'';
       var year=data.firstRegistration?(data.firstRegistration+'').substring(0,4):'';
-      var carId=mapDmrToCar(data);
+      var carId=data.category||mapDmrToCar(data);
       var carObj=CARS.filter(function(c){return c.id===carId;})[0];
       var carLabel=carObj?carObj.label[LANG]:'';
       var html='<div class="plate-found">';
@@ -213,7 +213,21 @@ function doLookup(){
 (function(){
   try{
     var saved=localStorage.getItem('ev_plate');
-    if(saved&&plateInput)plateInput.value=saved;
+    if(saved&&plateInput){
+      plateInput.value=saved;
+      // Show suggestion chip above the input
+      var wrap=plateInput.parentElement;
+      if(wrap&&!document.getElementById('plateSuggestion')){
+        var chip=document.createElement('div');
+        chip.id='plateSuggestion';
+        chip.style.cssText='display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:13px;color:var(--muted)';
+        chip.innerHTML=(LANG==='da'?'Sidst søgt: ':'Last searched: ')+'<button style="background:var(--green);color:#fff;border:none;border-radius:20px;padding:3px 12px;font-size:13px;font-weight:600;cursor:pointer" id="plateUseSaved">'+saved+'</button>';
+        wrap.insertBefore(chip,plateInput);
+        document.getElementById('plateUseSaved').addEventListener('click',function(){
+          plateInput.value=saved;doLookup();
+        });
+      }
+    }
   }catch(e){}
 })();
 function savePlate(plate){try{if(plate)localStorage.setItem('ev_plate',plate);}catch(e){}}
@@ -268,7 +282,7 @@ function doWizPlateLookup(inputEl,resultEl,btnEl){
     .then(function(data){
       btnEl.disabled=false;btnEl.textContent=W('plate_search');
       if(data.error){resultEl.style.display='block';resultEl.className='wiz-plate-result err';resultEl.innerHTML=LANG==='da'?'Bil ikke fundet. Vælg manuelt.':'Car not found. Select manually.';return;}
-      var carId=mapDmrToCar(data);
+      var carId=data.category||mapDmrToCar(data);
       var carObj=CARS.filter(function(c){return c.id===carId;})[0];
       if(carObj){
         wiz.car=carObj;
