@@ -609,8 +609,35 @@ function submitBooking(cb){
   input.addEventListener('keydown',function(e){if(e.key==='Enter')sendMsg();});
 })();
 
-/* ====== MENU + INIT ====== */
-document.getElementById('menuBtn').addEventListener('click',function(){document.getElementById('vaelg').scrollIntoView({behavior:'smooth'});});
+/* ====== HAMBURGER DRAWER ====== */
+(function(){
+  var btn=document.getElementById('menuBtn');
+  var drawer=document.getElementById('navDrawer');
+  if(!btn||!drawer)return;
+  btn.addEventListener('click',function(){
+    drawer.classList.toggle('open');
+    btn.classList.toggle('open');
+  });
+  // close on any drawer link click
+  drawer.querySelectorAll('.drawer-link,.drawer-book,.drawer-call').forEach(function(el){
+    el.addEventListener('click',function(){drawer.classList.remove('open');btn.classList.remove('open');});
+  });
+  // lang buttons in drawer
+  drawer.querySelectorAll('[data-lang]').forEach(function(el){
+    el.addEventListener('click',function(){
+      LANG=el.getAttribute('data-lang');
+      localStorage.setItem('lang',LANG);
+      applyLang();
+      drawer.classList.remove('open');btn.classList.remove('open');
+    });
+  });
+  // close on outside click
+  document.addEventListener('click',function(e){
+    if(drawer.classList.contains('open')&&!drawer.contains(e.target)&&e.target!==btn&&!btn.contains(e.target)){
+      drawer.classList.remove('open');btn.classList.remove('open');
+    }
+  });
+})();
 
 /* ====== MOBILE PARALLAX ====== */
 if(window.innerWidth<=880){
