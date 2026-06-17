@@ -17,6 +17,7 @@ import MobileCTA from "@/components/MobileCTA";
 import Lightbox from "@/components/Lightbox";
 import BookingWizard from "@/components/BookingWizard";
 import SiteScripts from "@/components/SiteScripts";
+import Chatbot from "@/components/Chatbot";
 
 export default function Page() {
   return (
@@ -40,6 +41,7 @@ export default function Page() {
       <MobileCTA />
       <Lightbox />
       <BookingWizard />
+      <Chatbot />
       <SiteScripts />
     </>
   );
