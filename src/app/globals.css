@@ -51,6 +51,7 @@ section{position:relative}
 .btn-lg{padding:15px 30px;font-size:15.5px}
 .menu-toggle{display:none;background:none;border:none;color:#fff;cursor:pointer}
 .menu-toggle svg{width:26px;height:26px}
+.lang-mobile{display:none}
 
 /* HERO */
 .hero{padding:46px 0 32px;text-align:center;overflow:hidden}
@@ -399,7 +400,7 @@ section{position:relative}
 .extra-item .ex-price{font-size:13px;color:var(--green);font-weight:700}
 .extra-item .ex-desc{font-size:11.5px;color:var(--muted-2)}
 @media(max-width:880px){
-  .nav-links{display:none}.nav-phone{display:none}.menu-toggle{display:block}
+  .nav-links{display:none}.nav-phone{display:none}.menu-toggle{display:block}.lang-mobile{display:flex}.nav-right .lang:not(.lang-mobile){display:none}
   .car-grid{grid-template-columns:repeat(2,1fr)}
   .calc-zip{margin-left:0;width:100%;justify-content:space-between}
   .pkgs{grid-template-columns:1fr}.pkg{border-right:none;border-bottom:1px solid var(--line)}.pkg:last-child{border-bottom:none}
