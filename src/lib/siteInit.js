@@ -88,6 +88,15 @@ function renderCalc(){
     el.querySelector('.pbtn').addEventListener('click',function(){openWiz(selCar,pk);});
     p.appendChild(el);
   });
+  // Render package tabs for mobile
+  var tabs=document.getElementById('pkgTabs');
+  if(tabs){
+    tabs.innerHTML=PKGS.map(function(pk,i){return '<button class="pkg-tab'+(i===0?' on':'')+'" data-pkg-idx="'+i+'">'+pk.name[LANG]+'</button>';}).join('');
+    if(window.innerWidth<=880){
+      var els=p.querySelectorAll('.pkg');
+      els.forEach(function(el,j){el.style.display=j===0?'':'none';});
+    }
+  }
 }
 /* ====== REVIEWS / FAQ ====== */
 function renderReviews(){
@@ -120,24 +129,34 @@ document.querySelectorAll('.lang button').forEach(function(b){
 
 /* ====== ZIP ====== */
 document.getElementById('zip').addEventListener('input',function(e){zipVal=e.target.value.replace(/\D/g,'');e.target.value=zipVal;if(selCar)renderCalc();});
+/* ====== PKG TABS (mobile) ====== */
+document.addEventListener('click',function(e){
+  var tab=e.target.closest('.pkg-tab');if(!tab)return;
+  var idx=parseInt(tab.dataset.pkgIdx,10);
+  document.querySelectorAll('.pkg-tab').forEach(function(t){t.classList.remove('on');});
+  tab.classList.add('on');
+  if(window.innerWidth<=880){document.querySelectorAll('#pkgs .pkg').forEach(function(p,j){p.style.display=j===idx?'':'none';});}
+});
 
 /* ====== PLATE LOOKUP (main page) ====== */
 function mapDmrToCar(data){
+  // usageCode from normalized route.js (Danish "anvBeskrivelse" → usageCode)
   var kind=(data.usageCode||data.kind||'').toLowerCase();
   if(kind.includes('vare')||kind.includes('lastbil')||kind.includes('truck')||kind.includes('van'))return 'varebil';
+  if(kind.includes('person')||kind.includes('privat')){}// continue to weight check
   var w=Number(data.totalWeight||data.weight||0);
   if(w>0){
-    if(w<1400)return 'lille';
-    if(w<2000)return 'mellem';
-    if(w<3000)return 'stor';
+    if(w<1250)return 'lille';
+    if(w<1600)return 'mellem';
+    if(w<2500)return 'stor';
     return 'varebil';
   }
   var make=(data.make||'').toLowerCase();
   var model=(data.model||'').toLowerCase();
   var full=make+' '+model;
   var vanCars=['transit','caddy','berlingo','partner','jumpy','master','ducato','sprinter','vito','crafter','trafic'];
-  var largeCars=['passat','a4','a6','5-series','e-class','3-series','touareg','q5','q7','x5','cx-5','rav4','discovery','land rover','xc90','xc60','stationcar','verso','outlander','sorento','cx5','kuga','tiguan','kodiaq'];
-  var smallCars=['aygo','up!','up ','i10','i20','polo','fiesta','208','fabia','yaris','corsa','swift','twingo','smart','picanto','rio','ibiza','107','108','c1','vw lupo','ka','micra','clio'];
+  var largeCars=['passat','a4','a6','5-series','e-class','3-series','touareg','q5','q7','x5','cx-5','rav4','discovery','land rover','xc90','xc60','stationcar','verso','outlander','sorento'];
+  var smallCars=['aygo','up!','up ','i10','i20','polo','fiesta','208','fabia','yaris','corsa','swift','twingo','smart','picanto','rio','ibiza','107','108','c1','vw lupo'];
   for(var i=0;i<vanCars.length;i++){if(full.includes(vanCars[i]))return 'varebil';}
   for(var i=0;i<largeCars.length;i++){if(full.includes(largeCars[i]))return 'stor';}
   for(var i=0;i<smallCars.length;i++){if(full.includes(smallCars[i]))return 'lille';}
@@ -176,10 +195,13 @@ function doLookup(){
       var carLabel=carObj?carObj.label[LANG]:'';
       var html='<div class="plate-found">';
       html+='<div class="plate-car-info"><div class="plate-car-title"><strong>'+(make+' '+model+(variant?' '+variant:'')).trim()+'</strong>'+(year?' ('+year+')':'')+'</div>';
-      html+='<div class="plate-car-type"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>'+(LANG==='da'?'Kategori: ':'Category: ')+'<strong>'+carLabel+'</strong></div></div></div>';
+      html+='<div class="plate-car-type"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>'+(LANG==='da'?'Kategoriseret som: ':'Categorized as: ')+'<strong>'+carLabel+'</strong></div></div>';
+      html+='<button class="btn btn-green plate-select-btn" id="plateSelectBtn">'+(LANG==='da'?'Se priser for denne bil':'See prices for this car')+'</button></div>';
       showPlateResult(html,'ok');
-      selectCarById(carId);
-      setTimeout(function(){document.getElementById('vaelg').scrollIntoView({behavior:'smooth',block:'start'});},200);
+      document.getElementById('plateSelectBtn').addEventListener('click',function(){
+        selectCarById(carId);
+        document.getElementById('vaelg').scrollIntoView({behavior:'smooth',block:'start'});
+      });
     })
     .catch(function(){
       plateBtn.disabled=false;

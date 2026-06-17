@@ -36,6 +36,7 @@ const HTML = `<!-- CAR SELECTOR + CALCULATOR -->
         <input id="zip" type="text" inputmode="numeric" maxlength="4" placeholder="4700">
       </div>
     </div>
+    <div class="pkg-tabs" id="pkgTabs"></div>
     <div class="pkgs" id="pkgs"></div>
     <div class="note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><span data-i18n="calc_note">Priserne er vejledende. Kørsel beregnes ud fra postnummer. Endelig pris bekræftes ved booking.</span></div>
   </div>
