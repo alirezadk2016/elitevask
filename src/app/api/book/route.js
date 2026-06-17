@@ -85,6 +85,17 @@ export async function POST(request) {
   const { car, pkg, extras, addr, zip, city, date, time, name, phone, email, msg, price, lang } = body;
 
   if (date && time) {
+    // Reject past slots (Copenhagen time = UTC+1 or UTC+2 in summer)
+    const slotMs = new Date(`${date}T${time}:00+02:00`).getTime();
+    if (slotMs < Date.now()) {
+      const L = lang !== 'en';
+      return Response.json({
+        error: 'slot_past',
+        message: L
+          ? 'Dette tidspunkt er allerede passeret. Vælg venligst et fremtidigt tidspunkt.'
+          : 'This time slot is in the past. Please choose a future time.',
+      }, { status: 409 });
+    }
     const key = slotKey(date, time);
     const taken = await isSlotBooked(key);
     if (taken) {

@@ -453,7 +453,7 @@ section{position:relative}
   .hero-cta .btn{width:100%;justify-content:center}
   .btn-lg{padding:14px 24px;font-size:15px}
   .chatbot{bottom:90px;right:16px}
-  .chat-window{width:calc(100vw - 32px);right:0;max-height:65vh}
+  .chat-window{position:fixed;bottom:160px;right:16px;left:16px;width:auto;max-height:65vh}
   .pkg-tabs{display:flex;gap:6px;overflow-x:auto;padding:0 0 12px;scrollbar-width:none;-ms-overflow-style:none;margin-bottom:2px}
   .pkg-tabs::-webkit-scrollbar{display:none}
   .pkg-tab{background:var(--surface);border:1px solid var(--line);border-radius:99px;padding:9px 18px;font-size:13.5px;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap;font-family:inherit;transition:.15s;flex-shrink:0}

@@ -454,38 +454,34 @@ function saveStep(){
   if(step===5){wiz.date=val('f_date');}// time saved on slot click
   if(step===6){wiz.name=val('f_name');wiz.phone=val('f_phone');wiz.email=val('f_email');wiz.msg=val('f_msg');}
 }
+function isPastSlot(date,time){
+  // Compare slot datetime to now in Copenhagen time (UTC+2 summer)
+  var slotMs=new Date(date+'T'+time+':00+02:00').getTime();
+  return slotMs<Date.now();
+}
+function renderSlotGrid(grid,booked,date){
+  var SLOTS=['08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00'];
+  grid.innerHTML=SLOTS.map(function(s){
+    var past=isPastSlot(date,s);
+    var isBooked=booked.indexOf(s)>=0||past;
+    var isSel=wiz.time===s;
+    var label=past?(LANG==='da'?'Passeret':'Past'):(isBooked?'🔴':'');
+    return '<button class="slot'+(isBooked?' booked':isSel?' sel':'')+'" data-slot="'+s+'"'+(isBooked?' disabled':'')+'>'+(past?'<s>'+s+'</s>':s)+(label?' <small>'+label+'</small>':'')+'</button>';
+  }).join('');
+  grid.querySelectorAll('.slot:not(.booked)').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      grid.querySelectorAll('.slot').forEach(function(x){x.classList.remove('sel');});
+      btn.classList.add('sel');wiz.time=btn.dataset.slot;
+    });
+  });
+}
 function loadSlots(date){
   var grid=document.getElementById('slotGrid');if(!grid)return;
-  var SLOTS=['08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00'];
   grid.innerHTML='<div class="slot-hint" style="grid-column:1/-1">'+(LANG==='da'?'Henter ledige tider…':'Loading available times…')+'</div>';
   fetch('/api/book?date='+encodeURIComponent(date))
     .then(function(r){return r.json();})
-    .then(function(res){
-      var booked=(res.booked||[]);
-      grid.innerHTML=SLOTS.map(function(s){
-        var isBooked=booked.indexOf(s)>=0;
-        var isSel=wiz.time===s;
-        return '<button class="slot'+(isBooked?' booked':isSel?' sel':'')+'" data-slot="'+s+'"'+(isBooked?' disabled title="'+(LANG==='da'?'Optaget':'Booked')+'"':'')+'>'+s+(isBooked?' 🔴':'')+'</button>';
-      }).join('');
-      grid.querySelectorAll('.slot:not(.booked)').forEach(function(btn){
-        btn.addEventListener('click',function(){
-          grid.querySelectorAll('.slot').forEach(function(x){x.classList.remove('sel');});
-          btn.classList.add('sel');wiz.time=btn.dataset.slot;
-        });
-      });
-    })
-    .catch(function(){
-      grid.innerHTML=SLOTS.map(function(s){
-        var isSel=wiz.time===s;
-        return '<button class="slot'+(isSel?' sel':'')+'" data-slot="'+s+'">'+s+'</button>';
-      }).join('');
-      grid.querySelectorAll('.slot').forEach(function(btn){
-        btn.addEventListener('click',function(){
-          grid.querySelectorAll('.slot').forEach(function(x){x.classList.remove('sel');});
-          btn.classList.add('sel');wiz.time=btn.dataset.slot;
-        });
-      });
-    });
+    .then(function(res){renderSlotGrid(grid,res.booked||[],date);})
+    .catch(function(){renderSlotGrid(grid,[],date);});
 }
 function val(id){var e=document.getElementById(id);return e?e.value:'';}
 
