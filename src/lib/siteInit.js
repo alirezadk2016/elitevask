@@ -88,6 +88,15 @@ function renderCalc(){
     el.querySelector('.pbtn').addEventListener('click',function(){openWiz(selCar,pk);});
     p.appendChild(el);
   });
+  // Render package tabs for mobile
+  var tabs=document.getElementById('pkgTabs');
+  if(tabs){
+    tabs.innerHTML=PKGS.map(function(pk,i){return '<button class="pkg-tab'+(i===0?' on':'')+'" data-pkg-idx="'+i+'">'+pk.name[LANG]+'</button>';}).join('');
+    if(window.innerWidth<=880){
+      var els=p.querySelectorAll('.pkg');
+      els.forEach(function(el,j){el.style.display=j===0?'':'none';});
+    }
+  }
 }
 /* ====== REVIEWS / FAQ ====== */
 function renderReviews(){
@@ -120,6 +129,14 @@ document.querySelectorAll('.lang button').forEach(function(b){
 
 /* ====== ZIP ====== */
 document.getElementById('zip').addEventListener('input',function(e){zipVal=e.target.value.replace(/\D/g,'');e.target.value=zipVal;if(selCar)renderCalc();});
+/* ====== PKG TABS (mobile) ====== */
+document.addEventListener('click',function(e){
+  var tab=e.target.closest('.pkg-tab');if(!tab)return;
+  var idx=parseInt(tab.dataset.pkgIdx,10);
+  document.querySelectorAll('.pkg-tab').forEach(function(t){t.classList.remove('on');});
+  tab.classList.add('on');
+  if(window.innerWidth<=880){document.querySelectorAll('#pkgs .pkg').forEach(function(p,j){p.style.display=j===idx?'':'none';});}
+});
 
 /* ====== PLATE LOOKUP (main page) ====== */
 function mapDmrToCar(data){
