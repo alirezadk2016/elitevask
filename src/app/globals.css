@@ -36,10 +36,11 @@ section{position:relative}
 .nav-links a:hover{color:#fff}
 .nav-right{display:flex;align-items:center;gap:13px}
 .lang{display:flex;gap:2px;background:var(--surface);border:1px solid var(--line);border-radius:99px;padding:3px}
-.lang button{background:none;border:none;cursor:pointer;font-family:inherit;font-size:12.5px;font-weight:600;color:var(--muted);padding:5px 11px;border-radius:99px;transition:.15s}
+.lang button{background:none;border:none;cursor:pointer;font-family:inherit;font-size:12.5px;font-weight:600;color:var(--muted);padding:5px 8px;border-radius:99px;transition:.15s;display:flex;align-items:center;justify-content:center;line-height:1}
 .lang button.on{background:var(--green);color:#062313}
-.nav-phone{display:flex;align-items:center;gap:7px;font-size:14px;font-weight:600;white-space:nowrap}
-.nav-phone svg{width:15px;height:15px;color:var(--green)}
+.nav-phone{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;background:var(--surface);border:1px solid var(--line);transition:.15s}
+.nav-phone:hover{border-color:var(--green)}
+.nav-phone svg{width:16px;height:16px;color:var(--green)}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:none;cursor:pointer;font-family:inherit;font-weight:600;border-radius:var(--r-sm);transition:transform .12s,background .15s,opacity .15s;white-space:nowrap}
 .btn:active{transform:scale(.97)}
 .btn-green{background:var(--green);color:#062313;padding:10px 20px;font-size:14px}
@@ -358,11 +359,13 @@ section{position:relative}
 .flow-link{text-decoration:none;cursor:pointer;transition:opacity .15s}
 .flow-link:hover{opacity:.8}
 .flow-link:hover .fn{background:var(--green);color:#062313}
+/* PKG TABS */
+.pkg-tabs{display:none}
 .chatbot{position:fixed;bottom:24px;right:24px;z-index:150}
 .chat-toggle{width:58px;height:58px;border-radius:50%;background:var(--green);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#062313;box-shadow:0 6px 24px rgba(55,210,120,.35);transition:transform .15s}
 .chat-toggle:hover{transform:scale(1.08)}
 .chat-badge{position:absolute;top:-4px;right:-4px;width:20px;height:20px;border-radius:50%;background:#e53;color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;border:2px solid var(--bg)}
-.chat-window{position:absolute;bottom:70px;right:0;width:320px;background:var(--surface);border:1px solid var(--line-2);border-radius:var(--r);box-shadow:0 20px 60px rgba(0,0,0,.4);overflow:hidden;display:flex;flex-direction:column}
+.chat-window{position:absolute;bottom:70px;right:0;width:320px;max-height:80vh;background:var(--surface);border:1px solid var(--line-2);border-radius:var(--r);box-shadow:0 20px 60px rgba(0,0,0,.4);overflow:hidden;display:flex;flex-direction:column}
 .chat-header{background:linear-gradient(135deg,var(--green-deep),#0a3d22);padding:14px 16px;display:flex;align-items:center;justify-content:space-between}
 .chat-header-info{display:flex;align-items:center;gap:10px}
 .chat-avatar{width:36px;height:36px;border-radius:50%;background:var(--green);color:#062313;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -425,7 +428,11 @@ section{position:relative}
   .hero-cta .btn{width:100%;justify-content:center}
   .btn-lg{padding:14px 24px;font-size:15px}
   .chatbot{bottom:90px;right:16px}
-  .chat-window{width:calc(100vw - 32px);right:0}
+  .chat-window{width:calc(100vw - 32px);right:0;max-height:65vh}
+  .pkg-tabs{display:flex;gap:6px;overflow-x:auto;padding:0 0 12px;scrollbar-width:none;-ms-overflow-style:none;margin-bottom:2px}
+  .pkg-tabs::-webkit-scrollbar{display:none}
+  .pkg-tab{background:var(--surface);border:1px solid var(--line);border-radius:99px;padding:9px 18px;font-size:13.5px;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap;font-family:inherit;transition:.15s;flex-shrink:0}
+  .pkg-tab.on{background:var(--green);color:#062313;border-color:var(--green)}
   .extras-grid{grid-template-columns:1fr}
   .wiz-plate-row{flex-direction:column}
   .wiz-plate-lookup{width:100%}
