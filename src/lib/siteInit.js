@@ -178,32 +178,53 @@ function showPlateResult(html,type){
   plateResult.className='plate-result plate-result-'+type;
   plateResult.innerHTML=html;
 }
-function fetchPlate(plate){
-  // Try multiple client-side APIs (browser fetch avoids Vercel IP blocks)
-  var apis=[
-    'https://motorapi.dk/vehicles/'+plate,
-    'https://www.tjekbil.dk/api/v3/dmr/plate/'+plate,
-  ];
-  function tryNext(i){
-    if(i>=apis.length){
-      // Fall back to server proxy as last resort
-      return fetch('/api/plate?plate='+encodeURIComponent(plate)).then(function(r){return r.json();});
-    }
-    return fetch(apis[i],{headers:{'Accept':'application/json','User-Agent':'Mozilla/5.0'}})
-      .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
-      .then(function(d){
-        if(!d||(d.error&&!d.make&&!d.model&&!d.mærke&&!d.brand))throw new Error('no data');
-        var make=d.make||d.brand||d.mærke||d.maerke||'';
-        var model=d.model||d.modelBetegnelse||d.Model||d.modelName||'';
-        if(!make&&!model)throw new Error('empty');
-        var w=Number(d.totalWeight||d.totalVaegt||d.tekniskTotalvægt||d.weight||0);
-        var usage=d.usageCode||d.anvBeskrivelse||d.anvendelsesBeskrivelse||d.type||d.kind||'';
-        var year=d.firstRegistration||d.registreringsDato||d.foersteRegistreringsDato||d.year||'';
-        return {make:make,model:model,variant:d.variant||d.body||'',firstRegistration:year,totalWeight:w,usageCode:usage};
-      })
-      .catch(function(){return tryNext(i+1);});
+function parsePlateHtml(html){
+  function exTd(label){
+    var re=new RegExp('<td[^>]*>\\s*'+label+'[^<]*</td>\\s*<td[^>]*>([^<]{1,100})','i');
+    var m=html.match(re);return m?m[1].trim():'';
   }
-  return tryNext(0);
+  function ex(label){
+    var re=new RegExp(label+'[^<]*<[^>]+>([^<]{1,80})','i');
+    var m=html.match(re);return m?m[1].trim():'';
+  }
+  var make=exTd('M.rke')||exTd('Fabrikat')||ex('M.rke');
+  var model=exTd('Model')||ex('Model');
+  var variant=exTd('Variant')||ex('Variant');
+  var firstReg=exTd('1\\. reg')||exTd('F.rste reg')||ex('1\\. reg');
+  var ws=exTd('Totalv.gt')||ex('Totalv.gt');
+  var totalWeight=parseInt(ws.replace(/\D/g,''),10)||0;
+  var usageCode=exTd('Anvendelse')||exTd('K.ret.jsart')||ex('Anvendelse');
+  if(!make&&!model)return null;
+  return {make:make,model:model,variant:variant,firstRegistration:firstReg,totalWeight:totalWeight,usageCode:usageCode};
+}
+function fetchPlate(plate){
+  // 1) Try nummerplade.net via allorigins CORS proxy (browser-side, no Vercel IP block)
+  return fetch('https://api.allorigins.win/raw?url='+encodeURIComponent('https://www.nummerplade.net/nummerplade.asp?nummerplade='+plate))
+    .then(function(r){if(!r.ok)throw new Error('ao '+r.status);return r.text();})
+    .then(function(html){
+      var d=parsePlateHtml(html);
+      if(!d)throw new Error('no data');
+      d.category=mapDmrToCar(d);
+      return d;
+    })
+    .catch(function(){
+      // 2) Try motorapi.dk directly (might have CORS)
+      return fetch('https://motorapi.dk/vehicles/'+plate,{headers:{Accept:'application/json'}})
+        .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
+        .then(function(d){
+          if(!d||(!d.make&&!d.model))throw new Error('empty');
+          var make=d.make||d.brand||'';
+          var model=d.model||d.modelName||'';
+          var w=Number(d.totalWeight||d.weight||0);
+          var usage=d.usageCode||d.type||d.kind||'';
+          var year=d.firstRegistration||d.year||'';
+          return {make:make,model:model,variant:d.variant||d.body||'',firstRegistration:year,totalWeight:w,usageCode:usage};
+        })
+        .catch(function(){
+          // 3) Server proxy as final fallback
+          return fetch('/api/plate?plate='+encodeURIComponent(plate)).then(function(r){return r.json();});
+        });
+    });
 }
 function doLookup(){
   var plate=plateInput.value.replace(/\s/g,'').toUpperCase();
