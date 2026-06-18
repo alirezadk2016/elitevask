@@ -13,9 +13,11 @@ var PKGS=[
   {id:"guld",pop:false,gold:true,includes:["motor","lak"],relevant:["haar","barnesaede"],name:{da:"Guld pakke",en:"Gold package"},desc:{da:"Inkl. alle ydelser",en:"All services included"},feat:{da:["Alt ind & ud","+ Motorrens","+ Lak- & glansbeskyttelse","+ Dybderens ved uheld","+ Interiørbeskyttelse"],en:["Everything in & out","+ Engine clean","+ Paint & gloss protection","+ Deep clean if needed","+ Interior protection"]}}
 ];
 var EXTRAS=[
-  {id:"motor",name:{da:"Motorrens",en:"Engine clean"},price:300,desc:{da:"Grundig afrensning af motorrum",en:"Thorough engine bay cleaning"}},
-  {id:"lak",name:{da:"Lak & glansbeskyttelse",en:"Paint & gloss protection"},price:250,desc:{da:"Udvendig – langvarig ekstra glans",en:"Exterior – long-lasting gloss"}},
-  {id:"haar",name:{da:"Fjernelse af dyrehår",en:"Pet hair removal"},price:150,desc:{da:"Effektiv fjernelse af hår og fnug",en:"Effective removal of hair and lint"}},
+  {id:"motor",name:{da:"Motorrens",en:"Engine clean"},price:400,desc:{da:"Grundig afrensning af motorrum",en:"Thorough engine bay cleaning"}},
+  {id:"lak",name:{da:"Lak & glansbeskyttelse",en:"Paint & gloss protection"},price:300,desc:{da:"Udvendig – langvarig ekstra glans",en:"Exterior – long-lasting gloss"}},
+  {id:"pleje",name:{da:"Indvendig pleje & beskyttelse",en:"Interior care & protection"},price:200,desc:{da:"Beskytter og fornyer interiøret",en:"Protects and renews the interior"}},
+  {id:"haar",name:{da:"Fjernelse af dyrehår",en:"Pet hair removal"},price:300,desc:{da:"Effektiv fjernelse af hår og fnug",en:"Effective removal of hair and lint"}},
+  {id:"saede",name:{da:"Sæderens (stof)",en:"Seat clean (fabric)"},price:400,desc:{da:"Dybderens af stofsæder",en:"Deep clean of fabric seats"}},
   {id:"barnesaede",name:{da:"Barnesæde rens",en:"Child seat cleaning"},price:100,desc:{da:"Grundig og sikker rengøring",en:"Thorough and safe cleaning"}}
 ];
 var REVIEWS=[];
@@ -37,7 +39,7 @@ var WIZ={
 };
 
 /* ====== STATE ====== */
-var LANG="da", selCar=null, zipVal="";
+var LANG=localStorage.getItem('lang')||"da", selCar=null, zipVal="";
 function t(k){return (I18N[LANG][k]!==undefined)?I18N[LANG][k]:k;}
 function svgWrap(inner,w,h,col){return '<svg viewBox="0 0 120 64" width="'+w+'" height="'+h+'" fill="none" stroke="'+(col||"currentColor")+'" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">'+inner+'</svg>';}
 function fmtKr(n){return Math.round(n).toLocaleString('da-DK')+' kr';}
@@ -125,7 +127,8 @@ function applyLang(){
   renderCars();renderFaq();if(selCar)renderCalc();
 }
 document.querySelectorAll('.lang button').forEach(function(b){
-  b.addEventListener('click',function(){LANG=b.dataset.lang;document.querySelectorAll('.lang button').forEach(function(x){x.classList.remove('on');});b.classList.add('on');applyLang();});
+  if(b.dataset.lang===LANG)b.classList.add('on');
+  b.addEventListener('click',function(){LANG=b.dataset.lang;localStorage.setItem('lang',LANG);document.querySelectorAll('.lang button').forEach(function(x){x.classList.remove('on');});b.classList.add('on');applyLang();});
 });
 
 /* ====== ZIP ====== */

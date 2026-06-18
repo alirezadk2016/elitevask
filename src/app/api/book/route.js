@@ -56,7 +56,6 @@ function slotKey(date, time) {
 function buildTransport() {
   const user = process.env.GMAIL_USER || COMPANY_EMAIL;
   const pass = process.env.GMAIL_PASS;
-  console.log('[book] GMAIL_USER:', user, '| GMAIL_PASS set:', !!pass);
   if (!pass) return null;
   return nodemailer.createTransport({
     host: 'smtp.gmail.com',
@@ -88,8 +87,12 @@ export async function POST(request) {
 
   if (date && time) {
     // Reject past slots (Copenhagen time = UTC+1 or UTC+2 in summer)
-    const slotMs = new Date(`${date}T${time}:00+02:00`).getTime();
-    if (slotMs < Date.now()) {
+    // Compute Copenhagen UTC offset dynamically (handles CET/CEST automatically)
+    const nowInCph = new Date().toLocaleString('sv-SE', { timeZone: 'Europe/Copenhagen' });
+    const nowUtc = new Date().toLocaleString('sv-SE', { timeZone: 'UTC' });
+    const cphOffsetMs = (new Date(nowInCph) - new Date(nowUtc));
+    const slotMsFinal = new Date(`${date}T${time}:00Z`).getTime() - cphOffsetMs;
+    if (slotMsFinal < Date.now()) {
       const L = lang !== 'en';
       return Response.json({
         error: 'slot_past',

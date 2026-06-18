@@ -9,7 +9,7 @@ const HTML = `<!-- FOOTER -->
     <div class="col"><h5 data-i18n="foot_s1">Service</h5><a href="#vaelg" data-i18n="foot_l1">Vælg bil & priser</a><a href="#arbejde" data-i18n="foot_l2">Vores arbejde</a><a href="#anmeldelser" data-i18n="foot_l3">Anmeldelser</a><a href="#faq">FAQ</a></div>
     <div class="col"><h5 data-i18n="foot_s2">Kontakt</h5><a href="tel:+4524440321">+45 24 44 03 21</a><a href="mailto:elitevask.info@gmail.com">elitevask.info@gmail.com</a><a href="https://instagram.com/elitevasksjaelland">@elitevasksjaelland</a></div>
   </div>
-  <div class="footer-bottom"><span>Rent • Effektivt • Miljøvenligt</span><span>Handelsbetingelser · Privatpolitik · Cookies</span></div>
+  <div class="footer-bottom"><span>Rent • Effektivt • Miljøvenligt</span><span class="foot-legal"><a href="/handelsbetingelser">Handelsbetingelser</a> · <a href="/privatpolitik">Privatpolitik</a> · <a href="/cookies">Cookies</a></span></div>
 </div></footer>`;
 export default function Footer() {
   return <div dangerouslySetInnerHTML={{ __html: HTML }} />;
