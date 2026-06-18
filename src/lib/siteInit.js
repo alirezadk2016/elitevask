@@ -23,7 +23,7 @@ var EXTRAS=[
 var REVIEWS=[];
 var FAQ=[
   {q:{da:"Hvad koster mobil bilvask?",en:"What does mobile car wash cost?"},a:{da:"Prisen afhænger af biltype og pakke. En komplet vask starter fra 799 kr. Vælg din biltype ovenfor for at se den præcise pris.",en:"Price depends on car type and package. A full wash starts from 799 kr. Select your car type above to see the exact price."}},
-  {q:{da:"Hvor lang tid tager det?",en:"How long does it take?"},a:{da:"Typisk mellem 1 og 4 timer, afhængigt af pakke og bilens størrelse.",en:"Typically between 1 and 4 hours, depending on package and car size."}},
+  {q:{da:"Hvor lang tid tager det?",en:"How long does it take?"},a:{da:"Det afhænger af bilstørrelse:<br>• <strong>Lille bil:</strong> 100–120 min<br>• <strong>Mellemstor bil:</strong> 120–180 min<br>• <strong>Stor bil / SUV:</strong> 150–200 min<br>• <strong>Varebil:</strong> 90–180 min",en:"It depends on the car size:<br>• <strong>Small car:</strong> 100–120 min<br>• <strong>Medium car:</strong> 120–180 min<br>• <strong>Large car / SUV:</strong> 150–200 min<br>• <strong>Van:</strong> 90–180 min"}},
   {q:{da:"Dækker I hele Sjælland?",en:"Do you cover all of Zealand?"},a:{da:"Ja, vi dækker store dele af Sjælland, herunder Storkøbenhavn og Nordsjælland.",en:"Yes, we cover large parts of Zealand, including Greater Copenhagen and North Zealand."}},
   {q:{da:"Kan I vaske leasingbiler?",en:"Can you clean lease cars?"},a:{da:"Ja, vores Returklargøring-pakke er lavet specielt til aflevering af leasingbiler.",en:"Yes, our Lease return package is made specifically for returning lease cars."}},
   {q:{da:"Kommer I hjem til mig?",en:"Do you come to my home?"},a:{da:"Ja, vi er mobile og kører ud til din adresse – hjemme eller på arbejde.",en:"Yes, we are mobile and drive to your address – at home or at work."}},
@@ -612,9 +612,9 @@ function submitBooking(cb){
        ans:['Det afhænger af pakken 😊 <br>• <strong>Udvendig:</strong> vask, fælge, glas og gummi<br>• <strong>Fuld:</strong> + indvendig rens<br>• <strong>Guld:</strong> alt inkl. motorrens og lakbeskyttelse<br><a href="#vaelg">Se pakkerne →</a>'],
        follow:['Hvad koster Guld?','Book nu']},
       {keys:['tid','lang','timer','varighed','hurtigt'],
-       ans:['Typisk <strong>1–3 timer</strong> afhængigt af pakke og bilstørrelse. Vi fortæller den præcise tid, når du booker 🕐',
-            'En standard udvendig vask tager <strong>ca. 1–2 timer</strong>, fuld pakke <strong>2–4 timer</strong>. Vi aftaler et tidspunkt der passer dig.'],
-       follow:['Hvad koster det?','Book nu']},
+       interactive:'duration_da',
+       ans:[''],
+       follow:[]},
       {keys:['sjælland','dækker','område','kørsel','postnr','kører','afstand','nærhed'],
        ans:['Vi dækker <strong>hele Sjælland</strong> – Storkøbenhavn, Nordsjælland og Sydsjælland. Kørsel beregnes fra dit postnummer. <a href="#vaelg">Tjek pris for dit område →</a>'],
        follow:['Hvad koster det?','Book nu']},
@@ -629,7 +629,7 @@ function submitBooking(cb){
        ans:['Ja! Vi tilbyder <strong>Returklargøring</strong> – en grundig vask tilpasset leasingaflevering. Ring til os for et tilbud! <a href="tel:+4524440321">📞 +45 24 44 03 21</a>'],
        follow:['Hvad koster det?','Book nu']},
       {keys:['motor','motorrens','motorrum','motor'],
-       ans:['Ja, <strong>motorrens (+300 kr)</strong> kan tilføjes til enhver pakke – og er allerede inkluderet i Guld-pakken 🔧 En grundig dampvask af motorrum.'],
+       ans:['Ja, <strong>motorrens (+400 kr)</strong> kan tilføjes til enhver pakke – og er allerede inkluderet i Guld-pakken 🔧 En grundig dampvask af motorrum.'],
        follow:['Se Guld pakken','Book nu']},
       {keys:['hjem','hjemme','arbejde','kontor','adresse'],
        ans:['Vi er <strong>100% mobile</strong> – vi kører ud til dig, hvad enten du er hjemme, på arbejdet eller et andet sted. Du behøver ikke flytte bilen! 🚗'],
@@ -656,9 +656,9 @@ function submitBooking(cb){
        ans:["Depends on the package 😊<br>• <strong>Exterior:</strong> wash, rims, glass and rubber<br>• <strong>Full:</strong> + interior cleaning<br>• <strong>Gold:</strong> everything + engine clean and paint protection<br><a href='#vaelg'>See packages →</a>"],
        follow:['How much is Gold?','Book now']},
       {keys:['time','long','hours','duration','fast','quick'],
-       ans:['Typically <strong>1–3 hours</strong> depending on package and car size. We\'ll confirm the exact time when you book 🕐',
-            'A standard wash takes <strong>1–2 hours</strong>, full package <strong>2–4 hours</strong>. We\'ll schedule a time that works for you.'],
-       follow:['What does it cost?','Book now']},
+       interactive:'duration_en',
+       ans:[''],
+       follow:[]},
       {keys:['zealand','area','cover','where','zip','distance'],
        ans:['We cover <strong>all of Zealand</strong> – Greater Copenhagen, North and South Zealand. Travel is calculated from your zip code. <a href="#vaelg">Check price for your area →</a>'],
        follow:['What does it cost?','Book now']},
@@ -673,7 +673,7 @@ function submitBooking(cb){
        ans:['Yes! We offer a <strong>Lease Return</strong> package – a thorough wash tailored for lease car returns. Call us for a custom quote! <a href="tel:+4524440321">📞 +45 24 44 03 21</a>'],
        follow:['What does it cost?','Book now']},
       {keys:['engine','engine clean','hood','motor'],
-       ans:['Yes, <strong>engine cleaning (+300 kr)</strong> can be added to any package – and is already included in the Gold package 🔧'],
+       ans:['Yes, <strong>engine cleaning (+400 kr)</strong> can be added to any package – and is already included in the Gold package 🔧'],
        follow:['See Gold package','Book now']},
       {keys:['home','address','workplace','office'],
        ans:['We are <strong>100% mobile</strong> – we drive to you whether you\'re at home, at work or anywhere else. No need to move your car! 🚗'],
@@ -722,9 +722,56 @@ function submitBooking(cb){
       msgs.appendChild(fw);msgs.scrollTop=msgs.scrollHeight;
     },350);
   }
+  var DURATIONS={
+    da:{
+      q:'Hvilken bilstørrelse har du? 🚗',
+      cars:[
+        {l:'🚙 Lille bil',t:'100–120 min'},
+        {l:'🚗 Mellemstor bil',t:'120–180 min'},
+        {l:'🚐 Stor bil / SUV',t:'150–200 min'},
+        {l:'🚚 Varebil',t:'90–180 min'}
+      ],
+      ans:'<strong>{l}</strong> tager typisk <strong>{t}</strong>. Vi bekræfter præcis tid ved booking 🕐',
+      follow:['Hvad koster det?','Book nu']
+    },
+    en:{
+      q:'Which car size do you have? 🚗',
+      cars:[
+        {l:'🚙 Small car',t:'100–120 min'},
+        {l:'🚗 Medium car',t:'120–180 min'},
+        {l:'🚐 Large car / SUV',t:'150–200 min'},
+        {l:'🚚 Van',t:'90–180 min'}
+      ],
+      ans:'<strong>{l}</strong> typically takes <strong>{t}</strong>. We confirm exact time at booking 🕐',
+      follow:['What does it cost?','Book now']
+    }
+  };
+  function showDurationPicker(){
+    var d=DURATIONS[LANG]||DURATIONS.da;
+    showTyping();
+    setTimeout(function(){
+      addMsg(d.q,'bot');
+      var fw=document.createElement('div');fw.className='chat-follow';
+      d.cars.forEach(function(car){
+        var btn=document.createElement('button');btn.className='follow-chip';btn.textContent=car.l;
+        btn.addEventListener('click',function(){
+          fw.remove();
+          addMsg(car.l,'user');
+          var ans=d.ans.replace('{l}',car.l).replace('{t}',car.t);
+          showTyping();
+          setTimeout(function(){addMsg(ans,'bot');showFollowUp(d.follow);},800);
+        });
+        fw.appendChild(btn);
+      });
+      msgs.appendChild(fw);msgs.scrollTop=msgs.scrollHeight;
+    },700);
+  }
   function botReply(text){
     var faq=FAQ[LANG]||FAQ.da;var tl=text.toLowerCase();var match=null;
     for(var i=0;i<faq.length;i++){for(var j=0;j<faq[i].keys.length;j++){if(tl.includes(faq[i].keys[j])){match=faq[i];break;}}if(match)break;}
+    if(match&&match.interactive&&match.interactive.startsWith('duration')){
+      showDurationPicker();return;
+    }
     var ans,follow;
     if(match){
       var av=match.ans;ans=Array.isArray(av)?av[Math.floor(Math.random()*av.length)]:av;follow=match.follow;
