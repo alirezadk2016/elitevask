@@ -178,44 +178,8 @@ function showPlateResult(html,type){
   plateResult.className='plate-result plate-result-'+type;
   plateResult.innerHTML=html;
 }
-function parseTjekbilHtml(html){
-  // Title format: "DG94158 - MAZDA MX-5 1.5 SKYACTIV..."
-  var titleM=html.match(/<title[^>]*>[^-\|<]+-\s*([A-ZÆØÅ][^<\|]{2,80})/i);
-  // h1 format: "MAZDA MX-5"
-  var h1M=html.match(/<h1[^>]*>\s*([A-ZÆØÅ][A-ZÆØÅ0-9\s\-\.]{1,40})\s*<\/h1>/i);
-  // Next heading for variant
-  var varM=html.match(/<h[23][^>]*>\s*([\d][^<]{5,60})\s*<\/h[23]>/i);
-  var yearM=html.match(/(\d{4})/);
-  var make='',model='',variant='';
-  if(h1M){var p=h1M[1].trim().split(/\s+/);make=p[0]||'';model=p.slice(1).join(' ')||'';}
-  else if(titleM){var p=titleM[1].trim().split(/\s+/);make=p[0]||'';model=p.slice(1,3).join(' ')||'';}
-  if(varM)variant=varM[1].trim();
-  if(!make&&!model)return null;
-  var isVan=/varebil|varevogn/i.test(html);
-  return {make:make,model:model,variant:variant,firstRegistration:yearM?yearM[1]:'',totalWeight:0,usageCode:isVan?'Varebil':'Personbil'};
-}
 function fetchPlate(plate){
-  var proxies=[
-    'https://api.allorigins.win/raw?url=',
-    'https://corsproxy.io/?url=',
-    'https://api.codetabs.com/v1/proxy?quest=',
-  ];
-  var tjekUrl='https://www.tjekbil.dk/nummerplade/'+plate+'/overblik';
-  function tryProxy(i){
-    if(i>=proxies.length){
-      return fetch('/api/plate?plate='+encodeURIComponent(plate)).then(function(r){return r.json();});
-    }
-    return fetch(proxies[i]+encodeURIComponent(tjekUrl))
-      .then(function(r){if(!r.ok)throw new Error(r.status);return r.text();})
-      .then(function(html){
-        var d=parseTjekbilHtml(html);
-        if(!d)throw new Error('no data');
-        d.category=mapDmrToCar(d);
-        return d;
-      })
-      .catch(function(){return tryProxy(i+1);});
-  }
-  return tryProxy(0);
+  return fetch('/api/plate?plate='+encodeURIComponent(plate)).then(function(r){return r.json();});
 }
 function doLookup(){
   var plate=plateInput.value.replace(/\s/g,'').toUpperCase();
