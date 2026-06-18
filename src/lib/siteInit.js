@@ -179,22 +179,31 @@ function showPlateResult(html,type){
   plateResult.innerHTML=html;
 }
 function fetchPlate(plate){
-  // Try client-side direct fetch first (bypasses Vercel network restrictions)
-  return fetch('https://www.tjekbil.dk/api/v3/dmr/plate/'+plate,{headers:{'Accept':'application/json'}})
-    .then(function(r){if(!r.ok)throw new Error('tjekbil '+r.status);return r.json();})
-    .then(function(d){
-      if(!d||d.error||(!d.make&&!d.mærke&&!d.brand))throw new Error('no data');
-      // normalize client-side
-      var make=d.make||d.brand||d.mærke||d.maerke||'';
-      var model=d.model||d.modelBetegnelse||d.Model||'';
-      var w=Number(d.totalWeight||d.totalVaegt||d.tekniskTotalvægt||0);
-      var usage=d.usageCode||d.anvBeskrivelse||d.anvendelsesBeskrivelse||'';
-      return {make:make,model:model,variant:d.variant||'',firstRegistration:d.firstRegistration||d.registreringsDato||d.foersteRegistreringsDato||'',totalWeight:w,usageCode:usage};
-    })
-    .catch(function(){
-      // Fall back to our server proxy
+  // Try multiple client-side APIs (browser fetch avoids Vercel IP blocks)
+  var apis=[
+    'https://motorapi.dk/vehicles/'+plate,
+    'https://www.tjekbil.dk/api/v3/dmr/plate/'+plate,
+  ];
+  function tryNext(i){
+    if(i>=apis.length){
+      // Fall back to server proxy as last resort
       return fetch('/api/plate?plate='+encodeURIComponent(plate)).then(function(r){return r.json();});
-    });
+    }
+    return fetch(apis[i],{headers:{'Accept':'application/json','User-Agent':'Mozilla/5.0'}})
+      .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
+      .then(function(d){
+        if(!d||(d.error&&!d.make&&!d.model&&!d.mærke&&!d.brand))throw new Error('no data');
+        var make=d.make||d.brand||d.mærke||d.maerke||'';
+        var model=d.model||d.modelBetegnelse||d.Model||d.modelName||'';
+        if(!make&&!model)throw new Error('empty');
+        var w=Number(d.totalWeight||d.totalVaegt||d.tekniskTotalvægt||d.weight||0);
+        var usage=d.usageCode||d.anvBeskrivelse||d.anvendelsesBeskrivelse||d.type||d.kind||'';
+        var year=d.firstRegistration||d.registreringsDato||d.foersteRegistreringsDato||d.year||'';
+        return {make:make,model:model,variant:d.variant||d.body||'',firstRegistration:year,totalWeight:w,usageCode:usage};
+      })
+      .catch(function(){return tryNext(i+1);});
+  }
+  return tryNext(0);
 }
 function doLookup(){
   var plate=plateInput.value.replace(/\s/g,'').toUpperCase();
