@@ -439,11 +439,7 @@ function drawWiz(){
       fd.addEventListener('change',function(){wiz.date=fd.value;wiz.time='';loadSlots(fd.value);});
       if(wiz.date)loadSlots(wiz.date);
     }
-    document.addEventListener('click',function slotClick(e){
-      var s=e.target.closest('.slot');if(!s||s.classList.contains('booked'))return;
-      document.querySelectorAll('#slotGrid .slot').forEach(function(x){x.classList.remove('sel');});
-      s.classList.add('sel');wiz.time=s.dataset.slot;
-    },{once:false});
+    // slot clicks handled inside renderSlotGrid
   }
   // bind car options
   wizBody.querySelectorAll('[data-car]').forEach(function(o){o.addEventListener('click',function(){wiz.car=CARS.filter(function(c){return c.id===o.dataset.car;})[0];wizBody.querySelectorAll('[data-car]').forEach(function(x){x.classList.remove('sel');});o.classList.add('sel');});});
@@ -518,10 +514,10 @@ function renderSlotGrid(grid,booked,date){
     var label=s+(isBooked?' <small>🔴</small>':'');
     return '<button class="slot'+(cls?' '+cls:'')+'" data-slot="'+s+'"'+((isBooked||blocked)?' disabled':'')+'>'+label+'</button>';
   }).join('');
-  if(need>1){
-    grid.insertAdjacentHTML('beforebegin','<p class="slot-dur-hint">'+(LANG==='da'?'Behandlingstid: <strong>~'+(need)+' timer</strong> – markerede tider reserveres automatisk':'Service time: <strong>~'+need+' hours</strong> – marked slots reserved automatically')+'</p>');
+  if(need>1&&!document.querySelector('.slot-dur-hint')){
+    grid.insertAdjacentHTML('beforebegin','<p class="slot-dur-hint">'+(LANG==='da'?'Behandlingstid: <strong>~'+need+' timer</strong> – de markerede tider reserveres automatisk':'Service time: <strong>~'+need+' hours</strong> – marked slots reserved automatically')+'</p>');
   }
-  grid.querySelectorAll('.slot:not(.booked):not(.unavail)').forEach(function(btn){
+  grid.querySelectorAll('.slot:not([disabled])').forEach(function(btn){
     btn.addEventListener('click',function(){
       wiz.time=btn.dataset.slot;
       renderSlotGrid(grid,booked,date);
