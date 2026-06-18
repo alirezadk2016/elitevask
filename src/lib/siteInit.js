@@ -603,7 +603,7 @@ function submitBooking(cb){
       win.style.display='flex';win.style.flexDirection='column';
       badge.style.display='none';opened=true;
       if(msgs.children.length===0){
-        addMsg(LANG==='da'?'Hej! 👋 Jeg er Elite Vaskes bot. Hvad kan jeg hjælpe dig med?':'Hi! 👋 I\'m Elite Vask\'s bot. How can I help you?','bot');
+        addMsg(LANG==='da'?'Hej! 👋 Jeg er Elite Bot. Hvad kan jeg hjælpe dig med?':'Hi! 👋 I\'m Elite Bot. How can I help you?','bot');
         showQuick();
       }
     }else{win.style.display='none';opened=false;}

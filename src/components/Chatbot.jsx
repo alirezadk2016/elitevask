@@ -9,7 +9,7 @@ const HTML = `<!-- CHATBOT -->
       <div class="chat-header-info">
         <div class="chat-avatar">EV</div>
         <div>
-          <div class="chat-name">Elite Vask Support</div>
+          <div class="chat-name">Elite Bot</div>
           <div class="chat-status" data-i18n="chat_status">Svar indenfor minutter</div>
         </div>
       </div>
