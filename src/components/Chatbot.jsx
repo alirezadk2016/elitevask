@@ -7,27 +7,7 @@ const HTML = `<!-- CHATBOT -->
   <div id="chatWindow" class="chat-window" style="display:none">
     <div class="chat-header">
       <div class="chat-header-info">
-        <div class="chat-avatar"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- antenna -->
-  <line x1="11" y1="1" x2="11" y2="4" stroke="#062313" stroke-width="1.4" stroke-linecap="round"/>
-  <circle cx="11" cy="1" r="1" fill="#062313"/>
-  <!-- head -->
-  <rect x="3" y="4" width="16" height="11" rx="3" fill="#062313" opacity="0.85"/>
-  <rect x="4" y="5" width="14" height="9" rx="2.2" fill="#1aff7a" opacity="0.18"/>
-  <!-- eyes -->
-  <rect x="6" y="7.5" width="3.5" height="3" rx="1" fill="#062313"/>
-  <rect x="12.5" y="7.5" width="3.5" height="3" rx="1" fill="#062313"/>
-  <circle cx="7.75" cy="9" r="1" fill="#7effc2"/>
-  <circle cx="14.25" cy="9" r="1" fill="#7effc2"/>
-  <!-- mouth -->
-  <rect x="7" y="12" width="8" height="1.5" rx="0.75" fill="#062313" opacity="0.6"/>
-  <rect x="8" y="12" width="1.5" height="1.5" rx="0.4" fill="#7effc2"/>
-  <rect x="10.25" y="12" width="1.5" height="1.5" rx="0.4" fill="#7effc2"/>
-  <rect x="12.5" y="12" width="1.5" height="1.5" rx="0.4" fill="#7effc2"/>
-  <!-- body -->
-  <rect x="7" y="15.5" width="8" height="4" rx="1.5" fill="#062313" opacity="0.7"/>
-  <rect x="9" y="16.5" width="4" height="2" rx="0.8" fill="#1aff7a" opacity="0.3"/>
-</svg></div>
+        <div class="chat-avatar"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="3" r="1.5" fill="#062313"/><line x1="12" y1="4.5" x2="12" y2="7" stroke="#062313" stroke-width="1.5" stroke-linecap="round"/><rect x="4" y="7" width="16" height="10" rx="3" fill="#062313"/><circle cx="8.5" cy="12" r="2" fill="#9afabd"/><circle cx="15.5" cy="12" r="2" fill="#9afabd"/><circle cx="8.5" cy="12" r="0.9" fill="#062313"/><circle cx="15.5" cy="12" r="0.9" fill="#062313"/><rect x="9" y="15.5" width="6" height="1.5" rx="0.75" fill="#9afabd"/><rect x="7" y="18" width="10" height="5" rx="2" fill="#062313"/><rect x="10" y="19.5" width="4" height="2" rx="0.8" fill="#9afabd" opacity="0.4"/></svg></div>
         <div>
           <div class="chat-name">Elite Bot</div>
           <div class="chat-status" data-i18n="chat_status">Svar indenfor minutter</div>
