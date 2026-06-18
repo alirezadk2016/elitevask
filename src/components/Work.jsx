@@ -21,6 +21,7 @@ const HTML = `<!-- BEFORE/AFTER + GALLERY -->
     <figure class="gitem" data-full="/gallery/roof-before.jpg"><img src="/gallery/roof-before.jpg" alt="Tagkant alger før" loading="lazy"><figcaption>Tagkant · alger · før</figcaption></figure>
     <figure class="gitem" data-full="/gallery/roof-after.jpg"><img src="/gallery/roof-after.jpg" alt="Tagkant alger efter" loading="lazy"><figcaption>Tagkant · alger · efter</figcaption></figure>
     <figure class="gitem" data-full="/gallery/interior-before.jpg"><img src="/gallery/interior-before.jpg" alt="Interiør før" loading="lazy"><figcaption>Interiør · før</figcaption></figure>
+    <figure class="gitem" data-full="/gallery/interior-after.jpg"><img src="/gallery/interior-after.jpg" alt="Interiør efter" loading="lazy"><figcaption>Interiør · efter</figcaption></figure>
     <figure class="gitem" data-full="/gallery/steam-bmw.jpg"><img src="/gallery/steam-bmw.jpg" alt="Dampvask BMW" loading="lazy"><figcaption>Dampvask · BMW</figcaption></figure>
     <figure class="gitem" data-full="/gallery/steam-hood.jpg"><img src="/gallery/steam-hood.jpg" alt="Dampvask motorhjelm" loading="lazy"><figcaption>Dampvask · motorhjelm</figcaption></figure>
     <figure class="gitem" data-full="/gallery/IMG_20260512_174045896_HDR.jpg"><img src="/gallery/thumb_motor_for.jpg" alt="Motorrens før" loading="lazy"><figcaption>Motorrens · før</figcaption></figure>
