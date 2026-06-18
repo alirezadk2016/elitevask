@@ -14,8 +14,8 @@ const HTML = `<!-- BEFORE/AFTER + GALLERY -->
 
   <div class="center" style="margin-top:64px"><div class="eyebrow" data-i18n="gal_eyebrow">Galleri</div><h2 class="sec-title" data-i18n="gal_title">Billeder fra vores arbejde</h2></div>
   <div class="gallery" id="gallery">
-    <figure class="gitem" data-full="/gallery/img07.jpg"><img src="/gallery/img07.jpg" alt="Sæderens før" loading="lazy"><figcaption data-i18n="g_seat_for">Sæderens · før</figcaption></figure>
-    <figure class="gitem" data-full="/gallery/img08.jpg"><img src="/gallery/img08.jpg" alt="Sæderens efter" loading="lazy"><figcaption data-i18n="g_seat_efter">Sæderens · efter</figcaption></figure>
+    <figure class="gitem" data-full="/gallery/seat-before.jpg"><img src="/gallery/seat-before.jpg" alt="Sæderens før" loading="lazy"><figcaption data-i18n="g_seat_for">Sæderens · før</figcaption></figure>
+    <figure class="gitem" data-full="/gallery/seat-after.jpg"><img src="/gallery/seat-after.jpg" alt="Sæderens efter" loading="lazy"><figcaption data-i18n="g_seat_efter">Sæderens · efter</figcaption></figure>
     <figure class="gitem" data-full="/gallery/img03.jpg"><img src="/gallery/img03.jpg" alt="Tankdæksel før" loading="lazy"><figcaption data-i18n="g_fuel_for">Tankdæksel · før</figcaption></figure>
     <figure class="gitem" data-full="/gallery/img04.jpg"><img src="/gallery/img04.jpg" alt="Tankdæksel efter" loading="lazy"><figcaption data-i18n="g_fuel_efter">Tankdæksel · efter</figcaption></figure>
     <figure class="gitem" data-full="/gallery/img05.jpg"><img src="/gallery/img05.jpg" alt="Fodrum rens" loading="lazy"><figcaption data-i18n="g_floor_efter">Fodrum · rens</figcaption></figure>
