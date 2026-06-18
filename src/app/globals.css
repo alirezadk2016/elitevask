@@ -499,16 +499,16 @@ section{position:relative}
   .plate-field{flex-direction:column}
   .plate-btn{width:100%}
   .plate-dk input{font-size:22px;letter-spacing:3px}
-  .hero.hero-img{padding:0;min-height:100svh;display:flex;align-items:center;overflow:hidden}
+  .hero.hero-img{padding:0;min-height:100svh;display:flex;align-items:flex-start;overflow:hidden}
   .hero-bg-img{position:absolute;top:0;left:0;right:0;bottom:0;width:100%;height:100%;object-fit:cover;object-position:center 30%}
-  .hero-overlay{background:linear-gradient(to bottom,rgba(8,16,12,.7) 0%,rgba(8,16,12,.5) 50%,rgba(8,16,12,.85) 100%)}
-  .hero-inner{padding:20px 0 24px;width:100%}
-  .hero h1{font-size:clamp(36px,9.5vw,52px);letter-spacing:-1.5px;line-height:1.05}
-  .badge{margin-bottom:14px;padding:6px 13px}
-  .hero p{margin-top:10px;font-size:14px}
-  .hero-cta{flex-direction:column;align-items:stretch;gap:10px;padding:0 4px;margin-top:18px}
+  .hero-overlay{background:linear-gradient(to bottom,rgba(8,16,12,.75) 0%,rgba(8,16,12,.55) 55%,rgba(8,16,12,.88) 100%)}
+  .hero-inner{padding:28px 0 32px;width:100%}
+  .hero h1{font-size:clamp(34px,9vw,48px);letter-spacing:-1.2px;line-height:1.06}
+  .badge{margin-bottom:12px;padding:5px 12px;font-size:12px}
+  .hero p{margin-top:8px;font-size:13.5px;padding:0 4px}
+  .hero-cta{flex-direction:column;align-items:stretch;gap:8px;padding:0 4px;margin-top:16px}
   .hero-cta .btn{width:100%;justify-content:center}
-  .btn-lg{padding:13px 24px;font-size:15px}
+  .btn-lg{padding:12px 24px;font-size:15px}
   .tb-hide-mobile{display:none}
   .chatbot{bottom:90px;right:16px}
   .chat-window{position:fixed;bottom:160px;right:16px;left:16px;width:auto;max-height:65vh}
