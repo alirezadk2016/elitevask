@@ -324,14 +324,6 @@ function drawWiz(){
   var h=ctxBar+'<div class="wiz-stepnum">'+W('step')+' '+step+' '+W('of')+' '+TOTAL+'</div>';
   if(step===1){
     h+='<div class="wiz-q">'+W('s1')+'</div>';
-    // plate lookup widget
-    h+='<div class="wiz-plate-row">';
-    h+='<div class="wiz-plate-dk"><div class="wiz-plate-flag"><svg viewBox="0 0 20 28" width="18" height="24" fill="none"><rect width="20" height="28" fill="#C60C30"/><rect x="6" y="0" width="4" height="28" fill="white"/><rect x="0" y="12" width="20" height="4" fill="white"/></svg><span>DK</span></div>';
-    h+='<input id="wizPlateInput" type="text" maxlength="8" placeholder="AB 12 345" autocomplete="off"></div>';
-    h+='<button id="wizPlateLookupBtn" class="btn btn-green wiz-plate-lookup">'+W('plate_search')+'</button>';
-    h+='</div>';
-    h+='<div id="wizPlateResult" class="wiz-plate-result" style="display:none"></div>';
-    h+='<div class="plate-divider" style="margin:14px 0 10px"><span>'+W('plate_or')+'</span></div>';
     h+='<div class="opt-grid">';
     CARS.forEach(function(c){h+='<div class="opt'+(wiz.car&&wiz.car.id===c.id?' sel':'')+'" data-car="'+c.id+'">'+svgWrap(c.svg,46,26)+'<span>'+c.label[LANG]+'</span></div>';});
     h+='</div>';
