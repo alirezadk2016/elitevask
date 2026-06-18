@@ -224,6 +224,22 @@ section{position:relative}
 .info-card p{font-size:13.5px;color:var(--muted)}
 .eq-specs{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}.eq-specs span{font-size:11.5px;background:var(--green-soft);color:var(--green);border-radius:20px;padding:3px 10px}
 .soon{display:inline-block;margin-top:12px;font-size:11px;font-weight:600;color:var(--gold);background:var(--gold-soft);padding:3px 10px;border-radius:99px}
+/* WHY CARD */
+.info-card-why{cursor:pointer;transition:border-color .2s,box-shadow .2s;user-select:none}
+.info-card-why:hover{border-color:rgba(55,210,120,.35);box-shadow:0 0 0 1px rgba(55,210,120,.12)}
+.info-card-why.open{border-color:rgba(55,210,120,.4);background:linear-gradient(135deg,var(--surface) 0%,rgba(55,210,120,.06) 100%)}
+.why-header{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.why-toggle-icon{flex-shrink:0;width:28px;height:28px;border-radius:50%;background:var(--green-soft);display:flex;align-items:center;justify-content:center;transition:transform .3s}
+.why-toggle-icon svg{width:15px;height:15px;color:var(--green)}
+.info-card-why.open .why-toggle-icon{transform:rotate(180deg)}
+.why-teaser{margin-top:8px;font-size:13px;color:var(--muted);font-style:italic}
+.why-body{max-height:0;overflow:hidden;transition:max-height .45s cubic-bezier(.4,0,.2,1)}
+.info-card-why.open .why-body{max-height:900px}
+.why-items{padding-top:20px;display:flex;flex-direction:column;gap:16px}
+.why-item{display:flex;gap:14px;align-items:flex-start}
+.why-emoji{font-size:20px;flex-shrink:0;margin-top:1px}
+.why-item div strong{display:block;font-size:13.5px;font-weight:700;color:#fff;margin-bottom:3px}
+.why-item div p{font-size:12.5px;color:var(--muted);margin:0;line-height:1.55}
 
 /* REVIEWS */
 .rev-head{display:flex;align-items:center;gap:18px;justify-content:center;margin-top:30px;flex-wrap:wrap}
