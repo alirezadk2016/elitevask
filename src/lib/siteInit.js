@@ -198,8 +198,8 @@ function parsePlateHtml(html){
   return {make:make,model:model,variant:variant,firstRegistration:firstReg,totalWeight:totalWeight,usageCode:usageCode};
 }
 function fetchPlate(plate){
-  // 1) Try nummerplade.net via allorigins CORS proxy (browser-side, no Vercel IP block)
-  return fetch('https://api.allorigins.win/raw?url='+encodeURIComponent('https://www.nummerplade.net/nummerplade.asp?nummerplade='+plate))
+  // 1) Try nummerplade.net via CORS proxy (browser-side, no Vercel IP block)
+  return fetch('https://corsproxy.io/?url='+encodeURIComponent('https://www.nummerplade.net/nummerplade.asp?nummerplade='+plate))
     .then(function(r){if(!r.ok)throw new Error('ao '+r.status);return r.text();})
     .then(function(html){
       var d=parsePlateHtml(html);
