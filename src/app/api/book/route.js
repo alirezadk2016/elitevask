@@ -1,6 +1,6 @@
 import nodemailer from 'nodemailer';
 
-const COMPANY_EMAIL = 'elitevask.info@gmail.com';
+const COMPANY_EMAIL = 'elitevask01@gmail.com';
 
 // In-memory fallback (works within same serverless instance)
 const memSlots = new Map();

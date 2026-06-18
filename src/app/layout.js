@@ -34,7 +34,7 @@ const JSONLD = [
   "image":"",
   "description":"Mobil bil dampvask på Sjælland. Rent, effektivt og miljøvenligt.",
   "telephone":"+4524440321",
-  "email":"elitevask.info@gmail.com",
+  "email":"elitevask01@gmail.com",
   "areaServed":["Næstved","Roskilde","Køge","Ringsted","København","Stevns Kommune","Faxe Kommune","Helsingør","Hillerød","Frederikssund","Sjælland"],
   "priceRange":"kr","vatID":"DK46392264",
   "address":{"@type":"PostalAddress","addressRegion":"Sjælland","addressCountry":"DK"},
