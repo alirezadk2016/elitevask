@@ -28,8 +28,8 @@ var FAQ=[
   {q:{da:"Hvad er forskellen på dampvask og almindelig bilvask?",en:"What is the difference between steam wash and regular wash?"},a:{da:"Dampvask bruger varm damp med minimalt vandforbrug, renser mere skånsomt og desinficerer overflader uden aggressive kemikalier.",en:"Steam washing uses hot steam with minimal water, cleans more gently and disinfects surfaces without aggressive chemicals."}}
 ];
 var I18N={
-  da:{tb_local:"Lokalt firma på Sjælland",tb_ins:"Forsikret virksomhed",tb_rating:"Google anmeldelser",tb_mobile:"Mobil dampvask",nav_choose:"Se priser",nav_work:"Vores arbejde",nav_reviews:"Anmeldelser",nav_contact:"Kontakt",nav_book:"Book nu",hero_badge:"Vi kører til dig – hele Sjælland",hero_h1a:"Vi kører til dig",hero_h1b:"og vasker din bil",hero_p:"Mobil bil dampvask med premium produkter. Rent, effektivt og miljøvenligt – uden at du forlader hjemmet.",flow1:"Indtast nummerplade",flow2:"Se pris",flow3:"Book tid",hero_cta1:"Slå nummerplade op",hero_cta2:"Book med det samme",hero_t1:"Rent",hero_t2:"Effektivt",hero_t3:"Miljøvenligt",plate_search:"Slå op",plate_or:"– eller vælg manuelt –",sel_eyebrow:"Trin 1 af 2",sel_title:"Find pris til din bil",sel_sub:"Indtast din nummerplade – vi finder bilen automatisk og viser prisen med det samme.",calc_head_p:"Vælg den pakke der passer til dig",calc_zip:"Postnr.",calc_note:"Priserne er vejledende. Kørsel beregnes ud fra postnummer. Endelig pris bekræftes ved booking.",st1:"Skånsom rensemetode",st2:"Typisk behandlingstid",st3:"Mobil – vi kører ud",st4:"Vores serviceområde",how_eyebrow:"Sådan virker det",how_title:"3 nemme trin",how1t:"Vælg og book",how1p:"Vælg biltype og pakke, og book en tid på få minutter.",how2t:"Vi kører ud",how2p:"Vi ankommer med alt udstyr direkte til din adresse.",how3t:"Bilen skinner",how3p:"Nyd en ren, frisk bil. Du behøvede ikke flytte dig.",ba_eyebrow:"Vores arbejde",ba_title:"Før & efter",ba_sub:"Træk i slideren for at se forskellen. Rigtige resultater fra vores kunder.",ba_cap:"Motorrens · Peugeot – afrenset med damp",gal_eyebrow:"Galleri",gal_title:"Billeder fra vores arbejde",g_seat_for:"Sæderens · før",g_seat_efter:"Sæderens · efter",g_floor_for:"Fodrum · før",g_floor_efter:"Fodrum · efter",g_fuel_for:"Tankdæksel · før",g_fuel_efter:"Tankdæksel · efter",g_roof:"Tagkant · algerens",g_pedal:"Pedalområde · rens",g_onsite:"Mobil dampvask · på stedet",ex_eyebrow:"Tilvalg",ex_title:"Ekstra ydelser",ex_sub:"Kan tilføjes til enhver pakke. Indgår i Guld pakken.",ex1t:"Motorrens",ex1p:"Grundig afrensning af motorrum",ex2t:"Lak- & glansbeskyttelse",ex2p:"Udvendig – langvarig ekstra glans",ex3t:"Indvendig pleje & beskyttelse",ex3p:"Beskytter og fornyer interiøret",ex4t:"Fjernelse af dyrehår",ex4p:"Effektiv fjernelse af hår og fnug",ex5t:"Sæderens (stof)",ex5p:"Dybderens af stofsæder",ex6t:"Rens af barnesæde",ex6p:"Grundig og sikker rengøring",why_eyebrow:"Hvorfor vælge os",why_title:"Tillid og kvalitet i centrum",why1t:"Gennemsigtige priser",why1p:"Du kender prisen, før vi kører ud. Ingen overraskelser.",why2t:"Miljøvenlig dampvask",why2p:"Skånsom metode med minimalt vandforbrug.",why3t:"Vi kommer til dig",why3p:"Hjemme, på kontoret eller i sommerhuset.",why4t:"Tilfredshedsgaranti",why4p:"Ikke tilfreds? Så finder vi en løsning.",info_eyebrow:"Om Elite Vask",info_title:"Mød holdet bag",info_sub:"Her fortæller vi snart mere om os og det udstyr, vi bruger.",info1t:"Ejer & kontaktperson",info1p:"Navn og direkte kontakt til indehaveren tilføjes her.",info_soon:"Tilføjes snart",info2t:"Vores udstyr",info2p:"Beskrivelse af de dampmaskiner og produkter vi vasker med.",info_soon2:"Tilføjes snart",info3t:"Dækningsområde",info3p:"Vi dækker store dele af Sjælland, herunder Storkøbenhavn.",rev_eyebrow:"Kundeanmeldelser",rev_title:"Det siger vores kunder",rev_empty_t:"Anmeldelser vises her snart",rev_empty_p:"Vi forbinder vores Google Business-profil. Når den er klar, vises rigtige kundeanmeldelser automatisk her.",rev_empty_cta:"Book din vask",faq_eyebrow:"Spørgsmål & svar",faq_title:"Ofte stillede spørgsmål",local_eyebrow:"Serviceområde",local_title:"Mobil bilvask i hele Sjælland",ct_title:"Klar til en skinnende ren bil?",ct_lead:"Kontakt os i dag og book din mobile dampvask. Vi kører til dig – nemt, hurtigt og lokalt.",ct_book:"Book online nu",ct_call:"Ring til os",ct_phone:"Telefon",ct_email:"E-mail",ct_addr:"Adresse",ct_hours:"Åbningstider",ct_hours_v:"Man–Søn · 08–20",foot_p:"Mobil bil dampvask på Sjælland. Vi kører til dig og vasker din bil – rent, effektivt og miljøvenligt.",foot_s1:"Service",foot_l1:"Vælg bil & priser",foot_l2:"Vores arbejde",foot_l3:"Anmeldelser",foot_s2:"Kontakt",m_call:"Ring nu",m_book:"Book nu",wiz_title:"Book din bilvask",chat_status:"Svar indenfor minutter",chat_intro_label:"Elite Bot er klar!"},
-  en:{tb_local:"Local company on Zealand",tb_ins:"Insured business",tb_rating:"Google reviews",tb_mobile:"Mobile steam wash",nav_choose:"See prices",nav_work:"Our work",nav_reviews:"Reviews",nav_contact:"Contact",nav_book:"Book now",hero_badge:"We drive to you – all of Zealand",hero_h1a:"We drive to you",hero_h1b:"and wash your car",hero_p:"Mobile car steam wash with premium products. Clean, effective and eco-friendly – without leaving home.",flow1:"Enter plate number",flow2:"See price",flow3:"Book time",hero_cta1:"Look up plate number",hero_cta2:"Book right away",hero_t1:"Clean",hero_t2:"Effective",hero_t3:"Eco-friendly",plate_search:"Search",plate_or:"– or select manually –",sel_eyebrow:"Step 1 of 2",sel_title:"Find price for your car",sel_sub:"Enter your license plate – we find your car automatically and show the price instantly.",calc_head_p:"Pick the package that suits you",calc_zip:"Zip",calc_note:"Prices are guidance. Travel is calculated from zip code. Final price confirmed at booking.",st1:"Gentle steam method",st2:"Typical service time",st3:"Mobile – we come to you",st4:"Our service area",how_eyebrow:"How it works",how_title:"3 easy steps",how1t:"Choose and book",how1p:"Pick car type and package, and book a time in minutes.",how2t:"We come to you",how2p:"We arrive with all equipment directly to your address.",how3t:"Your car shines",how3p:"Enjoy a clean, fresh car. You didn't even have to move.",ba_eyebrow:"Our work",ba_title:"Before & after",ba_sub:"Drag the slider to see the difference. Real results from our customers.",ba_cap:"Engine clean · Peugeot – steam cleaned",gal_eyebrow:"Gallery",gal_title:"Photos from our work",g_seat_for:"Seat clean · before",g_seat_efter:"Seat clean · after",g_floor_for:"Footwell · before",g_floor_efter:"Footwell · after",g_fuel_for:"Fuel cap · before",g_fuel_efter:"Fuel cap · after",g_roof:"Roof edge · algae removal",g_pedal:"Pedal area · clean",g_onsite:"Mobile steam wash · on location",ex_eyebrow:"Add-ons",ex_title:"Extra services",ex_sub:"Can be added to any package. Included in the Gold package.",ex1t:"Engine clean",ex1p:"Thorough engine bay cleaning",ex2t:"Paint & gloss protection",ex2p:"Exterior – long-lasting extra gloss",ex3t:"Interior care & protection",ex3p:"Protects and renews the interior",ex4t:"Pet hair removal",ex4p:"Effective removal of hair and lint",ex5t:"Seat clean (fabric)",ex5p:"Deep clean of fabric seats",ex6t:"Child seat cleaning",ex6p:"Thorough and safe cleaning",why_eyebrow:"Why choose us",why_title:"Trust and quality first",why1t:"Transparent prices",why1p:"You know the price before we drive out. No surprises.",why2t:"Eco-friendly steam wash",why2p:"Gentle method with minimal water use.",why3t:"We come to you",why3p:"At home, the office or the summer house.",why4t:"Satisfaction guarantee",why4p:"Not happy? Then we'll find a solution.",info_eyebrow:"About Elite Vask",info_title:"Meet the team",info_sub:"We'll soon tell you more about us and the equipment we use.",info1t:"Owner & contact",info1p:"Name and direct contact to the owner will be added here.",info_soon:"Added soon",info2t:"Our equipment",info2p:"Description of the steam machines and products we use.",info_soon2:"Added soon",info3t:"Coverage area",info3p:"We cover large parts of Zealand, including Greater Copenhagen.",rev_eyebrow:"Customer reviews",rev_title:"What our customers say",rev_empty_t:"Reviews appear here soon",rev_empty_p:"We are connecting our Google Business profile. Once ready, real customer reviews appear here automatically.",rev_empty_cta:"Book your wash",faq_eyebrow:"Questions & answers",faq_title:"Frequently asked questions",local_eyebrow:"Service area",local_title:"Mobile car wash across Zealand",ct_title:"Ready for a spotless car?",ct_lead:"Contact us today and book your mobile steam wash. We come to you – easy, fast and local.",ct_book:"Book online now",ct_call:"Call us",ct_phone:"Phone",ct_email:"Email",ct_addr:"Address",ct_hours:"Opening hours",ct_hours_v:"Mon–Sun · 08–20",foot_p:"Mobile car steam wash on Zealand. We drive to you and wash your car – clean, effective and eco-friendly.",foot_s1:"Service",foot_l1:"Choose car & prices",foot_l2:"Our work",foot_l3:"Reviews",foot_s2:"Contact",m_call:"Call now",m_book:"Book now",wiz_title:"Book your car wash",chat_status:"Reply within minutes",chat_intro_label:"Elite Bot is ready!"}
+  da:{tb_local:"Lokalt firma på Sjælland",tb_ins:"Forsikret virksomhed",tb_rating:"Google anmeldelser",tb_mobile:"Mobil dampvask",nav_choose:"Se priser",nav_work:"Vores arbejde",nav_reviews:"Anmeldelser",nav_contact:"Kontakt",nav_book:"Book nu",hero_badge:"Vi kører til dig – hele Sjælland",hero_h1a:"Vi kører til dig",hero_h1b:"og vasker din bil",hero_p:"Mobil bil dampvask med premium produkter. Rent, effektivt og miljøvenligt – uden at du forlader hjemmet.",flow1:"Indtast nummerplade",flow2:"Se pris",flow3:"Book tid",hero_cta1:"Slå nummerplade op",hero_cta2:"Book med det samme",hero_t1:"Rent",hero_t2:"Effektivt",hero_t3:"Miljøvenligt",plate_search:"Slå op",plate_or:"– eller vælg manuelt –",sel_eyebrow:"Trin 1 af 2",sel_title:"Find pris til din bil",sel_sub:"Indtast din nummerplade – vi finder bilen automatisk og viser prisen med det samme.",calc_head_p:"Vælg den pakke der passer til dig",calc_zip:"Postnr.",calc_note:"Priserne er vejledende. Kørsel beregnes ud fra postnummer. Endelig pris bekræftes ved booking.",st1:"Skånsom rensemetode",st2:"Typisk behandlingstid",st3:"Mobil – vi kører ud",st4:"Vores serviceområde",how_eyebrow:"Sådan virker det",how_title:"3 nemme trin",how1t:"Vælg og book",how1p:"Vælg biltype og pakke, og book en tid på få minutter.",how2t:"Vi kører ud",how2p:"Vi ankommer med alt udstyr direkte til din adresse.",how3t:"Bilen skinner",how3p:"Nyd en ren, frisk bil. Du behøvede ikke flytte dig.",ba_eyebrow:"Vores arbejde",ba_title:"Før & efter",ba_sub:"Træk i slideren for at se forskellen. Rigtige resultater fra vores kunder.",ba_cap:"Motorrens · Peugeot – afrenset med damp",gal_eyebrow:"Galleri",gal_title:"Billeder fra vores arbejde",g_seat_for:"Sæderens · før",g_seat_efter:"Sæderens · efter",g_floor_for:"Fodrum · før",g_floor_efter:"Fodrum · efter",g_fuel_for:"Tankdæksel · før",g_fuel_efter:"Tankdæksel · efter",g_roof:"Tagkant · algerens",g_pedal:"Pedalområde · rens",g_onsite:"Mobil dampvask · på stedet",ex_eyebrow:"Tilvalg",ex_title:"Ekstra ydelser",ex_sub:"Kan tilføjes til enhver pakke. Indgår i Guld pakken.",ex1t:"Motorrens",ex1p:"Grundig afrensning af motorrum",ex2t:"Lak- & glansbeskyttelse",ex2p:"Udvendig – langvarig ekstra glans",ex3t:"Indvendig pleje & beskyttelse",ex3p:"Beskytter og fornyer interiøret",ex4t:"Fjernelse af dyrehår",ex4p:"Effektiv fjernelse af hår og fnug",ex5t:"Sæderens (stof)",ex5p:"Dybderens af stofsæder",ex6t:"Rens af barnesæde",ex6p:"Grundig og sikker rengøring",why_eyebrow:"Hvorfor vælge os",why_title:"Tillid og kvalitet i centrum",why1t:"Gennemsigtige priser",why1p:"Du kender prisen, før vi kører ud. Ingen overraskelser.",why2t:"Miljøvenlig dampvask",why2p:"Skånsom metode med minimalt vandforbrug.",why3t:"Vi kommer til dig",why3p:"Hjemme, på kontoret eller i sommerhuset.",why4t:"Tilfredshedsgaranti",why4p:"Ikke tilfreds? Så finder vi en løsning.",info_eyebrow:"Om Elite Vask",info_title:"Mød holdet bag",info_sub:"Her fortæller vi snart mere om os og det udstyr, vi bruger.",info1t:"Ejer & kontaktperson",info1p:"Navn og direkte kontakt til indehaveren tilføjes her.",info_soon:"Tilføjes snart",info2t:"Vores udstyr",info2p:"Beskrivelse af de dampmaskiner og produkter vi vasker med.",info_soon2:"Tilføjes snart",info3t:"Dækningsområde",info3p:"Vi dækker store dele af Sjælland, herunder Storkøbenhavn.",rev_eyebrow:"Kundeanmeldelser",rev_title:"Det siger vores kunder",rev_empty_t:"Anmeldelser vises her snart",rev_empty_p:"Vi forbinder vores Google Business-profil. Når den er klar, vises rigtige kundeanmeldelser automatisk her.",rev_empty_cta:"Book din vask",faq_eyebrow:"Spørgsmål & svar",faq_title:"Ofte stillede spørgsmål",local_eyebrow:"Serviceområde",local_title:"Mobil bilvask i hele Sjælland",ct_title:"Klar til en skinnende ren bil?",ct_lead:"Kontakt os i dag og book din mobile dampvask. Vi kører til dig – nemt, hurtigt og lokalt.",ct_book:"Book online nu",ct_call:"Ring til os",ct_phone:"Telefon",ct_email:"E-mail",ct_addr:"Adresse",ct_hours:"Åbningstider",ct_hours_v:"Man–Søn · 08–20",foot_p:"Mobil bil dampvask på Sjælland. Vi kører til dig og vasker din bil – rent, effektivt og miljøvenligt.",foot_s1:"Service",foot_l1:"Vælg bil & priser",foot_l2:"Vores arbejde",foot_l3:"Anmeldelser",foot_s2:"Kontakt",m_call:"Ring nu",m_book:"Book nu",wiz_title:"Book din bilvask",chat_status:"Online nu",chat_intro_label:"Elite Bot er klar!"},
+  en:{tb_local:"Local company on Zealand",tb_ins:"Insured business",tb_rating:"Google reviews",tb_mobile:"Mobile steam wash",nav_choose:"See prices",nav_work:"Our work",nav_reviews:"Reviews",nav_contact:"Contact",nav_book:"Book now",hero_badge:"We drive to you – all of Zealand",hero_h1a:"We drive to you",hero_h1b:"and wash your car",hero_p:"Mobile car steam wash with premium products. Clean, effective and eco-friendly – without leaving home.",flow1:"Enter plate number",flow2:"See price",flow3:"Book time",hero_cta1:"Look up plate number",hero_cta2:"Book right away",hero_t1:"Clean",hero_t2:"Effective",hero_t3:"Eco-friendly",plate_search:"Search",plate_or:"– or select manually –",sel_eyebrow:"Step 1 of 2",sel_title:"Find price for your car",sel_sub:"Enter your license plate – we find your car automatically and show the price instantly.",calc_head_p:"Pick the package that suits you",calc_zip:"Zip",calc_note:"Prices are guidance. Travel is calculated from zip code. Final price confirmed at booking.",st1:"Gentle steam method",st2:"Typical service time",st3:"Mobile – we come to you",st4:"Our service area",how_eyebrow:"How it works",how_title:"3 easy steps",how1t:"Choose and book",how1p:"Pick car type and package, and book a time in minutes.",how2t:"We come to you",how2p:"We arrive with all equipment directly to your address.",how3t:"Your car shines",how3p:"Enjoy a clean, fresh car. You didn't even have to move.",ba_eyebrow:"Our work",ba_title:"Before & after",ba_sub:"Drag the slider to see the difference. Real results from our customers.",ba_cap:"Engine clean · Peugeot – steam cleaned",gal_eyebrow:"Gallery",gal_title:"Photos from our work",g_seat_for:"Seat clean · before",g_seat_efter:"Seat clean · after",g_floor_for:"Footwell · before",g_floor_efter:"Footwell · after",g_fuel_for:"Fuel cap · before",g_fuel_efter:"Fuel cap · after",g_roof:"Roof edge · algae removal",g_pedal:"Pedal area · clean",g_onsite:"Mobile steam wash · on location",ex_eyebrow:"Add-ons",ex_title:"Extra services",ex_sub:"Can be added to any package. Included in the Gold package.",ex1t:"Engine clean",ex1p:"Thorough engine bay cleaning",ex2t:"Paint & gloss protection",ex2p:"Exterior – long-lasting extra gloss",ex3t:"Interior care & protection",ex3p:"Protects and renews the interior",ex4t:"Pet hair removal",ex4p:"Effective removal of hair and lint",ex5t:"Seat clean (fabric)",ex5p:"Deep clean of fabric seats",ex6t:"Child seat cleaning",ex6p:"Thorough and safe cleaning",why_eyebrow:"Why choose us",why_title:"Trust and quality first",why1t:"Transparent prices",why1p:"You know the price before we drive out. No surprises.",why2t:"Eco-friendly steam wash",why2p:"Gentle method with minimal water use.",why3t:"We come to you",why3p:"At home, the office or the summer house.",why4t:"Satisfaction guarantee",why4p:"Not happy? Then we'll find a solution.",info_eyebrow:"About Elite Vask",info_title:"Meet the team",info_sub:"We'll soon tell you more about us and the equipment we use.",info1t:"Owner & contact",info1p:"Name and direct contact to the owner will be added here.",info_soon:"Added soon",info2t:"Our equipment",info2p:"Description of the steam machines and products we use.",info_soon2:"Added soon",info3t:"Coverage area",info3p:"We cover large parts of Zealand, including Greater Copenhagen.",rev_eyebrow:"Customer reviews",rev_title:"What our customers say",rev_empty_t:"Reviews appear here soon",rev_empty_p:"We are connecting our Google Business profile. Once ready, real customer reviews appear here automatically.",rev_empty_cta:"Book your wash",faq_eyebrow:"Questions & answers",faq_title:"Frequently asked questions",local_eyebrow:"Service area",local_title:"Mobile car wash across Zealand",ct_title:"Ready for a spotless car?",ct_lead:"Contact us today and book your mobile steam wash. We come to you – easy, fast and local.",ct_book:"Book online now",ct_call:"Call us",ct_phone:"Phone",ct_email:"Email",ct_addr:"Address",ct_hours:"Opening hours",ct_hours_v:"Mon–Sun · 08–20",foot_p:"Mobile car steam wash on Zealand. We drive to you and wash your car – clean, effective and eco-friendly.",foot_s1:"Service",foot_l1:"Choose car & prices",foot_l2:"Our work",foot_l3:"Reviews",foot_s2:"Contact",m_call:"Call now",m_book:"Book now",wiz_title:"Book your car wash",chat_status:"Online now",chat_intro_label:"Elite Bot is ready!"}
 };
 var WIZ={
   da:{step:"Trin",of:"af",s1:"Vælg din bil",s2:"Vælg pakke",s3:"Tilvalg (valgfrit)",s4:"Din adresse",s5:"Vælg dato & tid",s6:"Kontaktinfo",addr:"Adresse",zip:"Postnr.",city:"By",date:"Dato",time:"Tidspunkt",name:"Navn",phone:"Telefon",email:"E-mail (valgfri)",msg:"Besked (valgfri)",next:"Næste",back:"Tilbage",send:"Send anmodning",sumcar:"Bil",sumpkg:"Pakke",sumext:"Tilvalg",sumprice:"Anslået pris",done_t:"Tak for din anmodning!",done_p:"Vi kontakter dig hurtigst muligt for at bekræfte tid og pris.",close:"Luk",pick:"Vælg",skip:"Spring over",plate_label:"Slå nummerplade op",plate_or:"– eller vælg manuelt –",plate_search:"Slå op",plate_searching:"Søger...",plate_found:"Se priser for denne bil"},
@@ -598,89 +598,181 @@ function submitBooking(cb){
   var send=document.getElementById('chatSend');
   var badge=document.getElementById('chatBadge');
   if(!toggle)return;
-  var opened=false;
-  var introPlayed=false;
-  var FAQ_BOT={
+  var opened=false,introPlayed=false,typingEl=null;
+  var MINI_AV='<div class="chat-mini-av"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="3" r="1.5" fill="#062313"/><line x1="12" y1="4.5" x2="12" y2="7" stroke="#062313" stroke-width="1.5" stroke-linecap="round"/><rect x="4" y="7" width="16" height="10" rx="3" fill="#062313"/><circle cx="8.5" cy="12" r="2" fill="#9afabd"/><circle cx="15.5" cy="12" r="2" fill="#9afabd"/><circle cx="8.5" cy="12" r="0.9" fill="#062313"/><circle cx="15.5" cy="12" r="0.9" fill="#062313"/><rect x="9" y="15.5" width="6" height="1.5" rx="0.75" fill="#9afabd"/></svg></div>';
+  var FAQ={
     da:[
-      {keys:['pris','kost','hvad kost','priser'],ans:'Priser starter fra 500 kr for udvendig vask, og 800 kr for komplet vask. Det afhænger af bilens størrelse og pakke. <a href="#vaelg">Se alle priser her</a>.'},
-      {keys:['tid','lang','timer','varighed'],ans:'Typisk tager en vask 1–4 timer afhængigt af pakken og bilens størrelse.'},
-      {keys:['sjælland','dækker','område','kjer','adresse','kører'],ans:'Vi dækker hele Sjælland – inkl. Storkøbenhavn, Nordsjælland og Sydsjælland. Vi kører ud til dig!'},
-      {keys:['book','bestil','tid'],ans:'Du kan booke direkte her på siden. Klik på "Book nu" eller <a href="#vaelg">vælg din bil og pakke</a> for at komme i gang.'},
-      {keys:['damp','dampvask','miljø','vand'],ans:'Dampvask bruger varm damp med minimalt vandforbrug. Det renser skånsomt, desinficerer og er miljøvenligt.'},
-      {keys:['leasing','lease','aflevering'],ans:'Ja! Vi tilbyder Returklargøring specielt til aflevering af leasingbiler. Ring til os for en aftale.'},
-      {keys:['motor','motorrens'],ans:'Ja, vi tilbyder motorrens som tilvalg (+300 kr). Det kan tilføjes til enhver pakke.'},
-      {keys:['hjem','hjemme','arbejde'],ans:'Ja, vi er 100% mobile. Vi kører ud til din adresse – hjemme, på arbejdet eller hvad der passer dig.'},
-      {keys:['kontakt','ring','telefon','nummer'],ans:'Du kan ringe til os på <a href="tel:+4524440321">+45 24 44 03 21</a> eller skrive til elitevask.info@gmail.com'},
-      {keys:['firma','adresse','kontor','søborg'],ans:'Firmaadresse: Høje Gladsaxe 17, 2860 Søborg. Men vi kører ud til dig – du behøver ikke komme til os!'},
+      {keys:['pris','kost','hvad kost','priser','billig','dyr'],
+       ans:['Priserne starter fra <strong>499 kr</strong> for udvendig vask og <strong>799 kr</strong> for fuld pakke. Prisen afhænger af bilstørrelse og dit postnummer. <a href="#vaelg">👉 Se alle pakker her</a>',
+            'Vi har pakker fra <strong>499 kr</strong> – ingen skjulte gebyrer! Prisen beregnes efter din bil og adresse. <a href="#vaelg">Sammenlign pakker →</a>'],
+       follow:['Hvad er inkluderet?','Kan I komme i dag?','Book nu']},
+      {keys:['inkluderet','hvad får','hvad indeholder','pakke indhold'],
+       ans:['Det afhænger af pakken 😊 <br>• <strong>Udvendig:</strong> vask, fælge, glas og gummi<br>• <strong>Fuld:</strong> + indvendig rens<br>• <strong>Guld:</strong> alt inkl. motorrens og lakbeskyttelse<br><a href="#vaelg">Se pakkerne →</a>'],
+       follow:['Hvad koster Guld?','Book nu']},
+      {keys:['tid','lang','timer','varighed','hurtigt'],
+       ans:['Typisk <strong>1–3 timer</strong> afhængigt af pakke og bilstørrelse. Vi fortæller den præcise tid, når du booker 🕐',
+            'En standard udvendig vask tager <strong>ca. 1–2 timer</strong>, fuld pakke <strong>2–4 timer</strong>. Vi aftaler et tidspunkt der passer dig.'],
+       follow:['Hvad koster det?','Book nu']},
+      {keys:['sjælland','dækker','område','kørsel','postnr','kører','afstand','nærhed'],
+       ans:['Vi dækker <strong>hele Sjælland</strong> – Storkøbenhavn, Nordsjælland og Sydsjælland. Kørsel beregnes fra dit postnummer. <a href="#vaelg">Tjek pris for dit område →</a>'],
+       follow:['Hvad koster det?','Book nu']},
+      {keys:['book','bestil','reserve','aftale','time','dato'],
+       ans:['Booking er nemt! Vælg pakke, udfyld din adresse og vælg et tidspunkt. <a href="#vaelg">👉 Book her</a>',
+            'Du kan booke direkte her på siden – det tager kun et par minutter. <a href="#vaelg">Klik her for at komme i gang →</a>'],
+       follow:['Hvad koster det?','Dækker I mit område?']},
+      {keys:['damp','dampvask','miljø','vand','skånsom','kemi'],
+       ans:['Dampvask bruger varm damp under tryk med <strong>minimalt vandforbrug</strong>. Det renser skånsomt, desinficerer og er 100% miljøvenligt – perfekt til både interiør og eksteriør 🌿'],
+       follow:['Se pakker','Book nu']},
+      {keys:['leasing','lease','aflevering','retur','returnere'],
+       ans:['Ja! Vi tilbyder <strong>Returklargøring</strong> – en grundig vask tilpasset leasingaflevering. Ring til os for et tilbud! <a href="tel:+4524440321">📞 +45 24 44 03 21</a>'],
+       follow:['Hvad koster det?','Book nu']},
+      {keys:['motor','motorrens','motorrum','motor'],
+       ans:['Ja, <strong>motorrens (+300 kr)</strong> kan tilføjes til enhver pakke – og er allerede inkluderet i Guld-pakken 🔧 En grundig dampvask af motorrum.'],
+       follow:['Se Guld pakken','Book nu']},
+      {keys:['hjem','hjemme','arbejde','kontor','adresse'],
+       ans:['Vi er <strong>100% mobile</strong> – vi kører ud til dig, hvad enten du er hjemme, på arbejdet eller et andet sted. Du behøver ikke flytte bilen! 🚗'],
+       follow:['Book nu','Hvad koster det?']},
+      {keys:['kontakt','ring','telefon','nummer','mail','email','skrive'],
+       ans:['Du kan ringe til os på <a href="tel:+4524440321"><strong>+45 24 44 03 21</strong></a> eller skrive til <a href="mailto:elitevask.info@gmail.com">elitevask.info@gmail.com</a> 📩'],
+       follow:['Book nu','Åbningstider']},
+      {keys:['åbningstid','åbent','hvornår','åbnings','weekend','hverdage'],
+       ans:['Vi holder åbent <strong>mandag–søndag kl. 08–20</strong>. Online booking er tilgængelig hele døgnet 🕗'],
+       follow:['Book nu','Kontakt']},
+      {keys:['garanti','tilfreds','klage','refund','utilfreds'],
+       ans:['Vi tilbyder <strong>tilfredshedsgaranti</strong> – er du ikke tilfreds, finder vi en løsning 💚 Din tilfredshed er vores prioritet.'],
+       follow:['Book nu','Kontakt']},
+      {keys:['sæde','stof','indvendig','interiør','lugt'],
+       ans:['Vi tilbyder <strong>indvendig rens</strong> med damp – sæder, gulvtæpper, instrumentpanel og alle overflader. Til stof-sæder tilbyder vi også dybderens. <a href="#vaelg">Se pakker →</a>'],
+       follow:['Hvad koster det?','Book nu']},
     ],
     en:[
-      {keys:['price','cost','how much','prices'],ans:'Prices start from 500 kr for exterior wash, and 800 kr for full wash. Depends on car size and package. <a href="#vaelg">See all prices here</a>.'},
-      {keys:['time','long','hours','duration'],ans:'Typically 1–4 hours depending on package and car size.'},
-      {keys:['zealand','area','cover','where'],ans:'We cover all of Zealand – including Greater Copenhagen, North Zealand and South Zealand. We drive to you!'},
-      {keys:['book','order','reserve'],ans:'You can book directly on this page. Click "Book now" or <a href="#vaelg">select your car and package</a> to get started.'},
-      {keys:['steam','eco','water','environment'],ans:'Steam washing uses hot steam with minimal water. It cleans gently, disinfects and is eco-friendly.'},
-      {keys:['lease','leasing','return'],ans:'Yes! We offer a Lease Return package specially made for returning lease cars.'},
-      {keys:['engine','engine clean'],ans:'Yes, we offer engine cleaning as an add-on (+300 kr). Can be added to any package.'},
-      {keys:['home','address','workplace'],ans:'Yes, we are 100% mobile. We drive to your address – at home, at work, wherever suits you.'},
-      {keys:['contact','call','phone','number'],ans:'You can call us at <a href="tel:+4524440321">+45 24 44 03 21</a> or email elitevask.info@gmail.com'},
-      {keys:['office','address','company','søborg'],ans:'Company address: Høje Gladsaxe 17, 2860 Søborg. But we drive to you – you don\'t need to come to us!'},
+      {keys:['price','cost','how much','prices','cheap','expensive'],
+       ans:['Prices start from <strong>499 kr</strong> for exterior wash and <strong>799 kr</strong> for a full package. Price depends on car size and zip code. <a href="#vaelg">👉 See all packages</a>',
+            'We offer packages from <strong>499 kr</strong> – no hidden fees! Price is calculated based on your car and address. <a href="#vaelg">Compare packages →</a>'],
+       follow:["What's included?","Can you come today?","Book now"]},
+      {keys:['included','what do i get','package','contain'],
+       ans:["Depends on the package 😊<br>• <strong>Exterior:</strong> wash, rims, glass and rubber<br>• <strong>Full:</strong> + interior cleaning<br>• <strong>Gold:</strong> everything + engine clean and paint protection<br><a href='#vaelg'>See packages →</a>"],
+       follow:['How much is Gold?','Book now']},
+      {keys:['time','long','hours','duration','fast','quick'],
+       ans:['Typically <strong>1–3 hours</strong> depending on package and car size. We\'ll confirm the exact time when you book 🕐',
+            'A standard wash takes <strong>1–2 hours</strong>, full package <strong>2–4 hours</strong>. We\'ll schedule a time that works for you.'],
+       follow:['What does it cost?','Book now']},
+      {keys:['zealand','area','cover','where','zip','distance'],
+       ans:['We cover <strong>all of Zealand</strong> – Greater Copenhagen, North and South Zealand. Travel is calculated from your zip code. <a href="#vaelg">Check price for your area →</a>'],
+       follow:['What does it cost?','Book now']},
+      {keys:['book','order','reserve','appointment','date'],
+       ans:['Booking is easy! Pick your package, enter your address and choose a time slot. <a href="#vaelg">👉 Book here</a>',
+            'You can book directly on this page – it only takes a couple of minutes. <a href="#vaelg">Click here to get started →</a>'],
+       follow:['What does it cost?','Do you cover my area?']},
+      {keys:['steam','eco','water','environment','gentle','chemical'],
+       ans:['Steam washing uses hot pressurized steam with <strong>minimal water use</strong>. It cleans gently, disinfects and is 100% eco-friendly – perfect for both interior and exterior 🌿'],
+       follow:['See packages','Book now']},
+      {keys:['lease','leasing','return'],
+       ans:['Yes! We offer a <strong>Lease Return</strong> package – a thorough wash tailored for lease car returns. Call us for a custom quote! <a href="tel:+4524440321">📞 +45 24 44 03 21</a>'],
+       follow:['What does it cost?','Book now']},
+      {keys:['engine','engine clean','hood','motor'],
+       ans:['Yes, <strong>engine cleaning (+300 kr)</strong> can be added to any package – and is already included in the Gold package 🔧'],
+       follow:['See Gold package','Book now']},
+      {keys:['home','address','workplace','office'],
+       ans:['We are <strong>100% mobile</strong> – we drive to you whether you\'re at home, at work or anywhere else. No need to move your car! 🚗'],
+       follow:['Book now','What does it cost?']},
+      {keys:['contact','call','phone','number','mail','email'],
+       ans:['You can call us at <a href="tel:+4524440321"><strong>+45 24 44 03 21</strong></a> or email <a href="mailto:elitevask.info@gmail.com">elitevask.info@gmail.com</a> 📩'],
+       follow:['Book now','Opening hours']},
+      {keys:['hours','open','when','weekend','weekday'],
+       ans:['We are open <strong>Monday–Sunday 08–20</strong>. Online booking is available 24/7 🕗'],
+       follow:['Book now','Contact']},
+      {keys:['guarantee','not happy','complaint','refund'],
+       ans:['We offer a <strong>satisfaction guarantee</strong> – if you\'re not happy, we\'ll find a solution 💚 Your satisfaction is our priority.'],
+       follow:['Book now','Contact']},
+      {keys:['seat','fabric','interior','smell'],
+       ans:['We offer <strong>interior steam cleaning</strong> – seats, floor mats, dashboard and all surfaces. We also offer deep fabric seat cleaning. <a href="#vaelg">See packages →</a>'],
+       follow:['What does it cost?','Book now']},
     ]
   };
   var QUICK={
-    da:['Hvad koster det?','Hvor lang tid?','Dækker I mit område?','Kan I vaske leasingbil?'],
-    en:['What does it cost?','How long does it take?','Do you cover my area?','Can you clean lease cars?']
+    da:[{l:'💰 Hvad koster det?',q:'Hvad koster det?'},{l:'⏱ Hvor lang tid?',q:'Hvor lang tid?'},{l:'📍 Dækker I mit område?',q:'Dækker I mit område?'},{l:'🚗 Leasingbil?',q:'Kan I vaske leasingbil?'}],
+    en:[{l:'💰 What does it cost?',q:'What does it cost?'},{l:'⏱ How long does it take?',q:'How long does it take?'},{l:'📍 Do you cover my area?',q:'Do you cover my area?'},{l:'🚗 Lease car?',q:'Can you clean lease cars?'}]
   };
-  function addMsg(text,who){
-    var d=document.createElement('div');d.className='chat-msg '+who;d.innerHTML=text;msgs.appendChild(d);msgs.scrollTop=msgs.scrollHeight;
+  function showTyping(){
+    if(typingEl)return;
+    typingEl=document.createElement('div');typingEl.className='chat-typing';
+    typingEl.innerHTML='<span></span><span></span><span></span>';
+    msgs.appendChild(typingEl);msgs.scrollTop=msgs.scrollHeight;
+  }
+  function hideTyping(){if(typingEl){typingEl.remove();typingEl=null;}}
+  function addMsg(html,who){
+    hideTyping();
+    var row=document.createElement('div');row.className='chat-row chat-row-'+who;
+    if(who==='bot')row.innerHTML=MINI_AV;
+    var d=document.createElement('div');d.className='chat-msg '+who+' msg-in';d.innerHTML=html;
+    row.appendChild(d);msgs.appendChild(row);msgs.scrollTop=msgs.scrollHeight;
+  }
+  function showFollowUp(arr){
+    if(!arr||!arr.length)return;
+    setTimeout(function(){
+      var fw=document.createElement('div');fw.className='chat-follow';
+      arr.forEach(function(q){
+        var btn=document.createElement('button');btn.className='follow-chip';btn.textContent=q;
+        btn.addEventListener('click',function(){fw.remove();addMsg(q,'user');quick.innerHTML='';botReply(q);});
+        fw.appendChild(btn);
+      });
+      msgs.appendChild(fw);msgs.scrollTop=msgs.scrollHeight;
+    },350);
   }
   function botReply(text){
-    var faq=FAQ_BOT[LANG]||FAQ_BOT.da;
-    var tl=text.toLowerCase();
-    var found=null;
-    for(var i=0;i<faq.length;i++){for(var j=0;j<faq[i].keys.length;j++){if(tl.includes(faq[i].keys[j])){found=faq[i].ans;break;}}if(found)break;}
-    if(!found)found=LANG==='da'?'Det ved jeg ikke helt. Ring til os på <a href="tel:+4524440321">+45 24 44 03 21</a> – vi hjælper gerne!':'I\'m not sure about that. Call us at <a href="tel:+4524440321">+45 24 44 03 21</a> – we\'re happy to help!';
-    setTimeout(function(){addMsg(found,'bot');},500);
+    var faq=FAQ[LANG]||FAQ.da;var tl=text.toLowerCase();var match=null;
+    for(var i=0;i<faq.length;i++){for(var j=0;j<faq[i].keys.length;j++){if(tl.includes(faq[i].keys[j])){match=faq[i];break;}}if(match)break;}
+    var ans,follow;
+    if(match){
+      var av=match.ans;ans=Array.isArray(av)?av[Math.floor(Math.random()*av.length)]:av;follow=match.follow;
+    }else{
+      ans=LANG==='da'?'Hmm, det er jeg ikke helt sikker på 🤔 Ring til os på <a href="tel:+4524440321"><strong>+45 24 44 03 21</strong></a> – vi hjælper med det samme!':'Hmm, I\'m not entirely sure 🤔 Call us at <a href="tel:+4524440321"><strong>+45 24 44 03 21</strong></a> – we\'ll help right away!';
+      follow=LANG==='da'?['Hvad koster det?','Book nu']:['What does it cost?','Book now'];
+    }
+    showTyping();
+    var delay=Math.min(700+ans.length*5,2000);
+    setTimeout(function(){addMsg(ans,'bot');showFollowUp(follow);},delay);
   }
   function sendMsg(){
     var txt=input.value.trim();if(!txt)return;
-    addMsg(txt,'user');input.value='';
-    quick.innerHTML='';
-    botReply(txt);
+    addMsg(txt,'user');input.value='';send.disabled=true;
+    quick.innerHTML='';botReply(txt);
+    setTimeout(function(){send.disabled=!input.value.trim();},600);
   }
   function showQuick(){
     quick.innerHTML='';
-    (QUICK[LANG]||QUICK.da).forEach(function(q){
-      var btn=document.createElement('button');btn.className='chat-chip';btn.textContent=q;
-      btn.addEventListener('click',function(){addMsg(q,'user');quick.innerHTML='';botReply(q);});
+    (QUICK[LANG]||QUICK.da).forEach(function(item){
+      var btn=document.createElement('button');btn.className='chat-chip';btn.textContent=item.l;
+      btn.addEventListener('click',function(){addMsg(item.q,'user');quick.innerHTML='';botReply(item.q);});
       quick.appendChild(btn);
     });
   }
   function showGreeting(){
     if(msgs.children.length===0){
-      addMsg(LANG==='da'?'Hej! 👋 Jeg er Elite Bot. Hvad kan jeg hjælpe dig med?':'Hi! 👋 I\'m Elite Bot. How can I help you?','bot');
-      showQuick();
+      setTimeout(function(){
+        addMsg(LANG==='da'?'Hej! 👋 Jeg er <strong>Elite Bot</strong>. Hvad kan jeg hjælpe dig med i dag?':'Hi! 👋 I\'m <strong>Elite Bot</strong>. How can I help you today?','bot');
+        setTimeout(showQuick,350);
+      },250);
     }
   }
+  input.addEventListener('input',function(){send.disabled=!input.value.trim();});
+  send.disabled=true;
   toggle.addEventListener('click',function(){
     if(!opened){
       win.style.display='flex';win.style.flexDirection='column';
+      win.classList.add('opening');setTimeout(function(){win.classList.remove('opening');},350);
       badge.style.display='none';opened=true;
       var intro=document.getElementById('chatIntro');
       if(intro&&!introPlayed){
-        introPlayed=true;
-        intro.style.display='flex';
-        setTimeout(function(){
-          intro.classList.add('hiding');
-          setTimeout(function(){intro.style.display='none';showGreeting();},450);
-        },3200);
-      } else {
-        showGreeting();
-      }
+        introPlayed=true;intro.style.display='flex';
+        setTimeout(function(){intro.classList.add('hiding');setTimeout(function(){intro.style.display='none';showGreeting();},450);},3200);
+      }else{showGreeting();}
     }else{win.style.display='none';opened=false;}
   });
   document.getElementById('chatClose').addEventListener('click',function(){win.style.display='none';opened=false;});
   send.addEventListener('click',sendMsg);
-  input.addEventListener('keydown',function(e){if(e.key==='Enter')sendMsg();});
+  input.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey)sendMsg();});
 })();
 
 /* ====== HAMBURGER DRAWER ====== */
