@@ -42,7 +42,7 @@ const HTML = `<!-- BEFORE/AFTER + GALLERY -->
     <figure class="gitem" data-full="/gallery/steam-hood.jpg"><img src="/gallery/steam-hood.jpg" alt="Dampvask motorhjelm" loading="lazy"><figcaption>Dampvask · motorhjelm</figcaption></figure>
     <figure class="gitem" data-full="/gallery/IMG_20260512_174045896_HDR.jpg"><img src="/gallery/thumb_motor_for.jpg" alt="Motorrens før" loading="lazy"><figcaption>Motorrens · før</figcaption></figure>
     <figure class="gitem" data-full="/gallery/IMG_20260512_182945671_HDR.jpg"><img src="/gallery/thumb_motor_efter.jpg" alt="Motorrens efter" loading="lazy"><figcaption>Motorrens · efter</figcaption></figure>
-    <figure class="gitem" data-full="/gallery/img11.jpg"><img src="/gallery/img11.jpg" alt="Mobil dampvask på stedet" loading="lazy"><figcaption>Mobil dampvask · på stedet</figcaption></figure>
+    <figure class="gitem" data-full="/gallery/aerial-wash.jpg"><img src="/gallery/aerial-wash.jpg" alt="Mobil dampvask på stedet" loading="lazy"><figcaption>Mobil dampvask · på stedet</figcaption></figure>
   </div>
 </div></section>`;
 export default function Work() {
