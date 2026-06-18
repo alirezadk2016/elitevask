@@ -14,15 +14,14 @@ const HTML = `<!-- BEFORE/AFTER + GALLERY -->
 
   <div class="center" style="margin-top:64px"><div class="eyebrow" data-i18n="gal_eyebrow">Galleri</div><h2 class="sec-title" data-i18n="gal_title">Billeder fra vores arbejde</h2></div>
   <div class="gallery" id="gallery">
-    <figure class="gitem" data-full="/gallery/img12.jpg"><img src="/gallery/img03.jpg" alt="Sæderens før" loading="lazy"><figcaption data-i18n="g_seat_for">Sæderens · før</figcaption></figure>
-    <figure class="gitem" data-full="/gallery/img13.jpg"><img src="/gallery/img04.jpg" alt="Sæderens efter" loading="lazy"><figcaption data-i18n="g_seat_efter">Sæderens · efter</figcaption></figure>
-    <figure class="gitem" data-full="/gallery/img14.jpg"><img src="/gallery/img05.jpg" alt="Fodrum før" loading="lazy"><figcaption data-i18n="g_floor_for">Fodrum · før</figcaption></figure>
-    <figure class="gitem" data-full="/gallery/img15.jpg"><img src="/gallery/img06.jpg" alt="Fodrum efter" loading="lazy"><figcaption data-i18n="g_floor_efter">Fodrum · efter</figcaption></figure>
-    <figure class="gitem" data-full="/gallery/img16.jpg"><img src="/gallery/img07.jpg" alt="Tankdæksel før" loading="lazy"><figcaption data-i18n="g_fuel_for">Tankdæksel · før</figcaption></figure>
-    <figure class="gitem" data-full="/gallery/img17.jpg"><img src="/gallery/img08.jpg" alt="Tankdæksel efter" loading="lazy"><figcaption data-i18n="g_fuel_efter">Tankdæksel · efter</figcaption></figure>
-    <figure class="gitem" data-full="/gallery/img18.jpg"><img src="/gallery/img09.jpg" alt="Tagkant alger" loading="lazy"><figcaption data-i18n="g_roof">Tagkant · algerens</figcaption></figure>
-    <figure class="gitem" data-full="/gallery/img19.jpg"><img src="/gallery/img10.jpg" alt="Pedalområde" loading="lazy"><figcaption data-i18n="g_pedal">Pedalområde · rens</figcaption></figure>
-    <figure class="gitem" data-full="/gallery/img20.jpg"><img src="/gallery/img11.jpg" alt="Dampvask på stedet" loading="lazy"><figcaption data-i18n="g_onsite">Mobil dampvask · på stedet</figcaption></figure>
+    <figure class="gitem" data-full="/gallery/img07.jpg"><img src="/gallery/img07.jpg" alt="Sæderens før" loading="lazy"><figcaption data-i18n="g_seat_for">Sæderens · før</figcaption></figure>
+    <figure class="gitem" data-full="/gallery/img08.jpg"><img src="/gallery/img08.jpg" alt="Sæderens efter" loading="lazy"><figcaption data-i18n="g_seat_efter">Sæderens · efter</figcaption></figure>
+    <figure class="gitem" data-full="/gallery/img03.jpg"><img src="/gallery/img03.jpg" alt="Tankdæksel før" loading="lazy"><figcaption data-i18n="g_fuel_for">Tankdæksel · før</figcaption></figure>
+    <figure class="gitem" data-full="/gallery/img04.jpg"><img src="/gallery/img04.jpg" alt="Tankdæksel efter" loading="lazy"><figcaption data-i18n="g_fuel_efter">Tankdæksel · efter</figcaption></figure>
+    <figure class="gitem" data-full="/gallery/img05.jpg"><img src="/gallery/img05.jpg" alt="Fodrum rens" loading="lazy"><figcaption data-i18n="g_floor_efter">Fodrum · rens</figcaption></figure>
+    <figure class="gitem" data-full="/gallery/img09.jpg"><img src="/gallery/img09.jpg" alt="Tagkant alger" loading="lazy"><figcaption data-i18n="g_roof">Tagkant · algerens</figcaption></figure>
+    <figure class="gitem" data-full="/gallery/img10.jpg"><img src="/gallery/img10.jpg" alt="Dampvask på stedet" loading="lazy"><figcaption data-i18n="g_onsite">Mobil dampvask · på stedet</figcaption></figure>
+    <figure class="gitem" data-full="/gallery/img11.jpg"><img src="/gallery/img11.jpg" alt="Mobil dampvask" loading="lazy"><figcaption data-i18n="g_onsite">Mobil dampvask · på stedet</figcaption></figure>
     <figure class="gitem" data-full="/gallery/IMG_20260512_174045896_HDR.jpg"><img src="/gallery/thumb_motor_for.jpg" alt="Motorrens før" loading="lazy"><figcaption>Motorrens · før</figcaption></figure>
     <figure class="gitem" data-full="/gallery/IMG_20260512_182945671_HDR.jpg"><img src="/gallery/thumb_motor_efter.jpg" alt="Motorrens efter" loading="lazy"><figcaption>Motorrens · efter</figcaption></figure>
   </div>
