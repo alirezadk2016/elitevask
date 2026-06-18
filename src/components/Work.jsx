@@ -12,6 +12,22 @@ const HTML = `<!-- BEFORE/AFTER + GALLERY -->
     <p class="ba-cap" data-i18n="ba_cap">Motorrens · Peugeot – afrenset med damp</p>
   </div>
 
+  <!-- VIDEO -->
+  <div class="ev-video-wrap">
+    <div class="ev-video-card">
+      <div class="ev-video-badge"><span class="ev-pulse"></span><span data-i18n="vid_badge">Se os i aktion</span></div>
+      <video class="ev-video" autoplay muted loop playsinline poster="/gallery/steam-bmw.jpg">
+        <source src="/gallery/elite-vask-demo.mp4" type="video/mp4">
+      </video>
+      <div class="ev-video-overlay">
+        <div class="ev-video-text">
+          <h3 data-i18n="vid_title">Professionel dampvask</h3>
+          <p data-i18n="vid_sub">Se hvordan vi transformer din bil – fra snavset til skinnende ren</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="center" style="margin-top:64px"><div class="eyebrow" data-i18n="gal_eyebrow">Galleri</div><h2 class="sec-title" data-i18n="gal_title">Billeder fra vores arbejde</h2></div>
   <div class="gallery" id="gallery">
     <figure class="gitem" data-full="/gallery/seat-before.jpg"><img src="/gallery/seat-before.jpg" alt="Sæderens før" loading="lazy"><figcaption>Sæderens · før</figcaption></figure>
