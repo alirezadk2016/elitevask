@@ -53,6 +53,8 @@ function slotKey(date, time) {
   return `slot:${date}:${time}`;
 }
 
+const SLOT_TIMES = ['08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00'];
+
 function buildTransport() {
   const user = process.env.GMAIL_USER || COMPANY_EMAIL;
   const pass = process.env.GMAIL_PASS;
@@ -83,11 +85,10 @@ export async function POST(request) {
     return Response.json({ error: 'Invalid JSON' }, { status: 400 });
   }
 
-  const { car, pkg, extras, addr, zip, city, date, time, name, phone, email, msg, price, lang } = body;
+  const { car, pkg, extras, addr, zip, city, date, time, name, phone, email, msg, price, lang, slotsNeeded: rawSlots } = body;
+  const slotsNeeded = Math.max(1, Math.min(parseInt(rawSlots) || 1, 5));
 
   if (date && time) {
-    // Reject past slots (Copenhagen time = UTC+1 or UTC+2 in summer)
-    // Compute Copenhagen UTC offset dynamically (handles CET/CEST automatically)
     const nowInCph = new Date().toLocaleString('sv-SE', { timeZone: 'Europe/Copenhagen' });
     const nowUtc = new Date().toLocaleString('sv-SE', { timeZone: 'UTC' });
     const cphOffsetMs = (new Date(nowInCph) - new Date(nowUtc));
@@ -101,18 +102,28 @@ export async function POST(request) {
           : 'This time slot is in the past. Please choose a future time.',
       }, { status: 409 });
     }
-    const key = slotKey(date, time);
-    const taken = await isSlotBooked(key);
-    if (taken) {
-      const L = lang !== 'en';
-      return Response.json({
-        error: 'slot_taken',
-        message: L
-          ? 'Dette tidspunkt er desværre allerede booket. Vælg venligst et andet tidspunkt.'
-          : 'This time slot is already booked. Please choose a different time.',
-      }, { status: 409 });
+
+    const L = lang !== 'en';
+    const startIdx = SLOT_TIMES.indexOf(time);
+    // Check all slots needed for this car's duration are free
+    for (let i = 0; i < slotsNeeded; i++) {
+      const slotTime = SLOT_TIMES[startIdx + i];
+      if (!slotTime) break;
+      if (await isSlotBooked(slotKey(date, slotTime))) {
+        return Response.json({
+          error: 'slot_taken',
+          message: L
+            ? 'Dette tidspunkt er desværre allerede booket. Vælg venligst et andet tidspunkt.'
+            : 'This time slot is already booked. Please choose a different time.',
+        }, { status: 409 });
+      }
     }
-    await bookSlot(key, { name: name || 'unknown', bookedAt: new Date().toISOString() });
+    // Book all slots for the duration of this job
+    for (let i = 0; i < slotsNeeded; i++) {
+      const slotTime = SLOT_TIMES[startIdx + i];
+      if (!slotTime) break;
+      await bookSlot(slotKey(date, slotTime), { name: name || 'unknown', bookedAt: new Date().toISOString() });
+    }
   }
 
   const L = lang !== 'en';

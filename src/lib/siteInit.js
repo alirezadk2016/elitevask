@@ -376,7 +376,7 @@ function drawWiz(){
     h+='<div class="field"><label>'+W('addr')+'</label><input id="f_addr" value="'+wiz.addr+'" placeholder="Vejnavn 12"></div>';
     h+='<div class="field"><div class="row2"><div><label>'+W('zip')+'</label><input id="f_zip" inputmode="numeric" maxlength="4" value="'+(wiz.zip||"")+'" placeholder="4700"></div><div><label>'+W('city')+'</label><input id="f_city" value="'+wiz.city+'" placeholder="Næstved"></div></div></div>';
   }else if(step===5){
-    var minD=(function(){var d=new Date();d.setDate(d.getDate()+1);return d.toISOString().split('T')[0];})();
+    var minD=(function(){var d=new Date();return new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Copenhagen'}).format(d);})();
     h+='<div class="wiz-q">'+W('s5')+'</div>';
     h+='<div class="field"><label>'+W('date')+'</label><input id="f_date" type="date" value="'+wiz.date+'" min="'+minD+'"></div>';
     h+='<div class="field"><label>'+(LANG==='da'?'Vælg tidspunkt':'Choose time')+'</label>';
@@ -547,7 +547,8 @@ function submitBooking(cb){
       addr:wiz.addr,zip:wiz.zip,city:wiz.city,
       date:wiz.date,time:wiz.time,
       name:wiz.name,phone:wiz.phone,email:wiz.email,msg:wiz.msg,
-      price:priceStr,lang:LANG
+      price:priceStr,lang:LANG,
+      slotsNeeded:({lille:2,mellem:3,stor:4,varebil:3}[wiz.car?wiz.car.id:'']||2)
     })
   }).then(function(r){
     return r.json().then(function(d){return {status:r.status,data:d};});
