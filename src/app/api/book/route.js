@@ -53,7 +53,7 @@ function slotKey(date, time) {
   return `slot:${date}:${time}`;
 }
 
-const SLOT_TIMES = ['08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00'];
+const SLOT_TIMES = ['08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00'];
 
 function buildTransport() {
   const user = process.env.GMAIL_USER || COMPANY_EMAIL;

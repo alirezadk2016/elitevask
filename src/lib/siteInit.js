@@ -373,7 +373,7 @@ function drawWiz(){
     h+='<div class="field"><label>'+W('date')+'</label><input id="f_date" type="date" value="'+wiz.date+'" min="'+minD+'"></div>';
     h+='<div class="field"><label>'+(LANG==='da'?'Vælg tidspunkt':'Choose time')+'</label>';
     h+='<div class="slot-grid" id="slotGrid">';
-    var SLOTS=['08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00'];
+    var SLOTS=['08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00'];
     if(!wiz.date){
       h+='<div class="slot-hint">'+(LANG==='da'?'Vælg dato først':'Choose date first')+'</div>';
     }else{
@@ -488,7 +488,7 @@ function isPastSlot(date,time){
   return (date+'T'+time)<nowCopenhagen();
 }
 function renderSlotGrid(grid,booked,date){
-  var SLOTS=['08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00'];
+  var SLOTS=['08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00'];
   var CAR_SLOTS={lille:2,mellem:3,stor:4,varebil:3};
   var need=CAR_SLOTS[wiz.car?wiz.car.id:'']||1;
   var visible=SLOTS.filter(function(s){return !isPastSlot(date,s);});
