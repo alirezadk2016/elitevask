@@ -534,6 +534,7 @@ function submitBooking(cb){
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({
       car:wiz.car?wiz.car.label[LANG]:'-',
+      carId:wiz.car?wiz.car.id:null,
       pkg:wiz.pkg?wiz.pkg.name[LANG]:'-',
       extras:extList,
       addr:wiz.addr,zip:wiz.zip,city:wiz.city,

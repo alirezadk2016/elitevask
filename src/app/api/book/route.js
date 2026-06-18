@@ -85,8 +85,9 @@ export async function POST(request) {
     return Response.json({ error: 'Invalid JSON' }, { status: 400 });
   }
 
-  const { car, pkg, extras, addr, zip, city, date, time, name, phone, email, msg, price, lang, slotsNeeded: rawSlots } = body;
-  const slotsNeeded = Math.max(1, Math.min(parseInt(rawSlots) || 1, 5));
+  const { car, pkg, extras, addr, zip, city, date, time, name, phone, email, msg, price, lang, carId, slotsNeeded: rawSlots } = body;
+  const CAR_SLOTS = { lille: 2, mellem: 3, stor: 4, varebil: 3 };
+  const slotsNeeded = CAR_SLOTS[carId] || Math.max(1, Math.min(parseInt(rawSlots) || 2, 5));
 
   if (date && time) {
     const nowInCph = new Date().toLocaleString('sv-SE', { timeZone: 'Europe/Copenhagen' });
