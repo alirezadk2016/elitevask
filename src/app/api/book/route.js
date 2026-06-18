@@ -9,11 +9,13 @@ let kvClient = null;
 async function getKV() {
   if (kvClient) return kvClient;
   try {
-    const { kv } = await import('@vercel/kv');
-    // Test that env vars exist before returning
-    if (!process.env.KV_REST_API_URL) return null;
-    kvClient = kv;
-    return kv;
+    const { Redis } = await import('@upstash/redis');
+    // Support both default KV_ prefix and STORAGE_ prefix from Upstash integration
+    const url = process.env.KV_REST_API_URL || process.env.STORAGE_KV_REST_API_URL;
+    const token = process.env.KV_REST_API_TOKEN || process.env.STORAGE_KV_REST_API_TOKEN;
+    if (!url || !token) return null;
+    kvClient = new Redis({ url, token });
+    return kvClient;
   } catch {
     return null;
   }
@@ -30,7 +32,7 @@ async function isSlotBooked(key) {
 async function bookSlot(key, value) {
   try {
     const kv = await getKV();
-    if (kv) { await kv.set(key, value, { ex: 60 * 60 * 24 * 30 }); return; }
+    if (kv) { await kv.set(key, JSON.stringify(value), { ex: 60 * 60 * 24 * 30 }); return; }
   } catch {}
   memSlots.set(key, value);
 }
