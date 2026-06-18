@@ -7,10 +7,10 @@ var CARS=[
   {id:"varebil",label:{da:"Varebil",en:"Van"},ex:{da:"Transit, Caddy, Berlingo",en:"Transit, Caddy, Berlingo"},prices:{hele:1400,udv:750,indv:750,guld:2200},svg:'<path d="M6 48 L6 18 Q6 14 12 14 L74 14 Q82 14 88 22 L108 38 Q112 41 112 46 L112 47 Q112 48 108 48"/><path d="M40 48 L82 48"/><circle cx="28" cy="48" r="8.5"/><circle cx="28" cy="48" r="3"/><circle cx="92" cy="48" r="8.5"/><circle cx="92" cy="48" r="3"/><path d="M74 16 L80 30 L110 30"/><path d="M38 14 L38 30 L6 30"/>'}
 ];
 var PKGS=[
-  {id:"hele",pop:true,gold:false,includes:[],name:{da:"Hele bilen",en:"Full car"},desc:{da:"Ind & ud – komplet behandling",en:"In & out – complete service"},feat:{da:["Udvendig håndvask + fælge","Grundig indvendig støvsugning","Rens af måtter & sæder","Dampbehandling af kabine","Voksfinish & ruder ind/ud"],en:["Exterior hand wash + rims","Thorough interior vacuum","Mats & seats cleaned","Cabin steam treatment","Wax finish & windows"]}},
-  {id:"udv",pop:false,gold:false,includes:[],name:{da:"Udvendig",en:"Exterior"},desc:{da:"Skånsom udvendig dampvask",en:"Gentle exterior steam wash"},feat:{da:["Udvendig håndvask","Fælge & dæk","Lakrens: tjære & insekter","Voksfinish","Ruder udvendigt"],en:["Exterior hand wash","Rims & tyres","Paint: tar & insects","Wax finish","Windows outside"]}},
-  {id:"indv",pop:false,gold:false,includes:[],name:{da:"Indvendig",en:"Interior"},desc:{da:"Dybderens af kabinen",en:"Deep clean of the cabin"},feat:{da:["Grundig støvsugning","Rens af måtter","Dampbehandling af sæder","Desinficering","Ruder indvendigt"],en:["Thorough vacuum","Mat cleaning","Seat steam treatment","Disinfection","Windows inside"]}},
-  {id:"guld",pop:false,gold:true,includes:["motor","lak"],name:{da:"Guld pakke",en:"Gold package"},desc:{da:"Inkl. alle ydelser",en:"All services included"},feat:{da:["Alt ind & ud","+ Motorrens","+ Lak- & glansbeskyttelse","+ Dybderens ved uheld","+ Interiørbeskyttelse"],en:["Everything in & out","+ Engine clean","+ Paint & gloss protection","+ Deep clean if needed","+ Interior protection"]}}
+  {id:"hele",pop:true,gold:false,includes:[],relevant:["motor","lak","haar","barnesaede"],name:{da:"Hele bilen",en:"Full car"},desc:{da:"Ind & ud – komplet behandling",en:"In & out – complete service"},feat:{da:["Udvendig håndvask + fælge","Grundig indvendig støvsugning","Rens af måtter & sæder","Dampbehandling af kabine","Voksfinish & ruder ind/ud"],en:["Exterior hand wash + rims","Thorough interior vacuum","Mats & seats cleaned","Cabin steam treatment","Wax finish & windows"]}},
+  {id:"udv",pop:false,gold:false,includes:[],relevant:["motor","lak"],name:{da:"Udvendig",en:"Exterior"},desc:{da:"Skånsom udvendig dampvask",en:"Gentle exterior steam wash"},feat:{da:["Udvendig håndvask","Fælge & dæk","Lakrens: tjære & insekter","Voksfinish","Ruder udvendigt"],en:["Exterior hand wash","Rims & tyres","Paint: tar & insects","Wax finish","Windows outside"]}},
+  {id:"indv",pop:false,gold:false,includes:[],relevant:["haar","barnesaede"],name:{da:"Indvendig",en:"Interior"},desc:{da:"Dybderens af kabinen",en:"Deep clean of the cabin"},feat:{da:["Grundig støvsugning","Rens af måtter","Dampbehandling af sæder","Desinficering","Ruder indvendigt"],en:["Thorough vacuum","Mat cleaning","Seat steam treatment","Disinfection","Windows inside"]}},
+  {id:"guld",pop:false,gold:true,includes:["motor","lak"],relevant:["haar","barnesaede"],name:{da:"Guld pakke",en:"Gold package"},desc:{da:"Inkl. alle ydelser",en:"All services included"},feat:{da:["Alt ind & ud","+ Motorrens","+ Lak- & glansbeskyttelse","+ Dybderens ved uheld","+ Interiørbeskyttelse"],en:["Everything in & out","+ Engine clean","+ Paint & gloss protection","+ Deep clean if needed","+ Interior protection"]}}
 ];
 var EXTRAS=[
   {id:"motor",name:{da:"Motorrens",en:"Engine clean"},price:300,desc:{da:"Grundig afrensning af motorrum",en:"Thorough engine bay cleaning"}},
@@ -321,7 +321,8 @@ function drawWiz(){
   }else if(step===3){
     h+='<div class="wiz-q">'+W('s3')+'</div>';
     var pkgIncludes=(wiz.pkg&&wiz.pkg.includes)||[];
-    var hasOptional=EXTRAS.some(function(ex){return pkgIncludes.indexOf(ex.id)<0;});
+    var pkgRelevant=(wiz.pkg&&wiz.pkg.relevant)||EXTRAS.map(function(e){return e.id;});
+    var optionalExtras=EXTRAS.filter(function(ex){return pkgRelevant.indexOf(ex.id)>=0&&pkgIncludes.indexOf(ex.id)<0;});
     if(pkgIncludes.length>0){
       h+='<p style="font-size:13px;color:var(--green);margin-bottom:8px;font-weight:600">'+(LANG==='da'?'✓ Inkluderet i din pakke:':'✓ Included in your package:')+'</p>';
       h+='<div class="extras-grid" style="margin-bottom:16px">';
@@ -333,20 +334,22 @@ function drawWiz(){
       });
       h+='</div>';
     }
-    if(hasOptional){
+    if(optionalExtras.length>0){
       if(pkgIncludes.length>0)h+='<p style="font-size:13px;color:var(--muted);margin-bottom:8px">'+(LANG==='da'?'Tilvalg (ekstra pris):':'Add-ons (extra cost):')+'</p>';
       else h+='<p style="font-size:13px;color:var(--muted);margin-bottom:12px">'+(LANG==='da'?'Vælg hvad du vil tilføje. Pris tillægges automatisk.':'Choose extras to add. Price is calculated automatically.')+'</p>';
-    }
-    h+='<div class="extras-grid">';
-    EXTRAS.filter(function(ex){return pkgIncludes.indexOf(ex.id)<0;}).forEach(function(ex){
-      var sel=wiz.extras.indexOf(ex.id)>=0;
-      h+='<div class="extra-item'+(sel?' sel':'')+'" data-ext="'+ex.id+'">';
-      h+='<div class="ex-name">'+ex.name[LANG]+'</div>';
-      h+='<div class="ex-price">+'+fmtKr(ex.price)+'</div>';
-      h+='<div class="ex-desc">'+ex.desc[LANG]+'</div>';
+      h+='<div class="extras-grid">';
+      optionalExtras.forEach(function(ex){
+        var sel=wiz.extras.indexOf(ex.id)>=0;
+        h+='<div class="extra-item'+(sel?' sel':'')+'" data-ext="'+ex.id+'">';
+        h+='<div class="ex-name">'+ex.name[LANG]+'</div>';
+        h+='<div class="ex-price">+'+fmtKr(ex.price)+'</div>';
+        h+='<div class="ex-desc">'+ex.desc[LANG]+'</div>';
+        h+='</div>';
+      });
       h+='</div>';
-    });
-    h+='</div>';
+    }else if(pkgIncludes.length===0){
+      h+='<p style="font-size:13px;color:var(--muted);text-align:center;padding:16px">'+(LANG==='da'?'Ingen tilvalg tilgængelige for denne pakke.':'No add-ons available for this package.')+'</p>';
+    }
   }else if(step===4){
     h+='<div class="wiz-q">'+W('s4')+'</div>';
     h+='<div class="field"><label>'+W('addr')+'</label><input id="f_addr" value="'+wiz.addr+'" placeholder="Vejnavn 12"></div>';
@@ -430,7 +433,7 @@ function drawWiz(){
   // bind car options
   wizBody.querySelectorAll('[data-car]').forEach(function(o){o.addEventListener('click',function(){wiz.car=CARS.filter(function(c){return c.id===o.dataset.car;})[0];wizBody.querySelectorAll('[data-car]').forEach(function(x){x.classList.remove('sel');});o.classList.add('sel');});});
   // bind package options — clear any extras that are now included in the new package
-  wizBody.querySelectorAll('[data-pkg]').forEach(function(o){o.addEventListener('click',function(){wiz.pkg=PKGS.filter(function(p){return p.id===o.dataset.pkg;})[0];wizBody.querySelectorAll('[data-pkg]').forEach(function(x){x.classList.remove('sel');});o.classList.add('sel');if(wiz.pkg&&wiz.pkg.includes)wiz.extras=wiz.extras.filter(function(id){return wiz.pkg.includes.indexOf(id)<0;});});});
+  wizBody.querySelectorAll('[data-pkg]').forEach(function(o){o.addEventListener('click',function(){wiz.pkg=PKGS.filter(function(p){return p.id===o.dataset.pkg;})[0];wizBody.querySelectorAll('[data-pkg]').forEach(function(x){x.classList.remove('sel');});o.classList.add('sel');if(wiz.pkg){var rel=wiz.pkg.relevant||[];var inc=wiz.pkg.includes||[];wiz.extras=wiz.extras.filter(function(id){return rel.indexOf(id)>=0&&inc.indexOf(id)<0;});}});});
   // bind extras (multi-select toggle)
   wizBody.querySelectorAll('[data-ext]').forEach(function(o){o.addEventListener('click',function(){var id=o.dataset.ext;var idx=wiz.extras.indexOf(id);if(idx>=0){wiz.extras.splice(idx,1);o.classList.remove('sel');}else{wiz.extras.push(id);o.classList.add('sel');}});});
   var bk=document.getElementById('wizBack');if(bk)bk.addEventListener('click',function(){saveStep();step--;drawWiz();});
