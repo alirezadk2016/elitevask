@@ -1,6 +1,16 @@
+export async function GET(request) {
+  const { searchParams } = new URL(request.url);
+  if (searchParams.get('secret') !== 'elitevask-clear-2026') return new Response('forbidden', { status: 403 });
+  return clearAll();
+}
+
 export async function POST(request) {
   const { secret } = await request.json().catch(() => ({}));
   if (secret !== 'elitevask-clear-2026') return Response.json({ error: 'forbidden' }, { status: 403 });
+  return clearAll();
+}
+
+async function clearAll() {
   try {
     const { Redis } = await import('@upstash/redis');
     const url = process.env.KV_REST_API_URL || process.env.STORAGE_KV_REST_API_URL;
