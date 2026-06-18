@@ -178,53 +178,44 @@ function showPlateResult(html,type){
   plateResult.className='plate-result plate-result-'+type;
   plateResult.innerHTML=html;
 }
-function parsePlateHtml(html){
-  function exTd(label){
-    var re=new RegExp('<td[^>]*>\\s*'+label+'[^<]*</td>\\s*<td[^>]*>([^<]{1,100})','i');
-    var m=html.match(re);return m?m[1].trim():'';
-  }
-  function ex(label){
-    var re=new RegExp(label+'[^<]*<[^>]+>([^<]{1,80})','i');
-    var m=html.match(re);return m?m[1].trim():'';
-  }
-  var make=exTd('M.rke')||exTd('Fabrikat')||ex('M.rke');
-  var model=exTd('Model')||ex('Model');
-  var variant=exTd('Variant')||ex('Variant');
-  var firstReg=exTd('1\\. reg')||exTd('F.rste reg')||ex('1\\. reg');
-  var ws=exTd('Totalv.gt')||ex('Totalv.gt');
-  var totalWeight=parseInt(ws.replace(/\D/g,''),10)||0;
-  var usageCode=exTd('Anvendelse')||exTd('K.ret.jsart')||ex('Anvendelse');
+function parseTjekbilHtml(html){
+  // Title format: "DG94158 - MAZDA MX-5 1.5 SKYACTIV..."
+  var titleM=html.match(/<title[^>]*>[^-\|<]+-\s*([A-ZÆØÅ][^<\|]{2,80})/i);
+  // h1 format: "MAZDA MX-5"
+  var h1M=html.match(/<h1[^>]*>\s*([A-ZÆØÅ][A-ZÆØÅ0-9\s\-\.]{1,40})\s*<\/h1>/i);
+  // Next heading for variant
+  var varM=html.match(/<h[23][^>]*>\s*([\d][^<]{5,60})\s*<\/h[23]>/i);
+  var yearM=html.match(/(\d{4})/);
+  var make='',model='',variant='';
+  if(h1M){var p=h1M[1].trim().split(/\s+/);make=p[0]||'';model=p.slice(1).join(' ')||'';}
+  else if(titleM){var p=titleM[1].trim().split(/\s+/);make=p[0]||'';model=p.slice(1,3).join(' ')||'';}
+  if(varM)variant=varM[1].trim();
   if(!make&&!model)return null;
-  return {make:make,model:model,variant:variant,firstRegistration:firstReg,totalWeight:totalWeight,usageCode:usageCode};
+  var isVan=/varebil|varevogn/i.test(html);
+  return {make:make,model:model,variant:variant,firstRegistration:yearM?yearM[1]:'',totalWeight:0,usageCode:isVan?'Varebil':'Personbil'};
 }
 function fetchPlate(plate){
-  // 1) Try nummerplade.net via CORS proxy (browser-side, no Vercel IP block)
-  return fetch('https://corsproxy.io/?url='+encodeURIComponent('https://www.nummerplade.net/nummerplade.asp?nummerplade='+plate))
-    .then(function(r){if(!r.ok)throw new Error('ao '+r.status);return r.text();})
-    .then(function(html){
-      var d=parsePlateHtml(html);
-      if(!d)throw new Error('no data');
-      d.category=mapDmrToCar(d);
-      return d;
-    })
-    .catch(function(){
-      // 2) Try motorapi.dk directly (might have CORS)
-      return fetch('https://motorapi.dk/vehicles/'+plate,{headers:{Accept:'application/json'}})
-        .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
-        .then(function(d){
-          if(!d||(!d.make&&!d.model))throw new Error('empty');
-          var make=d.make||d.brand||'';
-          var model=d.model||d.modelName||'';
-          var w=Number(d.totalWeight||d.weight||0);
-          var usage=d.usageCode||d.type||d.kind||'';
-          var year=d.firstRegistration||d.year||'';
-          return {make:make,model:model,variant:d.variant||d.body||'',firstRegistration:year,totalWeight:w,usageCode:usage};
-        })
-        .catch(function(){
-          // 3) Server proxy as final fallback
-          return fetch('/api/plate?plate='+encodeURIComponent(plate)).then(function(r){return r.json();});
-        });
-    });
+  var proxies=[
+    'https://api.allorigins.win/raw?url=',
+    'https://corsproxy.io/?url=',
+    'https://api.codetabs.com/v1/proxy?quest=',
+  ];
+  var tjekUrl='https://www.tjekbil.dk/nummerplade/'+plate+'/overblik';
+  function tryProxy(i){
+    if(i>=proxies.length){
+      return fetch('/api/plate?plate='+encodeURIComponent(plate)).then(function(r){return r.json();});
+    }
+    return fetch(proxies[i]+encodeURIComponent(tjekUrl))
+      .then(function(r){if(!r.ok)throw new Error(r.status);return r.text();})
+      .then(function(html){
+        var d=parseTjekbilHtml(html);
+        if(!d)throw new Error('no data');
+        d.category=mapDmrToCar(d);
+        return d;
+      })
+      .catch(function(){return tryProxy(i+1);});
+  }
+  return tryProxy(0);
 }
 function doLookup(){
   var plate=plateInput.value.replace(/\s/g,'').toUpperCase();
