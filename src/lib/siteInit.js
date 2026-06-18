@@ -268,7 +268,13 @@ var modal=document.getElementById('modal'),wizBody=document.getElementById('wizB
 var wiz={car:null,pkg:null,extras:[],addr:"",zip:"",city:"",date:"",time:"",name:"",phone:"",email:"",msg:""};
 var step=1, TOTAL=7;
 function W(k){return WIZ[LANG][k]||k;}
-function openWiz(car,pkg){wiz.car=car||selCar||CARS[0];wiz.pkg=pkg||PKGS[0];wiz.zip=zipVal;wiz.extras=[];step=1;modal.classList.add('open');document.body.style.overflow='hidden';drawWiz();}
+function openWiz(car,pkg){
+  wiz.car=car||null;wiz.pkg=pkg||null;wiz.zip=zipVal;wiz.extras=[];
+  if(car&&pkg){step=3;}
+  else if(car){step=2;}
+  else{wiz.car=selCar||CARS[0];step=1;}
+  modal.classList.add('open');document.body.style.overflow='hidden';drawWiz();
+}
 function closeWiz(){modal.classList.remove('open');document.body.style.overflow='';if(_slotPollTimer){clearInterval(_slotPollTimer);_slotPollTimer=null;}}
 document.getElementById('wizClose').addEventListener('click',closeWiz);
 modal.addEventListener('click',function(e){if(e.target===modal)closeWiz();});
@@ -300,7 +306,18 @@ function doWizPlateLookup(inputEl,resultEl,btnEl){
 
 function drawWiz(){
   progress();
-  var h='<div class="wiz-stepnum">'+W('step')+' '+step+' '+W('of')+' '+TOTAL+'</div>';
+  // Context bar: show already-chosen car/package with edit links
+  var ctxBar='';
+  if(step>=2&&wiz.car){
+    ctxBar+='<div class="wiz-ctx">';
+    ctxBar+='<span class="wiz-ctx-item">'+wiz.car.label[LANG]+'<button class="wiz-ctx-edit" data-goto="1">✎</button></span>';
+    if(step>=3&&wiz.pkg){
+      ctxBar+='<span class="wiz-ctx-sep">›</span>';
+      ctxBar+='<span class="wiz-ctx-item">'+wiz.pkg.name[LANG]+'<button class="wiz-ctx-edit" data-goto="2">✎</button></span>';
+    }
+    ctxBar+='</div>';
+  }
+  var h=ctxBar+'<div class="wiz-stepnum">'+W('step')+' '+step+' '+W('of')+' '+TOTAL+'</div>';
   if(step===1){
     h+='<div class="wiz-q">'+W('s1')+'</div>';
     // plate lookup widget
@@ -409,6 +426,8 @@ function drawWiz(){
   h+='<button class="btn btn-green" id="wizNext">'+(step===TOTAL?W('send'):W('next'))+'</button>';
   h+='</div>';
   wizBody.innerHTML=h;
+  // bind context bar edit buttons
+  wizBody.querySelectorAll('.wiz-ctx-edit').forEach(function(btn){btn.addEventListener('click',function(){saveStep();step=parseInt(btn.dataset.goto,10);drawWiz();});});
   // bind step 1 plate lookup
   if(step===1){
     var wpi=document.getElementById('wizPlateInput');
