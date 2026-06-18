@@ -6,6 +6,15 @@
   --gold:#d4af37;--gold-soft:rgba(212,175,55,.13);--gold-line:rgba(212,175,55,.4);
   --r:14px;--r-sm:10px;
 }
+/* ANNOUNCEMENT BAR */
+.ann-bar{background:linear-gradient(90deg,#0d4a27 0%,#116635 40%,#0d4a27 100%);border-bottom:1px solid rgba(55,210,120,.25);padding:9px 16px;text-align:center}
+.ann-inner{display:inline-flex;align-items:center;gap:10px;justify-content:center;flex-wrap:wrap}
+.ann-pulse{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 0 rgba(55,210,120,.6);animation:annpulse 1.8s infinite;flex-shrink:0}
+@keyframes annpulse{0%{box-shadow:0 0 0 0 rgba(55,210,120,.6)}70%{box-shadow:0 0 0 8px rgba(55,210,120,0)}100%{box-shadow:0 0 0 0 rgba(55,210,120,0)}}
+.ann-text{display:inline-flex;align-items:center;gap:8px;font-size:13.5px;color:#c8f0d8;flex-wrap:wrap;justify-content:center}
+.ann-text svg{color:var(--green);flex-shrink:0}
+.ann-text strong{color:#fff;font-size:14px}
+.ann-sep{color:rgba(255,255,255,.3);font-size:12px}
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth}
 body{font-family:'Manrope',system-ui,sans-serif;background:var(--bg);color:var(--txt);line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}

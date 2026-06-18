@@ -1,3 +1,4 @@
+import AnnouncementBar from "@/components/AnnouncementBar";
 import TrustBar from "@/components/TrustBar";
 import Nav from "@/components/Nav";
 import Hero from "@/components/Hero";
@@ -22,6 +23,7 @@ import Chatbot from "@/components/Chatbot";
 export default function Page() {
   return (
     <>
+      <AnnouncementBar />
       <TrustBar />
       <Nav />
       <span id="top"></span>
