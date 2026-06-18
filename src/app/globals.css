@@ -398,13 +398,28 @@ section{position:relative}
 .chat-toggle{width:58px;height:58px;border-radius:50%;background:var(--green);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#062313;box-shadow:0 6px 24px rgba(55,210,120,.35);transition:transform .15s}
 .chat-toggle:hover{transform:scale(1.08)}
 .chat-badge{position:absolute;top:-4px;right:-4px;width:20px;height:20px;border-radius:50%;background:#e53;color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;border:2px solid var(--bg)}
-.chat-window{position:absolute;bottom:70px;right:0;width:320px;max-height:80vh;background:var(--surface);border:1px solid var(--line-2);border-radius:var(--r);box-shadow:0 20px 60px rgba(0,0,0,.4);overflow:hidden;display:flex;flex-direction:column}
+.chat-window{position:absolute;bottom:70px;right:0;width:320px;max-height:80vh;background:var(--surface);border:1px solid var(--line-2);border-radius:var(--r);box-shadow:0 20px 60px rgba(0,0,0,.4);overflow:hidden;display:flex;flex-direction:column;position:relative}
+/* chat intro animation */
+.chat-intro{position:absolute;inset:0;z-index:6;background:#030e07;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;border-radius:var(--r)}
+.intro-svg{width:88%;max-width:240px;overflow:visible}
+.intro-label{font-size:13px;font-weight:700;color:var(--green);letter-spacing:.5px;opacity:0;animation:introLabelIn .4s ease 1.1s forwards}
+.chat-intro.hiding{animation:chatIntroOut .45s ease forwards}
+.intro-car-g{animation:introCarIn .55s cubic-bezier(.22,1,.36,1) forwards;transform:translateX(260px)}
+.intro-robot-g{animation:introRobotUp .45s cubic-bezier(.34,1.56,.64,1) .65s both;transform:translateY(60px)}
+.intro-arm-wave{transform-box:fill-box;transform-origin:center top;animation:introArmWave .38s ease 1.3s 5 alternate}
+.intro-ant-ball{transform-box:fill-box;transform-origin:center center;animation:introAntPulse .7s ease-in-out .8s infinite alternate}
+@keyframes introCarIn{to{transform:translateX(0)}}
+@keyframes introRobotUp{to{transform:translateY(0)}}
+@keyframes introArmWave{to{transform:rotate(-38deg)}}
+@keyframes introAntPulse{to{transform:scale(1.4);opacity:.7}}
+@keyframes introLabelIn{to{opacity:1}}
+@keyframes chatIntroOut{to{opacity:0;pointer-events:none}}
+.chat-close{background:rgba(255,255,255,.15);border:none;border-radius:50%;width:30px;height:30px;cursor:pointer;color:#fff;display:flex;align-items:center;justify-content:center;position:relative;z-index:10}
 .chat-header{background:linear-gradient(135deg,var(--green-deep),#0a3d22);padding:14px 16px;display:flex;align-items:center;justify-content:space-between}
 .chat-header-info{display:flex;align-items:center;gap:10px}
 .chat-avatar{width:36px;height:36px;border-radius:50%;background:var(--green);color:#062313;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .chat-name{font-size:14px;font-weight:700;color:#fff}
 .chat-status{font-size:11px;color:rgba(255,255,255,.7);margin-top:1px}
-.chat-close{background:rgba(255,255,255,.15);border:none;border-radius:50%;width:30px;height:30px;cursor:pointer;color:#fff;display:flex;align-items:center;justify-content:center}
 .chat-messages{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;max-height:280px;min-height:180px}
 .chat-msg{max-width:82%;padding:9px 12px;border-radius:12px;font-size:13px;line-height:1.5}
 .chat-msg.bot{background:var(--surface-2);color:var(--txt);border-radius:12px 12px 12px 3px;align-self:flex-start}
