@@ -190,15 +190,14 @@ function doLookup(){
     .then(function(data){
       plateBtn.disabled=false;
       plateBtn.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><span data-i18n="plate_search">'+(LANG==='da'?'Slå op':'Search')+'</span>';
-      if(data.error){showPlateResult('<span>'+(LANG==='da'?'Bilen blev ikke fundet. Prøv igen eller vælg manuelt.':'Car not found. Try again or select manually.')+'</span>','err');return;}
-      var make=data.make||'';var model=data.model||'';var variant=data.variant||'';
-      var year=data.firstRegistration?(data.firstRegistration+'').substring(0,4):'';
-      var carId=data.category||mapDmrToCar(data);
+      if(data.error){showPlateResult('<span>'+(LANG==='da'?'Bilen blev ikke fundet. Vælg venligst manuelt nedenfor.':'Car not found. Please select manually below.')+'</span>','err');return;}
+      var carId=data.category||'mellem';
       var carObj=CARS.filter(function(c){return c.id===carId;})[0];
       var carLabel=carObj?carObj.label[LANG]:'';
+      var weightTxt=data.weight?(LANG==='da'?'Totalvægt: ':'Total weight: ')+'<strong>'+data.weight+' kg</strong> · ':'';
       var html='<div class="plate-found">';
-      html+='<div class="plate-car-info"><div class="plate-car-title"><strong>'+(make+' '+model+(variant?' '+variant:'')).trim()+'</strong>'+(year?' ('+year+')':'')+'</div>';
-      html+='<div class="plate-car-type"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>'+(LANG==='da'?'Kategoriseret som: ':'Categorized as: ')+'<strong>'+carLabel+'</strong></div></div>';
+      html+='<div class="plate-car-info">';
+      html+='<div class="plate-car-type"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>'+weightTxt+(LANG==='da'?'Kategori: ':'Category: ')+'<strong>'+carLabel+'</strong></div></div>';
       html+='<button class="btn btn-green plate-select-btn" id="plateSelectBtn">'+(LANG==='da'?'Se priser for denne bil':'See prices for this car')+'</button></div>';
       showPlateResult(html,'ok');
       document.getElementById('plateSelectBtn').addEventListener('click',function(){
@@ -290,13 +289,13 @@ function doWizPlateLookup(inputEl,resultEl,btnEl){
     .then(function(data){
       btnEl.disabled=false;btnEl.textContent=W('plate_search');
       if(data.error){resultEl.style.display='block';resultEl.className='wiz-plate-result err';resultEl.innerHTML=LANG==='da'?'Bil ikke fundet. Vælg manuelt.':'Car not found. Select manually.';return;}
-      var carId=data.category||mapDmrToCar(data);
+      var carId=data.category||'mellem';
       var carObj=CARS.filter(function(c){return c.id===carId;})[0];
       if(carObj){
         wiz.car=carObj;
         resultEl.style.display='block';resultEl.className='wiz-plate-result ok';
-        var make=(data.make||'');var model=(data.model||'');var year=data.firstRegistration?(data.firstRegistration+'').substring(0,4):'';
-        resultEl.innerHTML='<strong>'+(make+' '+model).trim()+(year?' ('+year+')':'')+'</strong> → <strong style="color:var(--green)">'+carObj.label[LANG]+'</strong>';
+        var weightInfo=data.weight?(' · '+data.weight+' kg'):'';
+        resultEl.innerHTML='<strong style="color:var(--green)">'+carObj.label[LANG]+'</strong>'+weightInfo;
         // highlight the matching car option
         wizBody.querySelectorAll('[data-car]').forEach(function(o){o.classList.toggle('sel',o.dataset.car===carId);});
       }

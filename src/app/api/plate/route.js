@@ -1,5 +1,7 @@
 export const runtime = 'edge';
 
+// Returns ONLY {weight, category} — no personal data ever exposed
+
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const plate = searchParams.get('plate');
@@ -8,99 +10,119 @@ export async function GET(request) {
   }
   const clean = plate.toUpperCase().replace(/[^A-Z0-9]/g, '');
 
+  // Try DMR (Statens Motorregister) — official government API
+  const dmr = await tryDMR(clean);
+  if (dmr) return Response.json(dmr);
+
+  // Try Synsbasen HTML scrape — weight is public technical data
+  const syn = await trySynsbasen(clean);
+  if (syn) return Response.json(syn);
+
+  return Response.json({ error: 'Not found' }, { status: 404 });
+}
+
+async function tryDMR(plate) {
   try {
     const res = await fetch(
-      `https://motorregister.skat.dk/dmr-front/resources/RegistreretKoeretoejer/${clean}`,
+      `https://motorregister.skat.dk/dmr-front/resources/RegistreretKoeretoejer/${plate}`,
       {
         headers: {
           Accept: 'application/json',
           'Accept-Language': 'da-DK,da;q=0.9',
+          'User-Agent': 'Mozilla/5.0 (compatible; site/1.0)',
         },
-        signal: AbortSignal.timeout(10000),
+        signal: AbortSignal.timeout(8000),
       }
     );
-
-    if (!res.ok) {
-      console.log(`[plate] DMR status ${res.status} for ${clean}`);
-      return Response.json({ error: 'Not found' }, { status: 404 });
-    }
+    console.log(`[dmr] status=${res.status} plate=${plate}`);
+    if (!res.ok) return null;
 
     const raw = await res.json();
-    const data = extractDmr(raw);
+    console.log('[dmr] raw keys:', Object.keys(raw || {}).join(','));
 
-    if (!data.make && !data.model) {
-      return Response.json({ error: 'Not found' }, { status: 404 });
-    }
-
-    const result = { ...data, category: categorize(data) };
-    console.log(`[plate] DMR ok: ${clean} → ${result.make} ${result.model} (${result.category})`);
-    return Response.json(result);
+    const weight = extractWeight(raw);
+    console.log(`[dmr] weight=${weight}`);
+    if (!weight) return null;
+    return { weight, category: categorize(weight) };
   } catch (e) {
-    console.error(`[plate] DMR error: ${e?.message}`);
-    return Response.json({ error: 'Not found' }, { status: 404 });
+    console.log(`[dmr] error: ${e?.message}`);
+    return null;
   }
 }
 
-function extractDmr(raw) {
-  // DMR returns a nested structure; field names vary by API version
-  const v = raw?.køretøj || raw?.koeretoejet || raw?.vehicle || raw || {};
-  const basis = v?.køretøjsartVærdi || v?.koeretoejet || v?.basis || v;
+async function trySynsbasen(plate) {
+  // Synsbasen shows public inspection records incl. vehicle weight
+  try {
+    const res = await fetch(
+      `https://www.synsbasen.dk/stelnummer-nummerpladesoeg/results/?query=${plate}`,
+      {
+        headers: {
+          Accept: 'text/html',
+          'User-Agent': 'Mozilla/5.0 (compatible; site/1.0)',
+        },
+        signal: AbortSignal.timeout(9000),
+      }
+    );
+    console.log(`[synsbasen] status=${res.status} plate=${plate}`);
+    if (!res.ok) return null;
 
-  const make =
-    v?.mærke || v?.maerke || v?.make ||
-    basis?.mærke || basis?.maerke || basis?.make ||
-    raw?.mærke || raw?.maerke || raw?.make || '';
-
-  const model =
-    v?.model || basis?.model || raw?.model || '';
-
-  const variant =
-    v?.variant || basis?.variant || raw?.variant || '';
-
-  const firstRegistration =
-    v?.førsteRegistreringDato || v?.foersteRegistreringDato ||
-    v?.firstRegistration || raw?.firstRegistration || '';
-
-  const totalWeight = Number(
-    v?.totalVægt || v?.totalVaegt || v?.totalWeight ||
-    basis?.totalVægt || raw?.totalWeight || 0
-  );
-
-  const usageCode =
-    v?.anvendelse || v?.usageCode || basis?.anvendelse ||
-    raw?.anvendelse || raw?.usageCode || '';
-
-  return {
-    make: String(make).trim(),
-    model: String(model).trim(),
-    variant: String(variant).trim(),
-    firstRegistration: String(firstRegistration).substring(0, 4),
-    totalWeight,
-    usageCode: String(usageCode).trim(),
-  };
+    const html = await res.text();
+    // Extract total weight from HTML — look for "totalvægt" or "Tilladt totalvægt"
+    const weight = parseWeightFromHtml(html);
+    console.log(`[synsbasen] weight=${weight}`);
+    if (!weight) return null;
+    return { weight, category: categorize(weight) };
+  } catch (e) {
+    console.log(`[synsbasen] error: ${e?.message}`);
+    return null;
+  }
 }
 
-function categorize({ make = '', model = '', totalWeight = 0, usageCode = '' }) {
-  const usage = (usageCode || '').toLowerCase();
-  const mdl = (model || '').toLowerCase();
-  const mk = (make || '').toLowerCase();
-  const full = mk + ' ' + mdl;
-
-  if (usage.includes('vare') || usage.includes('truck') || usage.includes('van') || usage.includes('last')) return 'varebil';
-  const vanModels = ['transit','sprinter','crafter','ducato','boxer','master','trafic','vito','caddy','berlingo','partner','combo','connect','tourneo','proace','movano','vivaro'];
-  if (vanModels.some(v => full.includes(v))) return 'varebil';
-
-  if (totalWeight > 0) {
-    if (totalWeight < 1300) return 'lille';
-    if (totalWeight < 1750) return 'mellem';
-    if (totalWeight < 2800) return 'stor';
-    return 'varebil';
+function parseWeightFromHtml(html) {
+  // Try to find "tilladt totalvægt" or "totalvægt" row in HTML tables
+  const patterns = [
+    /tilladt\s+totalv[æa]gt[^0-9]{0,60}?(\d{3,5})/i,
+    /totalv[æa]gt[^0-9]{0,60}?(\d{3,5})/i,
+    /total\s+weight[^0-9]{0,60}?(\d{3,5})/i,
+    /"totalWeight"\s*:\s*(\d{3,5})/i,
+    /"tilladetTotalvaegt"\s*:\s*(\d{3,5})/i,
+    /egenv[æa]gt[^0-9]{0,60}?(\d{3,5})/i,
+  ];
+  for (const re of patterns) {
+    const m = html.match(re);
+    if (m) {
+      const w = Number(m[1]);
+      if (w > 500 && w < 8000) return w;
+    }
   }
+  return 0;
+}
 
-  const smallModels = ['mx-5','aygo','yaris','up','i10','i20','polo','fiesta','corsa','clio','208','108','c1','ka','micra','spark','picanto','swift','jazz','note','fabia','ibiza','rio','lupo','arosa','107','forfour','smart','roadster','cabrio','convertible'];
-  const largeModels = ['passat','octavia','superb','mondeo','insignia','camry','rav4','cr-v','tiguan','touareg','x5','x3','q5','q7','kodiaq','qashqai','tucson','santa fe','sorento','kuga','3008','5008','xc60','xc90','cx-5','cx-60','palisade','stinger','outlander'];
-  if (smallModels.some(m => full.includes(m))) return 'lille';
-  if (largeModels.some(m => full.includes(m))) return 'stor';
+// Walk nested DMR JSON looking for weight fields
+function extractWeight(obj, depth = 0) {
+  if (!obj || typeof obj !== 'object' || depth > 8) return 0;
+  const weightKeys = ['totalVægt','totalVaegt','totalWeight','tilladetTotalvægt',
+    'tilladetTotalvaegt','tilladetTotalVaegt','egenvægt','egenvagt','kerbWeight'];
+  for (const k of Object.keys(obj)) {
+    if (weightKeys.some(wk => k.toLowerCase() === wk.toLowerCase())) {
+      const v = Number(obj[k]);
+      if (v > 500 && v < 8000) return v;
+    }
+  }
+  for (const k of Object.keys(obj)) {
+    const child = obj[k];
+    if (child && typeof child === 'object') {
+      const found = extractWeight(child, depth + 1);
+      if (found) return found;
+    }
+  }
+  return 0;
+}
 
-  return 'mellem';
+function categorize(weight) {
+  if (weight <= 0) return 'mellem';
+  if (weight < 1350) return 'lille';
+  if (weight < 1900) return 'mellem';
+  if (weight < 3500) return 'stor';
+  return 'varebil';
 }
