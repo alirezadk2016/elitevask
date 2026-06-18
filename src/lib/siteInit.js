@@ -269,7 +269,7 @@ var wiz={car:null,pkg:null,extras:[],addr:"",zip:"",city:"",date:"",time:"",name
 var step=1, TOTAL=7;
 function W(k){return WIZ[LANG][k]||k;}
 function openWiz(car,pkg){wiz.car=car||selCar||CARS[0];wiz.pkg=pkg||PKGS[0];wiz.zip=zipVal;wiz.extras=[];step=1;modal.classList.add('open');document.body.style.overflow='hidden';drawWiz();}
-function closeWiz(){modal.classList.remove('open');document.body.style.overflow='';}
+function closeWiz(){modal.classList.remove('open');document.body.style.overflow='';if(_slotPollTimer){clearInterval(_slotPollTimer);_slotPollTimer=null;}}
 document.getElementById('wizClose').addEventListener('click',closeWiz);
 modal.addEventListener('click',function(e){if(e.target===modal)closeWiz();});
 document.querySelectorAll('[data-book]').forEach(function(b){b.addEventListener('click',function(e){e.preventDefault();openWiz();});});
@@ -438,19 +438,24 @@ function saveStep(){
   if(step===5){wiz.date=val('f_date');}// time saved on slot click
   if(step===6){wiz.name=val('f_name');wiz.phone=val('f_phone');wiz.email=val('f_email');wiz.msg=val('f_msg');}
 }
+function nowCopenhagen(){
+  // Returns current date+time string "YYYY-MM-DDTHH:MM" in Copenhagen timezone (handles DST automatically)
+  return new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Copenhagen',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}).format(new Date()).replace(' ','T');
+}
 function isPastSlot(date,time){
-  // Compare slot datetime to now in Copenhagen time (UTC+2 summer)
-  var slotMs=new Date(date+'T'+time+':00+02:00').getTime();
-  return slotMs<Date.now();
+  return (date+'T'+time)<nowCopenhagen();
 }
 function renderSlotGrid(grid,booked,date){
   var SLOTS=['08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00'];
-  grid.innerHTML=SLOTS.map(function(s){
-    var past=isPastSlot(date,s);
-    var isBooked=booked.indexOf(s)>=0||past;
+  var visible=SLOTS.filter(function(s){return !isPastSlot(date,s);});
+  if(visible.length===0){
+    grid.innerHTML='<div class="slot-hint" style="grid-column:1/-1">'+(LANG==='da'?'Ingen ledige tider for denne dag. Vælg en anden dato.':'No available times for this day. Choose another date.')+'</div>';
+    return;
+  }
+  grid.innerHTML=visible.map(function(s){
+    var isBooked=booked.indexOf(s)>=0;
     var isSel=wiz.time===s;
-    var label=past?(LANG==='da'?'Passeret':'Past'):(isBooked?'🔴':'');
-    return '<button class="slot'+(isBooked?' booked':isSel?' sel':'')+'" data-slot="'+s+'"'+(isBooked?' disabled':'')+'>'+(past?'<s>'+s+'</s>':s)+(label?' <small>'+label+'</small>':'')+'</button>';
+    return '<button class="slot'+(isBooked?' booked':isSel?' sel':'')+'" data-slot="'+s+'"'+(isBooked?' disabled':'')+'>'+s+(isBooked?' <small>🔴</small>':'')+'</button>';
   }).join('');
   grid.querySelectorAll('.slot:not(.booked)').forEach(function(btn){
     btn.addEventListener('click',function(){
@@ -459,6 +464,7 @@ function renderSlotGrid(grid,booked,date){
     });
   });
 }
+var _slotPollTimer=null;
 function loadSlots(date){
   var grid=document.getElementById('slotGrid');if(!grid)return;
   grid.innerHTML='<div class="slot-hint" style="grid-column:1/-1">'+(LANG==='da'?'Henter ledige tider…':'Loading available times…')+'</div>';
@@ -466,6 +472,16 @@ function loadSlots(date){
     .then(function(r){return r.json();})
     .then(function(res){renderSlotGrid(grid,res.booked||[],date);})
     .catch(function(){renderSlotGrid(grid,[],date);});
+  // Poll every 30s so newly booked slots from other users appear automatically
+  if(_slotPollTimer)clearInterval(_slotPollTimer);
+  _slotPollTimer=setInterval(function(){
+    var g=document.getElementById('slotGrid');
+    if(!g){clearInterval(_slotPollTimer);_slotPollTimer=null;return;}
+    fetch('/api/book?date='+encodeURIComponent(date))
+      .then(function(r){return r.json();})
+      .then(function(res){var g2=document.getElementById('slotGrid');if(g2)renderSlotGrid(g2,res.booked||[],date);})
+      .catch(function(){});
+  },30000);
 }
 function val(id){var e=document.getElementById(id);return e?e.value:'';}
 
