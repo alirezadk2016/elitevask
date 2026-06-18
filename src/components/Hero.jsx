@@ -7,14 +7,14 @@ const HTML = `<!-- HERO -->
     <h1><span data-i18n="hero_h1a">Vi kører til dig</span><br><em data-i18n="hero_h1b">og vasker din bil</em></h1>
     <p data-i18n="hero_p">Mobil bil dampvask med premium produkter. Rent, effektivt og miljøvenligt – uden at du forlader hjemmet.</p>
     <div class="hero-flow">
-      <a href="#vaelg" class="flow-step flow-link"><span class="fn">1</span><span data-i18n="flow1">Indtast nummerplade</span></a>
+      <a href="#vaelg" class="flow-step flow-link"><span class="fn">1</span><span data-i18n="flow1">Vælg biltype</span></a>
       <span class="flow-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
       <a href="#vaelg" class="flow-step flow-link"><span class="fn">2</span><span data-i18n="flow2">Se pris</span></a>
       <span class="flow-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
       <a href="#" class="flow-step flow-link" id="flowBook3"><span class="fn">3</span><span data-i18n="flow3">Book tid</span></a>
     </div>
     <div class="hero-cta">
-      <a href="#vaelg" class="btn btn-green btn-lg"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2v-4c0-1-.7-1.8-1.5-2L16 10l-2.2-2.3c-.4-.4-1-.7-1.7-.7H5c-.6 0-1.1.4-1.4 1L2 11v6h2"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg><span data-i18n="hero_cta1">Slå nummerplade op</span></a>
+      <a href="#vaelg" class="btn btn-green btn-lg"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><span data-i18n="hero_cta1">Se priser</span></a>
       <button class="btn btn-ghost btn-lg" data-book data-i18n="hero_cta2">Book med det samme</button>
     </div>
   </div>
