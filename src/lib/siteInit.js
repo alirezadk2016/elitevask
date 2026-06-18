@@ -454,6 +454,16 @@ function drawWiz(){
   var bk=document.getElementById('wizBack');if(bk)bk.addEventListener('click',function(){saveStep();step--;drawWiz();});
   document.getElementById('wizNext').addEventListener('click',function(){
     saveStep();
+    // Validate required fields per step
+    if(step===1&&!wiz.car){showWizErr(LANG==='da'?'Vælg venligst din biltype.':'Please select your car type.');return;}
+    if(step===2&&!wiz.pkg){showWizErr(LANG==='da'?'Vælg venligst en pakke.':'Please select a package.');return;}
+    if(step===4&&!wiz.addr.trim()){showWizErr(LANG==='da'?'Indtast venligst din adresse.':'Please enter your address.');return;}
+    if(step===5){
+      if(!wiz.date){showWizErr(LANG==='da'?'Vælg venligst en dato.':'Please select a date.');return;}
+      if(!wiz.time){showWizErr(LANG==='da'?'Vælg venligst et tidspunkt.':'Please select a time slot.');return;}
+    }
+    if(step===6&&!wiz.name.trim()){showWizErr(LANG==='da'?'Indtast venligst dit navn.':'Please enter your name.');return;}
+    if(step===6&&!wiz.phone.trim()){showWizErr(LANG==='da'?'Indtast venligst dit telefonnummer.':'Please enter your phone number.');return;}
     if(step<TOTAL){step++;drawWiz();}
     else{
       var btn=document.getElementById('wizNext');
@@ -538,6 +548,12 @@ function loadSlots(date){
   },30000);
 }
 function val(id){var e=document.getElementById(id);return e?e.value:'';}
+function showWizErr(msg){
+  var el=document.getElementById('wiz-err');
+  if(!el){el=document.createElement('p');el.id='wiz-err';el.style.cssText='color:#e74c3c;font-size:13px;margin-top:8px;text-align:center;font-weight:600';document.getElementById('wizBody').appendChild(el);}
+  el.textContent=msg;
+  setTimeout(function(){if(el)el.textContent='';},3000);
+}
 
 function submitBooking(cb){
   var fee=driveFee(wiz.zip);
