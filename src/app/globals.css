@@ -499,6 +499,7 @@ section{position:relative}
 .extra-item .ex-price{font-size:13px;color:var(--green);font-weight:700}
 .extra-item .ex-desc{font-size:11.5px;color:var(--muted-2)}
 @media(max-width:880px){
+  .trustbar{display:none}
   .nav-links{display:none}.nav-phone{display:none}.nav-book-btn{display:none}.lang{display:none}.lang-mobile{display:none}.menu-toggle{display:block}
   .car-grid{grid-template-columns:repeat(2,1fr)}
   .calc-zip{margin-left:0;width:100%;justify-content:space-between}
