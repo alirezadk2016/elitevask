@@ -1,6 +1,5 @@
-export const runtime = 'edge';
-
-// Returns ONLY {weight, category} — no personal data ever exposed
+// Node.js runtime — better network access than edge
+// Returns ONLY {weight, category} — no personal data
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
@@ -10,17 +9,48 @@ export async function GET(request) {
   }
   const clean = plate.toUpperCase().replace(/[^A-Z0-9]/g, '');
 
-  // Try DMR (Statens Motorregister) — official government API
-  const dmr = await tryDMR(clean);
-  if (dmr) return Response.json(dmr);
+  // Try each source in order, return first success
+  const result =
+    (await tryMotorapi(clean)) ||
+    (await tryDMR(clean)) ||
+    (await trySynsbasenHtml(clean));
 
-  // Try Synsbasen HTML scrape — weight is public technical data
-  const syn = await trySynsbasen(clean);
-  if (syn) return Response.json(syn);
+  if (result) {
+    console.log(`[plate] OK ${clean} → weight=${result.weight} cat=${result.category}`);
+    return Response.json(result);
+  }
 
+  console.log(`[plate] all sources failed for ${clean}`);
   return Response.json({ error: 'Not found' }, { status: 404 });
 }
 
+// ── motorapi.dk ──────────────────────────────────────────────────────────────
+async function tryMotorapi(plate) {
+  try {
+    const res = await fetch(`https://motorapi.dk/vehicles/${plate}`, {
+      headers: {
+        Accept: 'application/json',
+        'User-Agent': 'Mozilla/5.0',
+      },
+      signal: AbortSignal.timeout(7000),
+    });
+    console.log(`[motorapi] status=${res.status}`);
+    if (!res.ok) return null;
+    const raw = await res.json();
+    const weight = Number(
+      raw?.totalWeight || raw?.total_weight || raw?.vægt?.total ||
+      raw?.technicalData?.totalWeight || raw?.weight?.total || 0
+    );
+    console.log(`[motorapi] weight=${weight} keys=${Object.keys(raw||{}).join(',')}`);
+    if (!weight) return null;
+    return { weight, category: categorize(weight) };
+  } catch (e) {
+    console.log(`[motorapi] err: ${e?.message}`);
+    return null;
+  }
+}
+
+// ── Statens Motorregister (DMR / SKAT) ───────────────────────────────────────
 async function tryDMR(plate) {
   try {
     const res = await fetch(
@@ -29,90 +59,86 @@ async function tryDMR(plate) {
         headers: {
           Accept: 'application/json',
           'Accept-Language': 'da-DK,da;q=0.9',
-          'User-Agent': 'Mozilla/5.0 (compatible; site/1.0)',
+          'User-Agent': 'Mozilla/5.0',
         },
-        signal: AbortSignal.timeout(8000),
+        signal: AbortSignal.timeout(9000),
       }
     );
-    console.log(`[dmr] status=${res.status} plate=${plate}`);
+    console.log(`[dmr] status=${res.status}`);
     if (!res.ok) return null;
-
     const raw = await res.json();
-    console.log('[dmr] raw keys:', Object.keys(raw || {}).join(','));
-
-    const weight = extractWeight(raw);
+    console.log(`[dmr] top-level keys: ${Object.keys(raw || {}).join(',')}`);
+    const weight = deepFindWeight(raw);
     console.log(`[dmr] weight=${weight}`);
     if (!weight) return null;
     return { weight, category: categorize(weight) };
   } catch (e) {
-    console.log(`[dmr] error: ${e?.message}`);
+    console.log(`[dmr] err: ${e?.message}`);
     return null;
   }
 }
 
-async function trySynsbasen(plate) {
-  // Synsbasen shows public inspection records incl. vehicle weight
+// ── Synsbasen HTML scrape — weight is public technical specification ──────────
+async function trySynsbasenHtml(plate) {
   try {
     const res = await fetch(
       `https://www.synsbasen.dk/stelnummer-nummerpladesoeg/results/?query=${plate}`,
       {
         headers: {
-          Accept: 'text/html',
-          'User-Agent': 'Mozilla/5.0 (compatible; site/1.0)',
+          Accept: 'text/html,application/xhtml+xml',
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+          'Accept-Language': 'da-DK,da;q=0.9',
         },
-        signal: AbortSignal.timeout(9000),
+        signal: AbortSignal.timeout(10000),
       }
     );
-    console.log(`[synsbasen] status=${res.status} plate=${plate}`);
+    console.log(`[synsbasen] status=${res.status}`);
     if (!res.ok) return null;
-
     const html = await res.text();
-    // Extract total weight from HTML — look for "totalvægt" or "Tilladt totalvægt"
-    const weight = parseWeightFromHtml(html);
+    const weight = parseWeightHtml(html);
     console.log(`[synsbasen] weight=${weight}`);
     if (!weight) return null;
     return { weight, category: categorize(weight) };
   } catch (e) {
-    console.log(`[synsbasen] error: ${e?.message}`);
+    console.log(`[synsbasen] err: ${e?.message}`);
     return null;
   }
 }
 
-function parseWeightFromHtml(html) {
-  // Try to find "tilladt totalvægt" or "totalvægt" row in HTML tables
+function parseWeightHtml(html) {
   const patterns = [
-    /tilladt\s+totalv[æa]gt[^0-9]{0,60}?(\d{3,5})/i,
-    /totalv[æa]gt[^0-9]{0,60}?(\d{3,5})/i,
-    /total\s+weight[^0-9]{0,60}?(\d{3,5})/i,
-    /"totalWeight"\s*:\s*(\d{3,5})/i,
-    /"tilladetTotalvaegt"\s*:\s*(\d{3,5})/i,
-    /egenv[æa]gt[^0-9]{0,60}?(\d{3,5})/i,
+    /tilladt\s+totalv[æa]gt[\s\S]{0,80}?(\d{3,5})/i,
+    /totalv[æa]gt[\s\S]{0,80}?(\d{3,5})/i,
+    /"tilladetTotalvaegt"\s*:\s*"?(\d{3,5})/i,
+    /"totalWeight"\s*:\s*"?(\d{3,5})/i,
+    /egenv[æa]gt[\s\S]{0,80}?(\d{3,5})/i,
   ];
   for (const re of patterns) {
     const m = html.match(re);
     if (m) {
       const w = Number(m[1]);
-      if (w > 500 && w < 8000) return w;
+      if (w > 600 && w < 8000) return w;
     }
   }
   return 0;
 }
 
-// Walk nested DMR JSON looking for weight fields
-function extractWeight(obj, depth = 0) {
-  if (!obj || typeof obj !== 'object' || depth > 8) return 0;
-  const weightKeys = ['totalVægt','totalVaegt','totalWeight','tilladetTotalvægt',
-    'tilladetTotalvaegt','tilladetTotalVaegt','egenvægt','egenvagt','kerbWeight'];
+// Recursively search JSON for weight fields
+function deepFindWeight(obj, depth = 0) {
+  if (!obj || typeof obj !== 'object' || depth > 10) return 0;
+  const KEYS = [
+    'totalvaegt','totalvægt','totalweight','tilladeттotalvægt',
+    'tilladettotalvaegt','tilladettotalvægt','kerbweight','egenvægt','egenvagt',
+  ];
   for (const k of Object.keys(obj)) {
-    if (weightKeys.some(wk => k.toLowerCase() === wk.toLowerCase())) {
+    if (KEYS.includes(k.toLowerCase())) {
       const v = Number(obj[k]);
-      if (v > 500 && v < 8000) return v;
+      if (v > 600 && v < 8000) return v;
     }
   }
   for (const k of Object.keys(obj)) {
-    const child = obj[k];
-    if (child && typeof child === 'object') {
-      const found = extractWeight(child, depth + 1);
+    if (obj[k] && typeof obj[k] === 'object') {
+      const found = deepFindWeight(obj[k], depth + 1);
       if (found) return found;
     }
   }
@@ -120,7 +146,6 @@ function extractWeight(obj, depth = 0) {
 }
 
 function categorize(weight) {
-  if (weight <= 0) return 'mellem';
   if (weight < 1350) return 'lille';
   if (weight < 1900) return 'mellem';
   if (weight < 3500) return 'stor';
