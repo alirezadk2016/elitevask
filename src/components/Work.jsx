@@ -23,8 +23,8 @@ const HTML = `<!-- BEFORE/AFTER + GALLERY -->
     <figure class="gitem" data-full="/gallery/img18.jpg"><img src="/gallery/img09.jpg" alt="Tagkant alger" loading="lazy"><figcaption data-i18n="g_roof">Tagkant · algerens</figcaption></figure>
     <figure class="gitem" data-full="/gallery/img19.jpg"><img src="/gallery/img10.jpg" alt="Pedalområde" loading="lazy"><figcaption data-i18n="g_pedal">Pedalområde · rens</figcaption></figure>
     <figure class="gitem" data-full="/gallery/img20.jpg"><img src="/gallery/img11.jpg" alt="Dampvask på stedet" loading="lazy"><figcaption data-i18n="g_onsite">Mobil dampvask · på stedet</figcaption></figure>
-    <figure class="gitem" data-full="/gallery/img21.jpg"><img src="/gallery/img21.jpg" alt="Motorrens før" loading="lazy"><figcaption>Motorrens · før</figcaption></figure>
-    <figure class="gitem" data-full="/gallery/img22.jpg"><img src="/gallery/img22.jpg" alt="Motorrens efter" loading="lazy"><figcaption>Motorrens · efter</figcaption></figure>
+    <figure class="gitem" data-full="/gallery/IMG_20260512_174045896_HDR.jpg"><img src="/gallery/IMG_20260512_174045896_HDR.jpg" alt="Motorrens før" loading="lazy"><figcaption>Motorrens · før</figcaption></figure>
+    <figure class="gitem" data-full="/gallery/IMG_20260512_182945671_HDR.jpg"><img src="/gallery/IMG_20260512_182945671_HDR.jpg" alt="Motorrens efter" loading="lazy"><figcaption>Motorrens · efter</figcaption></figure>
   </div>
 </div></section>`;
 export default function Work() {
