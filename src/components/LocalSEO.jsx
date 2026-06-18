@@ -4,7 +4,6 @@ const HTML = `<!-- LOCAL SEO -->
   <h2 class="sec-title" data-i18n="local_title">Mobil bilvask i hele Sjælland</h2>
   <div class="local-chips">
     <a href="#kontakt" class="chip">Bilvask i Næstved</a>
-    <a href="#kontakt" class="chip">Bilvask i Slagelse</a>
     <a href="#kontakt" class="chip">Bilvask i Roskilde</a>
     <a href="#kontakt" class="chip">Bilvask i Køge</a>
     <a href="#kontakt" class="chip">Bilvask i Ringsted</a>
