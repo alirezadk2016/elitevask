@@ -14,7 +14,7 @@ const HTML = `<!-- HERO -->
       <a href="#" class="flow-step flow-link" id="flowBook3"><span class="fn">3</span><span data-i18n="flow3">Book tid</span></a>
     </div>
     <div class="hero-cta">
-      <a href="#vaelg" class="btn btn-green btn-lg"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><span data-i18n="hero_cta1">Se priser</span></a>
+      <a href="#vaelg" class="btn btn-green btn-lg"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg><span data-i18n="hero_cta1">Se priser</span></a>
       <button class="btn btn-ghost btn-lg" data-book data-i18n="hero_cta2">Book med det samme</button>
     </div>
   </div>

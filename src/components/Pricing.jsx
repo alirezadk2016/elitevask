@@ -11,7 +11,7 @@ const HTML = `<!-- CAR SELECTOR + CALCULATOR -->
   <div class="calc" id="calc">
     <div class="calc-head">
       <div class="pi" id="calcIcon"></div>
-      <div><h3 id="calcTitle">Mini bil</h3><p data-i18n="calc_head_p">Vælg den pakke der passer til dig</p></div>
+      <div><h3 id="calcTitle">Mini bil</h3><p data-i18n="calc_head_p">Vælg den pakke der passer til dig</p><div id="calcTime" class="calc-time"></div></div>
       <div class="calc-zip">
         <label data-i18n="calc_zip">Postnr.</label>
         <input id="zip" type="text" inputmode="numeric" maxlength="4" placeholder="4700">
