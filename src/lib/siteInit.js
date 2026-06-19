@@ -478,28 +478,28 @@ function bindAddressAutocomplete(){
   var fa=document.getElementById('f_addr');
   if(!fz||!fc) return;
 
-  // zip → city (when 4 digits entered)
+  // zip → city: always update city when 4-digit zip is entered or changed
   fz.addEventListener('input',function(){
     var z=fz.value.replace(/\D/g,'');fz.value=z;
     if(z.length===4){
       fetch('https://api.dataforsyningen.dk/postnumre/'+z)
         .then(function(r){return r.ok?r.json():null;})
-        .then(function(d){if(d&&d.navn&&!fc.value){fc.value=d.navn;wiz.city=d.navn;}})
+        .then(function(d){if(d&&d.navn){fc.value=d.navn;wiz.city=d.navn;}})
         .catch(function(){});
     }
   });
 
-  // city → zip (debounced, when user types ≥3 chars and zip is empty)
+  // city → zip: always show suggestions and fill zip when unique match
   var cityTimer=null;
   fc.addEventListener('input',function(){
     clearTimeout(cityTimer);
     var q=fc.value.trim();
-    if(q.length<3||fz.value.length===4) return;
+    if(q.length<3){removeDropdown('city-drop');return;}
     cityTimer=setTimeout(function(){
-      fetch('https://api.dataforsyningen.dk/postnumre?q='+encodeURIComponent(q)+'&per_side=5')
+      fetch('https://api.dataforsyningen.dk/postnumre?q='+encodeURIComponent(q)+'&per_side=6')
         .then(function(r){return r.ok?r.json():[];})
         .then(function(list){
-          if(list&&list.length===1&&!fz.value){fz.value=list[0].nr;wiz.zip=list[0].nr;}
+          if(list&&list.length===1){fz.value=list[0].nr;wiz.zip=list[0].nr;}
           showCitySuggestions(list,fz,fc);
         })
         .catch(function(){});
