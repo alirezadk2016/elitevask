@@ -80,7 +80,7 @@ function renderCalc(){
     var driveLine=fee>0?'<div class="drive"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2v-4c0-1-.7-1.8-1.5-2L16 10l-2.2-2.3c-.4-.4-1-.7-1.7-.7H5c-.6 0-1.1.4-1.4 1L2 11v6h2"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg>+ '+(LANG==="da"?"kørsel":"travel")+' '+fmtKr(fee)+'</div>':'';
     var totLine=fee>0?'<div class="total">'+(LANG==="da"?"I alt:":"Total:")+' '+fmtKr(total)+'</div>':'<div class="total drive-free"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><path d="M19 17h2v-4c0-1-.7-1.8-1.5-2L16 10l-2.2-2.3c-.4-.4-1-.7-1.7-.7H5c-.6 0-1.1.4-1.4 1L2 11v6h2"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg> '+(LANG==="da"?"Gratis kørsel på Sjælland":"Free travel on Zealand")+'</div>';
     var el=document.createElement('div');el.className=cls;
-    var saveBadge=(pk.id==='hele')?'<div class="pkg-save">'+(LANG==="da"?"Spar 300 kr vs. separat":"Save 300 kr vs. separate")+'</div>':'';
+    var saveBadge='';
     var btnTxt=pk.pop?(LANG==="da"?"Bestil mest populære":"Order most popular"):(LANG==="da"?"Bestil denne pakke":"Order this package");
     el.innerHTML=tag+'<div class="pn">'+pk.name[LANG]+'</div><div class="pd">'+pk.desc[LANG]+'</div>'+saveBadge+'<div class="price">'+fmtKr(price)+'</div><div class="ps">'+(LANG==="da"?"inkl. moms":"incl. VAT")+'</div>'+driveLine+totLine+'<ul>'+feats+'</ul><button class="btn pbtn">'+btnTxt+'</button>';
     el.querySelector('.pbtn').addEventListener('click',function(){openWiz(selCar,pk);});
