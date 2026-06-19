@@ -269,7 +269,7 @@ export async function POST(request) {
             <p style="color:#333;margin:0 0 20px;font-size:15px;line-height:1.6">En ny bookingforespørgsel er modtaget via hjemmesiden.</p>
             <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;margin-bottom:20px">
               ${tr('Dato & tid', `${fmtDate(date, true)} · kl. ${time}`, true)}
-              ${tr('Adresse', `${addr || '-'}, ${zip || ''} ${city || ''}`)}
+              ${tr('Adresse', addr ? `<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${addr}, ${zip} ${city}`)}" style="color:#0d4a25;font-weight:700">${addr}, ${zip} ${city} 📍</a>` : '-')}
               ${tr('Bil', car || '-', true)}
               ${tr('Pakke', pkg || '-')}
               ${tr('Tilvalg', extrasStr, true)}
