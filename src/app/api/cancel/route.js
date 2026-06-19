@@ -41,6 +41,14 @@ export async function GET(request) {
   if (!booking) return Response.json({ error: 'not_found' }, { status: 404 });
 
   const data = typeof booking === 'string' ? JSON.parse(booking) : booking;
+
+  if (data.status === 'cancelled') {
+    return Response.json({ error: 'already_cancelled' }, { status: 409 });
+  }
+  if (data.cancelExpiresAt && new Date(data.cancelExpiresAt) < new Date()) {
+    return Response.json({ error: 'link_expired' }, { status: 410 });
+  }
+
   // Return only what the page needs — no internal fields
   return Response.json({
     date: data.date,
@@ -69,8 +77,18 @@ export async function POST(request) {
   if (!raw) return Response.json({ error: 'not_found' }, { status: 404 });
 
   const booking = typeof raw === 'string' ? JSON.parse(raw) : raw;
-  const { date, slots, name, email, car, pkg, price, lang } = booking;
+  const { date, slots, name, email, car, pkg, price, lang, cancelExpiresAt, status } = booking;
   const L = lang !== 'en';
+
+  // Reject already-cancelled bookings
+  if (status === 'cancelled') {
+    return Response.json({ error: 'already_cancelled' }, { status: 409 });
+  }
+
+  // Reject expired cancel links
+  if (cancelExpiresAt && new Date(cancelExpiresAt) < new Date()) {
+    return Response.json({ error: 'link_expired' }, { status: 410 });
+  }
 
   // Free all booked slots
   if (Array.isArray(slots)) {
@@ -78,8 +96,13 @@ export async function POST(request) {
       try { await kv.del(`slot:${date}:${slotTime}`); } catch {}
     }
   }
-  // Delete the booking record
-  await kv.del(`booking:${token}`);
+
+  // Soft delete — mark as cancelled instead of deleting
+  try {
+    await kv.set(`booking:${token}`, JSON.stringify({ ...booking, status: 'cancelled', cancelledAt: new Date().toISOString() }), { keepttl: true });
+  } catch {
+    await kv.del(`booking:${token}`);
+  }
 
   const transport = buildTransport();
 

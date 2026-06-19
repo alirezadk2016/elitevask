@@ -440,6 +440,8 @@ function drawWiz(){
   wizBody.querySelectorAll('[data-pkg]').forEach(function(o){o.addEventListener('click',function(){wiz.pkg=PKGS.filter(function(p){return p.id===o.dataset.pkg;})[0];wizBody.querySelectorAll('[data-pkg]').forEach(function(x){x.classList.remove('sel');});o.classList.add('sel');if(wiz.pkg){var rel=wiz.pkg.relevant||[];var inc=wiz.pkg.includes||[];wiz.extras=wiz.extras.filter(function(id){return rel.indexOf(id)>=0&&inc.indexOf(id)<0;});}});});
   // bind extras (multi-select toggle)
   wizBody.querySelectorAll('[data-ext]').forEach(function(o){o.addEventListener('click',function(){var id=o.dataset.ext;var idx=wiz.extras.indexOf(id);if(idx>=0){wiz.extras.splice(idx,1);o.classList.remove('sel');}else{wiz.extras.push(id);o.classList.add('sel');}});});
+  // zip/city/address autocomplete (step 4)
+  if(step===4){bindAddressAutocomplete();}
   var bk=document.getElementById('wizBack');if(bk)bk.addEventListener('click',function(){saveStep();step--;drawWiz();});
   document.getElementById('wizNext').addEventListener('click',function(){
     saveStep();
@@ -472,6 +474,108 @@ function drawWiz(){
     }
   });
 }
+function bindAddressAutocomplete(){
+  var fz=document.getElementById('f_zip');
+  var fc=document.getElementById('f_city');
+  var fa=document.getElementById('f_addr');
+  if(!fz||!fc) return;
+
+  // zip → city (when 4 digits entered)
+  fz.addEventListener('input',function(){
+    var z=fz.value.replace(/\D/g,'');fz.value=z;
+    if(z.length===4){
+      fetch('https://api.dataforsyningen.dk/postnumre/'+z)
+        .then(function(r){return r.ok?r.json():null;})
+        .then(function(d){if(d&&d.navn&&!fc.value){fc.value=d.navn;wiz.city=d.navn;}})
+        .catch(function(){});
+    }
+  });
+
+  // city → zip (debounced, when user types ≥3 chars and zip is empty)
+  var cityTimer=null;
+  fc.addEventListener('input',function(){
+    clearTimeout(cityTimer);
+    var q=fc.value.trim();
+    if(q.length<3||fz.value.length===4) return;
+    cityTimer=setTimeout(function(){
+      fetch('https://api.dataforsyningen.dk/postnumre?q='+encodeURIComponent(q)+'&per_side=5')
+        .then(function(r){return r.ok?r.json():[];})
+        .then(function(list){
+          if(list&&list.length===1&&!fz.value){fz.value=list[0].nr;wiz.zip=list[0].nr;}
+          showCitySuggestions(list,fz,fc);
+        })
+        .catch(function(){});
+    },350);
+  });
+
+  // address autocomplete (shows dropdown)
+  if(fa){
+    var addrTimer=null;
+    fa.addEventListener('input',function(){
+      clearTimeout(addrTimer);
+      var q=fa.value.trim();
+      removeDropdown('addr-drop');
+      if(q.length<3) return;
+      addrTimer=setTimeout(function(){
+        var url='https://api.dataforsyningen.dk/adresser/autocomplete?q='+encodeURIComponent(q)+'&per_side=6';
+        if(fz.value.length===4) url+='&postnr='+fz.value;
+        fetch(url)
+          .then(function(r){return r.ok?r.json():[];})
+          .then(function(list){showAddrSuggestions(list,fa,fz,fc);})
+          .catch(function(){});
+      },300);
+    });
+    fa.addEventListener('blur',function(){setTimeout(function(){removeDropdown('addr-drop');},180);});
+  }
+  fc.addEventListener('blur',function(){setTimeout(function(){removeDropdown('city-drop');},180);});
+}
+
+function removeDropdown(id){var d=document.getElementById(id);if(d)d.remove();}
+
+function showCitySuggestions(list,fz,fc){
+  removeDropdown('city-drop');
+  if(!list||list.length<=1) return;
+  var drop=document.createElement('ul');
+  drop.id='city-drop';drop.className='ac-drop';
+  list.slice(0,6).forEach(function(item){
+    var li=document.createElement('li');
+    li.textContent=item.navn+' ('+item.nr+')';
+    li.addEventListener('mousedown',function(e){
+      e.preventDefault();
+      fc.value=item.navn;fz.value=item.nr;
+      wiz.city=item.navn;wiz.zip=item.nr;
+      removeDropdown('city-drop');
+    });
+    drop.appendChild(li);
+  });
+  fc.parentNode.style.position='relative';
+  fc.parentNode.appendChild(drop);
+}
+
+function showAddrSuggestions(list,fa,fz,fc){
+  removeDropdown('addr-drop');
+  if(!list||!list.length) return;
+  var drop=document.createElement('ul');
+  drop.id='addr-drop';drop.className='ac-drop';
+  list.slice(0,6).forEach(function(item){
+    var li=document.createElement('li');
+    li.textContent=item.tekst;
+    li.addEventListener('mousedown',function(e){
+      e.preventDefault();
+      var a=item.adresse;
+      // street + number only (no zip/city in addr field)
+      fa.value=(a.vejnavn||'')+' '+(a.husnr||'');
+      if(a.postnr&&!fz.value){fz.value=a.postnr;wiz.zip=a.postnr;}
+      if(a.postnrnavn&&!fc.value){fc.value=a.postnrnavn;wiz.city=a.postnrnavn;}
+      wiz.addr=fa.value;
+      removeDropdown('addr-drop');
+    });
+    drop.appendChild(li);
+  });
+  fa.parentNode.style.position='relative';
+  fa.parentNode.appendChild(drop);
+}
+
 function saveStep(){
   if(step===4){wiz.addr=val('f_addr');wiz.zip=val('f_zip');wiz.city=val('f_city');}
   if(step===5){wiz.date=val('f_date');}// time saved on slot click

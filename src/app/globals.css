@@ -646,3 +646,19 @@ section{position:relative}
 .cancel-loading{text-align:center;padding:60px 0;color:var(--muted)}
 .cancel-spinner{width:36px;height:36px;border:3px solid var(--line-2);border-top-color:var(--green);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px}
 @keyframes spin{to{transform:rotate(360deg)}}
+
+/* ADDRESS AUTOCOMPLETE DROPDOWN */
+.ac-drop{position:absolute;top:100%;left:0;right:0;z-index:200;background:var(--surface);border:1px solid var(--line-2);border-radius:var(--r-sm);margin-top:2px;list-style:none;padding:4px 0;box-shadow:0 8px 24px rgba(0,0,0,.35);max-height:220px;overflow-y:auto}
+.ac-drop li{padding:10px 14px;font-size:14px;color:var(--txt);cursor:pointer;transition:background .1s}
+.ac-drop li:hover{background:var(--green-soft);color:var(--green)}
+
+/* COOKIE CONSENT BANNER */
+.cookie-banner{position:fixed;bottom:0;left:0;right:0;z-index:9999;background:var(--surface);border-top:1px solid var(--line-2);padding:16px 20px;box-shadow:0 -4px 24px rgba(0,0,0,.12)}
+.cookie-banner-inner{max-width:960px;margin:0 auto;display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.cookie-banner-text{font-size:14px;color:var(--muted);margin:0;flex:1;min-width:200px}
+.cookie-banner-link{color:var(--green);text-decoration:underline}
+.cookie-banner-actions{display:flex;gap:10px;flex-shrink:0}
+.cookie-btn{border:none;border-radius:var(--r-sm);padding:9px 20px;font-size:14px;font-weight:600;cursor:pointer;transition:opacity .15s}
+.cookie-btn-accept{background:var(--green);color:#000}
+.cookie-btn-decline{background:var(--surface-2);color:var(--muted);border:1px solid var(--line-2)}
+.cookie-btn:hover{opacity:.85}

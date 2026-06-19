@@ -7,15 +7,22 @@ function CancelContent() {
   const params = useSearchParams();
   const token = params.get("token");
 
-  const [state, setState] = useState("loading"); // loading | found | not_found | cancelled | error
+  const [state, setState] = useState("loading"); // loading | found | not_found | expired | already_cancelled | cancelled | error
   const [booking, setBooking] = useState(null);
   const [confirming, setConfirming] = useState(false);
 
   useEffect(() => {
     if (!token) { setState("not_found"); return; }
     fetch(`/api/cancel?token=${encodeURIComponent(token)}`)
-      .then((r) => { if (r.status === 404) throw new Error("not_found"); return r.json(); })
-      .then((data) => { setBooking(data); setState("found"); })
+      .then(async (r) => {
+        const data = await r.json();
+        if (r.status === 404) { setState("not_found"); return; }
+        if (r.status === 409) { setState("already_cancelled"); return; }
+        if (r.status === 410) { setState("expired"); return; }
+        if (!r.ok) { setState("not_found"); return; }
+        setBooking(data);
+        setState("found");
+      })
       .catch(() => setState("not_found"));
   }, [token]);
 
@@ -28,6 +35,8 @@ function CancelContent() {
         body: JSON.stringify({ token }),
       });
       if (r.status === 404) { setState("not_found"); return; }
+      if (r.status === 409) { setState("already_cancelled"); return; }
+      if (r.status === 410) { setState("expired"); return; }
       if (!r.ok) throw new Error();
       setState("cancelled");
     } catch {
@@ -72,6 +81,35 @@ function CancelContent() {
             }</p>
             <a href="/" className="btn btn-green" style={{display:"inline-block",marginTop:"16px"}}>
               {da ? "Gå til forsiden" : "Go to homepage"}
+            </a>
+          </div>
+        )}
+
+        {state === "expired" && (
+          <div className="cancel-card cancel-invalid">
+            <div className="cancel-icon">⏱</div>
+            <h1>{da ? "Link udløbet" : "Link expired"}</h1>
+            <p>{da
+              ? "Dette annulleringslink er udløbet (gyldigt i 24 timer). Kontakt os direkte for at ændre din booking."
+              : "This cancellation link has expired (valid for 24 hours). Contact us directly to change your booking."
+            }</p>
+            <p>{da ? "Telefon: +45 24 44 03 21 · elitevask01@gmail.com" : "Phone: +45 24 44 03 21 · elitevask01@gmail.com"}</p>
+            <a href="/" className="btn btn-green" style={{display:"inline-block",marginTop:"16px"}}>
+              {da ? "Gå til forsiden" : "Go to homepage"}
+            </a>
+          </div>
+        )}
+
+        {state === "already_cancelled" && (
+          <div className="cancel-card cancel-success-card">
+            <div className="cancel-icon">✅</div>
+            <h1>{da ? "Allerede annulleret" : "Already cancelled"}</h1>
+            <p>{da
+              ? "Denne booking er allerede annulleret."
+              : "This booking has already been cancelled."
+            }</p>
+            <a href="/" className="btn btn-green" style={{display:"inline-block",marginTop:"20px"}}>
+              {da ? "Book en ny tid" : "Book a new time"}
             </a>
           </div>
         )}
