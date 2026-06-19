@@ -603,3 +603,23 @@ section{position:relative}
   .chatbot{bottom:90px;right:16px}
   .chat-window{width:calc(100vw - 32px);right:0}
 }
+
+/* LEGAL PAGES */
+.legal-page{min-height:100vh;background:var(--bg);padding:60px 0 100px}
+.legal-wrap{max-width:780px;margin:0 auto;padding:0 24px}
+.legal-back{display:inline-flex;align-items:center;gap:6px;color:var(--green);font-size:14px;font-weight:600;text-decoration:none;margin-bottom:40px;opacity:.85;transition:opacity .2s}
+.legal-back:hover{opacity:1}
+.legal-wrap h1{font-size:clamp(28px,5vw,40px);font-weight:800;color:var(--txt);margin-bottom:6px;letter-spacing:-1px}
+.legal-updated{color:var(--muted);font-size:13px;margin-bottom:40px;border-bottom:1px solid var(--line);padding-bottom:24px}
+.legal-wrap h2{font-size:18px;font-weight:700;color:var(--green);margin:36px 0 10px;letter-spacing:-.3px}
+.legal-wrap h3{font-size:15px;font-weight:600;color:var(--txt);margin:24px 0 8px}
+.legal-wrap p{color:var(--muted);font-size:15px;line-height:1.75;margin-bottom:14px}
+.legal-wrap ul{color:var(--muted);font-size:15px;line-height:1.8;padding-left:20px;margin-bottom:14px}
+.legal-wrap ul li{margin-bottom:4px}
+.legal-wrap a{color:var(--green);text-decoration:underline;text-decoration-color:rgba(55,210,120,.4)}
+.legal-wrap a:hover{text-decoration-color:var(--green)}
+.cookie-table{width:100%;border-collapse:collapse;margin:12px 0 24px;font-size:14px}
+.cookie-table th{text-align:left;padding:10px 14px;background:var(--surface);color:var(--txt);font-weight:600;border-bottom:2px solid var(--line-2)}
+.cookie-table td{padding:10px 14px;color:var(--muted);border-bottom:1px solid var(--line)}
+.cookie-table tr:last-child td{border-bottom:none}
+.cookie-table a{font-size:13px}
