@@ -31,23 +31,29 @@ export async function GET(request) {
   if (!kv) return Response.redirect(`${SITE_URL}/portal/login?error=unavailable`);
 
   const hashed = hashToken(rawToken);
-  const raw = await kv.get(`magic:${hashed}`);
+
+  // Atomic delete-and-read: prevents replay even under concurrent requests.
+  // GETDEL returns the value and deletes in one operation — no race window.
+  let raw;
+  try {
+    raw = await kv.getdel(`magic:${hashed}`);
+  } catch {
+    // Fallback for clients that don't support GETDEL
+    raw = await kv.get(`magic:${hashed}`);
+    if (raw) await kv.del(`magic:${hashed}`);
+  }
 
   if (!raw) {
-    await auditLog(kv, 'magic_link_not_found', { ip, ua });
+    await auditLog(kv, 'magic_link_not_found_or_replayed', { ip, ua });
     return Response.redirect(`${SITE_URL}/portal/login?error=expired`);
   }
 
   const magic = typeof raw === 'string' ? JSON.parse(raw) : raw;
 
   if (new Date(magic.expiresAt) < new Date()) {
-    await kv.del(`magic:${hashed}`);
     await auditLog(kv, 'magic_link_expired', { ip, ua });
     return Response.redirect(`${SITE_URL}/portal/login?error=expired`);
   }
-
-  // One-time use: delete immediately
-  await kv.del(`magic:${hashed}`);
 
   // Create session
   const sessionRaw = randomBytes(32).toString('hex');

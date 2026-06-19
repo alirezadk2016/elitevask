@@ -1,5 +1,6 @@
 import nodemailer from 'nodemailer';
 import { hashToken, getSession, auditLog } from '@/lib/auth';
+import { isSameOrigin } from '@/lib/csrf';
 
 const COMPANY_EMAIL = 'elitevask01@gmail.com';
 
@@ -24,6 +25,9 @@ function buildTransport() {
 }
 
 export async function POST(request) {
+  if (!isSameOrigin(request)) {
+    return Response.json({ error: 'forbidden' }, { status: 403 });
+  }
   const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
 
   const kv = await getKV();

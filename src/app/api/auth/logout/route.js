@@ -1,4 +1,5 @@
 import { hashToken, clearSessionCookie } from '@/lib/auth';
+import { isSameOrigin } from '@/lib/csrf';
 
 let kvClient = null;
 async function getKV() {
@@ -14,6 +15,9 @@ async function getKV() {
 }
 
 export async function POST(request) {
+  if (!isSameOrigin(request)) {
+    return Response.json({ error: 'forbidden' }, { status: 403 });
+  }
   const cookie = request.headers.get('cookie') || '';
   const match = cookie.match(/(?:^|;\s*)ev_session=([^;]+)/);
   if (match) {
