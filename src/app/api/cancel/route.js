@@ -1,9 +1,7 @@
 import nodemailer from 'nodemailer';
 
 const COMPANY_EMAIL = 'elitevask01@gmail.com';
-
-// In-memory fallback
-const memBookings = new Map();
+const SITE_URL = 'https://elitevask.vercel.app';
 
 let kvClient = null;
 async function getKV() {
@@ -20,68 +18,41 @@ async function getKV() {
   }
 }
 
-async function getBooking(token) {
-  try {
-    const kv = await getKV();
-    if (kv) {
-      const raw = await kv.get(`booking:${token}`);
-      if (!raw) return null;
-      return typeof raw === 'string' ? JSON.parse(raw) : raw;
-    }
-  } catch {}
-  return memBookings.get(token) || null;
-}
-
-async function deleteBooking(token) {
-  try {
-    const kv = await getKV();
-    if (kv) { await kv.del(`booking:${token}`); return; }
-  } catch {}
-  memBookings.delete(token);
-}
-
-async function deleteSlot(date, slotTime) {
-  try {
-    const kv = await getKV();
-    if (kv) { await kv.del(`slot:${date}:${slotTime}`); return; }
-  } catch {}
-}
-
 function buildTransport() {
   const user = process.env.GMAIL_USER || COMPANY_EMAIL;
   const pass = process.env.GMAIL_PASS;
   if (!pass) return null;
   return nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 465,
-    secure: true,
+    host: 'smtp.gmail.com', port: 465, secure: true,
     auth: { user, pass },
   });
 }
 
-// GET ?token=xxx — return booking details (sanitized)
+// GET /api/cancel?token=xxx — look up booking
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const token = searchParams.get('token');
   if (!token) return Response.json({ error: 'Missing token' }, { status: 400 });
 
-  const booking = await getBooking(token);
+  const kv = await getKV();
+  if (!kv) return Response.json({ error: 'Service unavailable' }, { status: 503 });
+
+  const booking = await kv.get(`booking:${token}`);
   if (!booking) return Response.json({ error: 'not_found' }, { status: 404 });
 
-  // Return sanitized booking (no internal fields like token itself)
+  const data = typeof booking === 'string' ? JSON.parse(booking) : booking;
+  // Return only what the page needs — no internal fields
   return Response.json({
-    date: booking.date,
-    time: booking.time,
-    car: booking.car,
-    pkg: booking.pkg,
-    price: booking.price,
-    name: booking.name,
-    lang: booking.lang,
-    bookedAt: booking.bookedAt,
+    date: data.date,
+    time: data.time,
+    car: data.car,
+    pkg: data.pkg,
+    name: data.name,
+    lang: data.lang || 'da',
   });
 }
 
-// POST {token} — cancel the booking
+// POST /api/cancel — cancel booking by token
 export async function POST(request) {
   let body;
   try { body = await request.json(); } catch {
@@ -91,96 +62,66 @@ export async function POST(request) {
   const { token } = body;
   if (!token) return Response.json({ error: 'Missing token' }, { status: 400 });
 
-  const booking = await getBooking(token);
-  if (!booking) {
-    return Response.json({ error: 'not_found', message: 'Booking ikke fundet eller allerede annulleret.' }, { status: 404 });
-  }
+  const kv = await getKV();
+  if (!kv) return Response.json({ error: 'Service unavailable' }, { status: 503 });
 
-  // Delete all slot keys
-  if (booking.date && Array.isArray(booking.slots)) {
-    for (const slotTime of booking.slots) {
-      await deleteSlot(booking.date, slotTime);
+  const raw = await kv.get(`booking:${token}`);
+  if (!raw) return Response.json({ error: 'not_found' }, { status: 404 });
+
+  const booking = typeof raw === 'string' ? JSON.parse(raw) : raw;
+  const { date, slots, name, email, car, pkg, price, lang } = booking;
+  const L = lang !== 'en';
+
+  // Free all booked slots
+  if (Array.isArray(slots)) {
+    for (const slotTime of slots) {
+      try { await kv.del(`slot:${date}:${slotTime}`); } catch {}
     }
   }
+  // Delete the booking record
+  await kv.del(`booking:${token}`);
 
-  // Delete booking record
-  await deleteBooking(token);
-
-  const L = booking.lang !== 'en';
   const transport = buildTransport();
 
-  if (transport) {
-    // Notify company
-    const companyText = [
-      L ? 'Booking annulleret – Elite Vask' : 'Booking cancelled – Elite Vask',
-      '',
-      (L ? 'Navn' : 'Name') + ': ' + (booking.name || '-'),
-      (L ? 'Bil' : 'Car') + ': ' + (booking.car || '-'),
-      (L ? 'Pakke' : 'Package') + ': ' + (booking.pkg || '-'),
-      (L ? 'Dato & tid' : 'Date & time') + ': ' + (booking.date || '-') + ' ' + (booking.time || ''),
-      'Email: ' + (booking.email || '-'),
-      (L ? 'Telefon' : 'Phone') + ': ' + (booking.phone || '-'),
-    ].join('\n');
+  // Email to customer
+  if (transport && email) {
+    try {
+      await transport.sendMail({
+        from: `"Elite Vask" <${process.env.GMAIL_USER || COMPANY_EMAIL}>`,
+        to: email,
+        subject: L ? 'Din booking er annulleret – Elite Vask' : 'Your booking has been cancelled – Elite Vask',
+        html: `<div style="font-family:sans-serif;max-width:540px;padding:24px;background:#f9f9f9;border-radius:12px">
+          <h2 style="color:#e74c3c">${L ? '❌ Booking annulleret' : '❌ Booking cancelled'}</h2>
+          <p>${L ? `Hej ${name}, vi bekræfter at din booking er annulleret.` : `Hi ${name}, we confirm your booking has been cancelled.`}</p>
+          <p><strong>${L ? 'Dato' : 'Date'}:</strong> ${date} ${booking.time}</p>
+          <p><strong>${L ? 'Bil' : 'Car'}:</strong> ${car}</p>
+          <p><strong>${L ? 'Pakke' : 'Package'}:</strong> ${pkg}</p>
+          <hr style="margin:16px 0">
+          <p>${L ? 'Ønsker du at booke igen, er du altid velkommen.' : 'You are always welcome to book again.'}</p>
+          <a href="${SITE_URL}" style="display:inline-block;margin-top:8px;background:#37d278;color:#000;padding:10px 20px;border-radius:8px;text-decoration:none;font-weight:700">${L ? 'Book ny tid' : 'Book new time'}</a>
+        </div>`,
+      });
+    } catch {}
+  }
 
+  // Email to company
+  if (transport) {
     try {
       await transport.sendMail({
         from: `"Elite Vask Booking" <${process.env.GMAIL_USER || COMPANY_EMAIL}>`,
         to: COMPANY_EMAIL,
-        subject: (L ? 'Annulleret booking: ' : 'Cancelled booking: ') + (booking.car || '') + ' – ' + (booking.date || '') + ' ' + (booking.time || ''),
-        text: companyText,
-        html: `<div style="font-family:sans-serif;max-width:560px;padding:24px;background:#fff3f3;border-radius:12px;border-left:4px solid #e74c3c">${companyText.replace(/\n/g, '<br>')}</div>`,
+        subject: `❌ Annullering: ${car} – ${date} ${booking.time}`,
+        html: `<div style="font-family:sans-serif;max-width:540px;padding:24px;background:#fff3f3;border-radius:12px">
+          <h2 style="color:#e74c3c">❌ Booking annulleret af kunde</h2>
+          <p><strong>Dato:</strong> ${date} ${booking.time}</p>
+          <p><strong>Navn:</strong> ${name}</p>
+          <p><strong>Email:</strong> ${email || '-'}</p>
+          <p><strong>Telefon:</strong> ${booking.phone || '-'}</p>
+          <p><strong>Bil:</strong> ${car} · ${pkg}</p>
+          <p><strong>Pris:</strong> ${price || '-'}</p>
+        </div>`,
       });
-    } catch (err) {
-      console.error('Company cancel email error:', err.message);
-    }
-
-    // Confirm to customer
-    if (booking.email) {
-      const customerSubject = L ? 'Din booking er annulleret – Elite Vask' : 'Your booking has been cancelled – Elite Vask';
-      const customerText = L ? [
-        `Hej ${booking.name || ''},`,
-        '',
-        'Din booking hos Elite Vask er nu annulleret.',
-        '',
-        'Annulleret booking:',
-        'Bil: ' + (booking.car || '-'),
-        'Pakke: ' + (booking.pkg || '-'),
-        'Dato & tid: ' + (booking.date || '-') + ' ' + (booking.time || ''),
-        '',
-        'Ønsker du at booke en ny tid, er du meget velkommen på elitevask.vercel.app',
-        '',
-        'Med venlig hilsen',
-        'Elite Vask',
-        'Tlf: +45 24 44 03 21',
-      ].join('\n') : [
-        `Hi ${booking.name || ''},`,
-        '',
-        'Your booking with Elite Vask has been cancelled.',
-        '',
-        'Cancelled booking:',
-        'Car: ' + (booking.car || '-'),
-        'Package: ' + (booking.pkg || '-'),
-        'Date & time: ' + (booking.date || '-') + ' ' + (booking.time || ''),
-        '',
-        'To book a new appointment, visit elitevask.vercel.app',
-        '',
-        'Best regards,',
-        'Elite Vask',
-        'Phone: +45 24 44 03 21',
-      ].join('\n');
-
-      try {
-        await transport.sendMail({
-          from: `"Elite Vask" <${process.env.GMAIL_USER || COMPANY_EMAIL}>`,
-          to: booking.email,
-          subject: customerSubject,
-          text: customerText,
-          html: `<div style="font-family:sans-serif;max-width:560px;padding:24px;background:#f9f9f9;border-radius:12px;color:#222">${customerText.replace(/\n/g, '<br>')}</div>`,
-        });
-      } catch (err) {
-        console.error('Customer cancel email error:', err.message);
-      }
-    }
+    } catch {}
   }
 
   return Response.json({ ok: true });

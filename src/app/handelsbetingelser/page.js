@@ -41,7 +41,10 @@ export default function Handelsbetingelser() {
 
         <h2>4. Aflysning og ændring</h2>
         <p>
-          Du kan frit aflyse eller ændre din booking. Vi beder om, at aflysning sker senest <strong>24 timer</strong> før den aftalte tid, så vi kan disponere vores kapacitet optimalt. Aflysning kan nemt ske via annulleringslinket i din bookingbekræftelse på e-mail, eller pr. telefon, SMS eller e-mail.
+          Du kan frit aflyse din booking. Vi beder om, at aflysning sker senest <strong>24 timer</strong> før den aftalte tid, så vi kan disponere vores kapacitet optimalt.
+        </p>
+        <p>
+          Aflysning kan nemt gøres via <strong>annulleringslinket</strong> i din bookingbekræftelse på e-mail – klik blot på "Annuller booking" i mailen. Du kan også kontakte os pr. telefon (+45 24 44 03 21), SMS eller e-mail.
         </p>
         <p>
           Elite Vask kan aflyse eller ombooke i tilfælde af sygdom, ekstreme vejrforhold eller andre uforudsete omstændigheder. Vi kontakter dig hurtigst muligt og tilbyder en ny tid.

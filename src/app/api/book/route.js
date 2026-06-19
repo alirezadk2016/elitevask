@@ -1,11 +1,11 @@
 import nodemailer from 'nodemailer';
+import { randomUUID } from 'crypto';
 
 const COMPANY_EMAIL = 'elitevask01@gmail.com';
 const SITE_URL = 'https://elitevask.vercel.app';
 
 // In-memory fallback (works within same serverless instance)
 const memSlots = new Map();
-const memBookings = new Map();
 
 let kvClient = null;
 async function getKV() {
@@ -37,14 +37,6 @@ async function bookSlot(key, value) {
     if (kv) { await kv.set(key, JSON.stringify(value), { ex: 60 * 60 * 24 * 30 }); return; }
   } catch {}
   memSlots.set(key, value);
-}
-
-async function storeBooking(token, value) {
-  try {
-    const kv = await getKV();
-    if (kv) { await kv.set(`booking:${token}`, JSON.stringify(value), { ex: 60 * 60 * 24 * 30 }); return; }
-  } catch {}
-  memBookings.set(token, value);
 }
 
 async function getBookedSlots(date) {
@@ -99,9 +91,7 @@ export async function POST(request) {
   const CAR_SLOTS = { lille: 2, mellem: 3, stor: 4, varebil: 3 };
   const slotsNeeded = CAR_SLOTS[carId] || Math.max(1, Math.min(parseInt(rawSlots) || 2, 5));
 
-  // Generate cancellation token
-  const token = crypto.randomUUID();
-  const bookedAt = new Date().toISOString();
+  let cancelToken = null;
 
   if (date && time) {
     const nowInCph = new Date().toLocaleString('sv-SE', { timeZone: 'Europe/Copenhagen' });
@@ -120,7 +110,6 @@ export async function POST(request) {
 
     const L = lang !== 'en';
     const startIdx = SLOT_TIMES.indexOf(time);
-    // Check all slots needed for this car's duration are free
     for (let i = 0; i < slotsNeeded; i++) {
       const slotTime = SLOT_TIMES[startIdx + i];
       if (!slotTime) break;
@@ -133,28 +122,30 @@ export async function POST(request) {
         }, { status: 409 });
       }
     }
-
-    // Collect booked slot times
+    cancelToken = randomUUID();
     const bookedSlots = [];
-    const startIdx2 = SLOT_TIMES.indexOf(time);
     for (let i = 0; i < slotsNeeded; i++) {
-      const slotTime = SLOT_TIMES[startIdx2 + i];
+      const slotTime = SLOT_TIMES[startIdx + i];
       if (!slotTime) break;
       bookedSlots.push(slotTime);
-      await bookSlot(slotKey(date, slotTime), { name: name || 'unknown', bookedAt, token });
+      await bookSlot(slotKey(date, slotTime), { name: name || 'unknown', bookedAt: new Date().toISOString(), token: cancelToken });
     }
-
-    // Store booking record
-    await storeBooking(token, {
-      date, time, carId, slotsNeeded, name, email, phone, car, pkg, price, lang,
-      slots: bookedSlots, bookedAt,
-      extras, addr, zip, city, msg,
-    });
+    try {
+      const kv = await getKV();
+      if (kv) {
+        await kv.set(`booking:${cancelToken}`, JSON.stringify({
+          date, time, car, pkg, price, lang,
+          carId, slotsNeeded, slots: bookedSlots,
+          name, phone, email, msg,
+          bookedAt: new Date().toISOString(),
+        }), { ex: 60 * 60 * 24 * 30 });
+      }
+    } catch {}
   }
 
   const L = lang !== 'en';
   const extrasStr = extras?.length ? (Array.isArray(extras) ? extras.join(', ') : extras) : (L ? 'Ingen' : 'None');
-  const cancelLink = `${SITE_URL}/cancel?token=${token}`;
+  const cancelLink = cancelToken ? `${SITE_URL}/cancel?token=${cancelToken}` : null;
 
   const text = [
     L ? '🚗 Ny bookinganmodning – Elite Vask' : '🚗 New booking request – Elite Vask',
@@ -172,114 +163,66 @@ export async function POST(request) {
     (L ? 'Besked' : 'Message') + ': ' + (msg || '-'),
     '',
     (L ? 'Anslået pris' : 'Estimated price') + ': ' + (price || '-'),
-    '',
-    (L ? 'Annulleringslink' : 'Cancellation link') + ': ' + cancelLink,
+    ...(cancelLink ? ['', (L ? 'Annulleringslink' : 'Cancel link') + ': ' + cancelLink] : []),
   ].join('\n');
 
-  const html = text
+  const companyHtml = text
     .replace(/\n/g, '<br>')
     .replace('🚗 Ny bookinganmodning – Elite Vask', '<strong style="font-size:18px">🚗 Ny bookinganmodning – Elite Vask</strong>')
     .replace('🚗 New booking request – Elite Vask', '<strong style="font-size:18px">🚗 New booking request – Elite Vask</strong>');
 
   const subject = 'Booking: ' + (car || '') + ' – ' + (date || '') + ' ' + (time || '');
-
   const transport = buildTransport();
 
   if (transport) {
     try {
-      // Send to company
+      // Email to company
       await transport.sendMail({
         from: `"Elite Vask Booking" <${process.env.GMAIL_USER || COMPANY_EMAIL}>`,
         to: COMPANY_EMAIL,
         subject,
         text,
-        html: `<div style="font-family:sans-serif;max-width:560px;padding:24px;background:#f9f9f9;border-radius:12px">${html}</div>`,
+        html: `<div style="font-family:sans-serif;max-width:560px;padding:24px;background:#f9f9f9;border-radius:12px">${companyHtml}</div>`,
         replyTo: email || undefined,
       });
 
-      // Send confirmation to customer if email provided
+      // Confirmation email to customer
       if (email) {
-        const customerSubject = L ? 'Bookingbekræftelse – Elite Vask' : 'Booking Confirmation – Elite Vask';
-        const customerText = L ? [
-          `Hej ${name || ''},`,
-          '',
-          'Tak for din booking hos Elite Vask! Vi har modtaget din forespørgsel og vender tilbage med bekræftelse.',
-          '',
-          '--- Din booking ---',
-          'Bil: ' + (car || '-'),
-          'Pakke: ' + (pkg || '-'),
-          'Dato & tid: ' + (date || '-') + ' ' + (time || ''),
-          'Anslået pris: ' + (price || '-'),
-          '',
-          'Ønsker du at aflyse din booking, kan du gøre det via linket nedenfor senest 24 timer før den aftalte tid:',
-          cancelLink,
-          '',
-          'Med venlig hilsen',
-          'Elite Vask',
-          'Tlf: +45 24 44 03 21',
-          'elitevask01@gmail.com',
-        ].join('\n') : [
-          `Hi ${name || ''},`,
-          '',
-          'Thank you for booking with Elite Vask! We have received your request and will confirm shortly.',
-          '',
-          '--- Your booking ---',
-          'Car: ' + (car || '-'),
-          'Package: ' + (pkg || '-'),
-          'Date & time: ' + (date || '-') + ' ' + (time || ''),
-          'Estimated price: ' + (price || '-'),
-          '',
-          'To cancel your booking, use the link below at least 24 hours before your appointment:',
-          cancelLink,
-          '',
-          'Best regards,',
-          'Elite Vask',
-          'Phone: +45 24 44 03 21',
-          'elitevask01@gmail.com',
-        ].join('\n');
-
-        const customerHtmlBody = L ? `
-<div style="font-family:sans-serif;max-width:560px;padding:24px;background:#f9f9f9;border-radius:12px;color:#222">
-  <h2 style="color:#0f5a30;margin-bottom:16px">Bookingbekræftelse – Elite Vask</h2>
-  <p>Hej ${name || ''},</p>
-  <p>Tak for din booking hos Elite Vask! Vi har modtaget din forespørgsel og vender tilbage med bekræftelse.</p>
-  <div style="background:#fff;border:1px solid #e0e0e0;border-radius:8px;padding:16px;margin:20px 0">
-    <strong style="display:block;margin-bottom:10px;color:#0f5a30">Din booking</strong>
-    <p style="margin:4px 0"><strong>Bil:</strong> ${car || '-'}</p>
-    <p style="margin:4px 0"><strong>Pakke:</strong> ${pkg || '-'}</p>
-    <p style="margin:4px 0"><strong>Dato &amp; tid:</strong> ${date || '-'} ${time || ''}</p>
-    <p style="margin:4px 0"><strong>Anslået pris:</strong> ${price || '-'}</p>
-  </div>
-  <p>Ønsker du at aflyse din booking, kan du gøre det via linket nedenfor senest <strong>24 timer</strong> før den aftalte tid:</p>
-  <p><a href="${cancelLink}" style="color:#22a35a;font-weight:bold">${cancelLink}</a></p>
-  <p style="color:#666;font-size:13px;margin-top:24px">Med venlig hilsen<br><strong>Elite Vask</strong><br>Tlf: +45 24 44 03 21</p>
-</div>` : `
-<div style="font-family:sans-serif;max-width:560px;padding:24px;background:#f9f9f9;border-radius:12px;color:#222">
-  <h2 style="color:#0f5a30;margin-bottom:16px">Booking Confirmation – Elite Vask</h2>
-  <p>Hi ${name || ''},</p>
-  <p>Thank you for booking with Elite Vask! We have received your request and will confirm shortly.</p>
-  <div style="background:#fff;border:1px solid #e0e0e0;border-radius:8px;padding:16px;margin:20px 0">
-    <strong style="display:block;margin-bottom:10px;color:#0f5a30">Your Booking</strong>
-    <p style="margin:4px 0"><strong>Car:</strong> ${car || '-'}</p>
-    <p style="margin:4px 0"><strong>Package:</strong> ${pkg || '-'}</p>
-    <p style="margin:4px 0"><strong>Date &amp; time:</strong> ${date || '-'} ${time || ''}</p>
-    <p style="margin:4px 0"><strong>Estimated price:</strong> ${price || '-'}</p>
-  </div>
-  <p>To cancel your booking, use the link below at least <strong>24 hours</strong> before your appointment:</p>
-  <p><a href="${cancelLink}" style="color:#22a35a;font-weight:bold">${cancelLink}</a></p>
-  <p style="color:#666;font-size:13px;margin-top:24px">Best regards,<br><strong>Elite Vask</strong><br>Phone: +45 24 44 03 21</p>
-</div>`;
-
+        const fmt = (d) => {
+          if (!d) return d;
+          const [y, m, day] = d.split('-');
+          const months = L
+            ? ['jan','feb','mar','apr','maj','jun','jul','aug','sep','okt','nov','dec']
+            : ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+          return `${parseInt(day)}. ${months[parseInt(m)-1]} ${y}`;
+        };
         await transport.sendMail({
           from: `"Elite Vask" <${process.env.GMAIL_USER || COMPANY_EMAIL}>`,
           to: email,
-          subject: customerSubject,
-          text: customerText,
-          html: customerHtmlBody,
+          subject: L ? `Bookingbekræftelse – ${fmt(date)} ${time}` : `Booking confirmation – ${fmt(date)} ${time}`,
+          html: `<div style="font-family:sans-serif;max-width:560px;padding:24px;background:#f9f9f9;border-radius:12px">
+            <h2 style="color:#1a7a3f">✅ ${L ? 'Tak for din booking!' : 'Thank you for your booking!'}</h2>
+            <p>${L ? `Hej ${name || ''},` : `Hi ${name || ''},`}</p>
+            <p>${L ? 'Vi har modtaget din bookinganmodning og vender tilbage hurtigst muligt for at bekræfte tid og pris.' : 'We have received your booking request and will get back to you as soon as possible to confirm the time and price.'}</p>
+            <table style="width:100%;border-collapse:collapse;margin:16px 0">
+              <tr><td style="padding:8px;color:#666">${L ? 'Dato & tid' : 'Date & time'}</td><td style="padding:8px;font-weight:600">${fmt(date)} · ${time || ''}</td></tr>
+              <tr style="background:#f0f0f0"><td style="padding:8px;color:#666">${L ? 'Bil' : 'Car'}</td><td style="padding:8px;font-weight:600">${car || '-'}</td></tr>
+              <tr><td style="padding:8px;color:#666">${L ? 'Pakke' : 'Package'}</td><td style="padding:8px;font-weight:600">${pkg || '-'}</td></tr>
+              <tr style="background:#f0f0f0"><td style="padding:8px;color:#666">${L ? 'Adresse' : 'Address'}</td><td style="padding:8px;font-weight:600">${addr || ''}, ${zip || ''} ${city || ''}</td></tr>
+              <tr><td style="padding:8px;color:#666">${L ? 'Anslået pris' : 'Estimated price'}</td><td style="padding:8px;font-weight:600">${price || '-'}</td></tr>
+            </table>
+            ${cancelLink ? `
+            <hr style="margin:20px 0;border:none;border-top:1px solid #ddd">
+            <p style="font-size:14px;color:#555">${L ? 'Ønsker du at annullere din booking, kan du gøre det ved at klikke på knappen herunder. Annullering bedes ske senest 24 timer inden aftalt tid.' : 'If you wish to cancel your booking, you can do so by clicking the button below. Please cancel at least 24 hours before the scheduled time.'}</p>
+            <a href="${cancelLink}" style="display:inline-block;background:#e74c3c;color:#fff;padding:10px 20px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px">${L ? 'Annuller booking' : 'Cancel booking'}</a>
+            ` : ''}
+            <hr style="margin:20px 0;border:none;border-top:1px solid #ddd">
+            <p style="font-size:13px;color:#888">${L ? 'Spørgsmål? Ring til os på +45 24 44 03 21 eller skriv til elitevask01@gmail.com' : 'Questions? Call us at +45 24 44 03 21 or email elitevask01@gmail.com'}</p>
+          </div>`,
         });
       }
 
-      return Response.json({ ok: true, token });
+      return Response.json({ ok: true, ...(cancelToken ? { token: cancelToken } : {}) });
     } catch (err) {
       console.error('Email error:', err.message);
       return Response.json({ ok: false, error: 'email_failed' }, { status: 500 });
@@ -288,5 +231,5 @@ export async function POST(request) {
 
   console.warn('[book] No SMTP configured — GMAIL_PASS missing. Booking logged only.');
   console.log('BOOKING (no SMTP):\n' + text);
-  return Response.json({ ok: true, token, warn: 'no_smtp' });
+  return Response.json({ ok: true, warn: 'no_smtp', ...(cancelToken ? { token: cancelToken } : {}) });
 }
