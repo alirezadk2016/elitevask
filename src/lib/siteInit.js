@@ -478,7 +478,7 @@ function bindAddressAutocomplete(){
   var fa=document.getElementById('f_addr');
   if(!fz||!fc) return;
 
-  // zip → city: always update city when 4-digit zip is entered or changed
+  // zip → city
   fz.addEventListener('input',function(){
     var z=fz.value.replace(/\D/g,'');fz.value=z;
     if(z.length===4){
@@ -487,45 +487,46 @@ function bindAddressAutocomplete(){
         .then(function(d){if(d&&d.navn){fc.value=d.navn;wiz.city=d.navn;}})
         .catch(function(){});
     }
+    if(fa) removeDropdown('addr-drop');
   });
 
-  // city → zip: always show suggestions and fill zip when unique match
+  // city → zip suggestions
   var cityTimer=null;
   fc.addEventListener('input',function(){
     clearTimeout(cityTimer);
     var q=fc.value.trim();
-    if(q.length<3){removeDropdown('city-drop');return;}
+    if(q.length<2){removeDropdown('city-drop');return;}
     cityTimer=setTimeout(function(){
-      fetch('https://api.dataforsyningen.dk/postnumre?q='+encodeURIComponent(q)+'&per_side=6')
+      fetch('https://api.dataforsyningen.dk/postnumre?q='+encodeURIComponent(q)+'&per_side=8')
         .then(function(r){return r.ok?r.json():[];})
         .then(function(list){
           if(list&&list.length===1){fz.value=list[0].nr;wiz.zip=list[0].nr;}
           showCitySuggestions(list,fz,fc);
         })
         .catch(function(){});
-    },350);
+    },300);
   });
 
-  // address autocomplete (shows dropdown)
+  // address autocomplete — use adgangsadresser which works with partial street names
   if(fa){
     var addrTimer=null;
     fa.addEventListener('input',function(){
       clearTimeout(addrTimer);
       var q=fa.value.trim();
       removeDropdown('addr-drop');
-      if(q.length<3) return;
+      if(q.length<2) return;
       addrTimer=setTimeout(function(){
-        var url='https://api.dataforsyningen.dk/adresser/autocomplete?q='+encodeURIComponent(q)+'&per_side=6';
+        var url='https://api.dataforsyningen.dk/adgangsadresser/autocomplete?q='+encodeURIComponent(q)+'&per_side=8&fuzzy=';
         if(fz.value.length===4) url+='&postnr='+fz.value;
         fetch(url)
           .then(function(r){return r.ok?r.json():[];})
           .then(function(list){showAddrSuggestions(list,fa,fz,fc);})
           .catch(function(){});
-      },300);
+      },250);
     });
-    fa.addEventListener('blur',function(){setTimeout(function(){removeDropdown('addr-drop');},180);});
+    fa.addEventListener('blur',function(){setTimeout(function(){removeDropdown('addr-drop');},200);});
   }
-  fc.addEventListener('blur',function(){setTimeout(function(){removeDropdown('city-drop');},180);});
+  fc.addEventListener('blur',function(){setTimeout(function(){removeDropdown('city-drop');},200);});
 }
 
 function removeDropdown(id){var d=document.getElementById(id);if(d)d.remove();}
@@ -535,7 +536,7 @@ function showCitySuggestions(list,fz,fc){
   if(!list||list.length<=1) return;
   var drop=document.createElement('ul');
   drop.id='city-drop';drop.className='ac-drop';
-  list.slice(0,6).forEach(function(item){
+  list.slice(0,8).forEach(function(item){
     var li=document.createElement('li');
     li.textContent=item.navn+' ('+item.nr+')';
     li.addEventListener('mousedown',function(e){
@@ -555,17 +556,19 @@ function showAddrSuggestions(list,fa,fz,fc){
   if(!list||!list.length) return;
   var drop=document.createElement('ul');
   drop.id='addr-drop';drop.className='ac-drop';
-  list.slice(0,6).forEach(function(item){
+  list.slice(0,8).forEach(function(item){
     var li=document.createElement('li');
-    li.textContent=item.tekst;
+    // adgangsadresser returns item.tekst and item.adgangsadresse
+    var a=item.adgangsadresse||item.adresse||{};
+    li.textContent=item.tekst||'';
     li.addEventListener('mousedown',function(e){
       e.preventDefault();
-      var a=item.adresse;
-      // street + number only (no zip/city in addr field)
-      fa.value=(a.vejnavn||'')+' '+(a.husnr||'');
-      if(a.postnr&&!fz.value){fz.value=a.postnr;wiz.zip=a.postnr;}
-      if(a.postnrnavn&&!fc.value){fc.value=a.postnrnavn;wiz.city=a.postnrnavn;}
-      wiz.addr=fa.value;
+      var street=((a.vejnavn||'')+' '+(a.husnr||'')).trim();
+      fa.value=street;
+      wiz.addr=street;
+      // always update zip + city from selected suggestion
+      if(a.postnr){fz.value=a.postnr;wiz.zip=a.postnr;}
+      if(a.postnrnavn){fc.value=a.postnrnavn;wiz.city=a.postnrnavn;}
       removeDropdown('addr-drop');
     });
     drop.appendChild(li);
