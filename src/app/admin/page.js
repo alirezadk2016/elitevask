@@ -32,11 +32,11 @@ function Field({ label, value, green }) {
 
 function ConfirmBar({ msg, onYes, onNo }) {
   return (
-    <div style={{ background: "rgba(0,0,0,.6)", borderRadius: 10, padding: "12px 14px", marginTop: 10, border: "1px solid rgba(255,255,255,.1)" }}>
+    <div onClick={e => e.stopPropagation()} style={{ background: "rgba(0,0,0,.6)", borderRadius: 10, padding: "12px 14px", marginTop: 10, border: "1px solid rgba(255,255,255,.1)" }}>
       <p style={{ color: "#ddd", fontSize: 13, margin: "0 0 10px", lineHeight: 1.5 }}>{msg}</p>
       <div style={{ display: "flex", gap: 8 }}>
         <button onClick={onYes} style={{ flex: 1, padding: "9px", background: "#c0392b", color: "#fff", border: "none", borderRadius: 8, fontWeight: 700, fontSize: 13, cursor: "pointer" }}>Ja, bekræft</button>
-        <button onClick={onNo}  style={{ flex: 1, padding: "9px", background: "rgba(255,255,255,.08)", color: "#aaa", border: "none", borderRadius: 8, fontWeight: 600, fontSize: 13, cursor: "pointer" }}>Annuller</button>
+        <button onClick={onNo}  style={{ flex: 1, padding: "9px", background: "rgba(255,255,255,.08)", color: "#aaa", border: "none", borderRadius: 8, fontWeight: 600, fontSize: 13, cursor: "pointer" }}>Nej</button>
       </div>
     </div>
   );
@@ -48,7 +48,8 @@ function BookingCard({ b, secret, onCancel, onDelete }) {
   const [expanded,   setExpanded]   = useState(false);
   const [confirm,    setConfirm]    = useState(null); // "cancel" | "delete" | null
 
-  async function doCancel() {
+  async function doCancel(e) {
+    e.stopPropagation();
     setConfirm(null);
     setCancelling(true);
     try {
@@ -58,10 +59,11 @@ function BookingCard({ b, secret, onCancel, onDelete }) {
         body: JSON.stringify({ token: b.token }),
       });
       if (r.ok) onCancel(b.token);
-    } finally { setCancelling(false); }
+    } catch {} finally { setCancelling(false); }
   }
 
-  async function doDelete() {
+  async function doDelete(e) {
+    e.stopPropagation();
     setConfirm(null);
     setDeleting(true);
     try {
@@ -71,7 +73,7 @@ function BookingCard({ b, secret, onCancel, onDelete }) {
         body: JSON.stringify({ token: b.token }),
       });
       if (r.ok) onDelete(b.token);
-    } finally { setDeleting(false); }
+    } catch {} finally { setDeleting(false); }
   }
 
   const cancelled = b.status === "cancelled";
@@ -125,7 +127,7 @@ function BookingCard({ b, secret, onCancel, onDelete }) {
 
           <div style={{ display: "flex", gap: 10, marginTop: 16, flexWrap: "wrap" }}>
             {!cancelled && (
-              <button onClick={() => setConfirm(confirm === "cancel" ? null : "cancel")} disabled={cancelling} style={{
+              <button onClick={e => { e.stopPropagation(); setConfirm(confirm === "cancel" ? null : "cancel"); }} disabled={cancelling} style={{
                 flex: 1, minWidth: 120, padding: "11px 16px",
                 background: confirm === "cancel" ? "rgba(212,175,55,.25)" : "rgba(212,175,55,.12)",
                 color: "#d4af37", border: "1px solid rgba(212,175,55,.3)",
@@ -134,7 +136,7 @@ function BookingCard({ b, secret, onCancel, onDelete }) {
                 {cancelling ? "..." : "✕ Annuller"}
               </button>
             )}
-            <button onClick={() => setConfirm(confirm === "delete" ? null : "delete")} disabled={deleting} style={{
+            <button onClick={e => { e.stopPropagation(); setConfirm(confirm === "delete" ? null : "delete"); }} disabled={deleting} style={{
               flex: 1, minWidth: 120, padding: "11px 16px",
               background: confirm === "delete" ? "rgba(231,76,60,.25)" : "rgba(231,76,60,.1)",
               color: "#e74c3c", border: "1px solid rgba(231,76,60,.25)",
@@ -148,14 +150,14 @@ function BookingCard({ b, secret, onCancel, onDelete }) {
             <ConfirmBar
               msg="Annuller booking og send e-mail til kunden?"
               onYes={doCancel}
-              onNo={() => setConfirm(null)}
+              onNo={e => { e.stopPropagation(); setConfirm(null); }}
             />
           )}
           {confirm === "delete" && (
             <ConfirmBar
               msg="Slet booking permanent? Dette kan ikke fortrydes."
               onYes={doDelete}
-              onNo={() => setConfirm(null)}
+              onNo={e => { e.stopPropagation(); setConfirm(null); }}
             />
           )}
         </div>
