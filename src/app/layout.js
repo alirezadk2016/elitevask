@@ -1,5 +1,6 @@
 import { Manrope } from "next/font/google";
 import "./globals.css";
+import CookieConsent from "./components/CookieConsent";
 
 const manrope = Manrope({
   subsets: ["latin"],
@@ -35,9 +36,9 @@ const JSONLD = [
   "description":"Mobil bil dampvask på Sjælland. Rent, effektivt og miljøvenligt.",
   "telephone":"+4524440321",
   "email":"elitevask01@gmail.com",
-  "areaServed":"Sjælland, Danmark",
+  "areaServed":["Næstved","Roskilde","Køge","Ringsted","København","Stevns Kommune","Faxe Kommune","Helsingør","Hillerød","Frederikssund","Sjælland"],
   "priceRange":"kr","vatID":"DK46392264",
-  "address":{"@type":"PostalAddress","addressRegion":"Sjælland","addressCountry":"DK"},
+  "address":{"@type":"PostalAddress","addressLocality":"Copenhagen","addressRegion":"Sjælland","addressCountry":"DK"},
   "sameAs":["https://instagram.com/elitevasksjaelland"]
 },
 {
@@ -58,6 +59,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="da" className={manrope.variable}>
       <head>
+        <meta name="trustpilot-one-time-domain-verification-id" content="3c40dbdd-ba69-4e5f-94e9-55aa98bd97b7" />
         {JSONLD.map((obj, i) => (
           <script
             key={i}
@@ -66,7 +68,14 @@ export default function RootLayout({ children }) {
           />
         ))}
       </head>
-      <body>{children}</body>
+      <body>
+        {children}
+        <CookieConsent />
+        <script
+          dangerouslySetInnerHTML={{ __html: `(function(w,d,s,r,n){w.TrustpilotObject=n;w[n]=w[n]||function(){(w[n].q=w[n].q||[]).push(arguments)};a=d.createElement(s);a.async=1;a.src=r;a.type='text/java'+s;f=d.getElementsByTagName(s)[0];f.parentNode.insertBefore(a,f)})(window,document,'script','https://invitejs.trustpilot.com/tp.min.js','tp');tp('register','alMjUlvV9s57mEha');` }}
+        />
+        <script async src="https://widget.trustpilot.com/bootstrap/v5/tp.widget.bootstrap.min.js" charSet="UTF-8" />
+      </body>
     </html>
   );
 }
