@@ -5,16 +5,16 @@ import { Suspense } from "react";
 
 function LoginContent() {
   const params = useSearchParams();
-  const errorParam = params.get("error");
+  const error = params.get("error");
   const [email, setEmail] = useState("");
-  const [state, setState] = useState("idle");
+  const [state, setState] = useState("idle"); // idle | loading | sent | error
   const [errMsg, setErrMsg] = useState("");
 
   useEffect(() => {
-    if (errorParam === "expired") setErrMsg("Loginlinket er udløbet eller allerede brugt. Anmod om et nyt nedenfor.");
-    else if (errorParam === "invalid") setErrMsg("Ugyldigt loginlink. Prøv at anmode om et nyt.");
-    else if (errorParam === "unavailable") setErrMsg("Tjenesten er midlertidigt utilgængelig. Prøv igen om lidt.");
-  }, [errorParam]);
+    if (error === "expired") setErrMsg("Loginlinket er udløbet eller allerede brugt. Anmod om et nyt.");
+    else if (error === "invalid") setErrMsg("Ugyldigt loginlink.");
+    else if (error === "unavailable") setErrMsg("Tjenesten er midlertidigt utilgængelig. Prøv igen.");
+  }, [error]);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -27,7 +27,11 @@ function LoginContent() {
         body: JSON.stringify({ email }),
       });
       const data = await r.json();
-      if (!r.ok) { setErrMsg(data.message || "Noget gik galt. Prøv igen."); setState("error"); return; }
+      if (!r.ok) {
+        setErrMsg(data.message || "Noget gik galt. Prøv igen.");
+        setState("error");
+        return;
+      }
       setState("sent");
     } catch {
       setErrMsg("Netværksfejl. Tjek din forbindelse og prøv igen.");
@@ -47,9 +51,9 @@ function LoginContent() {
           <div className="portal-sent">
             <div className="portal-sent-icon">📧</div>
             <h1>Tjek din e-mail</h1>
-            <p>Vi har sendt et loginlink til <strong>{email}</strong>.<br />Linket er gyldigt i 15 minutter og kan kun bruges én gang.</p>
+            <p>Vi har sendt et loginlink til <strong>{email}</strong>.<br />Linket er gyldigt i 15 minutter.</p>
             <p className="portal-sent-hint">Kan du ikke finde mailen? Tjek din spam-mappe.</p>
-            <button className="portal-btn-ghost" onClick={() => { setState("idle"); setEmail(""); setErrMsg(""); }}>
+            <button className="portal-btn-ghost" onClick={() => { setState("idle"); setEmail(""); }}>
               Brug anden e-mail
             </button>
           </div>
@@ -57,16 +61,18 @@ function LoginContent() {
           <>
             <div className="portal-auth-header">
               <h1>Log ind</h1>
-              <p>Ingen adgangskode. Indtast din e-mail og vi sender dig et sikkert link.</p>
+              <p>Indtast din e-mail og vi sender dig et sikkert loginlink. Ingen adgangskode nødvendig.</p>
             </div>
 
-            {errMsg && <div className="portal-error-box">{errMsg}</div>}
+            {errMsg && (
+              <div className="portal-error-box">{errMsg}</div>
+            )}
 
             <form onSubmit={handleSubmit} className="portal-auth-form">
               <div className="portal-field">
-                <label htmlFor="portal-email">E-mailadresse</label>
+                <label htmlFor="email">E-mailadresse</label>
                 <input
-                  id="portal-email"
+                  id="email"
                   type="email"
                   value={email}
                   onChange={e => setEmail(e.target.value)}

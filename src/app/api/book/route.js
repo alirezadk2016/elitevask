@@ -227,8 +227,12 @@ export async function POST(request) {
     // Index booking by email for customer portal
     if (email) {
       try {
-        const kv = await getKV();
-        if (kv) await kv.sadd(`user:bookings:${hashEmail(email)}`, cancelToken);
+        const kv2 = await getKV();
+        if (kv2) {
+          const { createHash } = await import('crypto');
+          const emailHash = createHash('sha256').update(email.toLowerCase().trim()).digest('hex');
+          await kv2.sadd(`user:bookings:${emailHash}`, cancelToken);
+        }
       } catch {}
     }
   }
