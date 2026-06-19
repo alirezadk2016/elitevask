@@ -1,5 +1,9 @@
 import nodemailer from 'nodemailer';
-import { randomBytes } from 'crypto';
+import { randomBytes, createHash } from 'crypto';
+
+function hashEmail(email) {
+  return createHash('sha256').update(email.toLowerCase().trim()).digest('hex');
+}
 
 const COMPANY_EMAIL = 'elitevask01@gmail.com';
 const SITE_URL = 'https://elitevask.vercel.app';
@@ -219,6 +223,14 @@ export async function POST(request) {
 
     // Mark phone+date to prevent duplicate bookings
     await markDuplicateBooking(phone, date);
+
+    // Index booking by email for customer portal
+    if (email) {
+      try {
+        const kv = await getKV();
+        if (kv) await kv.sadd(`user:bookings:${hashEmail(email)}`, cancelToken);
+      } catch {}
+    }
   }
 
   const extrasStr = extras?.length ? (Array.isArray(extras) ? extras.join(', ') : extras) : (L ? 'Ingen' : 'None');

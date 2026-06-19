@@ -662,3 +662,78 @@ section{position:relative}
 .cookie-btn-accept{background:var(--green);color:#000}
 .cookie-btn-decline{background:var(--surface-2);color:var(--muted);border:1px solid var(--line-2)}
 .cookie-btn:hover{opacity:.85}
+
+/* ===== CUSTOMER PORTAL ===== */
+.portal-auth-page{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:var(--bg)}
+.portal-auth-card{width:100%;max-width:420px;background:var(--surface);border:1px solid var(--line-2);border-radius:var(--r);padding:40px 36px}
+.portal-auth-logo{display:flex;align-items:center;gap:10px;margin-bottom:32px;text-decoration:none}
+.portal-auth-logo-mark{width:36px;height:36px;background:var(--green);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#062313}
+.portal-auth-logo-text{font-size:16px;font-weight:700;color:#fff}
+.portal-auth-header h1{font-size:24px;font-weight:800;color:#fff;margin-bottom:8px;letter-spacing:-.3px}
+.portal-auth-header p{font-size:14px;color:var(--muted);margin-bottom:24px;line-height:1.5}
+.portal-error-box{background:rgba(231,76,60,.1);border:1px solid rgba(231,76,60,.3);border-radius:8px;padding:12px 14px;font-size:13px;color:#e74c3c;margin-bottom:16px}
+.portal-auth-form{display:flex;flex-direction:column;gap:16px}
+.portal-field{display:flex;flex-direction:column;gap:6px}
+.portal-field label{font-size:13px;font-weight:600;color:var(--txt)}
+.portal-field input{background:var(--surface-2);border:1px solid var(--line-2);border-radius:var(--r-sm);padding:12px 14px;font-size:15px;color:var(--txt);font-family:inherit;transition:border-color .15s}
+.portal-field input:focus{outline:none;border-color:var(--green)}
+.portal-field input::placeholder{color:var(--muted-2)}
+.portal-btn-primary{background:var(--green);color:#062313;border:none;border-radius:var(--r-sm);padding:14px 20px;font-size:15px;font-weight:700;cursor:pointer;transition:background .15s;font-family:inherit;text-decoration:none;display:inline-block;text-align:center}
+.portal-btn-primary:hover{background:#48e088}
+.portal-btn-primary:disabled{opacity:.5;cursor:not-allowed}
+.portal-btn-ghost{background:var(--surface-2);color:var(--muted);border:1px solid var(--line-2);border-radius:var(--r-sm);padding:11px 18px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:.15s}
+.portal-btn-ghost:hover{border-color:var(--green);color:var(--txt)}
+.portal-auth-footer{margin-top:20px;text-align:center;font-size:13px;color:var(--muted)}
+.portal-auth-footer a{color:var(--green);text-decoration:none}
+.portal-auth-footer a:hover{text-decoration:underline}
+.portal-sent{text-align:center}
+.portal-sent-icon{font-size:52px;margin-bottom:16px}
+.portal-sent h1{font-size:22px;font-weight:800;color:#fff;margin-bottom:12px}
+.portal-sent p{font-size:14px;color:var(--muted);margin-bottom:8px;line-height:1.5}
+.portal-sent-hint{font-size:12px;color:var(--muted-2)!important;margin-bottom:20px!important}
+.portal-page{min-height:100vh;background:var(--bg)}
+.portal-header{background:rgba(11,19,16,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:50}
+.portal-header-inner{max-width:900px;margin:0 auto;padding:13px 24px;display:flex;align-items:center;justify-content:space-between}
+.portal-logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:#fff;font-weight:700;font-size:15px}
+.portal-logo-mark{width:32px;height:32px;background:var(--green);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#062313}
+.portal-header-right{display:flex;align-items:center;gap:12px}
+.portal-email-label{font-size:13px;color:var(--muted);max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.portal-logout-btn{background:var(--surface-2);color:var(--muted);border:1px solid var(--line-2);border-radius:var(--r-sm);padding:7px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:.15s}
+.portal-logout-btn:hover{border-color:var(--green);color:var(--txt)}
+.portal-main{padding:40px 0 80px}
+.portal-wrap{max-width:900px;margin:0 auto;padding:0 24px}
+.portal-welcome{margin-bottom:32px}
+.portal-welcome h1{font-size:28px;font-weight:800;color:#fff;margin-bottom:6px;letter-spacing:-.5px}
+.portal-welcome p{font-size:15px;color:var(--muted)}
+.portal-loading{text-align:center;padding:60px 0;color:var(--muted)}
+.portal-spinner{width:36px;height:36px;border:3px solid var(--line-2);border-top-color:var(--green);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px}
+.portal-empty{text-align:center;padding:60px 20px}
+.portal-empty-icon{font-size:52px;margin-bottom:16px}
+.portal-empty h2{font-size:20px;font-weight:700;color:#fff;margin-bottom:8px}
+.portal-empty p{color:var(--muted);margin-bottom:24px}
+.portal-section{margin-bottom:40px}
+.portal-section-title{font-size:12px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+.portal-bookings{display:flex;flex-direction:column;gap:10px}
+.portal-booking-card{background:var(--surface);border:1px solid var(--line-2);border-radius:var(--r);overflow:hidden;transition:border-color .15s}
+.portal-booking-card:hover{border-color:rgba(55,210,120,.25)}
+.portal-booking-top{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--line)}
+.portal-booking-date{display:flex;flex-direction:column;gap:2px}
+.portal-booking-day{font-size:15px;font-weight:700;color:#fff}
+.portal-booking-time{font-size:13px;color:var(--muted)}
+.portal-status-chip{font-size:12px;font-weight:600;padding:4px 11px;border-radius:99px;border:1px solid;white-space:nowrap}
+.portal-booking-body{padding:14px 20px;display:flex;flex-direction:column;gap:9px}
+.portal-booking-row{display:flex;justify-content:space-between;align-items:baseline;font-size:14px;gap:12px}
+.portal-booking-row span:first-child{color:var(--muted);flex-shrink:0}
+.portal-booking-row span:last-child{color:var(--txt);font-weight:500;text-align:right}
+.portal-booking-actions{padding:4px 20px 16px}
+.portal-cancel-btn{width:100%;background:rgba(231,76,60,.08);color:#e74c3c;border:1px solid rgba(231,76,60,.25);border-radius:var(--r-sm);padding:11px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:.15s}
+.portal-cancel-btn:hover:not(:disabled){background:rgba(231,76,60,.16)}
+.portal-cancel-btn:disabled{opacity:.5;cursor:not-allowed}
+.portal-cancelled-note{font-size:12px;color:var(--muted-2);padding:0 20px 14px;margin:0}
+@media(max-width:600px){
+  .portal-auth-card{padding:28px 20px}
+  .portal-email-label{display:none}
+  .portal-header-inner{padding:11px 16px}
+  .portal-wrap{padding:0 16px}
+  .portal-booking-row span:last-child{max-width:55%}
+}
