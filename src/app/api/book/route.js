@@ -5,7 +5,8 @@ function hashEmail(email) {
   return createHash('sha256').update(email.toLowerCase().trim()).digest('hex');
 }
 
-const COMPANY_EMAIL = 'elitevask01@gmail.com';
+const COMPANY_EMAIL = 'booking@elite-vask.dk';
+const PUBLIC_EMAIL  = 'info@elite-vask.dk';
 const CANCEL_TTL = 60 * 60 * 24;      // 24 hours for cancel link
 const BOOKING_TTL = 60 * 60 * 24 * 30; // 30 days for slot records
 
@@ -304,7 +305,7 @@ export async function POST(request) {
         await transport.sendMail({
           from: `"Elite Vask" <${process.env.GMAIL_USER || COMPANY_EMAIL}>`,
           to: email,
-          replyTo: COMPANY_EMAIL,
+          replyTo: PUBLIC_EMAIL,
           subject: L ? `Bookingbekræftelse – ${fmtDate(date, true)} kl. ${time}` : `Booking confirmation – ${fmtDate(date, false)} at ${time}`,
           headers: {
             'X-Entity-Ref-ID': cancelToken || Date.now().toString(),
@@ -330,10 +331,10 @@ export async function POST(request) {
                   <p style="font-size:13px;color:#666;margin:0 0 12px;line-height:1.5">${L ? '⏱ Annulleringslink er gyldigt i 24 timer. Annullering bedes ske senest 24 timer inden aftalt tid.' : '⏱ Cancellation link valid for 24 hours. Please cancel at least 24 hours before the scheduled time.'}</p>
                   <a href="${cancelLink}" style="display:inline-block;background:#e74c3c;color:#fff;padding:11px 22px;border-radius:7px;text-decoration:none;font-weight:700;font-size:14px">${L ? 'Annuller booking' : 'Cancel booking'}</a>
                 </div>` : ''}
-                <p style="font-size:13px;color:#888;margin:0;line-height:1.6">${L ? 'Spørgsmål? Ring på <a href="tel:+4524440321" style="color:#1a7a3f">+45 24 44 03 21</a> eller skriv til <a href="mailto:elitevask01@gmail.com" style="color:#1a7a3f">elitevask01@gmail.com</a>' : 'Questions? Call <a href="tel:+4524440321" style="color:#1a7a3f">+45 24 44 03 21</a> or email <a href="mailto:elitevask01@gmail.com" style="color:#1a7a3f">elitevask01@gmail.com</a>'}</p>
+                <p style="font-size:13px;color:#888;margin:0;line-height:1.6">${L ? `Spørgsmål? Ring på <a href="tel:+4524440321" style="color:#1a7a3f">+45 24 44 03 21</a> eller skriv til <a href="mailto:${PUBLIC_EMAIL}" style="color:#1a7a3f">${PUBLIC_EMAIL}</a>` : `Questions? Call <a href="tel:+4524440321" style="color:#1a7a3f">+45 24 44 03 21</a> or email <a href="mailto:${PUBLIC_EMAIL}" style="color:#1a7a3f">${PUBLIC_EMAIL}</a>`}</p>
               </div>
               <div style="background:#f7f7f7;padding:16px 32px;border-top:1px solid #e8e8e8">
-                <p style="font-size:11px;color:#aaa;margin:0;text-align:center">Elite Vask · elitevask01@gmail.com · +45 24 44 03 21</p>
+                <p style="font-size:11px;color:#aaa;margin:0;text-align:center">Elite Vask · ${PUBLIC_EMAIL} · +45 24 44 03 21</p>
               </div>
             </div>
           </body></html>`,

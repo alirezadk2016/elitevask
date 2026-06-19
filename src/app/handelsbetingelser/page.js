@@ -17,7 +17,7 @@ export default function Handelsbetingelser() {
           CVR-nr.: 46392264<br />
           Sjælland, Danmark<br />
           Telefon: +45 24 44 03 21<br />
-          E-mail: elitevask01@gmail.com
+          E-mail: info@elite-vask.dk
         </p>
 
         <h2>2. Bestilling og aftale</h2>
@@ -63,7 +63,7 @@ export default function Handelsbetingelser() {
           Elite Vask er ikke ansvarlig for skader, der skyldes allerede eksisterende svagheder i lak, glas, gummi eller interiørmaterialer, som ikke var synlige inden behandlingen. Kunden bør informere os om eventuelle sådanne forhold inden start.
         </p>
         <p>
-          Ved eventuelle reklamationer skal disse fremsættes skriftligt til elitevask01@gmail.com senest 3 dage efter behandlingen.
+          Ved eventuelle reklamationer skal disse fremsættes skriftligt til info@elite-vask.dk senest 3 dage efter behandlingen.
         </p>
 
         <h2>7. Kundens forpligtelser</h2>

@@ -77,8 +77,8 @@ function CancelContent() {
               : "This cancellation link is invalid or the booking has already been cancelled."
             }</p>
             <p>{da
-              ? "Kontakt os direkte på +45 24 44 03 21 eller elitevask01@gmail.com."
-              : "Contact us directly at +45 24 44 03 21 or elitevask01@gmail.com."
+              ? "Kontakt os direkte på +45 24 44 03 21 eller info@elite-vask.dk."
+              : "Contact us directly at +45 24 44 03 21 or info@elite-vask.dk."
             }</p>
             <a href="/" className="btn btn-green" style={{display:"inline-block",marginTop:"16px"}}>
               {da ? "Gå til forsiden" : "Go to homepage"}
@@ -94,7 +94,7 @@ function CancelContent() {
               ? "Dette annulleringslink er udløbet (gyldigt i 24 timer). Kontakt os direkte for at ændre din booking."
               : "This cancellation link has expired (valid for 24 hours). Contact us directly to change your booking."
             }</p>
-            <p>{da ? "Telefon: +45 24 44 03 21 · elitevask01@gmail.com" : "Phone: +45 24 44 03 21 · elitevask01@gmail.com"}</p>
+            <p>{da ? "Telefon: +45 24 44 03 21 · info@elite-vask.dk" : "Phone: +45 24 44 03 21 · info@elite-vask.dk"}</p>
             <a href="/" className="btn btn-green" style={{display:"inline-block",marginTop:"16px"}}>
               {da ? "Gå til forsiden" : "Go to homepage"}
             </a>

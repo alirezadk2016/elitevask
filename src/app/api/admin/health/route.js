@@ -13,7 +13,7 @@ export async function GET(request) {
   results.gmail = {
     GMAIL_USER: gmailUser || '❌ NOT SET',
     GMAIL_PASS: gmailPass ? `✅ set (${gmailPass.length} chars)` : '❌ NOT SET',
-    sender_correct: gmailUser === 'elitevask01@gmail.com' ? '✅ correct' : `❌ wrong — got: ${gmailUser}`,
+    sender_correct: (gmailUser === 'booking@elite-vask.dk' || gmailUser === 'elitevask01@gmail.com') ? '✅ correct' : `❌ unexpected — got: ${gmailUser}`,
   };
 
   // KV / Redis

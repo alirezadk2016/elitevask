@@ -1,8 +1,8 @@
 import nodemailer from 'nodemailer';
 import { isSameOrigin } from '@/lib/csrf';
 
-const COMPANY_EMAIL = 'elitevask01@gmail.com';
-const SITE_URL = 'https://elitevask.vercel.app';
+const COMPANY_EMAIL = 'booking@elite-vask.dk';
+const PUBLIC_EMAIL  = 'info@elite-vask.dk';
 
 let kvClient = null;
 async function getKV() {
@@ -128,7 +128,7 @@ export async function POST(request) {
           <p><strong>${L ? 'Pakke' : 'Package'}:</strong> ${pkg}</p>
           <hr style="margin:16px 0">
           <p>${L ? 'Ønsker du at booke igen, er du altid velkommen.' : 'You are always welcome to book again.'}</p>
-          <a href="${SITE_URL}" style="display:inline-block;margin-top:8px;background:#37d278;color:#000;padding:10px 20px;border-radius:8px;text-decoration:none;font-weight:700">${L ? 'Book ny tid' : 'Book new time'}</a>
+          <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://elite-vask.dk'}" style="display:inline-block;margin-top:8px;background:#37d278;color:#000;padding:10px 20px;border-radius:8px;text-decoration:none;font-weight:700">${L ? 'Book ny tid' : 'Book new time'}</a>
         </div>`,
       });
     } catch {}

@@ -17,7 +17,7 @@ export default function Privatpolitik() {
           CVR-nr.: 46392264<br />
           Sjælland, Danmark<br />
           Telefon: +45 24 44 03 21<br />
-          E-mail: elitevask01@gmail.com
+          E-mail: info@elite-vask.dk
         </p>
 
         <h2>2. Hvilke oplysninger indsamler vi?</h2>
@@ -79,7 +79,7 @@ export default function Privatpolitik() {
           <li><strong>Indsigelse</strong> – gøre indsigelse mod behandling baseret på legitim interesse</li>
         </ul>
         <p>
-          Ønsker du at gøre brug af dine rettigheder, kontakt os på <a href="mailto:elitevask01@gmail.com">elitevask01@gmail.com</a>. Vi besvarer din henvendelse senest 30 dage.
+          Ønsker du at gøre brug af dine rettigheder, kontakt os på <a href="mailto:info@elite-vask.dk">info@elite-vask.dk</a>. Vi besvarer din henvendelse senest 30 dage.
         </p>
 
         <h2>8. Klage</h2>

@@ -130,7 +130,7 @@ export default function Cookies() {
         <h2>Kontakt</h2>
         <p>
           Har du spørgsmål til vores brug af cookies, er du velkommen til at kontakte os:<br />
-          <a href="mailto:elitevask01@gmail.com">elitevask01@gmail.com</a> · +45 24 44 03 21
+          <a href="mailto:info@elite-vask.dk">info@elite-vask.dk</a> · +45 24 44 03 21
         </p>
       </div>
     </div>

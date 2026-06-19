@@ -2,8 +2,7 @@ import nodemailer from 'nodemailer';
 import { randomBytes } from 'crypto';
 import { hashToken, auditLog } from '@/lib/auth';
 
-const COMPANY_EMAIL = 'elitevask01@gmail.com';
-const SITE_URL = 'https://elitevask.vercel.app';
+const COMPANY_EMAIL = 'booking@elite-vask.dk';
 const MAGIC_TTL = 60 * 15;
 
 let kvClient = null;
@@ -68,7 +67,9 @@ export async function POST(request) {
 
   await auditLog(kv, 'magic_link_requested', { emailHash: hashToken(email), ip, ua });
 
-  const link = `${SITE_URL}/api/auth/verify?token=${rawToken}`;
+  const reqUrl = new URL(request.url);
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || `${reqUrl.protocol}//${reqUrl.host}`;
+  const link = `${siteUrl}/api/auth/verify?token=${rawToken}`;
   const transport = buildTransport();
 
   if (transport) {
@@ -92,7 +93,7 @@ export async function POST(request) {
             <p style="font-size:12px;color:#6f857a;margin:0">⚠️ Har du ikke bedt om dette link? Ignorer blot denne e-mail. Linket udløber automatisk.</p>
           </div>
           <hr style="border:none;border-top:1px solid #1b2a22;margin:0 0 16px">
-          <p style="font-size:11px;color:#6f857a;text-align:center;margin:0">Elite Vask · elitevask01@gmail.com · +45 24 44 03 21</p>
+          <p style="font-size:11px;color:#6f857a;text-align:center;margin:0">Elite Vask · info@elite-vask.dk · +45 24 44 03 21</p>
         </div>`,
       });
     } catch (err) {
