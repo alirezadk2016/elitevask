@@ -316,11 +316,19 @@ function drawWiz(){
   if(step===1){
     h+='<div class="wiz-q">'+W('s1')+'</div>';
     h+='<div class="opt-grid">';
-    CARS.forEach(function(c){h+='<div class="opt'+(wiz.car&&wiz.car.id===c.id?' sel':'')+'" data-car="'+c.id+'">'+svgWrap(c.svg,46,26)+'<span>'+c.label[LANG]+'</span></div>';});
+    CARS.forEach(function(c){var minP=Math.min(c.prices.udv,c.prices.indv,c.prices.hele);h+='<div class="opt'+(wiz.car&&wiz.car.id===c.id?' sel':'')+'" data-car="'+c.id+'">'+svgWrap(c.svg,46,26)+'<span class="opt-lbl">'+c.label[LANG]+'</span><span class="opt-ex">'+c.ex[LANG]+'</span><span class="opt-fra">'+(LANG==='da'?'Fra ':'From ')+fmtKr(minP)+'</span></div>';});
     h+='</div>';
   }else if(step===2){
     h+='<div class="wiz-q">'+W('s2')+'</div><div class="opt-row">';
-    PKGS.forEach(function(p){var price=wiz.car?wiz.car.prices[p.id]:0;h+='<div class="opt opt-wide'+(wiz.pkg&&wiz.pkg.id===p.id?' sel':'')+'" data-pkg="'+p.id+'"><span>'+p.name[LANG]+'</span><span class="op">'+fmtKr(price)+'</span></div>';});
+    PKGS.forEach(function(p){
+      var price=wiz.car?wiz.car.prices[p.id]:0;
+      var badge=p.pop?'<span class="pkg-badge pop">'+(LANG==='da'?'Mest populær':'Most popular')+'</span>':(p.gold?'<span class="pkg-badge gold">★ Premium</span>':'');
+      var feats=p.feat[LANG].slice(0,3).map(function(f){return '<li>'+f+'</li>';}).join('');
+      h+='<div class="opt opt-pkg'+(wiz.pkg&&wiz.pkg.id===p.id?' sel':'')+'" data-pkg="'+p.id+'">';
+      h+='<div class="opt-pkg-top">'+badge+'<span class="opt-lbl">'+p.name[LANG]+'</span><span class="opt-pkg-price">'+fmtKr(price)+'</span></div>';
+      h+='<ul class="opt-pkg-feats">'+feats+'</ul>';
+      h+='</div>';
+    });
     h+='</div>';
   }else if(step===3){
     h+='<div class="wiz-q">'+W('s3')+'</div>';
@@ -368,9 +376,7 @@ function drawWiz(){
     if(!wiz.date){
       h+='<div class="slot-hint">'+(LANG==='da'?'Vælg dato først':'Choose date first')+'</div>';
     }else{
-      SLOTS.forEach(function(s){
-        h+='<button class="slot'+(wiz.time===s?' sel':'')+'" data-slot="'+s+'">'+s+'</button>';
-      });
+      h+='<div class="slot-hint" style="grid-column:1/-1">'+(LANG==='da'?'Henter ledige tider…':'Loading available times…')+'</div>';
     }
     h+='</div></div>';
   }else if(step===6){
@@ -395,15 +401,23 @@ function drawWiz(){
       h+='<div class="sr"><span class="k">'+W('sumext')+'</span><span class="v">'+extNames+'</span></div>';
     }
     h+='<div class="sr"><span class="k">'+W('addr')+'</span><span class="v">'+(wiz.addr||"-")+' '+(wiz.zip||"")+' '+(wiz.city||"")+'</span></div>';
-    h+='<div class="sr"><span class="k">'+W('date')+'</span><span class="v">'+(wiz.date||"-")+' '+(wiz.time||"")+'</span></div>';
+    h+='<div class="sr"><span class="k">'+W('date')+'</span><span class="v">'+fmtDate(wiz.date,LANG)+(wiz.time?' · '+wiz.time:'')+'</span></div>';
     h+='<div class="sr"><span class="k">'+W('name')+'</span><span class="v">'+(wiz.name||"-")+'</span></div>';
     h+='<div class="sr"><span class="k">'+W('phone')+'</span><span class="v">'+(wiz.phone||"-")+'</span></div>';
+    if(wiz.email)h+='<div class="sr"><span class="k">'+W('email')+'</span><span class="v">'+wiz.email+'</span></div>';
     if(fee>0)h+='<div class="sr"><span class="k">'+(LANG==="da"?"Kørsel":"Travel")+'</span><span class="v">'+fmtKr(fee)+'</span></div>';
     if(extPrice>0)h+='<div class="sr"><span class="k">'+W('sumext')+'</span><span class="v">'+fmtKr(extPrice)+'</span></div>';
     h+='<div class="sr tot"><span class="k">'+W('sumprice')+'</span><span class="v">'+fmtKr(tot)+'</span></div>';
     h+='</div>';
   }else if(step===8){
-    h='<div class="wiz-done"><div class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div><h3>'+W('done_t')+'</h3><p>'+W('done_p')+'</p><div class="wiz-nav"><a class="btn wiz-back" href="tel:+4524440321">'+(LANG==="da"?"Ring i stedet":"Call instead")+'</a><button class="btn btn-green" id="wizFinish">'+W('close')+'</button></div></div>';
+    var doneCarPkg=(wiz.car?wiz.car.label[LANG]:'')+' · '+(wiz.pkg?wiz.pkg.name[LANG]:'');
+    h='<div class="wiz-done"><div class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div><h3>'+W('done_t')+'</h3><p>'+W('done_p')+'</p>';
+    h+='<div class="done-summary">';
+    h+='<div class="done-row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span>'+fmtDate(wiz.date,LANG)+(wiz.time?' · '+wiz.time:'')+'</span></div>';
+    h+='<div class="done-row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M19 17h2v-4c0-1-.7-1.8-1.5-2L16 10l-2.2-2.3c-.4-.4-1-.7-1.7-.7H5c-.6 0-1.1.4-1.4 1L2 11v6h2"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg><span>'+doneCarPkg+'</span></div>';
+    h+='<div class="done-row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg><span>'+wiz.addr+', '+wiz.zip+' '+wiz.city+'</span></div>';
+    h+='</div>';
+    h+='<div class="wiz-nav"><a class="btn wiz-back" href="tel:+4524440321">'+(LANG==="da"?"Ring i stedet":"Call instead")+'</a><button class="btn btn-green" id="wizFinish">'+W('close')+'</button></div></div>';
     wizBody.innerHTML=h;wizProg.querySelectorAll('span').forEach(function(s){s.classList.add('done');});
     document.getElementById('wizFinish').addEventListener('click',closeWiz);
     return;
@@ -413,6 +427,8 @@ function drawWiz(){
   h+='<button class="btn btn-green" id="wizNext">'+(step===TOTAL?W('send'):W('next'))+'</button>';
   h+='</div>';
   wizBody.innerHTML=h;
+  wizBody.classList.remove('wiz-anim');
+  requestAnimationFrame(function(){wizBody.classList.add('wiz-anim');});
   // bind context bar edit buttons
   wizBody.querySelectorAll('.wiz-ctx-edit').forEach(function(btn){btn.addEventListener('click',function(){saveStep();step=parseInt(btn.dataset.goto,10);drawWiz();});});
   // bind step 1 plate lookup
@@ -646,14 +662,28 @@ function loadSlots(date){
   },30000);
 }
 function val(id){var e=document.getElementById(id);return e?e.value:'';}
+function fmtDate(d,lang){
+  if(!d)return '-';
+  var p=d.split('-');if(p.length<3)return d;
+  var dt=new Date(parseInt(p[0]),parseInt(p[1])-1,parseInt(p[2]));
+  if(lang==='en'){var dn=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'],mn=['January','February','March','April','May','June','July','August','September','October','November','December'];return dn[dt.getDay()]+' '+dt.getDate()+'. '+mn[dt.getMonth()]+' '+p[0];}
+  var dn=['Søndag','Mandag','Tirsdag','Onsdag','Torsdag','Fredag','Lørdag'],mn=['januar','februar','marts','april','maj','juni','juli','august','september','oktober','november','december'];
+  return dn[dt.getDay()]+' '+dt.getDate()+'. '+mn[dt.getMonth()]+' '+p[0];
+}
 function isServiceZip(z){var n=parseInt(z);if(isNaN(n)||String(z).replace(/\D/g,'').length<4)return false;if(n>=3700&&n<=3790)return false;return n>=1000&&n<=4799;}
 function isValidPhone(p){return p.replace(/\D/g,'').length>=8;}
 function isValidEmail(e){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);}
 function showWizErr(msg){
   var el=document.getElementById('wiz-err');
-  if(!el){el=document.createElement('p');el.id='wiz-err';el.style.cssText='color:#e74c3c;font-size:13px;margin-top:8px;text-align:center;font-weight:600';document.getElementById('wizBody').appendChild(el);}
-  el.textContent=msg;
-  setTimeout(function(){if(el)el.textContent='';},3000);
+  if(!el){
+    el=document.createElement('p');el.id='wiz-err';
+    el.style.cssText='color:#e74c3c;font-size:13px;margin-bottom:10px;text-align:center;font-weight:600;padding:10px 14px;background:rgba(231,76,60,.1);border:1px solid rgba(231,76,60,.25);border-radius:8px;transition:opacity .3s';
+    var nav=document.querySelector('#wizBody .wiz-nav');
+    if(nav)nav.parentNode.insertBefore(el,nav);
+    else document.getElementById('wizBody').appendChild(el);
+  }
+  el.style.opacity='1';el.textContent=msg;
+  setTimeout(function(){el.style.opacity='0';setTimeout(function(){el.textContent='';el.style.opacity='1';},300);},3500);
 }
 
 function submitBooking(cb){
