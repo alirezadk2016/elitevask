@@ -1,6 +1,5 @@
 import nodemailer from 'nodemailer';
 import { randomBytes, createHash } from 'crypto';
-import { isSameOrigin } from '@/lib/csrf';
 
 function hashEmail(email) {
   return createHash('sha256').update(email.toLowerCase().trim()).digest('hex');
@@ -135,11 +134,6 @@ export async function GET(request) {
 }
 
 export async function POST(request) {
-  // CSRF protection
-  if (!isSameOrigin(request)) {
-    return Response.json({ error: 'forbidden' }, { status: 403 });
-  }
-
   // Rate limiting
   const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
   if (!await checkRateLimit(ip)) {
