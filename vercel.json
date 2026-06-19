@@ -1,0 +1,9 @@
+{
+  "redirects": [
+    {
+      "source": "/cancel",
+      "destination": "/annuller",
+      "statusCode": 302
+    }
+  ]
+}
