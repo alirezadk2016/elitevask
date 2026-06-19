@@ -669,6 +669,14 @@ section{position:relative}
   .chat-window{width:calc(100vw - 32px);right:0}
 }
 
+/* SCROLL TO TOP */
+.scroll-top{position:fixed;bottom:32px;left:32px;z-index:140;width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.07);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,.13);box-shadow:0 8px 32px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(255,255,255,.55);opacity:0;pointer-events:none;transform:translateY(10px) scale(.88);transition:opacity .28s,transform .28s cubic-bezier(.34,1.4,.64,1),background .18s,color .18s,border-color .18s;outline:none}
+.scroll-top.vis{opacity:1;pointer-events:auto;transform:none}
+.scroll-top:hover{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.22);color:#fff;transform:translateY(-3px);box-shadow:0 12px 40px rgba(0,0,0,.32),inset 0 1px 0 rgba(255,255,255,.15)}
+.scroll-top svg{display:block;transition:transform .18s}
+.scroll-top:hover svg{transform:translateY(-1px)}
+@media(max-width:880px){.scroll-top{bottom:calc(80px + env(safe-area-inset-bottom));left:16px;width:42px;height:42px}}
+
 /* LEGAL PAGES */
 .legal-page{min-height:100vh;background:var(--bg);padding:60px 0 100px}
 .legal-wrap{max-width:780px;margin:0 auto;padding:0 24px}

@@ -1027,6 +1027,26 @@ if(window.innerWidth>880){
   }
 }
 
+/* ====== SCROLL TO TOP ====== */
+(function(){
+  var btn=document.createElement('button');
+  btn.className='scroll-top';
+  btn.setAttribute('aria-label','Scroll to top');
+  btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M18 15l-6-6-6 6"/></svg>';
+  document.body.appendChild(btn);
+  btn.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});
+  var ticking=false;
+  window.addEventListener('scroll',function(){
+    if(!ticking){
+      requestAnimationFrame(function(){
+        btn.classList.toggle('vis',window.scrollY>500);
+        ticking=false;
+      });
+      ticking=true;
+    }
+  },{passive:true});
+})();
+
 window.toggleWhyCard=function(){
   var card=document.getElementById('whyCard');
   if(card) card.classList.toggle('open');
