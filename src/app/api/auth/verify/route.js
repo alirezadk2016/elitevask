@@ -24,18 +24,18 @@ export async function GET(request) {
   const ua = request.headers.get('user-agent') || '';
 
   if (!rawToken || rawToken.length !== 64) {
-    return Response.redirect(`${SITE_URL}/portal/login?error=invalid`, 302);
+    return Response.redirect(`${SITE_URL}/portal/login?error=invalid`);
   }
 
   const kv = await getKV();
-  if (!kv) return Response.redirect(`${SITE_URL}/portal/login?error=unavailable`, 302);
+  if (!kv) return Response.redirect(`${SITE_URL}/portal/login?error=unavailable`);
 
   const hashed = hashToken(rawToken);
   const raw = await kv.get(`magic:${hashed}`);
 
   if (!raw) {
     await auditLog(kv, 'magic_link_not_found', { ip, ua });
-    return Response.redirect(`${SITE_URL}/portal/login?error=expired`, 302);
+    return Response.redirect(`${SITE_URL}/portal/login?error=expired`);
   }
 
   const magic = typeof raw === 'string' ? JSON.parse(raw) : raw;
@@ -43,7 +43,7 @@ export async function GET(request) {
   if (new Date(magic.expiresAt) < new Date()) {
     await kv.del(`magic:${hashed}`);
     await auditLog(kv, 'magic_link_expired', { ip, ua });
-    return Response.redirect(`${SITE_URL}/portal/login?error=expired`, 302);
+    return Response.redirect(`${SITE_URL}/portal/login?error=expired`);
   }
 
   // One-time use: delete immediately
