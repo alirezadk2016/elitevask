@@ -1,183 +1,231 @@
 "use client";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 
-export default function AdminPage() {
-  const [secret, setSecret] = useState("");
-  const [authed, setAuthed] = useState(false);
-  const [bookings, setBookings] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [deleting, setDeleting] = useState(null);
-  const [cancelling, setCancelling] = useState(null);
+const GREEN = "#37d278";
+const DARK  = "#0a0f0c";
+const CARD  = "#111a14";
+const BORDER= "rgba(55,210,120,.15)";
 
-  const load = useCallback(async (s) => {
-    setLoading(true);
-    setError("");
-    try {
-      const r = await fetch("/api/admin/bookings", {
-        headers: { Authorization: `Bearer ${s}` },
-      });
-      if (r.status === 401) { setError("Forkert adgangskode."); setAuthed(false); return; }
-      const data = await r.json();
-      setBookings(data.bookings || []);
-      setAuthed(true);
-    } catch { setError("Netværksfejl."); }
-    finally { setLoading(false); }
-  }, []);
+const STATUS_LABEL = { confirmed: "Bekræftet", cancelled: "Annulleret", completed: "Udført", pending: "Afventer" };
+const STATUS_COLOR = { confirmed: "#37d278", cancelled: "#e74c3c", completed: "#37d278", pending: "#d4af37" };
+const STATUS_BG    = { confirmed: "rgba(55,210,120,.12)", cancelled: "rgba(231,76,60,.12)", completed: "rgba(55,210,120,.12)", pending: "rgba(212,175,55,.12)" };
 
-  function handleLogin(e) {
-    e.preventDefault();
-    load(secret);
-  }
+function fmtDate(d) {
+  if (!d) return "-";
+  const [y, m, day] = d.split("-");
+  const months = ["jan","feb","mar","apr","maj","jun","jul","aug","sep","okt","nov","dec"];
+  return `${parseInt(day)}. ${months[parseInt(m)-1]} ${y}`;
+}
+function fmtBooked(iso) {
+  if (!iso) return "-";
+  return new Date(iso).toLocaleString("da-DK", { timeZone: "Europe/Copenhagen", day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
+}
 
-  async function handleCancel(token) {
-    if (!confirm("Annuller denne booking?")) return;
-    setCancelling(token);
+function Field({ label, value, green }) {
+  return (
+    <div style={{ marginBottom: 12 }}>
+      <div style={{ color: "#555", fontSize: 10, fontWeight: 700, letterSpacing: 1.2, textTransform: "uppercase", marginBottom: 2 }}>{label}</div>
+      <div style={{ color: green ? GREEN : "#e8e8e8", fontWeight: green ? 700 : 500, fontSize: 14, lineHeight: 1.4 }}>{value || "-"}</div>
+    </div>
+  );
+}
+
+function BookingCard({ b, secret, onCancel, onDelete }) {
+  const [cancelling, setCancelling] = useState(false);
+  const [deleting, setDeleting]     = useState(false);
+  const [expanded, setExpanded]     = useState(false);
+
+  async function doCancel() {
+    if (!confirm("Send annullering til kunden?")) return;
+    setCancelling(true);
     try {
       const r = await fetch("/api/admin/delete-booking", {
         method: "PATCH",
         headers: { Authorization: `Bearer ${secret}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ token }),
+        body: JSON.stringify({ token: b.token }),
       });
-      if (r.ok) setBookings(b => b.map(x => x.token === token ? { ...x, status: "cancelled" } : x));
-    } catch {}
-    finally { setCancelling(null); }
+      if (r.ok) onCancel(b.token);
+    } finally { setCancelling(false); }
   }
 
-  async function handleDelete(token) {
-    if (!confirm("Slet booking permanent?")) return;
-    setDeleting(token);
+  async function doDelete() {
+    if (!confirm("Slet permanent?")) return;
+    setDeleting(true);
     try {
       const r = await fetch("/api/admin/delete-booking", {
         method: "DELETE",
         headers: { Authorization: `Bearer ${secret}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ token }),
+        body: JSON.stringify({ token: b.token }),
       });
-      if (r.ok) setBookings(b => b.filter(x => x.token !== token));
-    } catch {}
-    finally { setDeleting(null); }
+      if (r.ok) onDelete(b.token);
+    } finally { setDeleting(false); }
   }
 
-  function fmtDate(d) {
-    if (!d) return "-";
-    const [y, m, day] = d.split("-");
-    const months = ["jan","feb","mar","apr","maj","jun","jul","aug","sep","okt","nov","dec"];
-    return `${parseInt(day)}. ${months[parseInt(m)-1]} ${y}`;
-  }
+  const cancelled = b.status === "cancelled";
 
-  function fmtBooked(iso) {
-    if (!iso) return "-";
-    const d = new Date(iso);
-    return d.toLocaleString("da-DK", { timeZone: "Europe/Copenhagen", day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
-  }
+  return (
+    <div style={{
+      background: CARD,
+      border: `1px solid ${cancelled ? "rgba(231,76,60,.2)" : BORDER}`,
+      borderRadius: 16,
+      marginBottom: 12,
+      overflow: "hidden",
+      opacity: cancelled ? 0.75 : 1,
+    }}>
+      {/* Top bar */}
+      <div
+        onClick={() => setExpanded(e => !e)}
+        style={{ padding: "16px 18px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}
+      >
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+            <span style={{ color: "#fff", fontWeight: 700, fontSize: 15 }}>{b.name || "Ukendt"}</span>
+            <span style={{
+              fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 20,
+              background: STATUS_BG[b.status] || "rgba(255,255,255,.08)",
+              color: STATUS_COLOR[b.status] || "#aaa",
+            }}>{STATUS_LABEL[b.status] || b.status}</span>
+          </div>
+          <div style={{ color: "#aaa", fontSize: 13, marginTop: 4 }}>
+            {fmtDate(b.date)} · kl. {b.time} &nbsp;·&nbsp; <span style={{ color: GREEN }}>{b.price || "-"}</span>
+          </div>
+        </div>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#555" strokeWidth="2.5" strokeLinecap="round"
+          style={{ transform: expanded ? "rotate(180deg)" : "none", transition: "transform .2s", flexShrink: 0 }}>
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </div>
 
-  const STATUS_COLOR = { confirmed: "#37d278", pending: "#d4af37", cancelled: "#e74c3c", completed: "#37d278" };
+      {/* Details */}
+      {expanded && (
+        <div style={{ padding: "0 18px 18px", borderTop: `1px solid ${BORDER}` }}>
+          <div style={{ paddingTop: 16, display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: "4px 20px" }}>
+            <Field label="Bil"      value={b.car} />
+            <Field label="Pakke"    value={b.pkg} />
+            <Field label="Pris"     value={b.price} green />
+            <Field label="Adresse"  value={b.addr ? `${b.addr}, ${b.zip} ${b.city}` : null} />
+            <Field label="E-mail"   value={b.email} />
+            <Field label="Telefon"  value={b.phone} />
+            <Field label="Booket"   value={fmtBooked(b.bookedAt)} />
+            {b.extras?.length ? <Field label="Tilvalg" value={b.extras.join(", ")} /> : null}
+            {b.msg ? <div style={{ gridColumn: "1/-1" }}><Field label="Besked" value={b.msg} /></div> : null}
+          </div>
+
+          {/* Actions */}
+          <div style={{ display: "flex", gap: 10, marginTop: 16, flexWrap: "wrap" }}>
+            {!cancelled && (
+              <button onClick={doCancel} disabled={cancelling} style={{
+                flex: 1, minWidth: 120, padding: "11px 16px",
+                background: "rgba(212,175,55,.12)", color: "#d4af37",
+                border: "1px solid rgba(212,175,55,.3)", borderRadius: 10,
+                fontWeight: 700, fontSize: 13, cursor: "pointer",
+              }}>
+                {cancelling ? "..." : "✕ Annuller"}
+              </button>
+            )}
+            <button onClick={doDelete} disabled={deleting} style={{
+              flex: 1, minWidth: 120, padding: "11px 16px",
+              background: "rgba(231,76,60,.1)", color: "#e74c3c",
+              border: "1px solid rgba(231,76,60,.25)", borderRadius: 10,
+              fontWeight: 700, fontSize: 13, cursor: "pointer",
+            }}>
+              {deleting ? "..." : "🗑 Slet"}
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function AdminPage() {
+  const [secret,   setSecret]   = useState("");
+  const [authed,   setAuthed]   = useState(false);
+  const [bookings, setBookings] = useState([]);
+  const [loading,  setLoading]  = useState(false);
+  const [error,    setError]    = useState("");
+
+  const load = useCallback(async (s) => {
+    setLoading(true); setError("");
+    try {
+      const r = await fetch("/api/admin/bookings", { headers: { Authorization: `Bearer ${s}` } });
+      if (r.status === 401) { setError("Forkert adgangskode."); return; }
+      const data = await r.json();
+      setBookings(data.bookings || []);
+      setAuthed(true);
+    } catch { setError("Netværksfejl — prøv igen."); }
+    finally { setLoading(false); }
+  }, []);
+
+  const confirmed = bookings.filter(b => b.status !== "cancelled").length;
+  const cancelled = bookings.filter(b => b.status === "cancelled").length;
 
   if (!authed) return (
-    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#0a0f0c", fontFamily: "system-ui, sans-serif" }}>
-      <form onSubmit={handleLogin} style={{ background: "#111a14", border: "1px solid rgba(55,210,120,.2)", borderRadius: 16, padding: "40px 48px", width: 340 }}>
-        <h2 style={{ color: "#37d278", margin: "0 0 24px", fontSize: 22 }}>Elite Vask Admin</h2>
-        <label style={{ color: "#aaa", fontSize: 13, display: "block", marginBottom: 6 }}>Adgangskode</label>
+    <div style={{ minHeight: "100dvh", display: "flex", alignItems: "center", justifyContent: "center", background: DARK, fontFamily: "-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif", padding: 16 }}>
+      <form onSubmit={e => { e.preventDefault(); load(secret); }}
+        style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 20, padding: "36px 28px", width: "100%", maxWidth: 360, boxSizing: "border-box" }}>
+        <div style={{ textAlign: "center", marginBottom: 28 }}>
+          <div style={{ width: 52, height: 52, borderRadius: 14, background: "rgba(55,210,120,.15)", border: `1px solid ${BORDER}`, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 14px", fontSize: 22 }}>🔐</div>
+          <h2 style={{ color: "#fff", margin: "0 0 4px", fontSize: 20, fontWeight: 700 }}>Elite Vask Admin</h2>
+          <p style={{ color: "#666", margin: 0, fontSize: 13 }}>Administrer bookinger</p>
+        </div>
         <input
           type="password"
+          placeholder="Adgangskode"
           value={secret}
           onChange={e => setSecret(e.target.value)}
-          style={{ width: "100%", padding: "10px 14px", borderRadius: 8, border: "1px solid rgba(255,255,255,.15)", background: "#0a0f0c", color: "#fff", fontSize: 15, boxSizing: "border-box", marginBottom: 16, outline: "none" }}
+          style={{ width: "100%", padding: "13px 16px", borderRadius: 10, border: `1px solid rgba(255,255,255,.1)`, background: "#0d170f", color: "#fff", fontSize: 15, boxSizing: "border-box", marginBottom: 12, outline: "none", fontFamily: "inherit" }}
           autoFocus
         />
-        {error && <p style={{ color: "#e74c3c", fontSize: 13, margin: "0 0 12px" }}>{error}</p>}
-        <button type="submit" style={{ width: "100%", padding: "11px", background: "#37d278", color: "#0a0f0c", border: "none", borderRadius: 8, fontWeight: 700, fontSize: 15, cursor: "pointer" }}>
-          Log ind
+        {error && <p style={{ color: "#e74c3c", fontSize: 13, margin: "0 0 10px", textAlign: "center" }}>{error}</p>}
+        <button type="submit" style={{ width: "100%", padding: 13, background: GREEN, color: DARK, border: "none", borderRadius: 10, fontWeight: 800, fontSize: 15, cursor: "pointer", fontFamily: "inherit" }}>
+          Log ind →
         </button>
       </form>
     </div>
   );
 
   return (
-    <div style={{ minHeight: "100vh", background: "#0a0f0c", fontFamily: "system-ui, sans-serif", padding: "32px 24px" }}>
-      <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 32 }}>
-          <h1 style={{ color: "#37d278", margin: 0, fontSize: 26 }}>Bookinger ({bookings.length})</h1>
-          <button onClick={() => load(secret)} style={{ background: "rgba(55,210,120,.15)", color: "#37d278", border: "1px solid rgba(55,210,120,.3)", borderRadius: 8, padding: "8px 18px", cursor: "pointer", fontSize: 14 }}>
-            🔄 Opdater
-          </button>
-        </div>
-
-        {loading && <p style={{ color: "#aaa" }}>Indlæser...</p>}
-
-        {!loading && bookings.length === 0 && (
-          <p style={{ color: "#666", textAlign: "center", marginTop: 80, fontSize: 18 }}>Ingen bookinger fundet.</p>
-        )}
-
-        {bookings.map(b => (
-          <div key={b.token} style={{ background: "#111a14", border: "1px solid rgba(55,210,120,.15)", borderRadius: 14, padding: "20px 24px", marginBottom: 16, display: "grid", gridTemplateColumns: "1fr auto", gap: 16, alignItems: "start" }}>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: "10px 24px" }}>
-              <div>
-                <span style={{ color: "#666", fontSize: 11, textTransform: "uppercase", letterSpacing: 1 }}>Navn</span>
-                <div style={{ color: "#fff", fontWeight: 600, marginTop: 2 }}>{b.name || "-"}</div>
-              </div>
-              <div>
-                <span style={{ color: "#666", fontSize: 11, textTransform: "uppercase", letterSpacing: 1 }}>Dato & tid</span>
-                <div style={{ color: "#fff", fontWeight: 600, marginTop: 2 }}>{fmtDate(b.date)} · kl. {b.time}</div>
-              </div>
-              <div>
-                <span style={{ color: "#666", fontSize: 11, textTransform: "uppercase", letterSpacing: 1 }}>Bil</span>
-                <div style={{ color: "#fff", marginTop: 2 }}>{b.car || "-"}</div>
-              </div>
-              <div>
-                <span style={{ color: "#666", fontSize: 11, textTransform: "uppercase", letterSpacing: 1 }}>Pakke</span>
-                <div style={{ color: "#fff", marginTop: 2 }}>{b.pkg || "-"}</div>
-              </div>
-              <div>
-                <span style={{ color: "#666", fontSize: 11, textTransform: "uppercase", letterSpacing: 1 }}>Pris</span>
-                <div style={{ color: "#37d278", fontWeight: 700, marginTop: 2 }}>{b.price || "-"}</div>
-              </div>
-              <div>
-                <span style={{ color: "#666", fontSize: 11, textTransform: "uppercase", letterSpacing: 1 }}>Adresse</span>
-                <div style={{ color: "#fff", marginTop: 2 }}>{b.addr ? `${b.addr}, ${b.zip} ${b.city}` : "-"}</div>
-              </div>
-              <div>
-                <span style={{ color: "#666", fontSize: 11, textTransform: "uppercase", letterSpacing: 1 }}>E-mail</span>
-                <div style={{ color: "#fff", marginTop: 2 }}>{b.email || "-"}</div>
-              </div>
-              <div>
-                <span style={{ color: "#666", fontSize: 11, textTransform: "uppercase", letterSpacing: 1 }}>Telefon</span>
-                <div style={{ color: "#fff", marginTop: 2 }}>{b.phone || "-"}</div>
-              </div>
-              <div>
-                <span style={{ color: "#666", fontSize: 11, textTransform: "uppercase", letterSpacing: 1 }}>Booket</span>
-                <div style={{ color: "#aaa", fontSize: 13, marginTop: 2 }}>{fmtBooked(b.bookedAt)}</div>
-              </div>
-              <div>
-                <span style={{ color: "#666", fontSize: 11, textTransform: "uppercase", letterSpacing: 1 }}>Status</span>
-                <div style={{ color: STATUS_COLOR[b.status] || "#aaa", fontWeight: 600, marginTop: 2 }}>{b.status || "-"}</div>
-              </div>
-              {b.msg && (
-                <div style={{ gridColumn: "1/-1" }}>
-                  <span style={{ color: "#666", fontSize: 11, textTransform: "uppercase", letterSpacing: 1 }}>Besked</span>
-                  <div style={{ color: "#ccc", marginTop: 2, fontStyle: "italic" }}>{b.msg}</div>
-                </div>
-              )}
-            </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              {b.status !== "cancelled" && (
-                <button
-                  onClick={() => handleCancel(b.token)}
-                  disabled={cancelling === b.token}
-                  style={{ background: "rgba(212,175,55,.15)", color: "#d4af37", border: "1px solid rgba(212,175,55,.3)", borderRadius: 8, padding: "8px 16px", cursor: "pointer", fontSize: 13, fontWeight: 600, whiteSpace: "nowrap" }}
-                >
-                  {cancelling === b.token ? "..." : "✕ Annuller"}
-                </button>
-              )}
-              <button
-                onClick={() => handleDelete(b.token)}
-                disabled={deleting === b.token}
-                style={{ background: "rgba(231,76,60,.15)", color: "#e74c3c", border: "1px solid rgba(231,76,60,.3)", borderRadius: 8, padding: "8px 16px", cursor: "pointer", fontSize: 13, fontWeight: 600, whiteSpace: "nowrap" }}
-              >
-                {deleting === b.token ? "..." : "🗑 Slet"}
-              </button>
+    <div style={{ minHeight: "100dvh", background: DARK, fontFamily: "-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" }}>
+      {/* Header */}
+      <div style={{ background: CARD, borderBottom: `1px solid ${BORDER}`, padding: "16px 18px", position: "sticky", top: 0, zIndex: 10 }}>
+        <div style={{ maxWidth: 720, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+          <div>
+            <div style={{ color: "#fff", fontWeight: 700, fontSize: 16 }}>Bookinger</div>
+            <div style={{ color: "#555", fontSize: 12, marginTop: 2 }}>
+              <span style={{ color: GREEN }}>{confirmed} aktive</span>
+              {cancelled > 0 && <span> · {cancelled} annulleret</span>}
             </div>
           </div>
+          <button onClick={() => load(secret)} style={{
+            background: "rgba(55,210,120,.12)", color: GREEN,
+            border: `1px solid rgba(55,210,120,.25)`, borderRadius: 10,
+            padding: "9px 16px", cursor: "pointer", fontSize: 13, fontWeight: 600,
+          }}>
+            {loading ? "..." : "🔄 Opdater"}
+          </button>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div style={{ maxWidth: 720, margin: "0 auto", padding: "20px 14px 40px" }}>
+        {loading && (
+          <div style={{ textAlign: "center", padding: "60px 0", color: "#555" }}>Indlæser...</div>
+        )}
+        {!loading && bookings.length === 0 && (
+          <div style={{ textAlign: "center", padding: "80px 0" }}>
+            <div style={{ fontSize: 40, marginBottom: 12 }}>📭</div>
+            <p style={{ color: "#555", fontSize: 16 }}>Ingen bookinger endnu</p>
+          </div>
+        )}
+        {bookings.map(b => (
+          <BookingCard
+            key={b.token}
+            b={b}
+            secret={secret}
+            onCancel={token => setBookings(bs => bs.map(x => x.token === token ? { ...x, status: "cancelled" } : x))}
+            onDelete={token => setBookings(bs => bs.filter(x => x.token !== token))}
+          />
         ))}
       </div>
     </div>
