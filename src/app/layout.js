@@ -38,7 +38,7 @@ const JSONLD = [
   "email":"info@elite-vask.dk",
   "areaServed":["Næstved","Roskilde","Køge","Ringsted","København","Stevns Kommune","Faxe Kommune","Helsingør","Hillerød","Frederikssund","Sjælland"],
   "priceRange":"kr","vatID":"DK46392264",
-  "address":{"@type":"PostalAddress","addressLocality":"Copenhagen","addressRegion":"Sjælland","addressCountry":"DK"},
+  "address":{"@type":"PostalAddress","streetAddress":"Vangeledet 21","postalCode":"2830","addressLocality":"Virum","addressRegion":"Sjælland","addressCountry":"DK"},
   "sameAs":["https://instagram.com/elitevasksjaelland"]
 },
 {
