@@ -984,6 +984,39 @@ function submitBooking(cb){
   document.getElementById('chatClose').addEventListener('click',function(){win.style.display='none';opened=false;});
   send.addEventListener('click',sendMsg);
   input.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey)sendMsg();});
+
+  // Swipe-to-dismiss chatbot
+  var chatbot=document.querySelector('.chatbot');
+  if(chatbot){
+    var dismissed=false;
+    // Mini re-open button
+    var mini=document.createElement('button');
+    mini.className='chat-mini-btn';
+    mini.setAttribute('aria-label','Åbn chat');
+    mini.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>';
+    document.body.appendChild(mini);
+    function dismissChat(){
+      dismissed=true;
+      chatbot.classList.add('chat-dismissed');
+      mini.classList.add('vis');
+      if(opened){win.style.display='none';opened=false;}
+    }
+    function restoreChat(){
+      dismissed=false;
+      chatbot.classList.remove('chat-dismissed');
+      mini.classList.remove('vis');
+    }
+    mini.addEventListener('click',restoreChat);
+    // Touch swipe on chatbot toggle
+    var t0x=0,t0y=0;
+    toggle.addEventListener('touchstart',function(e){t0x=e.touches[0].clientX;t0y=e.touches[0].clientY;},{passive:true});
+    toggle.addEventListener('touchend',function(e){
+      var dx=e.changedTouches[0].clientX-t0x;
+      var dy=e.changedTouches[0].clientY-t0y;
+      var dist=Math.sqrt(dx*dx+dy*dy);
+      if(dist>40&&(dx<-20||dy>20)){e.preventDefault();dismissChat();}
+    });
+  }
 })();
 
 /* ====== HAMBURGER DRAWER ====== */
