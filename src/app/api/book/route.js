@@ -6,7 +6,6 @@ function hashEmail(email) {
 }
 
 const COMPANY_EMAIL = 'elitevask01@gmail.com';
-const SITE_URL = 'https://elitevask.vercel.app';
 const CANCEL_TTL = 60 * 60 * 24;      // 24 hours for cancel link
 const BOOKING_TTL = 60 * 60 * 24 * 30; // 30 days for slot records
 
@@ -250,8 +249,15 @@ export async function POST(request) {
     }
   }
 
+  // Derive site URL from the incoming request so the cancel link always works
+  // regardless of which Vercel deployment or domain is active.
+  // NEXT_PUBLIC_SITE_URL env var can override if needed.
+  const reqUrl = new URL(request.url);
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ||
+    `${reqUrl.protocol}//${reqUrl.host}`;
+
   const extrasStr = extras?.length ? (Array.isArray(extras) ? extras.join(', ') : extras) : (L ? 'Ingen' : 'None');
-  const cancelLink = cancelToken ? `${SITE_URL}/annuller?token=${cancelToken}` : null;
+  const cancelLink = cancelToken ? `${siteUrl}/annuller?token=${cancelToken}` : null;
 
   const textLines = [
     L ? '🚗 Ny bookinganmodning – Elite Vask' : '🚗 New booking request – Elite Vask',

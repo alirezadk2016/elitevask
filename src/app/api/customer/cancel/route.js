@@ -97,7 +97,7 @@ export async function POST(request) {
             <p>${L ? `Hej ${name || ''}, din booking er nu annulleret.` : `Hi ${name || ''}, your booking has been cancelled.`}</p>
             <p><strong>${L ? 'Dato' : 'Date'}:</strong> ${date} ${time}</p>
             <p><strong>${L ? 'Bil' : 'Car'}:</strong> ${car} · ${pkg}</p>
-            <a href="https://elitevask.vercel.app" style="display:inline-block;margin-top:12px;background:#37d278;color:#000;padding:10px 20px;border-radius:8px;text-decoration:none;font-weight:700">${L ? 'Book ny tid' : 'Book new time'}</a>
+            <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://elitevask.vercel.app'}" style="display:inline-block;margin-top:12px;background:#37d278;color:#000;padding:10px 20px;border-radius:8px;text-decoration:none;font-weight:700">${L ? 'Book ny tid' : 'Book new time'}</a>
           </div>`,
         });
       } catch {}
