@@ -1029,7 +1029,6 @@ function submitBooking(cb){
   }
 })();
 
-<<<<<<< HEAD
 /* ====== HAMBURGER DRAWER ====== */
 (function(){
   var btn=document.getElementById('menuBtn');
@@ -1059,7 +1058,7 @@ function submitBooking(cb){
     }
   });
 })();
-=======
+
 /* ====== BILPLEJE GUIDE DROPDOWN ====== */
 (function(){
   var btn=document.getElementById('guideNavBtn');
@@ -1072,10 +1071,6 @@ function submitBooking(cb){
   document.addEventListener('click',function(e){if(!panel.contains(e.target)&&e.target!==btn)closeGuide();});
   document.addEventListener('keydown',function(e){if(e.key==='Escape')closeGuide();});
 })();
-
-/* ====== MENU + INIT ====== */
-document.getElementById('menuBtn').addEventListener('click',function(){document.getElementById('vaelg').scrollIntoView({behavior:'smooth'});});
->>>>>>> claude/dazzling-cori-1cokr3
 
 /* ====== DESKTOP PARALLAX ONLY ====== */
 if(window.innerWidth>880){
