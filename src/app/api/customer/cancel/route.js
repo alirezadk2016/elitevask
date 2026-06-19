@@ -47,9 +47,9 @@ export async function POST(request) {
 
   const booking = typeof raw === 'string' ? JSON.parse(raw) : raw;
 
-  // Authorization: booking must belong to logged-in user — never trust client
+  // Authorization: booking must belong to logged-in user
   if ((booking.email || '').toLowerCase() !== session.email.toLowerCase()) {
-    await auditLog(kv, 'unauthorized_cancel_attempt', { ip, emailHash: hashToken(session.email) });
+    await auditLog(kv, 'unauthorized_cancel', { ip, emailHash: hashToken(session.email) });
     return Response.json({ error: 'forbidden' }, { status: 403 });
   }
 
@@ -57,40 +57,26 @@ export async function POST(request) {
     return Response.json({ error: 'already_cancelled' }, { status: 409 });
   }
 
-  // Backend enforces 24h rule — frontend check alone is never trusted
+  // Backend 24h rule
   if (booking.date && booking.time) {
     const dt = new Date(`${booking.date}T${booking.time}:00`);
     if ((dt - Date.now()) < 24 * 3600 * 1000) {
-      return Response.json({
-        error: 'too_late',
-        message: 'Booking kan ikke annulleres inden for 24 timer inden aftaletidspunktet. Kontakt os på +45 24 44 03 21.',
-      }, { status: 409 });
+      return Response.json({ error: 'too_late', message: 'Kan ikke annulleres inden for 24 timer.' }, { status: 409 });
     }
   }
 
-  // Free reserved slots
+  // Free slots
   if (Array.isArray(booking.slots)) {
     for (const s of booking.slots) {
       try { await kv.del(`slot:${booking.date}:${s}`); } catch {}
     }
   }
 
-  // Soft delete — never hard delete
   const cancelledAt = new Date().toISOString();
-  await kv.set(`booking:${token}`, JSON.stringify({
-    ...booking,
-    status: 'cancelled',
-    cancelledAt,
-    cancelledBy: 'customer_portal',
-  }), { keepttl: true });
+  await kv.set(`booking:${token}`, JSON.stringify({ ...booking, status: 'cancelled', cancelledAt, cancelledBy: 'portal' }), { keepttl: true });
 
-  await auditLog(kv, 'booking_cancelled_portal', {
-    ip,
-    emailHash: hashToken(session.email),
-    tokenRef: token.slice(0, 8),
-  });
+  await auditLog(kv, 'booking_cancelled_portal', { ip, emailHash: hashToken(session.email), tokenRef: token.slice(0, 8) });
 
-  // Send emails
   const transport = buildTransport();
   const { date, time, car, pkg, name, price, lang } = booking;
   const L = lang !== 'en';
@@ -102,15 +88,12 @@ export async function POST(request) {
           from: `"Elite Vask" <${process.env.GMAIL_USER || COMPANY_EMAIL}>`,
           to: booking.email,
           subject: L ? 'Din booking er annulleret – Elite Vask' : 'Your booking has been cancelled – Elite Vask',
-          html: `<div style="font-family:sans-serif;max-width:540px;padding:28px 24px;background:#f9f9f9;border-radius:12px">
-            <h2 style="color:#e74c3c;margin-bottom:8px">❌ ${L ? 'Booking annulleret' : 'Booking cancelled'}</h2>
-            <p style="color:#555;margin-bottom:16px">${L ? `Hej ${name || ''}, vi bekræfter at din booking er annulleret.` : `Hi ${name || ''}, we confirm your booking has been cancelled.`}</p>
-            <table style="width:100%;border-collapse:collapse;font-size:14px;margin-bottom:20px">
-              <tr><td style="padding:8px 12px;background:#f0f0f0;color:#666;width:40%">${L ? 'Dato & tid' : 'Date & time'}</td><td style="padding:8px 12px;background:#f0f0f0;font-weight:600">${date} kl. ${time}</td></tr>
-              <tr><td style="padding:8px 12px;color:#666">${L ? 'Bil' : 'Car'}</td><td style="padding:8px 12px;font-weight:600">${car}</td></tr>
-              <tr><td style="padding:8px 12px;background:#f0f0f0;color:#666">${L ? 'Pakke' : 'Package'}</td><td style="padding:8px 12px;background:#f0f0f0;font-weight:600">${pkg}</td></tr>
-            </table>
-            <a href="https://elitevask.vercel.app" style="display:inline-block;background:#37d278;color:#062313;padding:11px 22px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px">${L ? 'Book ny tid' : 'Book new time'}</a>
+          html: `<div style="font-family:sans-serif;max-width:540px;padding:24px;background:#f9f9f9;border-radius:12px">
+            <h2 style="color:#e74c3c">❌ ${L ? 'Booking annulleret' : 'Booking cancelled'}</h2>
+            <p>${L ? `Hej ${name || ''}, din booking er nu annulleret.` : `Hi ${name || ''}, your booking has been cancelled.`}</p>
+            <p><strong>${L ? 'Dato' : 'Date'}:</strong> ${date} ${time}</p>
+            <p><strong>${L ? 'Bil' : 'Car'}:</strong> ${car} · ${pkg}</p>
+            <a href="https://elitevask.vercel.app" style="display:inline-block;margin-top:12px;background:#37d278;color:#000;padding:10px 20px;border-radius:8px;text-decoration:none;font-weight:700">${L ? 'Book ny tid' : 'Book new time'}</a>
           </div>`,
         });
       } catch {}
@@ -122,13 +105,9 @@ export async function POST(request) {
         subject: `❌ Annullering (portal): ${car} – ${date} ${time}`,
         html: `<div style="font-family:sans-serif;max-width:540px;padding:24px;background:#fff3f3;border-radius:12px">
           <h2 style="color:#e74c3c">❌ Annulleret via kundeportal</h2>
-          <p><strong>Dato:</strong> ${date} kl. ${time}</p>
-          <p><strong>Navn:</strong> ${name || '-'}</p>
-          <p><strong>Email:</strong> ${booking.email || '-'}</p>
-          <p><strong>Telefon:</strong> ${booking.phone || '-'}</p>
-          <p><strong>Bil:</strong> ${car} · ${pkg}</p>
-          <p><strong>Pris:</strong> ${price || '-'}</p>
-          <p><strong>Annulleret:</strong> ${cancelledAt}</p>
+          <p><strong>Dato:</strong> ${date} ${time}</p><p><strong>Navn:</strong> ${name}</p>
+          <p><strong>Email:</strong> ${booking.email}</p><p><strong>Telefon:</strong> ${booking.phone || '-'}</p>
+          <p><strong>Bil:</strong> ${car} · ${pkg}</p><p><strong>Pris:</strong> ${price || '-'}</p>
         </div>`,
       });
     } catch {}
