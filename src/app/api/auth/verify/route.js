@@ -1,7 +1,6 @@
 import { randomBytes } from 'crypto';
 import { hashToken, makeSessionCookie, auditLog } from '@/lib/auth';
 
-const SITE_URL = 'https://elitevask.vercel.app';
 const SESSION_TTL = 60 * 60 * 24 * 30;
 
 let kvClient = null;
@@ -18,17 +17,19 @@ async function getKV() {
 }
 
 export async function GET(request) {
-  const { searchParams } = new URL(request.url);
+  const reqUrl = new URL(request.url);
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || `${reqUrl.protocol}//${reqUrl.host}`;
+  const { searchParams } = reqUrl;
   const rawToken = searchParams.get('token');
   const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
   const ua = request.headers.get('user-agent') || '';
 
   if (!rawToken || rawToken.length !== 64) {
-    return Response.redirect(`${SITE_URL}/portal/login?error=invalid`);
+    return Response.redirect(`${siteUrl}/portal/login?error=invalid`);
   }
 
   const kv = await getKV();
-  if (!kv) return Response.redirect(`${SITE_URL}/portal/login?error=unavailable`);
+  if (!kv) return Response.redirect(`${siteUrl}/portal/login?error=unavailable`);
 
   const hashed = hashToken(rawToken);
 
@@ -45,14 +46,14 @@ export async function GET(request) {
 
   if (!raw) {
     await auditLog(kv, 'magic_link_not_found_or_replayed', { ip, ua });
-    return Response.redirect(`${SITE_URL}/portal/login?error=expired`);
+    return Response.redirect(`${siteUrl}/portal/login?error=expired`);
   }
 
   const magic = typeof raw === 'string' ? JSON.parse(raw) : raw;
 
   if (new Date(magic.expiresAt) < new Date()) {
     await auditLog(kv, 'magic_link_expired', { ip, ua });
-    return Response.redirect(`${SITE_URL}/portal/login?error=expired`);
+    return Response.redirect(`${siteUrl}/portal/login?error=expired`);
   }
 
   // Create session
@@ -68,7 +69,7 @@ export async function GET(request) {
 
   await auditLog(kv, 'login_success', { emailHash: hashToken(magic.email), ip, ua });
 
-  return Response.redirect(`${SITE_URL}/portal`, {
+  return Response.redirect(`${siteUrl}/portal`, {
     headers: { 'Set-Cookie': makeSessionCookie(sessionRaw) },
     status: 302,
   });

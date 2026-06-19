@@ -1,4 +1,4 @@
-const SITE_URL = 'https://elitevask.vercel.app';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://elite-vask.dk';
 
 export default function robots() {
   return {

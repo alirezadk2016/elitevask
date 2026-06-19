@@ -1,12 +1,9 @@
-import nodemailer from 'nodemailer';
 import { randomBytes, createHash } from 'crypto';
+import { buildTransport, emailShell, tr, BOOKING_EMAIL, INFO_EMAIL, CONTACT_EMAIL } from '@/lib/mailer';
 
 function hashEmail(email) {
   return createHash('sha256').update(email.toLowerCase().trim()).digest('hex');
 }
-
-const COMPANY_EMAIL = 'booking@elite-vask.dk';
-const PUBLIC_EMAIL  = 'info@elite-vask.dk';
 const CANCEL_TTL = 60 * 60 * 24;      // 24 hours for cancel link
 const BOOKING_TTL = 60 * 60 * 24 * 30; // 30 days for slot records
 
@@ -107,12 +104,6 @@ function slotKey(date, time) { return `slot:${date}:${time}`; }
 
 const SLOT_TIMES = ['08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00'];
 
-function buildTransport() {
-  const user = process.env.GMAIL_USER || COMPANY_EMAIL;
-  const pass = process.env.GMAIL_PASS;
-  if (!pass) return null;
-  return nodemailer.createTransport({ host: 'smtp.gmail.com', port: 465, secure: true, auth: { user, pass } });
-}
 
 function fmtDate(d, L) {
   if (!d) return d;
@@ -259,90 +250,107 @@ export async function POST(request) {
 
   const extrasStr = extras?.length ? (Array.isArray(extras) ? extras.join(', ') : extras) : (L ? 'Ingen' : 'None');
   const cancelLink = cancelToken ? `${siteUrl}/annuller?token=${cancelToken}` : null;
+  const senderUser = process.env.SMTP_USER || process.env.GMAIL_USER || BOOKING_EMAIL;
 
-  const textLines = [
-    L ? '🚗 Ny bookinganmodning – Elite Vask' : '🚗 New booking request – Elite Vask',
-    '',
-    (L ? 'Bil' : 'Car') + ': ' + (car || '-'),
-    (L ? 'Pakke' : 'Package') + ': ' + (pkg || '-'),
-    (L ? 'Tilvalg' : 'Add-ons') + ': ' + extrasStr,
-    '',
-    (L ? 'Dato & tid' : 'Date & time') + ': ' + (date || '-') + ' ' + (time || ''),
-    (L ? 'Adresse' : 'Address') + ': ' + (addr || '-') + ', ' + (zip || '') + ' ' + (city || ''),
-    '',
-    (L ? 'Navn' : 'Name') + ': ' + (name || '-'),
-    (L ? 'Telefon' : 'Phone') + ': ' + (phone || '-'),
-    'Email: ' + (email || '-'),
-    (L ? 'Besked' : 'Message') + ': ' + (msg || '-'),
-    '',
-    (L ? 'Anslået pris' : 'Estimated price') + ': ' + (price || '-'),
-    ...(cancelLink ? ['', (L ? 'Annulleringslink (24t)' : 'Cancel link (24h)') + ': ' + cancelLink] : []),
-  ];
-
-  const subject = 'Booking: ' + (car || '') + ' – ' + (date || '') + ' ' + (time || '');
   const transport = buildTransport();
 
   if (transport) {
-    // Send company notification — if this fails, the whole booking fails
+    // ── Company notification ─────────────────────────────────────────────────
     try {
       await transport.sendMail({
-        from: `"Elite Vask Booking" <${process.env.GMAIL_USER || COMPANY_EMAIL}>`,
-        to: COMPANY_EMAIL,
-        subject,
-        text: textLines.join('\n'),
-        html: `<div style="font-family:sans-serif;max-width:560px;padding:24px;background:#f9f9f9;border-radius:12px">${textLines.join('<br>').replace(textLines[0], `<strong style="font-size:18px">${textLines[0]}</strong>`)}</div>`,
-        replyTo: email || undefined,
+        from: `"Elite Vask Booking" <${senderUser}>`,
+        to: BOOKING_EMAIL,
+        replyTo: email || CONTACT_EMAIL,
+        subject: `📋 Ny booking: ${car || ''} – ${date || ''} kl. ${time || ''}`,
+        html: emailShell({
+          title: `Ny bookinganmodning`,
+          lang: 'da',
+          body: `
+            <p style="color:#333;margin:0 0 20px;font-size:15px;line-height:1.6">En ny bookingforespørgsel er modtaget via hjemmesiden.</p>
+            <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;margin-bottom:20px">
+              ${tr('Dato & tid', `${fmtDate(date, true)} · kl. ${time}`, true)}
+              ${tr('Adresse', `${addr || '-'}, ${zip || ''} ${city || ''}`)}
+              ${tr('Bil', car || '-', true)}
+              ${tr('Pakke', pkg || '-')}
+              ${tr('Tilvalg', extrasStr, true)}
+              ${tr('Anslået pris', price || '-')}
+            </table>
+            <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;margin-bottom:20px;border-top:2px solid #e0e8e3">
+              ${tr('Navn', name || '-', true)}
+              ${tr('Telefon', `<a href="tel:${(phone||'').replace(/\s/g,'')}" style="color:#0d4a25">${phone || '-'}</a>`)}
+              ${tr('Email', email ? `<a href="mailto:${email}" style="color:#0d4a25">${email}</a>` : '-', true)}
+              ${msg ? tr('Besked', msg) : ''}
+            </table>
+            ${cancelLink ? `<p style="font-size:12px;color:#999;margin:0">Annulleringslink (24t): <a href="${cancelLink}" style="color:#0d4a25">${cancelLink}</a></p>` : ''}
+          `,
+        }),
       });
     } catch (err) {
       console.error('[book] Company email failed:', err.message);
       return Response.json({ ok: false, error: 'email_failed' }, { status: 500 });
     }
 
-    // Send customer confirmation — logged separately so a delivery failure doesn't
-    // block the booking confirmation or hide the real error from logs
+    // ── Customer confirmation ────────────────────────────────────────────────
     if (email) {
       try {
         await transport.sendMail({
-          from: `"Elite Vask" <${process.env.GMAIL_USER || COMPANY_EMAIL}>`,
+          from: `"Elite Vask" <${senderUser}>`,
           to: email,
-          replyTo: PUBLIC_EMAIL,
-          subject: L ? `Bookingbekræftelse – ${fmtDate(date, true)} kl. ${time}` : `Booking confirmation – ${fmtDate(date, false)} at ${time}`,
+          replyTo: CONTACT_EMAIL,
+          subject: L
+            ? `Bookingbekræftelse – ${fmtDate(date, true)} kl. ${time}`
+            : `Booking confirmation – ${fmtDate(date, false)} at ${time}`,
           headers: {
             'X-Entity-Ref-ID': cancelToken || Date.now().toString(),
-            'List-Unsubscribe': `<mailto:${COMPANY_EMAIL}?subject=unsubscribe>`,
+            'List-Unsubscribe': `<mailto:${CONTACT_EMAIL}?subject=afmeld>`,
           },
-          html: `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="margin:0;padding:16px;background:#f0f4f1;font-family:Arial,Helvetica,sans-serif">
-            <div style="max-width:560px;margin:0 auto;background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #d8e8dc">
-              <div style="background:#1a7a3f;padding:28px 32px">
-                <p style="margin:0;color:#a8e6bc;font-size:13px;font-weight:600;letter-spacing:1px;text-transform:uppercase">Elite Vask</p>
-                <h1 style="margin:8px 0 0;color:#ffffff;font-size:22px">✅ ${L ? 'Tak for din booking!' : 'Thank you for your booking!'}</h1>
-              </div>
-              <div style="padding:28px 32px">
-                <p style="color:#444;margin:0 0 24px;line-height:1.6">${L ? `Hej ${name || ''},<br><br>Vi har modtaget din anmodning og kontakter dig hurtigst muligt for at bekræfte tid og pris.` : `Hi ${name || ''},<br><br>We've received your request and will contact you as soon as possible to confirm time and price.`}</p>
-                <table style="width:100%;border-collapse:collapse;font-size:14px;margin-bottom:24px">
-                  <tr><td style="padding:10px 14px;background:#f0f7f2;color:#555;width:42%;border-bottom:1px solid #e0ede5">${L ? 'Dato & tid' : 'Date & time'}</td><td style="padding:10px 14px;background:#f0f7f2;font-weight:700;border-bottom:1px solid #e0ede5">${fmtDate(date, L)} · kl. ${time}</td></tr>
-                  <tr><td style="padding:10px 14px;color:#555;border-bottom:1px solid #eee">${L ? 'Bil' : 'Car'}</td><td style="padding:10px 14px;font-weight:600;border-bottom:1px solid #eee">${car || '-'}</td></tr>
-                  <tr><td style="padding:10px 14px;background:#f0f7f2;color:#555;border-bottom:1px solid #e0ede5">${L ? 'Pakke' : 'Package'}</td><td style="padding:10px 14px;background:#f0f7f2;font-weight:600;border-bottom:1px solid #e0ede5">${pkg || '-'}</td></tr>
-                  <tr><td style="padding:10px 14px;color:#555;border-bottom:1px solid #eee">${L ? 'Adresse' : 'Address'}</td><td style="padding:10px 14px;border-bottom:1px solid #eee">${addr || ''}, ${zip || ''} ${city || ''}</td></tr>
-                  <tr><td style="padding:10px 14px;background:#f0f7f2;color:#555">${L ? 'Anslået pris' : 'Est. price'}</td><td style="padding:10px 14px;background:#f0f7f2;font-weight:700;color:#1a7a3f">${price || '-'}</td></tr>
-                </table>
-                ${cancelLink ? `
-                <div style="background:#fff5f5;border:1px solid #fcc;border-radius:8px;padding:16px;margin-bottom:24px">
-                  <p style="font-size:13px;color:#666;margin:0 0 12px;line-height:1.5">${L ? '⏱ Annulleringslink er gyldigt i 24 timer. Annullering bedes ske senest 24 timer inden aftalt tid.' : '⏱ Cancellation link valid for 24 hours. Please cancel at least 24 hours before the scheduled time.'}</p>
-                  <a href="${cancelLink}" style="display:inline-block;background:#e74c3c;color:#fff;padding:11px 22px;border-radius:7px;text-decoration:none;font-weight:700;font-size:14px">${L ? 'Annuller booking' : 'Cancel booking'}</a>
-                </div>` : ''}
-                <p style="font-size:13px;color:#888;margin:0;line-height:1.6">${L ? `Spørgsmål? Ring på <a href="tel:+4524440321" style="color:#1a7a3f">+45 24 44 03 21</a> eller skriv til <a href="mailto:${PUBLIC_EMAIL}" style="color:#1a7a3f">${PUBLIC_EMAIL}</a>` : `Questions? Call <a href="tel:+4524440321" style="color:#1a7a3f">+45 24 44 03 21</a> or email <a href="mailto:${PUBLIC_EMAIL}" style="color:#1a7a3f">${PUBLIC_EMAIL}</a>`}</p>
-              </div>
-              <div style="background:#f7f7f7;padding:16px 32px;border-top:1px solid #e8e8e8">
-                <p style="font-size:11px;color:#aaa;margin:0;text-align:center">Elite Vask · ${PUBLIC_EMAIL} · +45 24 44 03 21</p>
-              </div>
-            </div>
-          </body></html>`,
+          html: emailShell({
+            title: L ? '✅ Tak for din booking!' : '✅ Thank you for your booking!',
+            preheader: L
+              ? `Vi har modtaget din booking til ${fmtDate(date, true)} kl. ${time}.`
+              : `We received your booking for ${fmtDate(date, false)} at ${time}.`,
+            lang: lang || 'da',
+            body: `
+              <p style="color:#333;margin:0 0 20px;font-size:15px;line-height:1.7">
+                ${L ? `Hej ${name || ''},` : `Hi ${name || ''},`}<br><br>
+                ${L
+                  ? 'Vi har modtaget din bookingforespørgsel og vender tilbage hurtigst muligt for at bekræfte tid og endelig pris.'
+                  : "We've received your booking request and will get back to you as soon as possible to confirm the time and final price."}
+              </p>
+
+              <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;margin-bottom:24px">
+                ${tr(L ? 'Dato & tid' : 'Date & time', `${fmtDate(date, L)} · kl. ${time}`, true)}
+                ${tr(L ? 'Bil' : 'Car', car || '-')}
+                ${tr(L ? 'Pakke' : 'Package', pkg || '-', true)}
+                ${extras?.length ? tr(L ? 'Tilvalg' : 'Add-ons', extrasStr) : ''}
+                ${tr(L ? 'Adresse' : 'Address', `${addr || ''}, ${zip || ''} ${city || ''}`, true)}
+                ${tr(L ? 'Anslået pris' : 'Est. price', `<strong style="color:#0d4a25;font-size:15px">${price || '-'}</strong>`)}
+              </table>
+
+              ${cancelLink ? `
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px">
+                <tr><td style="background:#fdf3f3;border:1px solid #f5c6c6;border-radius:8px;padding:16px 20px">
+                  <p style="margin:0 0 10px;font-size:13px;color:#555;line-height:1.5">
+                    ${L
+                      ? '⏱ Du kan annullere gratis op til 24 timer inden din aftalte tid.'
+                      : '⏱ You can cancel free of charge up to 24 hours before your scheduled time.'}
+                  </p>
+                  <a href="${cancelLink}" style="display:inline-block;background:#c0392b;color:#ffffff;padding:11px 24px;border-radius:7px;text-decoration:none;font-weight:700;font-size:14px">
+                    ${L ? 'Annuller booking' : 'Cancel booking'}
+                  </a>
+                </td></tr>
+              </table>` : ''}
+
+              <p style="font-size:13px;color:#777;margin:0;line-height:1.7">
+                ${L
+                  ? `Spørgsmål? Ring til os på <a href="tel:+4524440321" style="color:#0d4a25;font-weight:600">+45 24 44 03 21</a> eller skriv til <a href="mailto:${CONTACT_EMAIL}" style="color:#0d4a25">${CONTACT_EMAIL}</a>.`
+                  : `Questions? Call us on <a href="tel:+4524440321" style="color:#0d4a25;font-weight:600">+45 24 44 03 21</a> or email <a href="mailto:${CONTACT_EMAIL}" style="color:#0d4a25">${CONTACT_EMAIL}</a>.`}
+              </p>
+            `,
+          }),
         });
         console.log(`[book] Customer confirmation sent to ${email}`);
       } catch (err) {
-        // Don't fail the booking — company email was sent, booking is recorded.
-        // Log the exact error so it shows in Vercel logs.
         console.error(`[book] Customer email FAILED to ${email}:`, err.message);
       }
     }

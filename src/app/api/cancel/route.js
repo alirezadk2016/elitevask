@@ -1,8 +1,5 @@
-import nodemailer from 'nodemailer';
 import { isSameOrigin } from '@/lib/csrf';
-
-const COMPANY_EMAIL = 'booking@elite-vask.dk';
-const PUBLIC_EMAIL  = 'info@elite-vask.dk';
+import { buildTransport, emailShell, tr, BOOKING_EMAIL, INFO_EMAIL, CONTACT_EMAIL } from '@/lib/mailer';
 
 let kvClient = null;
 async function getKV() {
@@ -17,16 +14,6 @@ async function getKV() {
   } catch {
     return null;
   }
-}
-
-function buildTransport() {
-  const user = process.env.GMAIL_USER || COMPANY_EMAIL;
-  const pass = process.env.GMAIL_PASS;
-  if (!pass) return null;
-  return nodemailer.createTransport({
-    host: 'smtp.gmail.com', port: 465, secure: true,
-    auth: { user, pass },
-  });
 }
 
 // GET /api/cancel?token=xxx — look up booking
@@ -111,45 +98,64 @@ export async function POST(request) {
     await kv.del(`booking:${token}`);
   }
 
+  const senderUser = process.env.SMTP_USER || process.env.GMAIL_USER || BOOKING_EMAIL;
   const transport = buildTransport();
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://elite-vask.dk';
 
-  // Email to customer
-  if (transport && email) {
-    try {
-      await transport.sendMail({
-        from: `"Elite Vask" <${process.env.GMAIL_USER || COMPANY_EMAIL}>`,
-        to: email,
-        subject: L ? 'Din booking er annulleret – Elite Vask' : 'Your booking has been cancelled – Elite Vask',
-        html: `<div style="font-family:sans-serif;max-width:540px;padding:24px;background:#f9f9f9;border-radius:12px">
-          <h2 style="color:#e74c3c">${L ? '❌ Booking annulleret' : '❌ Booking cancelled'}</h2>
-          <p>${L ? `Hej ${name}, vi bekræfter at din booking er annulleret.` : `Hi ${name}, we confirm your booking has been cancelled.`}</p>
-          <p><strong>${L ? 'Dato' : 'Date'}:</strong> ${date} ${booking.time}</p>
-          <p><strong>${L ? 'Bil' : 'Car'}:</strong> ${car}</p>
-          <p><strong>${L ? 'Pakke' : 'Package'}:</strong> ${pkg}</p>
-          <hr style="margin:16px 0">
-          <p>${L ? 'Ønsker du at booke igen, er du altid velkommen.' : 'You are always welcome to book again.'}</p>
-          <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://elite-vask.dk'}" style="display:inline-block;margin-top:8px;background:#37d278;color:#000;padding:10px 20px;border-radius:8px;text-decoration:none;font-weight:700">${L ? 'Book ny tid' : 'Book new time'}</a>
-        </div>`,
-      });
-    } catch {}
-  }
-
-  // Email to company
   if (transport) {
+    if (email) {
+      try {
+        await transport.sendMail({
+          from: `"Elite Vask" <${senderUser}>`,
+          to: email,
+          replyTo: CONTACT_EMAIL,
+          subject: L ? 'Din booking er annulleret – Elite Vask' : 'Your booking has been cancelled – Elite Vask',
+          html: emailShell({
+            title: L ? '❌ Booking annulleret' : '❌ Booking cancelled',
+            preheader: L ? `Din booking den ${date} kl. ${booking.time} er nu annulleret.` : `Your booking on ${date} at ${booking.time} has been cancelled.`,
+            lang: lang || 'da',
+            body: `
+              <p style="color:#333;margin:0 0 20px;font-size:15px;line-height:1.7">
+                ${L ? `Hej ${name || ''},` : `Hi ${name || ''},`}<br><br>
+                ${L ? 'Vi bekræfter, at din booking er annulleret.' : 'We confirm that your booking has been cancelled.'}
+              </p>
+              <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;margin-bottom:24px">
+                ${tr(L ? 'Dato & tid' : 'Date & time', `${date} · kl. ${booking.time}`, true)}
+                ${tr(L ? 'Bil' : 'Car', car || '-')}
+                ${tr(L ? 'Pakke' : 'Package', pkg || '-', true)}
+              </table>
+              <p style="color:#555;margin:0 0 20px;font-size:14px;line-height:1.6">
+                ${L ? 'Ønsker du at booke en ny tid, er du altid velkommen.' : 'You are always welcome to book a new time.'}
+              </p>
+              <a href="${siteUrl}" style="display:inline-block;background:#0d4a25;color:#ffffff;padding:12px 26px;border-radius:7px;text-decoration:none;font-weight:700;font-size:14px">
+                ${L ? 'Book ny tid' : 'Book new time'}
+              </a>
+            `,
+          }),
+        });
+      } catch {}
+    }
     try {
       await transport.sendMail({
-        from: `"Elite Vask Booking" <${process.env.GMAIL_USER || COMPANY_EMAIL}>`,
-        to: COMPANY_EMAIL,
-        subject: `❌ Annullering: ${car} – ${date} ${booking.time}`,
-        html: `<div style="font-family:sans-serif;max-width:540px;padding:24px;background:#fff3f3;border-radius:12px">
-          <h2 style="color:#e74c3c">❌ Booking annulleret af kunde</h2>
-          <p><strong>Dato:</strong> ${date} ${booking.time}</p>
-          <p><strong>Navn:</strong> ${name}</p>
-          <p><strong>Email:</strong> ${email || '-'}</p>
-          <p><strong>Telefon:</strong> ${booking.phone || '-'}</p>
-          <p><strong>Bil:</strong> ${car} · ${pkg}</p>
-          <p><strong>Pris:</strong> ${price || '-'}</p>
-        </div>`,
+        from: `"Elite Vask Booking" <${senderUser}>`,
+        to: BOOKING_EMAIL,
+        replyTo: email || CONTACT_EMAIL,
+        subject: `❌ Annullering: ${car || ''} – ${date} kl. ${booking.time}`,
+        html: emailShell({
+          title: 'Booking annulleret af kunde',
+          lang: 'da',
+          body: `
+            <p style="color:#333;margin:0 0 16px;font-size:14px">En kunde har annulleret sin booking via hjemmesiden.</p>
+            <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;margin-bottom:16px">
+              ${tr('Dato & tid', `${date} · kl. ${booking.time}`, true)}
+              ${tr('Bil', `${car || '-'} · ${pkg || '-'}`)}
+              ${tr('Pris', price || '-', true)}
+              ${tr('Navn', name || '-')}
+              ${tr('Email', email ? `<a href="mailto:${email}" style="color:#0d4a25">${email}</a>` : '-', true)}
+              ${tr('Telefon', booking.phone ? `<a href="tel:${(booking.phone||'').replace(/\s/g,'')}" style="color:#0d4a25">${booking.phone}</a>` : '-')}
+            </table>
+          `,
+        }),
       });
     } catch {}
   }

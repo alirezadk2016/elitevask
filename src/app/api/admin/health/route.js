@@ -7,59 +7,62 @@ export async function GET(request) {
 
   const results = {};
 
-  // GMAIL
-  const gmailUser = process.env.GMAIL_USER;
-  const gmailPass = process.env.GMAIL_PASS;
-  results.gmail = {
-    GMAIL_USER: gmailUser || '❌ NOT SET',
-    GMAIL_PASS: gmailPass ? `✅ set (${gmailPass.length} chars)` : '❌ NOT SET',
-    sender_correct: (gmailUser === 'booking@elite-vask.dk' || gmailUser === 'elitevask01@gmail.com') ? '✅ correct' : `❌ unexpected — got: ${gmailUser}`,
+  // SMTP
+  const smtpUser = process.env.SMTP_USER || process.env.GMAIL_USER;
+  const smtpPass = process.env.SMTP_PASS || process.env.GMAIL_PASS;
+  const smtpHost = process.env.SMTP_HOST || 'send.one.com';
+  const smtpPort = parseInt(process.env.SMTP_PORT || '465', 10);
+  results.smtp = {
+    SMTP_USER: smtpUser || '❌ NOT SET',
+    SMTP_PASS: smtpPass ? `✅ set (${smtpPass.length} chars)` : '❌ NOT SET',
+    SMTP_HOST: smtpHost,
+    SMTP_PORT: smtpPort,
+    sender_expected: 'booking@elite-vask.dk',
+    sender_ok: smtpUser === 'booking@elite-vask.dk' ? '✅' : `⚠️ got: ${smtpUser}`,
   };
 
   // KV / Redis
-  const kvUrl = process.env.KV_REST_API_URL || process.env.STORAGE_KV_REST_API_URL;
-  const kvToken = process.env.KV_REST_API_TOKEN || process.env.STORAGE_KV_REST_API_TOKEN;
+  const kvUrl   = process.env.KV_REST_API_URL   || process.env.STORAGE_KV_REST_API_URL;
+  const kvToken = process.env.KV_REST_API_TOKEN  || process.env.STORAGE_KV_REST_API_TOKEN;
   results.kv = {
-    KV_REST_API_URL: kvUrl ? `✅ set (${kvUrl.slice(0, 30)}...)` : '❌ NOT SET',
-    KV_REST_API_TOKEN: kvToken ? `✅ set (${kvToken.length} chars)` : '❌ NOT SET',
+    KV_REST_API_URL:   kvUrl   ? `✅ set (${kvUrl.slice(0, 30)}...)` : '❌ NOT SET',
+    KV_REST_API_TOKEN: kvToken ? `✅ set (${kvToken.length} chars)`  : '❌ NOT SET',
   };
 
-  // Test actual Redis connection
   if (kvUrl && kvToken) {
     try {
       const { Redis } = await import('@upstash/redis');
       const kv = new Redis({ url: kvUrl, token: kvToken });
       await kv.set('health:ping', '1', { ex: 10 });
       const val = await kv.get('health:ping');
-      results.kv.connection = val === '1' ? '✅ connected and read/write OK' : '❌ write OK but read failed';
+      results.kv.connection = val === '1' ? '✅ read/write OK' : '❌ write OK but read failed';
     } catch (e) {
-      results.kv.connection = `❌ connection failed: ${e.message}`;
+      results.kv.connection = `❌ failed: ${e.message}`;
     }
   } else {
     results.kv.connection = '❌ skipped — credentials missing';
   }
 
-  // Test SMTP connection (no email sent)
-  if (gmailUser && gmailPass) {
+  // Test SMTP (no email sent — just auth handshake)
+  if (smtpUser && smtpPass) {
     try {
       const nodemailer = await import('nodemailer');
-      const transport = nodemailer.default.createTransport({
-        host: 'smtp.gmail.com', port: 465, secure: true,
-        auth: { user: gmailUser, pass: gmailPass },
+      const t = nodemailer.default.createTransport({
+        host: smtpHost, port: smtpPort, secure: smtpPort === 465,
+        auth: { user: smtpUser, pass: smtpPass },
       });
-      await transport.verify();
-      results.gmail.smtp_connection = '✅ SMTP authenticated OK';
+      await t.verify();
+      results.smtp.connection = '✅ SMTP authenticated OK';
     } catch (e) {
-      results.gmail.smtp_connection = `❌ SMTP failed: ${e.message}`;
+      results.smtp.connection = `❌ SMTP failed: ${e.message}`;
     }
   } else {
-    results.gmail.smtp_connection = '❌ skipped — credentials missing';
+    results.smtp.connection = '❌ skipped — credentials missing';
   }
 
-  // ADMIN_SECRET
-  results.admin = {
-    ADMIN_SECRET: `✅ set (${secret.length} chars)`,
-  };
+  // Env check
+  results.admin = { ADMIN_SECRET: `✅ set (${secret.length} chars)` };
+  results.site  = { NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL || '⚠️ not set (will derive from request)' };
 
   return Response.json(results, { status: 200 });
 }

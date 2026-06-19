@@ -1,8 +1,7 @@
-import nodemailer from 'nodemailer';
 import { randomBytes } from 'crypto';
 import { hashToken, auditLog } from '@/lib/auth';
+import { buildTransport, emailShell, BOOKING_EMAIL, INFO_EMAIL, CONTACT_EMAIL } from '@/lib/mailer';
 
-const COMPANY_EMAIL = 'booking@elite-vask.dk';
 const MAGIC_TTL = 60 * 15;
 
 let kvClient = null;
@@ -27,13 +26,6 @@ async function checkRL(kv, key, max, window) {
   } catch { return true; }
 }
 
-function buildTransport() {
-  const user = process.env.GMAIL_USER || COMPANY_EMAIL;
-  const pass = process.env.GMAIL_PASS;
-  if (!pass) return null;
-  return nodemailer.createTransport({ host: 'smtp.gmail.com', port: 465, secure: true, auth: { user, pass } });
-}
-
 export async function POST(request) {
   const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
   const ua = request.headers.get('user-agent') || '';
@@ -51,7 +43,7 @@ export async function POST(request) {
   const kv = await getKV();
 
   const emailOk = await checkRL(kv, `rl:magic:email:${hashToken(email)}`, 3, 3600);
-  const ipOk = await checkRL(kv, `rl:magic:ip:${ip}`, 8, 3600);
+  const ipOk    = await checkRL(kv, `rl:magic:ip:${ip}`, 8, 3600);
   if (!emailOk || !ipOk) {
     await auditLog(kv, 'magic_link_rate_limited', { emailHash: hashToken(email), ip });
     return Response.json({ error: 'rate_limit', message: 'For mange anmodninger. Prøv igen om en time.' }, { status: 429 });
@@ -70,31 +62,45 @@ export async function POST(request) {
   const reqUrl = new URL(request.url);
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || `${reqUrl.protocol}//${reqUrl.host}`;
   const link = `${siteUrl}/api/auth/verify?token=${rawToken}`;
+  const senderUser = process.env.SMTP_USER || process.env.GMAIL_USER || BOOKING_EMAIL;
   const transport = buildTransport();
 
   if (transport) {
     try {
       await transport.sendMail({
-        from: `"Elite Vask" <${process.env.GMAIL_USER || COMPANY_EMAIL}>`,
+        from: `"Elite Vask" <${senderUser}>`,
         to: email,
+        replyTo: CONTACT_EMAIL,
         subject: 'Din loginlink til Elite Vask',
-        html: `<div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:32px 24px;background:#0b1310;color:#e9f1ec;border-radius:16px">
-          <div style="text-align:center;margin-bottom:24px">
-            <div style="display:inline-block;background:#15211b;border-radius:50%;padding:16px;margin-bottom:12px">
-              <span style="font-size:32px">🔑</span>
-            </div>
-            <h2 style="color:#37d278;margin:0;font-size:22px">Log ind på Elite Vask</h2>
-          </div>
-          <p style="color:#94a89c;margin-bottom:24px;text-align:center">Klik på knappen nedenfor for at logge ind i din kundeprofil. Linket er gyldigt i <strong style="color:#fff">15 minutter</strong> og kan kun bruges én gang.</p>
-          <div style="text-align:center;margin-bottom:28px">
-            <a href="${link}" style="display:inline-block;background:#37d278;color:#062313;padding:15px 32px;border-radius:10px;text-decoration:none;font-weight:700;font-size:16px">Log ind nu →</a>
-          </div>
-          <div style="background:#15211b;border-radius:8px;padding:14px 16px;margin-bottom:20px">
-            <p style="font-size:12px;color:#6f857a;margin:0">⚠️ Har du ikke bedt om dette link? Ignorer blot denne e-mail. Linket udløber automatisk.</p>
-          </div>
-          <hr style="border:none;border-top:1px solid #1b2a22;margin:0 0 16px">
-          <p style="font-size:11px;color:#6f857a;text-align:center;margin:0">Elite Vask · info@elite-vask.dk · +45 24 44 03 21</p>
-        </div>`,
+        html: emailShell({
+          title: '🔑 Log ind på Elite Vask',
+          preheader: 'Klik på linket for at logge ind. Gyldigt i 15 minutter.',
+          lang: 'da',
+          body: `
+            <p style="color:#333;font-size:15px;line-height:1.7;margin:0 0 24px;text-align:center">
+              Klik på knappen nedenfor for at logge ind i din kundeprofil.<br>
+              Linket er gyldigt i <strong>15 minutter</strong> og kan kun bruges én gang.
+            </p>
+            <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px">
+              <tr><td align="center">
+                <a href="${link}" style="display:inline-block;background:#0d4a25;color:#ffffff;padding:15px 36px;border-radius:8px;text-decoration:none;font-weight:700;font-size:16px">
+                  Log ind nu →
+                </a>
+              </td></tr>
+            </table>
+            <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:16px">
+              <tr><td style="background:#fdf8ec;border:1px solid #f0e0a0;border-radius:8px;padding:14px 18px">
+                <p style="margin:0;font-size:13px;color:#7a6520;line-height:1.5">
+                  ⚠️ <strong>Har du ikke bedt om dette link?</strong> Ignorer blot denne e-mail. Linket udløber automatisk og kan ikke misbruges.
+                </p>
+              </td></tr>
+            </table>
+            <p style="font-size:12px;color:#aaa;margin:0;text-align:center;line-height:1.6">
+              Kan du ikke klikke på knappen? Kopier dette link til din browser:<br>
+              <a href="${link}" style="color:#0d4a25;word-break:break-all">${link}</a>
+            </p>
+          `,
+        }),
       });
     } catch (err) {
       console.error('Magic link email error:', err.message);
