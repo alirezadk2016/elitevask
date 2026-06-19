@@ -367,7 +367,8 @@ section{position:relative}
 .foot-legal a{color:var(--muted-2);text-decoration:none}.foot-legal a:hover{color:var(--green)}
 
 /* STICKY MOBILE CTA */
-.mobile-cta{position:fixed;bottom:0;left:0;right:0;z-index:60;display:none;gap:10px;padding:12px 16px;background:rgba(11,19,16,.94);backdrop-filter:blur(12px);border-top:1px solid var(--line)}
+/* Use translate3d to keep on GPU layer — prevents iOS jump on address-bar show/hide */
+.mobile-cta{position:fixed;bottom:0;left:0;right:0;z-index:60;display:none;gap:10px;padding:12px 16px;padding-bottom:calc(12px + env(safe-area-inset-bottom));background:rgba(11,19,16,.96);backdrop-filter:blur(12px);border-top:1px solid var(--line);transform:translate3d(0,0,0);-webkit-transform:translate3d(0,0,0);will-change:transform}
 .mobile-cta a{flex:1}
 
 /* WIZARD MODAL */
@@ -556,6 +557,7 @@ section{position:relative}
   .contact-grid{grid-template-columns:1fr;gap:32px}
   .footer-grid{grid-template-columns:1fr 1fr;gap:30px}.footer .fb{grid-column:1/-1}
   html,body{overflow-x:clip}
+  body{padding-bottom:calc(68px + env(safe-area-inset-bottom))}
   .mobile-cta{display:flex}
   .hero-flow{display:none}
   .plate-field{flex-direction:column}
@@ -572,8 +574,8 @@ section{position:relative}
   .hero-cta .btn{width:100%;justify-content:center}
   .btn-lg{padding:13px 24px;font-size:15px}
   .tb-hide-mobile{display:none}
-  .chatbot{bottom:90px;right:16px}
-  .chat-window{position:fixed;bottom:160px;right:16px;left:16px;width:auto;max-height:65vh}
+  .chatbot{bottom:calc(76px + env(safe-area-inset-bottom));right:16px}
+  .chat-window{position:fixed;bottom:calc(148px + env(safe-area-inset-bottom));right:16px;left:16px;width:auto;max-height:65vh}
   .pkg-tabs{display:flex;gap:6px;overflow-x:auto;padding:0 0 12px;scrollbar-width:none;-ms-overflow-style:none;margin-bottom:2px}
   .pkg-tabs::-webkit-scrollbar{display:none}
   .pkg-tab{background:var(--surface);border:1px solid var(--line);border-radius:99px;padding:9px 18px;font-size:13.5px;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap;font-family:inherit;transition:.15s;flex-shrink:0}
