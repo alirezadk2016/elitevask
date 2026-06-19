@@ -1,12 +1,25 @@
+import { isSameOrigin } from '@/lib/csrf';
+
+function checkSecret(secret) {
+  const expected = process.env.ADMIN_SECRET;
+  if (!expected || !secret) return false;
+  // Prevent timing attacks on string comparison
+  if (secret.length !== expected.length) return false;
+  let diff = 0;
+  for (let i = 0; i < expected.length; i++) diff |= expected.charCodeAt(i) ^ secret.charCodeAt(i);
+  return diff === 0;
+}
+
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
-  if (searchParams.get('secret') !== 'elitevask-clear-2026') return new Response('forbidden', { status: 403 });
+  if (!checkSecret(searchParams.get('secret'))) return new Response('forbidden', { status: 403 });
   return clearAll();
 }
 
 export async function POST(request) {
+  if (!isSameOrigin(request)) return Response.json({ error: 'forbidden' }, { status: 403 });
   const { secret } = await request.json().catch(() => ({}));
-  if (secret !== 'elitevask-clear-2026') return Response.json({ error: 'forbidden' }, { status: 403 });
+  if (!checkSecret(secret)) return Response.json({ error: 'forbidden' }, { status: 403 });
   return clearAll();
 }
 
@@ -19,7 +32,7 @@ async function clearAll() {
     const kv = new Redis({ url, token });
     const keys = await kv.keys('slot:*');
     if (keys.length > 0) await kv.del(...keys);
-    return Response.json({ ok: true, cleared: keys.length, keys });
+    return Response.json({ ok: true, cleared: keys.length });
   } catch (e) {
     return Response.json({ ok: false, error: e.message }, { status: 500 });
   }

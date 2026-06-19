@@ -61,10 +61,10 @@ export async function POST(request) {
     return Response.json({ error: 'already_cancelled' }, { status: 409 });
   }
 
-  // Backend 24h rule
+  // Backend 24h rule — interpret booking time in Copenhagen timezone
   if (booking.date && booking.time) {
-    const dt = new Date(`${booking.date}T${booking.time}:00`);
-    if ((dt - Date.now()) < 24 * 3600 * 1000) {
+    const dt = new Date(`${booking.date}T${booking.time}:00+02:00`); // CEST; safe fallback
+    if ((dt.getTime() - Date.now()) < 24 * 3600 * 1000) {
       return Response.json({ error: 'too_late', message: 'Kan ikke annulleres inden for 24 timer.' }, { status: 409 });
     }
   }

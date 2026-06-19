@@ -1,5 +1,6 @@
 import nodemailer from 'nodemailer';
 import { randomBytes, createHash } from 'crypto';
+import { isSameOrigin } from '@/lib/csrf';
 
 function hashEmail(email) {
   return createHash('sha256').update(email.toLowerCase().trim()).digest('hex');
@@ -134,6 +135,11 @@ export async function GET(request) {
 }
 
 export async function POST(request) {
+  // CSRF protection
+  if (!isSameOrigin(request)) {
+    return Response.json({ error: 'forbidden' }, { status: 403 });
+  }
+
   // Rate limiting
   const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
   if (!await checkRateLimit(ip)) {
@@ -146,6 +152,19 @@ export async function POST(request) {
   }
 
   const { car, pkg, extras, addr, zip, city, date, time, name, phone, email, msg, price, lang, carId, slotsNeeded: rawSlots } = body;
+
+  // Input validation
+  if (email && !/^[^\s@\r\n]+@[^\s@\r\n]+\.[^\s@\r\n]+$/.test(email)) {
+    return Response.json({ error: 'invalid_email' }, { status: 400 });
+  }
+  if (phone && !/^[\d\s\-\+\(\)]{6,25}$/.test(phone)) {
+    return Response.json({ error: 'invalid_phone' }, { status: 400 });
+  }
+  if (name && name.length > 120) return Response.json({ error: 'name_too_long' }, { status: 400 });
+  if (addr && addr.length > 200) return Response.json({ error: 'addr_too_long' }, { status: 400 });
+  if (msg  && msg.length  > 1000) return Response.json({ error: 'msg_too_long'  }, { status: 400 });
+  if (zip  && !/^\d{3,5}$/.test(zip.trim())) return Response.json({ error: 'invalid_zip' }, { status: 400 });
+
   const CAR_SLOTS = { lille: 2, mellem: 3, stor: 4, varebil: 3 };
   const slotsNeeded = CAR_SLOTS[carId] || Math.max(1, Math.min(parseInt(rawSlots) || 2, 5));
   const L = lang !== 'en';

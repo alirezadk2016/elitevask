@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer';
+import { isSameOrigin } from '@/lib/csrf';
 
 const COMPANY_EMAIL = 'elitevask01@gmail.com';
 const SITE_URL = 'https://elitevask.vercel.app';
@@ -60,15 +61,21 @@ export async function GET(request) {
   });
 }
 
-// POST /api/cancel — cancel booking by token
+// POST /api/cancel — cancel booking by token (used from /annuller page)
 export async function POST(request) {
+  if (!isSameOrigin(request)) {
+    return Response.json({ error: 'forbidden' }, { status: 403 });
+  }
+
   let body;
   try { body = await request.json(); } catch {
     return Response.json({ error: 'Invalid JSON' }, { status: 400 });
   }
 
   const { token } = body;
-  if (!token) return Response.json({ error: 'Missing token' }, { status: 400 });
+  if (!token || typeof token !== 'string' || !/^[a-f0-9]{64}$/.test(token)) {
+    return Response.json({ error: 'invalid_token' }, { status: 400 });
+  }
 
   const kv = await getKV();
   if (!kv) return Response.json({ error: 'Service unavailable' }, { status: 503 });

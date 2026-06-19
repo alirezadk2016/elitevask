@@ -1,22 +1,27 @@
 export const runtime = 'nodejs';
 
+// Debug endpoint — requires ADMIN_SECRET to prevent info leakage in production
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
-  const plate = (searchParams.get('plate') || 'AB12345').toUpperCase().replace(/[^A-Z0-9]/g, '');
+  const secret = process.env.ADMIN_SECRET;
+  if (!secret || searchParams.get('secret') !== secret) {
+    return Response.json({ error: 'forbidden' }, { status: 403 });
+  }
 
+  const plate = (searchParams.get('plate') || 'AB12345').toUpperCase().replace(/[^A-Z0-9]/g, '');
   const results = {};
 
   const tests = [
-    { name: 'motorapi', url: `https://motorapi.dk/vehicles/${plate}` },
-    { name: 'tjekbil', url: `https://www.tjekbil.dk/api/v3/dmr/plate/${plate}` },
-    { name: 'synsbasen', url: `https://api.synsbasen.dk/v1/vehicles/registration/${plate}` },
+    { name: 'motorapi',    url: `https://motorapi.dk/vehicles/${plate}` },
+    { name: 'tjekbil',    url: `https://www.tjekbil.dk/api/v3/dmr/plate/${plate}` },
+    { name: 'synsbasen',  url: `https://api.synsbasen.dk/v1/vehicles/registration/${plate}` },
     { name: 'nummerplade', url: `https://www.nummerplade.net/nummerplade.asp?nummerplade=${plate}` },
   ];
 
   for (const { name, url } of tests) {
     try {
       const r = await fetch(url, {
-        headers: { 'Accept': 'application/json, text/html', 'User-Agent': 'Mozilla/5.0' },
+        headers: { Accept: 'application/json, text/html', 'User-Agent': 'Mozilla/5.0' },
         signal: AbortSignal.timeout(6000),
       });
       const text = await r.text();
