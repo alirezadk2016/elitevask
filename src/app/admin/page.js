@@ -8,6 +8,7 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [deleting, setDeleting] = useState(null);
+  const [cancelling, setCancelling] = useState(null);
 
   const load = useCallback(async (s) => {
     setLoading(true);
@@ -29,8 +30,22 @@ export default function AdminPage() {
     load(secret);
   }
 
+  async function handleCancel(token) {
+    if (!confirm("Annuller denne booking?")) return;
+    setCancelling(token);
+    try {
+      const r = await fetch("/api/admin/delete-booking", {
+        method: "PATCH",
+        headers: { Authorization: `Bearer ${secret}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ token }),
+      });
+      if (r.ok) setBookings(b => b.map(x => x.token === token ? { ...x, status: "cancelled" } : x));
+    } catch {}
+    finally { setCancelling(null); }
+  }
+
   async function handleDelete(token) {
-    if (!confirm("Slet denne booking?")) return;
+    if (!confirm("Slet booking permanent?")) return;
     setDeleting(token);
     try {
       const r = await fetch("/api/admin/delete-booking", {
@@ -144,13 +159,24 @@ export default function AdminPage() {
                 </div>
               )}
             </div>
-            <button
-              onClick={() => handleDelete(b.token)}
-              disabled={deleting === b.token}
-              style={{ background: "rgba(231,76,60,.15)", color: "#e74c3c", border: "1px solid rgba(231,76,60,.3)", borderRadius: 8, padding: "8px 16px", cursor: "pointer", fontSize: 13, fontWeight: 600, whiteSpace: "nowrap" }}
-            >
-              {deleting === b.token ? "..." : "🗑 Slet"}
-            </button>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {b.status !== "cancelled" && (
+                <button
+                  onClick={() => handleCancel(b.token)}
+                  disabled={cancelling === b.token}
+                  style={{ background: "rgba(212,175,55,.15)", color: "#d4af37", border: "1px solid rgba(212,175,55,.3)", borderRadius: 8, padding: "8px 16px", cursor: "pointer", fontSize: 13, fontWeight: 600, whiteSpace: "nowrap" }}
+                >
+                  {cancelling === b.token ? "..." : "✕ Annuller"}
+                </button>
+              )}
+              <button
+                onClick={() => handleDelete(b.token)}
+                disabled={deleting === b.token}
+                style={{ background: "rgba(231,76,60,.15)", color: "#e74c3c", border: "1px solid rgba(231,76,60,.3)", borderRadius: 8, padding: "8px 16px", cursor: "pointer", fontSize: 13, fontWeight: 600, whiteSpace: "nowrap" }}
+              >
+                {deleting === b.token ? "..." : "🗑 Slet"}
+              </button>
+            </div>
           </div>
         ))}
       </div>

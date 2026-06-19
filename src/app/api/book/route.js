@@ -158,25 +158,6 @@ export async function POST(request) {
 
   if (date && time) {
     // Past slot check
-    const nowInCph = new Date().toLocaleString('sv-SE', { timeZone: 'Europe/Copenhagen' });
-    const nowUtc = new Date().toLocaleString('sv-SE', { timeZone: 'UTC' });
-    const cphOffsetMs = new Date(nowInCph) - new Date(nowUtc);
-    if (new Date(`${date}T${time}:00Z`).getTime() - cphOffsetMs < Date.now()) {
-      return Response.json({
-        error: 'slot_past',
-        message: L ? 'Dette tidspunkt er allerede passeret.' : 'This time slot is in the past.',
-      }, { status: 409 });
-    }
-
-    // Duplicate booking by phone check
-    if (phone && await isDuplicateBooking(phone, date)) {
-      return Response.json({
-        error: 'duplicate',
-        message: L
-          ? 'Der findes allerede en booking med dette telefonnummer på den valgte dato. Kontakt os på +45 24 44 03 21 for at ændre din booking.'
-          : 'A booking with this phone number already exists for the selected date. Contact us at +45 24 44 03 21 to change your booking.',
-      }, { status: 409 });
-    }
 
     // Slot availability check
     const startIdx = SLOT_TIMES.indexOf(time);
@@ -224,9 +205,6 @@ export async function POST(request) {
         memBookings.set(cancelToken, bookingRecord);
       }
     } catch {}
-
-    // Mark phone+date to prevent duplicate bookings
-    await markDuplicateBooking(phone, date);
 
     // Index booking by email for customer portal
     if (email) {
@@ -327,19 +305,6 @@ export async function POST(request) {
                 ${tr(L ? 'Anslået pris' : 'Est. price', `<strong style="color:#0d4a25;font-size:15px">${price || '-'}</strong>`)}
               </table>
 
-              ${cancelLink ? `
-              <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px">
-                <tr><td style="background:#fdf3f3;border:1px solid #f5c6c6;border-radius:8px;padding:16px 20px">
-                  <p style="margin:0 0 10px;font-size:13px;color:#555;line-height:1.5">
-                    ${L
-                      ? '⏱ Du kan annullere gratis op til 24 timer inden din aftalte tid.'
-                      : '⏱ You can cancel free of charge up to 24 hours before your scheduled time.'}
-                  </p>
-                  <a href="${cancelLink}" style="display:inline-block;background:#c0392b;color:#ffffff;padding:11px 24px;border-radius:7px;text-decoration:none;font-weight:700;font-size:14px">
-                    ${L ? 'Annuller booking' : 'Cancel booking'}
-                  </a>
-                </td></tr>
-              </table>` : ''}
 
               <p style="font-size:13px;color:#777;margin:0 0 16px;line-height:1.7">
                 ${L
