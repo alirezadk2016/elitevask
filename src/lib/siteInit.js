@@ -316,7 +316,7 @@ function drawWiz(){
   if(step===1){
     h+='<div class="wiz-q">'+W('s1')+'</div>';
     h+='<div class="opt-grid">';
-    CARS.forEach(function(c){var minP=Math.min(c.prices.udv,c.prices.indv,c.prices.hele);h+='<div class="opt'+(wiz.car&&wiz.car.id===c.id?' sel':'')+'" data-car="'+c.id+'">'+svgWrap(c.svg,46,26)+'<span class="opt-lbl">'+c.label[LANG]+'</span><span class="opt-ex">'+c.ex[LANG]+'</span><span class="opt-fra">'+(LANG==='da'?'Fra ':'From ')+fmtKr(minP)+'</span></div>';});
+    CARS.forEach(function(c){var minP=Math.min(c.prices.udv,c.prices.indv,c.prices.hele);h+='<div class="opt'+(wiz.car&&wiz.car.id===c.id?' sel':'')+'" data-car="'+c.id+'"><div class="opt-icon-wrap">'+svgWrap(c.svg,46,26)+'</div><span class="opt-lbl">'+c.label[LANG]+'</span><span class="opt-ex">'+c.ex[LANG]+'</span><span class="opt-fra">'+(LANG==='da'?'Fra ':'From ')+fmtKr(minP)+'</span><span class="opt-time">'+c.time[LANG]+'</span></div>';});
     h+='</div>';
   }else if(step===2){
     h+='<div class="wiz-q">'+W('s2')+'</div><div class="opt-row">';
@@ -324,7 +324,7 @@ function drawWiz(){
       var price=wiz.car?wiz.car.prices[p.id]:0;
       var badge=p.pop?'<span class="pkg-badge pop">'+(LANG==='da'?'Mest populær':'Most popular')+'</span>':(p.gold?'<span class="pkg-badge gold">★ Premium</span>':'');
       var feats=p.feat[LANG].slice(0,3).map(function(f){return '<li>'+f+'</li>';}).join('');
-      h+='<div class="opt opt-pkg'+(wiz.pkg&&wiz.pkg.id===p.id?' sel':'')+'" data-pkg="'+p.id+'">';
+      h+='<div class="opt opt-pkg'+(wiz.pkg&&wiz.pkg.id===p.id?' sel':'')+(p.gold?' opt-gold':'')+(p.pop?' opt-pop':'')+'" data-pkg="'+p.id+'">';
       h+='<div class="opt-pkg-top">'+badge+'<span class="opt-lbl">'+p.name[LANG]+'</span><span class="opt-pkg-price">'+fmtKr(price)+'</span></div>';
       h+='<ul class="opt-pkg-feats">'+feats+'</ul>';
       h+='</div>';
@@ -409,6 +409,7 @@ function drawWiz(){
     if(extPrice>0)h+='<div class="sr"><span class="k">'+W('sumext')+'</span><span class="v">'+fmtKr(extPrice)+'</span></div>';
     h+='<div class="sr tot"><span class="k">'+W('sumprice')+'</span><span class="v">'+fmtKr(tot)+'</span></div>';
     h+='</div>';
+    h+='<p class="wiz-trust"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>'+(LANG==='da'?'Ingen forudbetaling · Betal efter vask · Tilfredshedsgaranti':'No prepayment · Pay after wash · Satisfaction guarantee')+'</p>';
   }else if(step===8){
     var doneCarPkg=(wiz.car?wiz.car.label[LANG]:'')+' · '+(wiz.pkg?wiz.pkg.name[LANG]:'');
     h='<div class="wiz-done"><div class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div><h3>'+W('done_t')+'</h3><p>'+W('done_p')+'</p>';
