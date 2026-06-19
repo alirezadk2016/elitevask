@@ -263,8 +263,8 @@ export async function POST(request) {
   const transport = buildTransport();
 
   if (transport) {
+    // Send company notification — if this fails, the whole booking fails
     try {
-      // Company email
       await transport.sendMail({
         from: `"Elite Vask Booking" <${process.env.GMAIL_USER || COMPANY_EMAIL}>`,
         to: COMPANY_EMAIL,
@@ -273,38 +273,61 @@ export async function POST(request) {
         html: `<div style="font-family:sans-serif;max-width:560px;padding:24px;background:#f9f9f9;border-radius:12px">${textLines.join('<br>').replace(textLines[0], `<strong style="font-size:18px">${textLines[0]}</strong>`)}</div>`,
         replyTo: email || undefined,
       });
+    } catch (err) {
+      console.error('[book] Company email failed:', err.message);
+      return Response.json({ ok: false, error: 'email_failed' }, { status: 500 });
+    }
 
-      // Customer confirmation email
-      if (email) {
+    // Send customer confirmation — logged separately so a delivery failure doesn't
+    // block the booking confirmation or hide the real error from logs
+    if (email) {
+      try {
         await transport.sendMail({
           from: `"Elite Vask" <${process.env.GMAIL_USER || COMPANY_EMAIL}>`,
           to: email,
+          replyTo: COMPANY_EMAIL,
           subject: L ? `Bookingbekræftelse – ${fmtDate(date, true)} kl. ${time}` : `Booking confirmation – ${fmtDate(date, false)} at ${time}`,
-          html: `<div style="font-family:sans-serif;max-width:560px;padding:24px;background:#f9f9f9;border-radius:12px">
-            <h2 style="color:#1a7a3f;margin-bottom:4px">✅ ${L ? 'Tak for din booking!' : 'Thank you for your booking!'}</h2>
-            <p style="color:#555;margin-bottom:20px">${L ? `Hej ${name || ''},<br>Vi har modtaget din anmodning og kontakter dig hurtigst muligt for at bekræfte.` : `Hi ${name || ''},<br>We've received your request and will contact you shortly to confirm.`}</p>
-            <table style="width:100%;border-collapse:collapse;margin:0 0 20px;font-size:14px">
-              <tr><td style="padding:10px 12px;background:#e8f5ee;color:#555;width:40%">${L ? 'Dato & tid' : 'Date & time'}</td><td style="padding:10px 12px;background:#e8f5ee;font-weight:600">${fmtDate(date, L)} · kl. ${time}</td></tr>
-              <tr><td style="padding:10px 12px;color:#555">${L ? 'Bil' : 'Car'}</td><td style="padding:10px 12px;font-weight:600">${car || '-'}</td></tr>
-              <tr><td style="padding:10px 12px;background:#e8f5ee;color:#555">${L ? 'Pakke' : 'Package'}</td><td style="padding:10px 12px;background:#e8f5ee;font-weight:600">${pkg || '-'}</td></tr>
-              <tr><td style="padding:10px 12px;color:#555">${L ? 'Adresse' : 'Address'}</td><td style="padding:10px 12px;font-weight:600">${addr || ''}, ${zip || ''} ${city || ''}</td></tr>
-              <tr><td style="padding:10px 12px;background:#e8f5ee;color:#555">${L ? 'Anslået pris' : 'Est. price'}</td><td style="padding:10px 12px;background:#e8f5ee;font-weight:600">${price || '-'}</td></tr>
-            </table>
-            ${cancelLink ? `
-            <div style="background:#fff8f8;border:1px solid #fdd;border-radius:8px;padding:16px;margin-bottom:20px">
-              <p style="font-size:13px;color:#666;margin-bottom:10px">${L ? '⏱ Annulleringslink er gyldigt i 24 timer. Annullering bedes ske senest 24 timer inden aftalt tid.' : '⏱ Cancellation link valid for 24 hours. Please cancel at least 24 hours before the scheduled time.'}</p>
-              <a href="${cancelLink}" style="display:inline-block;background:#e74c3c;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;font-weight:700;font-size:14px">${L ? 'Annuller booking' : 'Cancel booking'}</a>
-            </div>` : ''}
-            <p style="font-size:13px;color:#999">${L ? 'Spørgsmål? +45 24 44 03 21 · elitevask01@gmail.com' : 'Questions? +45 24 44 03 21 · elitevask01@gmail.com'}</p>
-          </div>`,
+          headers: {
+            'X-Entity-Ref-ID': cancelToken || Date.now().toString(),
+            'List-Unsubscribe': `<mailto:${COMPANY_EMAIL}?subject=unsubscribe>`,
+          },
+          html: `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="margin:0;padding:16px;background:#f0f4f1;font-family:Arial,Helvetica,sans-serif">
+            <div style="max-width:560px;margin:0 auto;background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #d8e8dc">
+              <div style="background:#1a7a3f;padding:28px 32px">
+                <p style="margin:0;color:#a8e6bc;font-size:13px;font-weight:600;letter-spacing:1px;text-transform:uppercase">Elite Vask</p>
+                <h1 style="margin:8px 0 0;color:#ffffff;font-size:22px">✅ ${L ? 'Tak for din booking!' : 'Thank you for your booking!'}</h1>
+              </div>
+              <div style="padding:28px 32px">
+                <p style="color:#444;margin:0 0 24px;line-height:1.6">${L ? `Hej ${name || ''},<br><br>Vi har modtaget din anmodning og kontakter dig hurtigst muligt for at bekræfte tid og pris.` : `Hi ${name || ''},<br><br>We've received your request and will contact you as soon as possible to confirm time and price.`}</p>
+                <table style="width:100%;border-collapse:collapse;font-size:14px;margin-bottom:24px">
+                  <tr><td style="padding:10px 14px;background:#f0f7f2;color:#555;width:42%;border-bottom:1px solid #e0ede5">${L ? 'Dato & tid' : 'Date & time'}</td><td style="padding:10px 14px;background:#f0f7f2;font-weight:700;border-bottom:1px solid #e0ede5">${fmtDate(date, L)} · kl. ${time}</td></tr>
+                  <tr><td style="padding:10px 14px;color:#555;border-bottom:1px solid #eee">${L ? 'Bil' : 'Car'}</td><td style="padding:10px 14px;font-weight:600;border-bottom:1px solid #eee">${car || '-'}</td></tr>
+                  <tr><td style="padding:10px 14px;background:#f0f7f2;color:#555;border-bottom:1px solid #e0ede5">${L ? 'Pakke' : 'Package'}</td><td style="padding:10px 14px;background:#f0f7f2;font-weight:600;border-bottom:1px solid #e0ede5">${pkg || '-'}</td></tr>
+                  <tr><td style="padding:10px 14px;color:#555;border-bottom:1px solid #eee">${L ? 'Adresse' : 'Address'}</td><td style="padding:10px 14px;border-bottom:1px solid #eee">${addr || ''}, ${zip || ''} ${city || ''}</td></tr>
+                  <tr><td style="padding:10px 14px;background:#f0f7f2;color:#555">${L ? 'Anslået pris' : 'Est. price'}</td><td style="padding:10px 14px;background:#f0f7f2;font-weight:700;color:#1a7a3f">${price || '-'}</td></tr>
+                </table>
+                ${cancelLink ? `
+                <div style="background:#fff5f5;border:1px solid #fcc;border-radius:8px;padding:16px;margin-bottom:24px">
+                  <p style="font-size:13px;color:#666;margin:0 0 12px;line-height:1.5">${L ? '⏱ Annulleringslink er gyldigt i 24 timer. Annullering bedes ske senest 24 timer inden aftalt tid.' : '⏱ Cancellation link valid for 24 hours. Please cancel at least 24 hours before the scheduled time.'}</p>
+                  <a href="${cancelLink}" style="display:inline-block;background:#e74c3c;color:#fff;padding:11px 22px;border-radius:7px;text-decoration:none;font-weight:700;font-size:14px">${L ? 'Annuller booking' : 'Cancel booking'}</a>
+                </div>` : ''}
+                <p style="font-size:13px;color:#888;margin:0;line-height:1.6">${L ? 'Spørgsmål? Ring på <a href="tel:+4524440321" style="color:#1a7a3f">+45 24 44 03 21</a> eller skriv til <a href="mailto:elitevask01@gmail.com" style="color:#1a7a3f">elitevask01@gmail.com</a>' : 'Questions? Call <a href="tel:+4524440321" style="color:#1a7a3f">+45 24 44 03 21</a> or email <a href="mailto:elitevask01@gmail.com" style="color:#1a7a3f">elitevask01@gmail.com</a>'}</p>
+              </div>
+              <div style="background:#f7f7f7;padding:16px 32px;border-top:1px solid #e8e8e8">
+                <p style="font-size:11px;color:#aaa;margin:0;text-align:center">Elite Vask · elitevask01@gmail.com · +45 24 44 03 21</p>
+              </div>
+            </div>
+          </body></html>`,
         });
+        console.log(`[book] Customer confirmation sent to ${email}`);
+      } catch (err) {
+        // Don't fail the booking — company email was sent, booking is recorded.
+        // Log the exact error so it shows in Vercel logs.
+        console.error(`[book] Customer email FAILED to ${email}:`, err.message);
       }
-
-      return Response.json({ ok: true, ...(cancelToken ? { token: cancelToken } : {}) });
-    } catch (err) {
-      console.error('Email error:', err.message);
-      return Response.json({ ok: false, error: 'email_failed' }, { status: 500 });
     }
+
+    return Response.json({ ok: true, ...(cancelToken ? { token: cancelToken } : {}) });
   }
 
   console.warn('[book] No SMTP — booking logged only.');
