@@ -23,6 +23,21 @@ const nextConfig = {
   async headers() {
     return [{ source: '/(.*)', headers: securityHeaders }];
   },
+  async redirects() {
+    return [
+      {
+        source: '/cancel',
+        destination: '/annuller',
+        permanent: false,
+        has: [{ type: 'query', key: 'token' }],
+      },
+      {
+        source: '/cancel',
+        destination: '/',
+        permanent: false,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

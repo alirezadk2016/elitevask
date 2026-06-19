@@ -238,7 +238,7 @@ export async function POST(request) {
   }
 
   const extrasStr = extras?.length ? (Array.isArray(extras) ? extras.join(', ') : extras) : (L ? 'Ingen' : 'None');
-  const cancelLink = cancelToken ? `${SITE_URL}/cancel?token=${cancelToken}` : null;
+  const cancelLink = cancelToken ? `${SITE_URL}/annuller?token=${cancelToken}` : null;
 
   const textLines = [
     L ? '🚗 Ny bookinganmodning – Elite Vask' : '🚗 New booking request – Elite Vask',

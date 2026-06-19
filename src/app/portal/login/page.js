@@ -3,6 +3,8 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 
+export const dynamic = 'force-dynamic';
+
 function LoginContent() {
   const params = useSearchParams();
   const error = params.get("error");

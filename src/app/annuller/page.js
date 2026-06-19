@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 
-export const dynamic = 'force-dynamic';
 
 function CancelContent() {
   const params = useSearchParams();

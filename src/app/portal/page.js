@@ -2,6 +2,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
+export const dynamic = 'force-dynamic';
+
 const STATUS_LABEL = {
   confirmed: { da: "Bekræftet", color: "#37d278" },
   pending: { da: "Afventer", color: "#d4af37" },
