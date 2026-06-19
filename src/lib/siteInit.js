@@ -635,6 +635,19 @@ function submitBooking(cb){
   input.addEventListener('keydown',function(e){if(e.key==='Enter')sendMsg();});
 })();
 
+/* ====== BILPLEJE GUIDE DROPDOWN ====== */
+(function(){
+  var btn=document.getElementById('guideNavBtn');
+  var panel=document.getElementById('guideDropdown');
+  if(!btn||!panel)return;
+  function openGuide(){btn.setAttribute('aria-expanded','true');panel.classList.add('open');panel.setAttribute('aria-hidden','false');}
+  function closeGuide(){btn.setAttribute('aria-expanded','false');panel.classList.remove('open');panel.setAttribute('aria-hidden','true');}
+  btn.addEventListener('click',function(e){e.stopPropagation();panel.classList.contains('open')?closeGuide():openGuide();});
+  document.getElementById('guideDropdownClose').addEventListener('click',closeGuide);
+  document.addEventListener('click',function(e){if(!panel.contains(e.target)&&e.target!==btn)closeGuide();});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')closeGuide();});
+})();
+
 /* ====== MENU + INIT ====== */
 document.getElementById('menuBtn').addEventListener('click',function(){document.getElementById('vaelg').scrollIntoView({behavior:'smooth'});});
 
