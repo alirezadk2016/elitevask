@@ -341,10 +341,15 @@ export async function POST(request) {
                 </td></tr>
               </table>` : ''}
 
-              <p style="font-size:13px;color:#777;margin:0;line-height:1.7">
+              <p style="font-size:13px;color:#777;margin:0 0 16px;line-height:1.7">
                 ${L
                   ? `Spørgsmål? Ring til os på <a href="tel:+4524440321" style="color:#0d4a25;font-weight:600">+45 24 44 03 21</a> eller skriv til <a href="mailto:${CONTACT_EMAIL}" style="color:#0d4a25">${CONTACT_EMAIL}</a>.`
                   : `Questions? Call us on <a href="tel:+4524440321" style="color:#0d4a25;font-weight:600">+45 24 44 03 21</a> or email <a href="mailto:${CONTACT_EMAIL}" style="color:#0d4a25">${CONTACT_EMAIL}</a>.`}
+              </p>
+              <p style="font-size:12px;color:#aaa;margin:0;line-height:1.6;border-top:1px solid #eee;padding-top:14px">
+                ${L
+                  ? '📬 Modtager du ikke vores e-mails? Tjek venligst din spam- eller junk-mappe og markér os som sikker afsender.'
+                  : "📬 Not receiving our emails? Please check your spam or junk folder and mark us as a safe sender."}
               </p>
             `,
           }),
