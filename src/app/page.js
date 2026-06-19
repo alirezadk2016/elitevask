@@ -10,6 +10,7 @@ import Why from "@/components/Why";
 import Info from "@/components/Info";
 import Reviews from "@/components/Reviews";
 import FAQ from "@/components/FAQ";
+import GuideSection from "@/components/GuideSection";
 import LocalSEO from "@/components/LocalSEO";
 import Contact from "@/components/Contact";
 import Footer from "@/components/Footer";
@@ -34,6 +35,7 @@ export default function Page() {
       <Why />
       <Info />
       <Reviews />
+      <GuideSection />
       <FAQ />
       <LocalSEO />
       <Contact />
