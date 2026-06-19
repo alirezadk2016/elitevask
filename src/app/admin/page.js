@@ -1,5 +1,5 @@
 "use client";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 
 const GREEN = "#37d278";
 const DARK  = "#0a0f0c";
@@ -30,13 +30,26 @@ function Field({ label, value, green }) {
   );
 }
 
+function ConfirmBar({ msg, onYes, onNo }) {
+  return (
+    <div style={{ background: "rgba(0,0,0,.6)", borderRadius: 10, padding: "12px 14px", marginTop: 10, border: "1px solid rgba(255,255,255,.1)" }}>
+      <p style={{ color: "#ddd", fontSize: 13, margin: "0 0 10px", lineHeight: 1.5 }}>{msg}</p>
+      <div style={{ display: "flex", gap: 8 }}>
+        <button onClick={onYes} style={{ flex: 1, padding: "9px", background: "#c0392b", color: "#fff", border: "none", borderRadius: 8, fontWeight: 700, fontSize: 13, cursor: "pointer" }}>Ja, bekræft</button>
+        <button onClick={onNo}  style={{ flex: 1, padding: "9px", background: "rgba(255,255,255,.08)", color: "#aaa", border: "none", borderRadius: 8, fontWeight: 600, fontSize: 13, cursor: "pointer" }}>Annuller</button>
+      </div>
+    </div>
+  );
+}
+
 function BookingCard({ b, secret, onCancel, onDelete }) {
   const [cancelling, setCancelling] = useState(false);
-  const [deleting, setDeleting]     = useState(false);
-  const [expanded, setExpanded]     = useState(false);
+  const [deleting,   setDeleting]   = useState(false);
+  const [expanded,   setExpanded]   = useState(false);
+  const [confirm,    setConfirm]    = useState(null); // "cancel" | "delete" | null
 
   async function doCancel() {
-    if (!confirm("Send annullering til kunden?")) return;
+    setConfirm(null);
     setCancelling(true);
     try {
       const r = await fetch("/api/admin/delete-booking", {
@@ -49,7 +62,7 @@ function BookingCard({ b, secret, onCancel, onDelete }) {
   }
 
   async function doDelete() {
-    if (!confirm("Slet permanent?")) return;
+    setConfirm(null);
     setDeleting(true);
     try {
       const r = await fetch("/api/admin/delete-booking", {
@@ -72,13 +85,12 @@ function BookingCard({ b, secret, onCancel, onDelete }) {
       overflow: "hidden",
       opacity: cancelled ? 0.75 : 1,
     }}>
-      {/* Top bar */}
       <div
-        onClick={() => setExpanded(e => !e)}
-        style={{ padding: "16px 18px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}
+        onClick={() => { setExpanded(e => !e); setConfirm(null); }}
+        style={{ padding: "16px 18px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, WebkitTapHighlightColor: "transparent" }}
       >
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
             <span style={{ color: "#fff", fontWeight: 700, fontSize: 15 }}>{b.name || "Ukendt"}</span>
             <span style={{
               fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 20,
@@ -87,7 +99,8 @@ function BookingCard({ b, secret, onCancel, onDelete }) {
             }}>{STATUS_LABEL[b.status] || b.status}</span>
           </div>
           <div style={{ color: "#aaa", fontSize: 13, marginTop: 4 }}>
-            {fmtDate(b.date)} · kl. {b.time} &nbsp;·&nbsp; <span style={{ color: GREEN }}>{b.price || "-"}</span>
+            {fmtDate(b.date)} · kl. {b.time}
+            <span style={{ color: GREEN }}> · {b.price || "-"}</span>
           </div>
         </div>
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#555" strokeWidth="2.5" strokeLinecap="round"
@@ -96,42 +109,55 @@ function BookingCard({ b, secret, onCancel, onDelete }) {
         </svg>
       </div>
 
-      {/* Details */}
       {expanded && (
         <div style={{ padding: "0 18px 18px", borderTop: `1px solid ${BORDER}` }}>
           <div style={{ paddingTop: 16, display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: "4px 20px" }}>
-            <Field label="Bil"      value={b.car} />
-            <Field label="Pakke"    value={b.pkg} />
-            <Field label="Pris"     value={b.price} green />
-            <Field label="Adresse"  value={b.addr ? `${b.addr}, ${b.zip} ${b.city}` : null} />
-            <Field label="E-mail"   value={b.email} />
-            <Field label="Telefon"  value={b.phone} />
-            <Field label="Booket"   value={fmtBooked(b.bookedAt)} />
+            <Field label="Bil"     value={b.car} />
+            <Field label="Pakke"   value={b.pkg} />
+            <Field label="Pris"    value={b.price} green />
+            <Field label="Adresse" value={b.addr ? `${b.addr}, ${b.zip} ${b.city}` : null} />
+            <Field label="E-mail"  value={b.email} />
+            <Field label="Telefon" value={b.phone} />
+            <Field label="Booket"  value={fmtBooked(b.bookedAt)} />
             {b.extras?.length ? <Field label="Tilvalg" value={b.extras.join(", ")} /> : null}
             {b.msg ? <div style={{ gridColumn: "1/-1" }}><Field label="Besked" value={b.msg} /></div> : null}
           </div>
 
-          {/* Actions */}
           <div style={{ display: "flex", gap: 10, marginTop: 16, flexWrap: "wrap" }}>
             {!cancelled && (
-              <button onClick={doCancel} disabled={cancelling} style={{
+              <button onClick={() => setConfirm(confirm === "cancel" ? null : "cancel")} disabled={cancelling} style={{
                 flex: 1, minWidth: 120, padding: "11px 16px",
-                background: "rgba(212,175,55,.12)", color: "#d4af37",
-                border: "1px solid rgba(212,175,55,.3)", borderRadius: 10,
-                fontWeight: 700, fontSize: 13, cursor: "pointer",
+                background: confirm === "cancel" ? "rgba(212,175,55,.25)" : "rgba(212,175,55,.12)",
+                color: "#d4af37", border: "1px solid rgba(212,175,55,.3)",
+                borderRadius: 10, fontWeight: 700, fontSize: 13, cursor: "pointer",
               }}>
                 {cancelling ? "..." : "✕ Annuller"}
               </button>
             )}
-            <button onClick={doDelete} disabled={deleting} style={{
+            <button onClick={() => setConfirm(confirm === "delete" ? null : "delete")} disabled={deleting} style={{
               flex: 1, minWidth: 120, padding: "11px 16px",
-              background: "rgba(231,76,60,.1)", color: "#e74c3c",
-              border: "1px solid rgba(231,76,60,.25)", borderRadius: 10,
-              fontWeight: 700, fontSize: 13, cursor: "pointer",
+              background: confirm === "delete" ? "rgba(231,76,60,.25)" : "rgba(231,76,60,.1)",
+              color: "#e74c3c", border: "1px solid rgba(231,76,60,.25)",
+              borderRadius: 10, fontWeight: 700, fontSize: 13, cursor: "pointer",
             }}>
               {deleting ? "..." : "🗑 Slet"}
             </button>
           </div>
+
+          {confirm === "cancel" && (
+            <ConfirmBar
+              msg="Annuller booking og send e-mail til kunden?"
+              onYes={doCancel}
+              onNo={() => setConfirm(null)}
+            />
+          )}
+          {confirm === "delete" && (
+            <ConfirmBar
+              msg="Slet booking permanent? Dette kan ikke fortrydes."
+              onYes={doDelete}
+              onNo={() => setConfirm(null)}
+            />
+          )}
         </div>
       )}
     </div>
@@ -149,13 +175,20 @@ export default function AdminPage() {
     setLoading(true); setError("");
     try {
       const r = await fetch("/api/admin/bookings", { headers: { Authorization: `Bearer ${s}` } });
-      if (r.status === 401) { setError("Forkert adgangskode."); return; }
+      if (r.status === 401) { setError("Forkert adgangskode."); sessionStorage.removeItem("adm"); return; }
       const data = await r.json();
       setBookings(data.bookings || []);
       setAuthed(true);
+      sessionStorage.setItem("adm", s);
     } catch { setError("Netværksfejl — prøv igen."); }
     finally { setLoading(false); }
   }, []);
+
+  // Auto-login from session
+  useEffect(() => {
+    const saved = sessionStorage.getItem("adm");
+    if (saved) { setSecret(saved); load(saved); }
+  }, [load]);
 
   const confirmed = bookings.filter(b => b.status !== "cancelled").length;
   const cancelled = bookings.filter(b => b.status === "cancelled").length;
@@ -174,12 +207,12 @@ export default function AdminPage() {
           placeholder="Adgangskode"
           value={secret}
           onChange={e => setSecret(e.target.value)}
-          style={{ width: "100%", padding: "13px 16px", borderRadius: 10, border: `1px solid rgba(255,255,255,.1)`, background: "#0d170f", color: "#fff", fontSize: 15, boxSizing: "border-box", marginBottom: 12, outline: "none", fontFamily: "inherit" }}
+          style={{ width: "100%", padding: "13px 16px", borderRadius: 10, border: "1px solid rgba(255,255,255,.1)", background: "#0d170f", color: "#fff", fontSize: 15, boxSizing: "border-box", marginBottom: 12, outline: "none", fontFamily: "inherit" }}
           autoFocus
         />
         {error && <p style={{ color: "#e74c3c", fontSize: 13, margin: "0 0 10px", textAlign: "center" }}>{error}</p>}
-        <button type="submit" style={{ width: "100%", padding: 13, background: GREEN, color: DARK, border: "none", borderRadius: 10, fontWeight: 800, fontSize: 15, cursor: "pointer", fontFamily: "inherit" }}>
-          Log ind →
+        <button type="submit" disabled={loading} style={{ width: "100%", padding: 13, background: GREEN, color: DARK, border: "none", borderRadius: 10, fontWeight: 800, fontSize: 15, cursor: "pointer", fontFamily: "inherit" }}>
+          {loading ? "..." : "Log ind →"}
         </button>
       </form>
     </div>
@@ -187,7 +220,6 @@ export default function AdminPage() {
 
   return (
     <div style={{ minHeight: "100dvh", background: DARK, fontFamily: "-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" }}>
-      {/* Header */}
       <div style={{ background: CARD, borderBottom: `1px solid ${BORDER}`, padding: "16px 18px", position: "sticky", top: 0, zIndex: 10 }}>
         <div style={{ maxWidth: 720, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
           <div>
@@ -207,11 +239,8 @@ export default function AdminPage() {
         </div>
       </div>
 
-      {/* Content */}
       <div style={{ maxWidth: 720, margin: "0 auto", padding: "20px 14px 40px" }}>
-        {loading && (
-          <div style={{ textAlign: "center", padding: "60px 0", color: "#555" }}>Indlæser...</div>
-        )}
+        {loading && <div style={{ textAlign: "center", padding: "60px 0", color: "#555" }}>Indlæser...</div>}
         {!loading && bookings.length === 0 && (
           <div style={{ textAlign: "center", padding: "80px 0" }}>
             <div style={{ fontSize: 40, marginBottom: 12 }}>📭</div>
