@@ -76,19 +76,19 @@ function BookingCard({ b, secret, onCancel, onDelete }) {
         </span>
       </div>
 
-      {/* Info grid */}
-      <div style={S.grid}>
-        <div style={S.row}><span style={S.label}>Dato</span><span style={S.value}>{fmtDate(b.date)}</span></div>
-        <div style={S.row}><span style={S.label}>Tid</span><span style={S.value}>kl. {b.time}</span></div>
-        <div style={S.row}><span style={S.label}>Bil</span><span style={S.value}>{b.car || "-"}</span></div>
-        <div style={S.row}><span style={S.label}>Pakke</span><span style={S.value}>{b.pkg || "-"}</span></div>
-        <div style={S.row}><span style={S.label}>Pris</span><span style={{ ...S.value, color:"#37d278", fontWeight:700 }}>{b.price || "-"}</span></div>
-        <div style={S.row}><span style={S.label}>Booket</span><span style={S.value}>{fmtBooked(b.bookedAt)}</span></div>
+      {/* Info — compact rows */}
+      <div style={{ fontSize:13, color:"#ccc", lineHeight:1.8, marginBottom:12 }}>
+        <span style={{ color:"#555" }}>📅</span> {fmtDate(b.date)} · kl. {b.time}
+        {" · "}<span style={{ color:"#37d278", fontWeight:700 }}>{b.price || "-"}</span>
       </div>
-      <div style={{ marginBottom:10 }}><span style={S.label}>Adresse</span><span style={S.value}>{b.addr ? `${b.addr}, ${b.zip} ${b.city}` : "-"}</span></div>
-      <div style={{ marginBottom:10 }}><span style={S.label}>E-mail</span><span style={S.value}>{b.email || "-"}</span></div>
-      <div style={{ marginBottom:14 }}><span style={S.label}>Telefon</span><span style={S.value}>{b.phone || "-"}</span></div>
-      {b.msg ? <div style={{ marginBottom:14 }}><span style={S.label}>Besked</span><span style={S.value}>{b.msg}</span></div> : null}
+      <div style={{ fontSize:13, color:"#ccc", lineHeight:1.8, marginBottom:4 }}>
+        <span style={{ color:"#555" }}>🚗</span> {b.car || "-"} · {b.pkg || "-"}
+      </div>
+      {b.addr ? <div style={{ fontSize:13, color:"#aaa", marginBottom:4 }}>📍 {b.addr}, {b.zip} {b.city}</div> : null}
+      {b.email ? <div style={{ fontSize:13, color:"#aaa", marginBottom:4 }}>✉️ {b.email}</div> : null}
+      {b.phone ? <div style={{ fontSize:13, color:"#aaa", marginBottom:4 }}>📞 {b.phone}</div> : null}
+      {b.msg   ? <div style={{ fontSize:13, color:"#888", marginBottom:4, fontStyle:"italic" }}>💬 {b.msg}</div> : null}
+      <div style={{ fontSize:11, color:"#444", marginBottom:12 }}>Booket: {fmtBooked(b.bookedAt)}</div>
 
       {/* Actions */}
       {!cancelled && state === "idle" && (
@@ -135,21 +135,29 @@ export default function AdminPage() {
     setLoading(true); setError("");
     try {
       const r = await fetch("/api/admin/bookings", { headers:{ Authorization:`Bearer ${s}` } });
-      if (r.status === 401) { setError("Forkert adgangskode."); try { sessionStorage.removeItem("adm"); } catch {} return; }
+      if (r.status === 401) { setError("Forkert adgangskode."); clearSecret(); return; }
       const data = await r.json();
       setBookings(data.bookings || []);
       setAuthed(true);
-      try { sessionStorage.setItem("adm", s); } catch {}
+      saveSecret(s);
     } catch { setError("Netværksfejl — prøv igen."); }
     finally { setLoading(false); }
   }, []);
 
   useEffect(() => {
     try {
-      const saved = sessionStorage.getItem("adm");
+      const saved = sessionStorage.getItem("adm") || localStorage.getItem("adm");
       if (saved) { setSecret(saved); load(saved); }
     } catch {}
   }, [load]);
+
+  // Save to both storages for reliability
+  const saveSecret = (s) => {
+    try { sessionStorage.setItem("adm", s); localStorage.setItem("adm", s); } catch {}
+  };
+  const clearSecret = () => {
+    try { sessionStorage.removeItem("adm"); localStorage.removeItem("adm"); } catch {}
+  };
 
   const active    = bookings.filter(b => b.status !== "cancelled").length;
   const cancelled = bookings.filter(b => b.status === "cancelled").length;
