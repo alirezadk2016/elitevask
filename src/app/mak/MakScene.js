@@ -2,7 +2,7 @@
 
 import { useRef, useState, useEffect, Suspense } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
-import { Stars, Text, Html, Environment } from '@react-three/drei'
+import { Html } from '@react-three/drei'
 import * as THREE from 'three'
 import gsap from 'gsap'
 import { projects } from './projects'
@@ -10,14 +10,31 @@ import { projects } from './projects'
 // ─── Floating Stars Particles ──────────────────────────────────────────────
 function SpaceParticles() {
   const ref = useRef()
+  const positions = useRef(null)
+
+  if (!positions.current) {
+    const count = 3000
+    const pos = new Float32Array(count * 3)
+    for (let i = 0; i < count; i++) {
+      pos[i * 3] = (Math.random() - 0.5) * 200
+      pos[i * 3 + 1] = (Math.random() - 0.5) * 200
+      pos[i * 3 + 2] = (Math.random() - 0.5) * 200
+    }
+    positions.current = pos
+  }
+
   useFrame((state) => {
     ref.current.rotation.y = state.clock.elapsedTime * 0.02
     ref.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.01) * 0.05
   })
+
   return (
-    <group ref={ref}>
-      <Stars radius={80} depth={60} count={5000} factor={4} saturation={0} fade speed={1} />
-    </group>
+    <points ref={ref}>
+      <bufferGeometry>
+        <bufferAttribute attach="attributes-position" args={[positions.current, 3]} />
+      </bufferGeometry>
+      <pointsMaterial color="#ffffff" size={0.3} transparent opacity={0.7} sizeAttenuation />
+    </points>
   )
 }
 
@@ -91,28 +108,19 @@ function GlassDoor({ project, position, rotation, onClick, isSelected }) {
         <meshStandardMaterial color={project.color} metalness={1} roughness={0} />
       </mesh>
 
-      {/* Icon on door */}
-      <Text
-        position={[0, 0.4, 0.06]}
-        fontSize={0.35}
-        anchorX="center"
-        anchorY="middle"
-      >
-        {project.icon}
-      </Text>
-
-      {/* Project title */}
-      <Text
-        position={[0, -0.1, 0.06]}
-        fontSize={0.1}
-        color={hovered || isSelected ? project.color : 'white'}
-        anchorX="center"
-        anchorY="middle"
-        font="/fonts/SpaceMono-Regular.ttf"
-        maxWidth={1.2}
-      >
-        {project.title}
-      </Text>
+      {/* Icon + title on door */}
+      <Html position={[0, 0.15, 0.07]} center transform occlude>
+        <div style={{ textAlign: 'center', pointerEvents: 'none', userSelect: 'none' }}>
+          <div style={{ fontSize: 28 }}>{project.icon}</div>
+          <div style={{
+            color: hovered || isSelected ? project.color : '#fff',
+            fontSize: 11,
+            fontFamily: 'monospace',
+            marginTop: 4,
+            textShadow: `0 0 8px ${project.color}`,
+          }}>{project.title}</div>
+        </div>
+      </Html>
 
       {/* Door frame border lines */}
       <lineSegments position={[0, 0, 0.03]}>
@@ -308,13 +316,12 @@ function Room() {
         <planeGeometry args={[3.8, 2.3]} />
         <meshBasicMaterial color="#00060f" />
       </mesh>
-      {/* Screen text */}
-      <Text position={[0, 1.7, -7.85]} fontSize={0.18} color="#00f5ff" anchorX="center">
-        MAK.DEV
-      </Text>
-      <Text position={[0, 1.3, -7.85]} fontSize={0.1} color="#8338ec" anchorX="center">
-        {'< PORTFOLIO />'}
-      </Text>
+      <Html position={[0, 1.5, -7.8]} center transform>
+        <div style={{ textAlign: 'center', pointerEvents: 'none' }}>
+          <div style={{ color: '#00f5ff', fontFamily: 'monospace', fontSize: 14, fontWeight: 'bold', textShadow: '0 0 10px #00f5ff' }}>MAK.DEV</div>
+          <div style={{ color: '#8338ec', fontFamily: 'monospace', fontSize: 9, marginTop: 4 }}>{'< PORTFOLIO />'}</div>
+        </div>
+      </Html>
     </group>
   )
 }
@@ -475,24 +482,25 @@ function FloatingTitle() {
   })
   return (
     <group ref={ref} position={[0, 2.2, 1]}>
-      <Text
-        fontSize={0.38}
-        color="#ffffff"
-        anchorX="center"
-        anchorY="middle"
-        font="/fonts/SpaceMono-Regular.ttf"
-      >
-        MAK's PORTFOLIO
-      </Text>
-      <Text
-        position={[0, -0.5, 0]}
-        fontSize={0.13}
-        color="#8338ec"
-        anchorX="center"
-        anchorY="middle"
-      >
-        {'[ choose a door to explore ]'}
-      </Text>
+      <Html center transform>
+        <div style={{ textAlign: 'center', pointerEvents: 'none', whiteSpace: 'nowrap' }}>
+          <div style={{
+            color: '#fff',
+            fontFamily: 'monospace',
+            fontSize: 24,
+            fontWeight: 'bold',
+            letterSpacing: 4,
+            textShadow: '0 0 20px #8338ec, 0 0 40px #8338ec44',
+          }}>MAK&apos;s PORTFOLIO</div>
+          <div style={{
+            color: '#8338ec',
+            fontFamily: 'monospace',
+            fontSize: 11,
+            marginTop: 8,
+            letterSpacing: 2,
+          }}>[ choose a door to explore ]</div>
+        </div>
+      </Html>
     </group>
   )
 }
