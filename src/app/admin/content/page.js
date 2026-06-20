@@ -18,6 +18,13 @@ const T = {
   gold:         "#d4af37",
   goldDim:      "rgba(212,175,55,.12)",
   goldBorder:   "rgba(212,175,55,.3)",
+  // booking status colors
+  blue:         "#4f8ef7",
+  blueDim:      "rgba(79,142,247,.13)",
+  blueBorder:   "rgba(79,142,247,.4)",
+  amber:        "#f5a623",
+  amberDim:     "rgba(245,166,35,.12)",
+  amberBorder:  "rgba(245,166,35,.38)",
   border:       "rgba(255,255,255,.07)",
   shadow:       "0 1px 3px rgba(0,0,0,.4), 0 4px 16px rgba(0,0,0,.3)",
   shadowL:      "0 2px 8px rgba(0,0,0,.5), 0 8px 32px rgba(0,0,0,.4)",
@@ -430,7 +437,7 @@ export default function AdminPanel() {
         )}
 
         {/* MAIN CONTENT */}
-        <main style={{ padding: narrow ? "20px 16px" : "32px 32px", maxWidth:900 }}>
+        <main style={{ padding: narrow ? "16px 12px" : "28px 28px", width:"100%", boxSizing:"border-box", overflow:"hidden" }}>
 
           {/* Page title + badge */}
           <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:28 }}>
@@ -542,7 +549,7 @@ export default function AdminPanel() {
                     </div>
 
                     {/* Calendar */}
-                    <div ref={calScrollRef} style={{ overflowX:"auto", borderRadius:14, border:`1px solid ${T.border}`, background:T.bg1, boxShadow:T.shadow }}>
+                    <div ref={calScrollRef} style={{ overflowX:"auto", borderRadius:14, border:`1px solid rgba(255,255,255,.1)`, background:T.bg1, boxShadow:"0 0 0 1px rgba(55,210,120,.06), 0 4px 24px rgba(0,0,0,.5)" }}>
                       <div style={{ minWidth: TIME_W + COL_W * 7, position:"relative" }}>
 
                         {/* Day headers */}
@@ -560,17 +567,19 @@ export default function AdminPanel() {
                                 <div style={{ display:"inline-flex", alignItems:"center", justifyContent:"center", width:32, height:32, borderRadius:"50%", background:isToday?T.accent:"transparent", marginBottom:4 }}>
                                   <span style={{ fontSize:16, fontWeight:700, color:isToday?T.bg0:isWeekend?"rgba(255,255,255,.35)":T.t1, lineHeight:1 }}>{d.getDate()}</span>
                                 </div>
-                                {/* Booking dots */}
-                                {dayBookings.length > 0 ? (
-                                  <div style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:3, marginTop:2 }}>
-                                    {dayBookings.slice(0,4).map((_,di) => (
-                                      <span key={di} style={{ width:5, height:5, borderRadius:"50%", background:isToday?T.accent:T.accentBorder, flexShrink:0 }}/>
-                                    ))}
-                                    {dayBookings.length > 4 && <span style={{ fontSize:9, color:T.accent, fontWeight:700 }}>+{dayBookings.length-4}</span>}
-                                  </div>
-                                ) : (
-                                  <div style={{ height:9 }}/>
-                                )}
+                                {/* Today pulse dot + booking dots */}
+                                <div style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:3, marginTop:3, minHeight:10 }}>
+                                  {isToday && (
+                                    <span style={{ position:"relative", display:"inline-flex", alignItems:"center", justifyContent:"center" }}>
+                                      <span style={{ width:7, height:7, borderRadius:"50%", background:T.accent, display:"block", position:"relative", zIndex:1 }}/>
+                                      <span style={{ position:"absolute", width:13, height:13, borderRadius:"50%", background:"rgba(55,210,120,.25)", animation:"calPulse 1.8s ease-out infinite" }}/>
+                                    </span>
+                                  )}
+                                  {dayBookings.slice(0, isToday ? 3 : 4).map((_,di) => (
+                                    <span key={di} style={{ width:5, height:5, borderRadius:"50%", background:T.blue, flexShrink:0, opacity:.7 }}/>
+                                  ))}
+                                  {dayBookings.length > (isToday ? 3 : 4) && <span style={{ fontSize:9, color:T.blue, fontWeight:700 }}>+{dayBookings.length-(isToday?3:4)}</span>}
+                                </div>
                               </div>
                             );
                           })}
@@ -625,13 +634,14 @@ export default function AdminPanel() {
                                       const durationMin = slots * 30;
                                       const heightPx = Math.round((durationMin / 60) * ROW_H) - 6;
                                       const isCancelled = b.status === "cancelled";
-                                      const isPending = b.status === "pending";
+                                      const isPending   = b.status === "pending";
+                                      const isCompleted = b.status === "completed";
 
-                                      // Rich color per status
-                                      const cardBg    = isCancelled ? "rgba(229,83,75,.1)"     : isPending ? "rgba(212,175,55,.1)" : "rgba(55,210,120,.13)";
-                                      const cardBor   = isCancelled ? "rgba(229,83,75,.35)"    : isPending ? "rgba(212,175,55,.35)" : "rgba(55,210,120,.4)";
-                                      const cardLeft  = isCancelled ? T.danger                 : isPending ? T.gold                : T.accent;
-                                      const cardText  = isCancelled ? T.danger                 : isPending ? T.gold                : T.accent;
+                                      // confirmed/completed = blue, cancelled = amber, pending = grey
+                                      const cardBg   = isCancelled ? T.amberDim  : isPending ? "rgba(255,255,255,.05)" : T.blueDim;
+                                      const cardBor  = isCancelled ? T.amberBorder : isPending ? "rgba(255,255,255,.12)" : T.blueBorder;
+                                      const cardLeft = isCancelled ? T.amber      : isPending ? T.t3                   : T.blue;
+                                      const cardText = isCancelled ? T.amber      : isPending ? T.t2                   : T.blue;
 
                                       return (
                                         <div key={b.token}
