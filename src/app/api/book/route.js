@@ -259,7 +259,6 @@ export async function POST(request) {
               ${tr('Email', email ? `<a href="mailto:${email}" style="color:#0d4a25">${email}</a>` : '-', true)}
               ${msg ? tr('Besked', msg) : ''}
             </table>
-            ${cancelLink ? `<p style="font-size:12px;color:#999;margin:0">Annulleringslink (24t): <a href="${cancelLink}" style="color:#0d4a25">${cancelLink}</a></p>` : ''}
           `,
         }),
       });
