@@ -510,7 +510,7 @@ export default function AdminPanel() {
                 {!bLoading && !bError && (
                   <>
                     {/* Week nav toolbar */}
-                    <div style={{ display:"flex", alignItems:"center", gap: narrow ? 8 : 12, marginBottom:16, background:"linear-gradient(135deg,rgba(17,30,21,.98),rgba(13,22,16,.98))", border:`1px solid rgba(55,210,120,.18)`, borderRadius:16, padding: narrow ? "10px 12px" : "12px 18px", boxShadow:"0 2px 16px rgba(0,0,0,.5), 0 0 0 1px rgba(55,210,120,.08)", minWidth:0, overflow:"hidden" }}>
+                    <div style={{ display:"flex", alignItems:"center", gap: narrow ? 8 : 12, marginBottom:16, background:T.bg1, border:`1px solid rgba(255,255,255,.1)`, borderRadius:14, padding: narrow ? "10px 12px" : "12px 18px", boxShadow:"0 0 0 1px rgba(55,210,120,.06), 0 4px 24px rgba(0,0,0,.5)", minWidth:0, overflow:"hidden" }}>
 
                       {/* Prev / Today / Next */}
                       <div style={{ display:"flex", gap:4, flexShrink:0 }}>
