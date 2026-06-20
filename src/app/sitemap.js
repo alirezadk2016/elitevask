@@ -9,5 +9,10 @@ export default function sitemap() {
     { url: `${SITE_URL}/guide/hvor-ofte`, lastModified: new Date('2026-06-01'), changeFrequency: 'monthly', priority: 0.7 },
     { url: `${SITE_URL}/guide/salt-og-lak`, lastModified: new Date('2026-06-01'), changeFrequency: 'monthly', priority: 0.7 },
     { url: `${SITE_URL}/guide/dampvask-vs-traditionel`, lastModified: new Date('2026-06-19'), changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${SITE_URL}/bilvask/koebenhavn`, lastModified: new Date('2026-06-20'), changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${SITE_URL}/bilvask/roskilde`, lastModified: new Date('2026-06-20'), changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${SITE_URL}/bilvask/koege`, lastModified: new Date('2026-06-20'), changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${SITE_URL}/bilvask/naestved`, lastModified: new Date('2026-06-20'), changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${SITE_URL}/bilvask/ringsted`, lastModified: new Date('2026-06-20'), changeFrequency: 'monthly', priority: 0.8 },
   ];
 }

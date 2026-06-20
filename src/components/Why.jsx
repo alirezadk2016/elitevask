@@ -18,8 +18,8 @@ const HTML = `<!-- WHY -->
       <div class="steam-fact">
         <div class="steam-fact-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c1 2.5 4 6 4 9a4 4 0 0 1-8 0c0-3 3-6.5 4-9z"/><path d="M12 15v3"/><path d="M9.5 20h5"/></svg></div>
         <div class="steam-fact-body">
-          <h4 data-i18n="steam_f1t">Fjerner mikrorids & hvirvelmærker</h4>
-          <p data-i18n="steam_f1p">Den intense varme fra dampen blødgør lakoverfladen og jævner fine ridser og swirl marks ud — skader som traditionel vandvask aldrig kan udbedre, men kun forværre over tid.</p>
+          <h4 data-i18n="steam_f1t">Skånsom rensning – beskytter lakken</h4>
+          <p data-i18n="steam_f1p">Dampvask løsner snavs termisk uden børster og aggressive kemikalier – og reducerer dermed synligheden af overfladisk snavs og belægninger. Resultatet er en renere, friskere overflade uden de ridser, som roterende børster i tunnelvaske typisk efterlader.</p>
         </div>
       </div>
       <div class="steam-fact">

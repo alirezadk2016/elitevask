@@ -3,11 +3,11 @@ const HTML = `<!-- LOCAL SEO -->
   <div class="eyebrow" data-i18n="local_eyebrow">Serviceområde</div>
   <h2 class="sec-title" data-i18n="local_title">Mobil bilvask i hele Sjælland</h2>
   <div class="local-chips">
-    <a href="#kontakt" class="chip">Bilvask i Næstved</a>
-    <a href="#kontakt" class="chip">Bilvask i Roskilde</a>
-    <a href="#kontakt" class="chip">Bilvask i Køge</a>
-    <a href="#kontakt" class="chip">Bilvask i Ringsted</a>
-    <a href="#kontakt" class="chip">Bilvask i København</a>
+    <a href="/bilvask/koebenhavn" class="chip">Bilvask i København</a>
+    <a href="/bilvask/roskilde" class="chip">Bilvask i Roskilde</a>
+    <a href="/bilvask/koege" class="chip">Bilvask i Køge</a>
+    <a href="/bilvask/naestved" class="chip">Bilvask i Næstved</a>
+    <a href="/bilvask/ringsted" class="chip">Bilvask i Ringsted</a>
     <a href="#kontakt" class="chip">Bilvask i Stevns Kommune</a>
     <a href="#kontakt" class="chip">Bilvask i Faxe Kommune</a>
     <a href="#kontakt" class="chip">Bilvask i Helsingør</a>
