@@ -873,18 +873,16 @@ section{position:relative}
 /* ====== STEAM FACTS ACCORDION (mobile only) ====== */
 @media(max-width:880px){
   .sf-acc{cursor:pointer;padding:0!important;overflow:hidden}
-  .sf-trigger{display:flex;align-items:center;gap:14px;padding:18px 18px;width:100%}
+  .sf-trigger{display:grid;grid-template-columns:44px 1fr 20px;align-items:center;gap:12px;padding:16px 16px}
   .sf-trigger .steam-fact-icon{width:44px;height:44px;flex-shrink:0}
-  .sf-title{font-size:15px;font-weight:700;color:#fff;flex:1;margin:0;line-height:1.3}
-  .sf-chevron{width:18px;height:18px;color:var(--muted);flex-shrink:0;transition:transform .3s}
+  .sf-title{font-size:14px;font-weight:700;color:#fff;margin:0;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .sf-chevron{width:18px;height:18px;color:var(--muted);transition:transform .3s;justify-self:end}
   .sf-acc.sf-open .sf-chevron{transform:rotate(180deg);color:var(--green)}
-  .sf-acc.sf-open{border-color:rgba(55,210,120,.3)!important}
-  .sf-body{max-height:0;overflow:hidden;transition:max-height .35s cubic-bezier(0.4,0,0.2,1)}
-  .sf-acc.sf-open .sf-body{max-height:300px}
-  .sf-body .steam-fact-body{padding:0 18px 18px 76px}
-  .sf-body .steam-fact-body p{font-size:13.5px;color:var(--muted);line-height:1.65;margin:0}
-  /* desktop: hide chevron, show as before */
-  .steam-fact-body h4{display:none}
+  .sf-acc.sf-open{border-color:rgba(55,210,120,.3)!important;background:rgba(55,210,120,.04)}
+  .sf-body{max-height:0;overflow:hidden;transition:max-height .4s cubic-bezier(0.4,0,0.2,1)}
+  .sf-acc.sf-open .sf-body{max-height:400px}
+  .sf-body .steam-fact-body{padding:0 16px 18px 72px}
+  .sf-body .steam-fact-body p{font-size:13.5px;color:rgba(255,255,255,.65)!important;line-height:1.7;margin:0}
 }
 @media(min-width:881px){
   .sf-chevron{display:none}

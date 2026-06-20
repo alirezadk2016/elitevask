@@ -18,7 +18,7 @@ const HTML = `<!-- WHY -->
       <div class="steam-fact sf-acc" data-sf="0">
         <div class="sf-trigger">
           <div class="steam-fact-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c1 2.5 4 6 4 9a4 4 0 0 1-8 0c0-3 3-6.5 4-9z"/><path d="M12 15v3"/><path d="M9.5 20h5"/></svg></div>
-          <h4 class="sf-title" data-i18n="steam_f1t">Skånsom rensning – beskytter lakken</h4>
+          <h4 class="sf-title">Skånsom rensning</h4>
           <svg class="sf-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
         </div>
         <div class="sf-body">
@@ -28,7 +28,7 @@ const HTML = `<!-- WHY -->
       <div class="steam-fact sf-acc" data-sf="1">
         <div class="sf-trigger">
           <div class="steam-fact-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
-          <h4 class="sf-title" data-i18n="steam_f2t">Giver lakken en naturlig dybdeglans</h4>
+          <h4 class="sf-title">Naturlig dybdeglans</h4>
           <svg class="sf-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
         </div>
         <div class="sf-body">
@@ -38,7 +38,7 @@ const HTML = `<!-- WHY -->
       <div class="steam-fact sf-acc" data-sf="2">
         <div class="sf-trigger">
           <div class="steam-fact-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg></div>
-          <h4 class="sf-title" data-i18n="steam_f3t">Langt bedre end traditionel vandvask</h4>
+          <h4 class="sf-title">Bedre end tunnelvask</h4>
           <svg class="sf-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
         </div>
         <div class="sf-body">

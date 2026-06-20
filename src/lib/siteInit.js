@@ -1038,25 +1038,20 @@ function submitBooking(cb){
 /* ====== STEAM FACTS ACCORDION (mobile) ====== */
 (function(){
   function initSteamAcc(){
-    if(window.innerWidth>880)return;
     var items=document.querySelectorAll('.sf-acc');
     if(!items.length)return;
     items.forEach(function(item){
-      var trigger=item.querySelector('.sf-trigger');
-      if(!trigger||item.dataset.sfBound)return;
+      if(item.dataset.sfBound)return;
       item.dataset.sfBound='1';
-      trigger.addEventListener('click',function(){
+      item.addEventListener('click',function(){
+        if(window.innerWidth>880)return;
         var isOpen=item.classList.contains('sf-open');
         items.forEach(function(i){i.classList.remove('sf-open');});
         if(!isOpen)item.classList.add('sf-open');
       });
     });
   }
-  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',initSteamAcc);}else{initSteamAcc();}
-  window.addEventListener('resize',function(){
-    var items=document.querySelectorAll('.sf-acc');
-    if(window.innerWidth>880){items.forEach(function(i){i.classList.remove('sf-open');});}
-  });
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',initSteamAcc);}else{setTimeout(initSteamAcc,0);}
 })();
 
 /* ====== HAMBURGER DRAWER ====== */
