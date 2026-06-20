@@ -193,7 +193,10 @@ export default function AdminPanel() {
   const [hoverDropzone, setHoverDropzone] = useState(false);
   const [narrow, setNarrow]               = useState(false);
   const [loginErr, setLoginErr]           = useState("");
+  const [nowTime, setNowTime]             = useState(() => new Date());
   const fileRef = useRef();
+  const todayColRef = useRef();
+  const calScrollRef = useRef();
 
   useEffect(() => {
     const check = () => setNarrow(window.innerWidth < 700);
@@ -201,6 +204,22 @@ export default function AdminPanel() {
     window.addEventListener("resize", check);
     return () => window.removeEventListener("resize", check);
   }, []);
+
+  // Update current time every minute
+  useEffect(() => {
+    const id = setInterval(() => setNowTime(new Date()), 60000);
+    return () => clearInterval(id);
+  }, []);
+
+  // Auto-scroll calendar to today column on mobile
+  useEffect(() => {
+    if (tab === "bookings" && narrow && calScrollRef.current && todayColRef.current) {
+      const container = calScrollRef.current;
+      const col = todayColRef.current;
+      const offset = col.offsetLeft - container.offsetWidth / 2 + col.offsetWidth / 2;
+      container.scrollLeft = Math.max(0, offset);
+    }
+  }, [tab, narrow, authed]);
 
   const loadBookings = useCallback(async (s) => {
     setBLoading(true); setBError("");
@@ -523,8 +542,8 @@ export default function AdminPanel() {
                     </div>
 
                     {/* Calendar */}
-                    <div style={{ overflowX:"auto", borderRadius:14, border:`1px solid ${T.border}`, background:T.bg1, boxShadow:T.shadow }}>
-                      <div style={{ minWidth: TIME_W + COL_W * 7 }}>
+                    <div ref={calScrollRef} style={{ overflowX:"auto", borderRadius:14, border:`1px solid ${T.border}`, background:T.bg1, boxShadow:T.shadow }}>
+                      <div style={{ minWidth: TIME_W + COL_W * 7, position:"relative" }}>
 
                         {/* Day headers */}
                         <div style={{ display:"flex", borderBottom:`1px solid ${T.border}`, background:T.bg0 }}>
@@ -535,7 +554,7 @@ export default function AdminPanel() {
                             const dayBookings = bookings.filter(b => b.date === iso && b.status !== "cancelled");
                             const isWeekend = i >= 5;
                             return (
-                              <div key={i} style={{ width:COL_W, flexShrink:0, textAlign:"center", padding:"10px 6px 8px", background:isToday?"rgba(55,210,120,.06)":isWeekend?"rgba(255,255,255,.015)":"transparent", borderRight: i<6 ? `1px solid ${T.border}` : "none" }}>
+                              <div key={i} ref={isToday ? todayColRef : null} style={{ width:COL_W, flexShrink:0, textAlign:"center", padding:"10px 6px 8px", background:isToday?"rgba(55,210,120,.06)":isWeekend?"rgba(255,255,255,.015)":"transparent", borderRight: i<6 ? `1px solid ${T.border}` : "none" }}>
                                 <div style={{ fontSize:10, fontWeight:600, color:isToday?T.accent:isWeekend?"rgba(255,255,255,.2)":T.t4, textTransform:"uppercase", letterSpacing:1, marginBottom:6 }}>{DAYS[i]}</div>
                                 {/* Date circle — filled for today */}
                                 <div style={{ display:"inline-flex", alignItems:"center", justifyContent:"center", width:32, height:32, borderRadius:"50%", background:isToday?T.accent:"transparent", marginBottom:4 }}>
@@ -557,16 +576,39 @@ export default function AdminPanel() {
                           })}
                         </div>
 
+                        {/* Current time line — only shown when this week is visible */}
+                        {weekOffset === 0 && (() => {
+                          const nowH = nowTime.getHours();
+                          const nowM = nowTime.getMinutes();
+                          if (nowH < 8 || nowH >= 21) return null;
+                          // Header height ~67px, each row ROW_H px
+                          const HEADER_H = 67;
+                          const topPx = HEADER_H + (nowH - 8) * ROW_H + (nowM / 60) * ROW_H;
+                          const todayIdx = weekDays.findIndex(d => toISO(d) === todayISO);
+                          const leftPx = TIME_W + todayIdx * COL_W;
+                          return (
+                            <div style={{ position:"absolute", top:topPx, left:0, right:0, zIndex:10, pointerEvents:"none", display:"flex", alignItems:"center" }}>
+                              {/* dot on time label */}
+                              <div style={{ width:TIME_W, display:"flex", justifyContent:"flex-end", paddingRight:6 }}>
+                                <div style={{ width:9, height:9, borderRadius:"50%", background:"#e5534b", boxShadow:"0 0 0 3px rgba(229,83,75,.25)" }}/>
+                              </div>
+                              {/* line across all columns */}
+                              <div style={{ flex:1, height:2, background:"rgba(229,83,75,.7)", boxShadow:"0 0 6px rgba(229,83,75,.4)" }}/>
+                            </div>
+                          );
+                        })()}
+
                         {/* Time rows */}
                         {HOURS.map((hour, hi) => {
                           const isLast = hi === HOURS.length - 1;
-                          const nowHour = new Date().getHours();
-                          const isCurrentHour = weekOffset === 0 && hour === nowHour;
+                          const nowH = nowTime.getHours();
+                          const isPast = weekOffset < 0 || (weekOffset === 0 && hour < nowH);
+                          const isCurrentHour = weekOffset === 0 && hour === nowH;
                           return (
-                            <div key={hour} style={{ display:"flex", borderBottom: isLast?"none":`1px solid ${T.border}`, minHeight:ROW_H, position:"relative" }}>
+                            <div key={hour} style={{ display:"flex", borderBottom: isLast?"none":`1px solid ${T.border}`, minHeight:ROW_H, position:"relative", background: isPast ? "rgba(0,0,0,.12)" : "transparent" }}>
                               {/* Time label */}
                               <div style={{ width:TIME_W, flexShrink:0, borderRight:`1px solid ${T.border}`, padding:"6px 8px 0", textAlign:"right", paddingTop:8 }}>
-                                <span style={{ fontSize:11, color:isCurrentHour?T.accent:T.t4, fontWeight:isCurrentHour?700:500, fontVariantNumeric:"tabular-nums" }}>
+                                <span style={{ fontSize:11, color:isCurrentHour?"#e5534b":isPast?T.t4:T.t3, fontWeight:isCurrentHour?700:500, fontVariantNumeric:"tabular-nums" }}>
                                   {String(hour).padStart(2,"0")}:00
                                 </span>
                               </div>

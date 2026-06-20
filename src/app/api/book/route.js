@@ -306,6 +306,18 @@ export async function POST(request) {
               </table>
 
 
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:20px">
+                <tr><td style="background:#fff8e6;border-left:4px solid #f5a623;border-radius:0 8px 8px 0;padding:12px 16px">
+                  <p style="margin:0;font-size:13px;color:#7a5c00;line-height:1.6">
+                    <strong>${L ? '⚠️ Afbud / ændring' : '⚠️ Cancellation policy'}</strong><br>
+                    ${L
+                      ? 'Ønsker du at aflyse eller ændre din booking, bedes du kontakte os <strong>mindst 24 timer i forvejen</strong>.'
+                      : 'If you need to cancel or change your booking, please contact us <strong>at least 24 hours in advance</strong>.'}
+                    <br><a href="tel:+4524440321" style="color:#0d4a25;font-weight:700">+45 24 44 03 21</a>
+                  </p>
+                </td></tr>
+              </table>
+
               <p style="font-size:13px;color:#777;margin:0 0 16px;line-height:1.7">
                 ${L
                   ? `Spørgsmål? Ring til os på <a href="tel:+4524440321" style="color:#0d4a25;font-weight:600">+45 24 44 03 21</a> eller skriv til <a href="mailto:${CONTACT_EMAIL}" style="color:#0d4a25">${CONTACT_EMAIL}</a>.`
