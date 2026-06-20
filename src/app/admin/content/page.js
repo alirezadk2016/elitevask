@@ -26,6 +26,29 @@ const T = {
 const FF = "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
 
 const MONTHS = ["jan","feb","mar","apr","maj","jun","jul","aug","sep","okt","nov","dec"];
+const FULL_MONTHS = ["januar","februar","marts","april","maj","juni","juli","august","september","oktober","november","december"];
+const DAYS = ["Man","Tir","Ons","Tor","Fre","Lør","Søn"];
+
+function getWeekStart(offset) {
+  const d = new Date();
+  const day = d.getDay();
+  const diff = (day === 0 ? -6 : 1 - day);
+  d.setDate(d.getDate() + diff + offset * 7);
+  d.setHours(0,0,0,0);
+  return d;
+}
+
+function toISO(d) {
+  return d.toISOString().slice(0,10);
+}
+
+function getWeekNumber(d) {
+  const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  const dayNum = date.getUTCDay() || 7;
+  date.setUTCDate(date.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(date.getUTCFullYear(),0,1));
+  return Math.ceil((((date - yearStart) / 86400000) + 1)/7);
+}
 function fmtDate(d) {
   if (!d) return "-";
   const [,m,day] = d.split("-");
@@ -151,6 +174,9 @@ export default function AdminPanel() {
   const [bookings, setBookings]           = useState([]);
   const [bLoading, setBLoading]           = useState(false);
   const [bError, setBError]               = useState("");
+  const [weekOffset, setWeekOffset]       = useState(0);
+  const [selectedBooking, setSelectedBooking] = useState(null);
+  const [modalState, setModalState]       = useState("idle");
 
   // Content state
   const [gallery, setGallery]             = useState([]);
@@ -397,30 +423,175 @@ export default function AdminPanel() {
             </span>
           </div>
 
-          {/* ── BOOKINGS ── */}
-          {tab === "bookings" && (
-            <>
-              {bLoading && <div style={{ textAlign:"center", color:T.t3, padding:"60px 0", fontSize:14 }}>Indlæser…</div>}
-              {bError && (
-                <div style={{ display:"flex", alignItems:"center", gap:8, background:T.dangerDim, border:`1px solid ${T.dangerBorder}`, borderRadius:8, padding:"12px 16px", fontSize:13, color:T.danger, marginBottom:16 }}>
-                  {bError}
-                </div>
-              )}
-              {!bLoading && bookings.length === 0 && !bError && (
-                <div style={{ textAlign:"center", padding:"80px 0" }}>
-                  <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke={T.t4} strokeWidth="1.5" strokeLinecap="round" style={{ marginBottom:16, opacity:.4 }}><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                  <p style={{ fontSize:16, fontWeight:700, color:T.t2, margin:"0 0 6px" }}>Ingen bookinger endnu</p>
-                  <p style={{ fontSize:13, color:T.t3, margin:0 }}>Nye bookinger vises her</p>
-                </div>
-              )}
-              {bookings.map(b => (
-                <BookingCard key={b.token} b={b} secret={secret}
-                  onCancel={token => setBookings(bs => bs.map(x => x.token===token ? {...x, status:"cancelled"} : x))}
-                  onDelete={token => setBookings(bs => bs.filter(x => x.token!==token))}
-                />
-              ))}
-            </>
-          )}
+          {/* ── BOOKINGS WEEKLY CALENDAR ── */}
+          {tab === "bookings" && (() => {
+            const weekStart = getWeekStart(weekOffset);
+            const weekDays = Array.from({length:7}, (_,i) => {
+              const d = new Date(weekStart);
+              d.setDate(weekStart.getDate() + i);
+              return d;
+            });
+            const todayISO = toISO(new Date());
+            const weekISOs = weekDays.map(toISO);
+            const weekNum = getWeekNumber(weekStart);
+            const weekEnd = weekDays[6];
+            const startDay = weekStart.getDate();
+            const endDay = weekEnd.getDate();
+            const startMonth = FULL_MONTHS[weekStart.getMonth()];
+            const endMonth = FULL_MONTHS[weekEnd.getMonth()];
+            const weekLabel = startMonth === endMonth
+              ? `Uge ${weekNum} · ${startDay}–${endDay} ${startMonth} ${weekStart.getFullYear()}`
+              : `Uge ${weekNum} · ${startDay} ${startMonth}–${endDay} ${endMonth} ${weekStart.getFullYear()}`;
+
+            const bookingsThisWeek = bookings.filter(b => weekISOs.includes(b.date));
+            const activeThisWeek = bookingsThisWeek.filter(b => b.status !== "cancelled").length;
+
+            const HOURS = Array.from({length:12}, (_,i) => i + 8); // 8..19
+
+            function timeToSlot(timeStr) {
+              if (!timeStr) return null;
+              const [h,m] = timeStr.split(":").map(Number);
+              return { h, m };
+            }
+
+            function slotsNeeded(b) {
+              if (b.slotsNeeded) return b.slotsNeeded;
+              const pkg = (b.pkg||"").toLowerCase();
+              if (pkg.includes("stor")) return 4;
+              if (pkg.includes("mellem")) return 3;
+              return 2;
+            }
+
+            const btnBase = { border:"none", cursor:"pointer", fontFamily:FF, fontWeight:600, fontSize:13, borderRadius:8, padding:"7px 14px" };
+
+            return (
+              <>
+                {bLoading && <div style={{ textAlign:"center", color:T.t3, padding:"60px 0", fontSize:14 }}>Indlæser…</div>}
+                {bError && (
+                  <div style={{ display:"flex", alignItems:"center", gap:8, background:T.dangerDim, border:`1px solid ${T.dangerBorder}`, borderRadius:8, padding:"12px 16px", fontSize:13, color:T.danger, marginBottom:16 }}>
+                    {bError}
+                  </div>
+                )}
+
+                {!bLoading && !bError && (
+                  <>
+                    {/* Week stats bar */}
+                    <div style={{ display:"flex", alignItems:"center", gap:16, marginBottom:20, flexWrap:"wrap" }}>
+                      <div style={{ background:T.accentDim, border:`1px solid ${T.accentBorder}`, borderRadius:10, padding:"8px 16px", fontSize:13, color:T.accent, fontWeight:600 }}>
+                        {activeThisWeek} aktive bookinger denne uge
+                      </div>
+                      <div style={{ background:T.bg1, border:`1px solid ${T.border}`, borderRadius:10, padding:"8px 16px", fontSize:13, color:T.t3 }}>
+                        {bookings.filter(b=>b.status!=="cancelled").length} i alt
+                      </div>
+                    </div>
+
+                    {/* Week navigation */}
+                    <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:16, flexWrap:"wrap" }}>
+                      <button onClick={() => setWeekOffset(w=>w-1)} style={{ ...btnBase, background:T.bg1, color:T.t2, border:`1px solid ${T.border}` }}>
+                        ← Forrige
+                      </button>
+                      <button onClick={() => setWeekOffset(0)} style={{ ...btnBase, background:weekOffset===0?T.accentDim:T.bg1, color:weekOffset===0?T.accent:T.t2, border:`1px solid ${weekOffset===0?T.accentBorder:T.border}` }}>
+                        I dag
+                      </button>
+                      <button onClick={() => setWeekOffset(w=>w+1)} style={{ ...btnBase, background:T.bg1, color:T.t2, border:`1px solid ${T.border}` }}>
+                        Næste →
+                      </button>
+                      <span style={{ fontSize:14, fontWeight:700, color:T.t1, marginLeft:6 }}>{weekLabel}</span>
+                    </div>
+
+                    {/* Calendar grid */}
+                    <div style={{ overflowX:"auto", borderRadius:14, border:`1px solid ${T.border}`, background:T.bg1 }}>
+                      <div style={{ minWidth: 50 + 7 * 110, display:"flex", flexDirection:"column" }}>
+
+                        {/* Header row */}
+                        <div style={{ display:"flex", borderBottom:`1px solid ${T.border}` }}>
+                          <div style={{ width:50, flexShrink:0, borderRight:`1px solid ${T.border}`, padding:"10px 0" }}/>
+                          {weekDays.map((d, i) => {
+                            const iso = toISO(d);
+                            const isToday = iso === todayISO;
+                            return (
+                              <div key={i} style={{ flex:1, minWidth:110, textAlign:"center", padding:"10px 4px", background:isToday?T.accentDim:"transparent", borderRight: i<6 ? `1px solid ${T.border}` : "none" }}>
+                                <div style={{ fontSize:11, fontWeight:700, color:isToday?T.accent:T.t3, textTransform:"uppercase", letterSpacing:1 }}>{DAYS[i]}</div>
+                                <div style={{ fontSize:16, fontWeight:800, color:isToday?T.accent:T.t1, marginTop:2 }}>{d.getDate()}</div>
+                                <div style={{ fontSize:11, color:isToday?T.accent:T.t4 }}>{MONTHS[d.getMonth()]}</div>
+                              </div>
+                            );
+                          })}
+                        </div>
+
+                        {/* Time rows */}
+                        {HOURS.map((hour, hi) => {
+                          const isLast = hi === HOURS.length - 1;
+                          return (
+                            <div key={hour} style={{ display:"flex", borderBottom: isLast ? "none" : `1px solid ${T.border}`, minHeight:60 }}>
+                              {/* Time label */}
+                              <div style={{ width:50, flexShrink:0, borderRight:`1px solid ${T.border}`, padding:"4px 8px 0", textAlign:"right" }}>
+                                <span style={{ fontSize:11, color:T.t4, fontWeight:600 }}>{String(hour).padStart(2,"0")}:00</span>
+                              </div>
+                              {/* Day cells */}
+                              {weekDays.map((d, di) => {
+                                const iso = toISO(d);
+                                const isToday = iso === todayISO;
+                                const cellBookings = bookings.filter(b => {
+                                  if (b.date !== iso) return false;
+                                  const slot = timeToSlot(b.time);
+                                  if (!slot) return false;
+                                  return slot.h === hour && slot.m < 30;
+                                }).concat(bookings.filter(b => {
+                                  if (b.date !== iso) return false;
+                                  const slot = timeToSlot(b.time);
+                                  if (!slot) return false;
+                                  return slot.h === hour && slot.m >= 30;
+                                }));
+                                // Only show bookings that START in this hour cell
+                                const startingHere = bookings.filter(b => {
+                                  if (b.date !== iso) return false;
+                                  const slot = timeToSlot(b.time);
+                                  if (!slot) return false;
+                                  return slot.h === hour;
+                                });
+                                return (
+                                  <div key={di} style={{ flex:1, minWidth:110, borderRight: di<6 ? `1px solid ${T.border}` : "none", padding:"3px 4px", background:isToday?"rgba(55,210,120,.03)":"transparent", position:"relative", minHeight:60, display:"flex", flexDirection:"column", gap:3 }}>
+                                    {startingHere.map(b => {
+                                      const slots = slotsNeeded(b);
+                                      const durationMin = slots * 30;
+                                      const cancelled = b.status === "cancelled";
+                                      const completed = b.status === "completed";
+                                      const bgColor = cancelled ? T.dangerDim : T.accentDim;
+                                      const borderColor = cancelled ? T.dangerBorder : T.accentBorder;
+                                      const textColor = cancelled ? T.danger : T.accent;
+                                      const heightPx = Math.max(54, (durationMin / 60) * 60 - 6);
+                                      return (
+                                        <div key={b.token}
+                                          onClick={() => { setSelectedBooking(b); setModalState("idle"); }}
+                                          style={{ background:bgColor, border:`1px solid ${borderColor}`, borderRadius:8, padding:"5px 7px", cursor:"pointer", overflow:"hidden", height:heightPx, boxSizing:"border-box", display:"flex", flexDirection:"column", justifyContent:"space-between", transition:"opacity .15s", opacity: cancelled ? .6 : 1 }}>
+                                          <div style={{ fontSize:12, fontWeight:700, color:textColor, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{b.name || "Ukendt"}</div>
+                                          <div style={{ fontSize:11, color:textColor, opacity:.8, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{b.pkg || "-"}</div>
+                                          <div style={{ fontSize:11, fontWeight:600, color:textColor }}>{b.price || ""}</div>
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {bookings.length === 0 && (
+                      <div style={{ textAlign:"center", padding:"60px 0" }}>
+                        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke={T.t4} strokeWidth="1.5" strokeLinecap="round" style={{ marginBottom:16, opacity:.4 }}><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        <p style={{ fontSize:16, fontWeight:700, color:T.t2, margin:"0 0 6px" }}>Ingen bookinger endnu</p>
+                        <p style={{ fontSize:13, color:T.t3, margin:0 }}>Nye bookinger vises her</p>
+                      </div>
+                    )}
+                  </>
+                )}
+              </>
+            );
+          })()}
 
           {/* ── GALLERY ── */}
           {tab === "gallery" && (
@@ -588,6 +759,169 @@ export default function AdminPanel() {
           )}
         </main>
       </div>
+
+      {/* BOOKING DETAIL MODAL */}
+      {selectedBooking && (() => {
+        const b = selectedBooking;
+        const cancelled = b.status === "cancelled";
+
+        async function doCancel() {
+          setModalState("loading");
+          try {
+            const r = await fetch("/api/admin/delete-booking", {
+              method:"PATCH",
+              headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" },
+              body:JSON.stringify({ token:b.token }),
+            });
+            if (r.ok) {
+              setBookings(bs => bs.map(x => x.token===b.token ? {...x, status:"cancelled"} : x));
+              setSelectedBooking(sb => sb ? {...sb, status:"cancelled"} : null);
+            }
+            setModalState("idle");
+          } catch { setModalState("idle"); }
+        }
+
+        async function doDelete() {
+          setModalState("loading");
+          try {
+            const r = await fetch("/api/admin/delete-booking", {
+              method:"DELETE",
+              headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" },
+              body:JSON.stringify({ token:b.token }),
+            });
+            if (r.ok) {
+              setBookings(bs => bs.filter(x => x.token!==b.token));
+              setSelectedBooking(null);
+            } else { setModalState("idle"); }
+          } catch { setModalState("idle"); }
+        }
+
+        const statusColor = STATUS_COLOR[b.status] || T.t3;
+        const statusLabel = STATUS_LABEL[b.status] || b.status;
+
+        return (
+          <div onClick={() => setSelectedBooking(null)}
+            style={{ position:"fixed", inset:0, background:"rgba(0,0,0,.88)", backdropFilter:"blur(10px)", zIndex:300, display:"flex", alignItems:"center", justifyContent:"center", padding:24 }}>
+            <div onClick={e => e.stopPropagation()}
+              style={{ background:T.bg1, border:`1px solid ${T.border}`, borderRadius:20, padding:32, maxWidth:480, width:"100%", boxShadow:T.shadowL, maxHeight:"90vh", overflowY:"auto", boxSizing:"border-box" }}>
+
+              {/* Header */}
+              <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", marginBottom:20 }}>
+                <div>
+                  <div style={{ fontSize:20, fontWeight:800, color:T.t1, marginBottom:6 }}>{b.name || "Ukendt"}</div>
+                  <span style={{ fontSize:12, fontWeight:700, padding:"4px 12px", borderRadius:20, background:"rgba(0,0,0,.3)", color:statusColor }}>{statusLabel}</span>
+                </div>
+                <button onClick={() => setSelectedBooking(null)}
+                  style={{ width:36, height:36, borderRadius:"50%", background:"rgba(255,255,255,.08)", border:`1px solid ${T.border}`, color:T.t2, fontSize:16, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:FF, flexShrink:0 }}>
+                  ✕
+                </button>
+              </div>
+
+              {/* Details */}
+              <div style={{ display:"flex", flexDirection:"column", gap:8, marginBottom:24 }}>
+                <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8 }}>
+                  <div style={{ background:T.bg0, borderRadius:10, padding:"12px 14px" }}>
+                    <div style={{ fontSize:10, color:T.t4, fontWeight:700, letterSpacing:1, textTransform:"uppercase", marginBottom:4 }}>Dato</div>
+                    <div style={{ fontSize:14, color:T.t1, fontWeight:600 }}>{fmtDate(b.date)}</div>
+                  </div>
+                  <div style={{ background:T.bg0, borderRadius:10, padding:"12px 14px" }}>
+                    <div style={{ fontSize:10, color:T.t4, fontWeight:700, letterSpacing:1, textTransform:"uppercase", marginBottom:4 }}>Tidspunkt</div>
+                    <div style={{ fontSize:14, color:T.t1, fontWeight:600 }}>kl. {b.time || "-"}</div>
+                  </div>
+                  <div style={{ background:T.bg0, borderRadius:10, padding:"12px 14px" }}>
+                    <div style={{ fontSize:10, color:T.t4, fontWeight:700, letterSpacing:1, textTransform:"uppercase", marginBottom:4 }}>Pakke</div>
+                    <div style={{ fontSize:14, color:T.t1, fontWeight:600 }}>{b.pkg || "-"}</div>
+                  </div>
+                  <div style={{ background:T.bg0, borderRadius:10, padding:"12px 14px" }}>
+                    <div style={{ fontSize:10, color:T.t4, fontWeight:700, letterSpacing:1, textTransform:"uppercase", marginBottom:4 }}>Pris</div>
+                    <div style={{ fontSize:14, color:T.accent, fontWeight:700 }}>{b.price || "-"}</div>
+                  </div>
+                </div>
+
+                {b.car && (
+                  <div style={{ background:T.bg0, borderRadius:10, padding:"12px 14px" }}>
+                    <div style={{ fontSize:10, color:T.t4, fontWeight:700, letterSpacing:1, textTransform:"uppercase", marginBottom:4 }}>Bil</div>
+                    <div style={{ fontSize:14, color:T.t1, fontWeight:600 }}>{b.car}</div>
+                  </div>
+                )}
+
+                {(b.addr || b.zip || b.city) && (
+                  <div style={{ background:T.bg0, borderRadius:10, padding:"12px 14px" }}>
+                    <div style={{ fontSize:10, color:T.t4, fontWeight:700, letterSpacing:1, textTransform:"uppercase", marginBottom:4 }}>Adresse</div>
+                    <div style={{ fontSize:14, color:T.t1 }}>{[b.addr, b.zip, b.city].filter(Boolean).join(", ")}</div>
+                  </div>
+                )}
+
+                {b.email && (
+                  <div style={{ background:T.bg0, borderRadius:10, padding:"12px 14px" }}>
+                    <div style={{ fontSize:10, color:T.t4, fontWeight:700, letterSpacing:1, textTransform:"uppercase", marginBottom:4 }}>E-mail</div>
+                    <div style={{ fontSize:14, color:T.t1 }}>{b.email}</div>
+                  </div>
+                )}
+
+                {b.phone && (
+                  <div style={{ background:T.bg0, borderRadius:10, padding:"12px 14px" }}>
+                    <div style={{ fontSize:10, color:T.t4, fontWeight:700, letterSpacing:1, textTransform:"uppercase", marginBottom:4 }}>Telefon</div>
+                    <div style={{ fontSize:14, color:T.t1 }}>{b.phone}</div>
+                  </div>
+                )}
+
+                {b.msg && (
+                  <div style={{ background:T.bg0, borderRadius:10, padding:"12px 14px" }}>
+                    <div style={{ fontSize:10, color:T.t4, fontWeight:700, letterSpacing:1, textTransform:"uppercase", marginBottom:4 }}>Besked</div>
+                    <div style={{ fontSize:13, color:T.t2, fontStyle:"italic", lineHeight:1.5 }}>{b.msg}</div>
+                  </div>
+                )}
+
+                <div style={{ background:T.bg0, borderRadius:10, padding:"12px 14px" }}>
+                  <div style={{ fontSize:10, color:T.t4, fontWeight:700, letterSpacing:1, textTransform:"uppercase", marginBottom:4 }}>Booket</div>
+                  <div style={{ fontSize:13, color:T.t3 }}>{fmtBooked(b.bookedAt)}</div>
+                </div>
+              </div>
+
+              {/* Actions */}
+              {modalState === "loading" && (
+                <div style={{ textAlign:"center", color:T.t3, fontSize:13, padding:"8px 0 16px" }}>Behandler…</div>
+              )}
+
+              {modalState === "idle" && (
+                <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
+                  {!cancelled && (
+                    <button onClick={() => setModalState("confirmCancel")}
+                      style={{ width:"100%", padding:"12px 0", background:T.goldDim, color:T.gold, border:`1px solid ${T.goldBorder}`, borderRadius:10, fontWeight:700, fontSize:14, cursor:"pointer", fontFamily:FF }}>
+                      Annuller booking
+                    </button>
+                  )}
+                  <button onClick={() => setModalState("confirmDelete")}
+                    style={{ width:"100%", padding:"12px 0", background:T.dangerDim, color:T.danger, border:`1px solid ${T.dangerBorder}`, borderRadius:10, fontWeight:700, fontSize:14, cursor:"pointer", fontFamily:FF }}>
+                    Slet permanent
+                  </button>
+                </div>
+              )}
+
+              {modalState === "confirmCancel" && (
+                <div style={{ background:"rgba(0,0,0,.3)", border:`1px solid ${T.border}`, borderRadius:12, padding:"16px 18px" }}>
+                  <p style={{ color:T.t2, fontSize:13, margin:"0 0 12px", lineHeight:1.5 }}>Send annullerings-e-mail til kunden?</p>
+                  <div style={{ display:"flex", gap:8 }}>
+                    <button onClick={doCancel} style={{ flex:1, padding:"10px 0", background:"#c0392b", color:"#fff", border:"none", borderRadius:9, fontWeight:700, fontSize:13, cursor:"pointer", fontFamily:FF }}>Ja, annuller</button>
+                    <button onClick={() => setModalState("idle")} style={{ flex:1, padding:"10px 0", background:"rgba(255,255,255,.07)", color:T.t3, border:"none", borderRadius:9, fontWeight:600, fontSize:13, cursor:"pointer", fontFamily:FF }}>Tilbage</button>
+                  </div>
+                </div>
+              )}
+
+              {modalState === "confirmDelete" && (
+                <div style={{ background:"rgba(0,0,0,.3)", border:`1px solid ${T.border}`, borderRadius:12, padding:"16px 18px" }}>
+                  <p style={{ color:T.t2, fontSize:13, margin:"0 0 12px", lineHeight:1.5 }}>Slet booking permanent? Kan ikke fortrydes.</p>
+                  <div style={{ display:"flex", gap:8 }}>
+                    <button onClick={doDelete} style={{ flex:1, padding:"10px 0", background:"#c0392b", color:"#fff", border:"none", borderRadius:9, fontWeight:700, fontSize:13, cursor:"pointer", fontFamily:FF }}>Ja, slet</button>
+                    <button onClick={() => setModalState("idle")} style={{ flex:1, padding:"10px 0", background:"rgba(255,255,255,.07)", color:T.t3, border:"none", borderRadius:9, fontWeight:600, fontSize:13, cursor:"pointer", fontFamily:FF }}>Tilbage</button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      })()}
 
       {/* LIGHTBOX */}
       {previewItem && (
