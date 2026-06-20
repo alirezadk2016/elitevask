@@ -59,7 +59,7 @@ var WIZ={
 /* ====== STATE ====== */
 var LANG=localStorage.getItem('lang')||"da", selCar=null;
 function t(k){return (I18N[LANG][k]!==undefined)?I18N[LANG][k]:k;}
-function svgWrap(inner,w,h,col){return '<svg viewBox="0 0 120 64" width="'+w+'" height="'+h+'" fill="none" stroke="'+(col||"currentColor")+'" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">'+inner+'</svg>';}
+function svgWrap(inner,w,h,col){return '<svg viewBox="0 0 120 64" width="'+w+'" height="'+h+'" fill="none" stroke="'+(col||"currentColor")+'" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><g transform="translate(120,0) scale(-1,1)">'+inner+'</g></svg>';}
 function fmtKr(n){return Math.round(n).toLocaleString('da-DK')+' kr';}
 
 /* ====== KØRSEL ====== */
@@ -72,7 +72,7 @@ function renderCars(){
     var d=document.createElement('div');d.className='car';d.dataset.id=c.id;
     if(selCar&&selCar.id===c.id)d.classList.add('on');
     var minPrice=Math.min(c.prices.udv,c.prices.indv,c.prices.hele);
-    d.innerHTML='<svg class="cs" viewBox="0 0 120 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">'+c.svg+'</svg><div class="nm">'+c.label[LANG]+'</div><div class="ex">'+c.ex[LANG]+'</div><div class="car-price">'+(LANG==='da'?'Fra ':'From ')+fmtKr(minPrice)+'</div>';
+    d.innerHTML='<svg class="cs" viewBox="0 0 120 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><g transform="translate(120,0) scale(-1,1)">'+c.svg+'</g></svg><div class="nm">'+c.label[LANG]+'</div><div class="ex">'+c.ex[LANG]+'</div><div class="car-price">'+(LANG==='da'?'Fra ':'From ')+fmtKr(minPrice)+'</div>';
     d.addEventListener('click',function(){selCar=c;renderCars();renderCalc();var cal=document.getElementById('calc');cal.classList.add('show');setTimeout(function(){cal.scrollIntoView({behavior:'smooth',block:'nearest'});},60);});
     g.appendChild(d);
   });
