@@ -166,6 +166,31 @@ section{position:relative}
 .pkg.pop .pbtn:hover{background:#48e088}
 .pkg.gold .pbtn{border-color:var(--gold);background:linear-gradient(135deg,#e6c75a,var(--gold));color:#2b2206}
 .pkg.gold .pbtn:hover{filter:brightness(1.06)}
+
+/* GOLD SCENE ANIMATION */
+.gold-scene{position:relative;width:100%;height:110px;margin-bottom:8px;overflow:visible}
+.gs-stage{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:130px;height:70px}
+.gs-car{width:130px;height:70px;filter:drop-shadow(0 0 8px rgba(212,175,55,.25));animation:gsCarGlow 3.5s ease-in-out infinite}
+@keyframes gsCarGlow{0%,100%{stroke:rgba(212,175,55,.45);filter:drop-shadow(0 0 6px rgba(212,175,55,.2))}50%{stroke:rgba(212,175,55,.9);filter:drop-shadow(0 0 14px rgba(212,175,55,.5))}}
+.gs-shine{position:absolute;inset:0;background:linear-gradient(105deg,transparent 30%,rgba(255,240,180,.18) 50%,transparent 70%);animation:gsShine 3.5s ease-in-out infinite;border-radius:6px}
+@keyframes gsShine{0%,100%{transform:translateX(-100%);opacity:0}45%{opacity:1}55%{transform:translateX(100%);opacity:0}}
+.gs-sparks{position:absolute;inset:0;pointer-events:none}
+.gs-sparks span{position:absolute;font-size:9px;color:#f0d97a;animation:gsSpark 3.5s ease-in-out infinite;opacity:0}
+.gs-sparks span:nth-child(1){top:10%;left:20%;animation-delay:.6s}
+.gs-sparks span:nth-child(2){top:15%;left:60%;animation-delay:.9s}
+.gs-sparks span:nth-child(3){top:50%;left:80%;animation-delay:.75s}
+.gs-sparks span:nth-child(4){top:60%;left:35%;animation-delay:1.05s}
+@keyframes gsSpark{0%,40%,100%{opacity:0;transform:scale(.4)}55%,75%{opacity:1;transform:scale(1.2)}}
+.gs-robot{position:absolute;right:4px;top:50%;transform:translateY(-50%);width:44px;animation:gsRobotFloat 3.5s ease-in-out infinite}
+@keyframes gsRobotFloat{0%,100%{transform:translateY(calc(-50% + 0px))}50%{transform:translateY(calc(-50% - 5px))}}
+.gs-spray{position:absolute;top:28px;right:44px;display:flex;flex-direction:column;gap:2px}
+.gs-spray span{display:block;height:1.5px;border-radius:2px;background:linear-gradient(90deg,rgba(55,210,120,.8),transparent);animation:gsSprayShoot 3.5s ease-in-out infinite;opacity:0;transform-origin:right center}
+.gs-spray span:nth-child(1){width:22px;animation-delay:.1s;transform:rotate(-15deg)}
+.gs-spray span:nth-child(2){width:28px;animation-delay:.15s;transform:rotate(-5deg)}
+.gs-spray span:nth-child(3){width:30px;animation-delay:.2s;transform:rotate(2deg)}
+.gs-spray span:nth-child(4){width:26px;animation-delay:.25s;transform:rotate(10deg)}
+.gs-spray span:nth-child(5){width:20px;animation-delay:.3s;transform:rotate(18deg)}
+@keyframes gsSprayShoot{0%,30%,100%{opacity:0;transform:scaleX(0)}38%,55%{opacity:1;transform:scaleX(1)}}
 .note{border-top:1px solid var(--line);padding:14px 24px;font-size:12.5px;color:var(--muted-2);display:flex;gap:8px;align-items:center}
 .note svg{width:16px;height:16px;color:var(--muted);flex-shrink:0}
 
