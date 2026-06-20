@@ -361,6 +361,6 @@ export async function POST(request) {
   }
 
   console.warn('[book] No SMTP — booking logged only.');
-  console.log('BOOKING:\n' + textLines.join('\n'));
+  console.log('BOOKING:', { token: cancelToken, name, date, time, pkg, car });
   return Response.json({ ok: true, warn: 'no_smtp', ...(cancelToken ? { token: cancelToken } : {}) });
 }

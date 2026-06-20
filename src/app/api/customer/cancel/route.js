@@ -65,7 +65,7 @@ export async function POST(request) {
   }
 
   const cancelledAt = new Date().toISOString();
-  await kv.set(`booking:${token}`, JSON.stringify({ ...booking, status: 'cancelled', cancelledAt, cancelledBy: 'portal' }), { keepttl: true });
+  await kv.set(`booking:${token}`, JSON.stringify({ ...booking, status: 'cancelled', cancelledAt, cancelledBy: 'portal' }), { ex: 60 * 60 * 24 * 60 });
   await auditLog(kv, 'booking_cancelled_portal', { ip, emailHash: hashToken(session.email), tokenRef: token.slice(0, 8) });
 
   const { date, time, car, pkg, name, price, lang } = booking;

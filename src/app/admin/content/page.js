@@ -103,7 +103,7 @@ function BookingCard({ b, secret, onCancel, onDelete }) {
         headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" },
         body:JSON.stringify({ token:b.token }),
       });
-      if (r.ok) onDelete(b.token);
+      if (r.ok) { onDelete(b.token); setState("idle"); }
       else setState("idle");
     } catch { setState("idle"); }
   }

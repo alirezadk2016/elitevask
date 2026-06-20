@@ -93,7 +93,7 @@ export async function POST(request) {
 
   // Soft delete — mark as cancelled instead of deleting
   try {
-    await kv.set(`booking:${token}`, JSON.stringify({ ...booking, status: 'cancelled', cancelledAt: new Date().toISOString() }), { keepttl: true });
+    await kv.set(`booking:${token}`, JSON.stringify({ ...booking, status: 'cancelled', cancelledAt: new Date().toISOString() }), { ex: 60 * 60 * 24 * 60 });
   } catch {
     await kv.del(`booking:${token}`);
   }
