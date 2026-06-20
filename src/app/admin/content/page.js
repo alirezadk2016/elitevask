@@ -212,9 +212,9 @@ export default function AdminPanel() {
     return () => window.removeEventListener("resize", check);
   }, []);
 
-  // Update current time every minute
+  // Update current time every 10 seconds for accurate time line
   useEffect(() => {
-    const id = setInterval(() => setNowTime(new Date()), 60000);
+    const id = setInterval(() => setNowTime(new Date()), 10000);
     return () => clearInterval(id);
   }, []);
 
@@ -589,10 +589,11 @@ export default function AdminPanel() {
                         {weekOffset === 0 && (() => {
                           const nowH = nowTime.getHours();
                           const nowM = nowTime.getMinutes();
+                          const nowS = nowTime.getSeconds();
                           if (nowH < 8 || nowH >= 21) return null;
                           // Header height ~67px, each row ROW_H px
                           const HEADER_H = 67;
-                          const topPx = HEADER_H + (nowH - 8) * ROW_H + (nowM / 60) * ROW_H;
+                          const topPx = HEADER_H + (nowH - 8) * ROW_H + ((nowM * 60 + nowS) / 3600) * ROW_H;
                           const todayIdx = weekDays.findIndex(d => toISO(d) === todayISO);
                           const leftPx = TIME_W + todayIdx * COL_W;
                           return (
