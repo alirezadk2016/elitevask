@@ -46,7 +46,7 @@ function getWeekStart(offset) {
 }
 
 function toISO(d) {
-  return d.toISOString().slice(0,10);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
 
 function getWeekNumber(d) {
@@ -474,7 +474,7 @@ export default function AdminPanel() {
 
             // 08:00 → 20:00 = 13 hours
             const HOURS = Array.from({length:13}, (_,i) => i + 8);
-            const ROW_H = 68;
+            const ROW_H = 52;
             const COL_W = narrow ? 120 : 140;
             const TIME_W = 52;
 
