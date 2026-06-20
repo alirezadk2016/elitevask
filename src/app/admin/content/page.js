@@ -437,7 +437,7 @@ export default function AdminPanel() {
         )}
 
         {/* MAIN CONTENT */}
-        <main style={{ padding: narrow ? "16px 12px" : "28px 28px", width:"100%", boxSizing:"border-box", minWidth:0 }}>
+        <main style={{ padding: narrow ? "16px 12px" : "28px 28px", boxSizing:"border-box", minWidth:0, overflow:"hidden" }}>
 
           {/* Page title + badge */}
           <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:28 }}>
