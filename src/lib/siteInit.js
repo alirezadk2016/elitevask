@@ -1057,6 +1057,50 @@ function submitBooking(cb){
   if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',initSteamAcc);}else{setTimeout(initSteamAcc,0);}
 })();
 
+// Dynamic gallery: load items added via /admin/content
+(function(){
+  function loadDynamicGallery(){
+    var grid=document.getElementById('gallery');
+    if(!grid)return;
+    fetch('/api/content/gallery')
+      .then(function(r){return r.json();})
+      .then(function(data){
+        var items=data.items||[];
+        if(!items.length)return;
+        items.forEach(function(item){
+          var fig=document.createElement('figure');
+          fig.className='gitem gitem-dynamic';
+          fig.dataset.full=item.url;
+          var img=document.createElement('img');
+          img.src=item.url;
+          img.alt=item.caption||'Galleri';
+          img.loading='lazy';
+          var cap=document.createElement('figcaption');
+          cap.textContent=item.caption||'';
+          fig.appendChild(img);
+          if(item.caption)fig.appendChild(cap);
+          grid.appendChild(fig);
+          // bind lightbox click
+          var idx=Array.from(grid.querySelectorAll('.gitem')).indexOf(fig);
+          fig.addEventListener('click',function(){
+            var lb=document.getElementById('lightbox');
+            var lbImg=document.getElementById('lbImg');
+            if(!lb||!lbImg)return;
+            var allItems=Array.from(grid.querySelectorAll('.gitem'));
+            var srcs=allItems.map(function(g){return g.dataset.full||g.querySelector('img')?.src||'';});
+            var cur=allItems.indexOf(fig);
+            lbImg.src=srcs[cur];
+            lb.classList.add('open');
+            document.body.style.overflow='hidden';
+          });
+        });
+      })
+      .catch(function(){});
+  }
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',loadDynamicGallery);}
+  else{setTimeout(loadDynamicGallery,100);}
+})();
+
 /* ====== HAMBURGER DRAWER ====== */
 (function(){
   var btn=document.getElementById('menuBtn');
