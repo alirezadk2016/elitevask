@@ -168,29 +168,58 @@ section{position:relative}
 .pkg.gold .pbtn:hover{filter:brightness(1.06)}
 
 /* GOLD SCENE ANIMATION */
-.gold-scene{position:relative;width:100%;height:110px;margin-bottom:8px;overflow:visible}
-.gs-stage{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:130px;height:70px}
-.gs-car{width:130px;height:70px;filter:drop-shadow(0 0 8px rgba(212,175,55,.25));animation:gsCarGlow 3.5s ease-in-out infinite}
-@keyframes gsCarGlow{0%,100%{stroke:rgba(212,175,55,.45);filter:drop-shadow(0 0 6px rgba(212,175,55,.2))}50%{stroke:rgba(212,175,55,.9);filter:drop-shadow(0 0 14px rgba(212,175,55,.5))}}
-.gs-shine{position:absolute;inset:0;background:linear-gradient(105deg,transparent 30%,rgba(255,240,180,.18) 50%,transparent 70%);animation:gsShine 3.5s ease-in-out infinite;border-radius:6px}
-@keyframes gsShine{0%,100%{transform:translateX(-100%);opacity:0}45%{opacity:1}55%{transform:translateX(100%);opacity:0}}
-.gs-sparks{position:absolute;inset:0;pointer-events:none}
-.gs-sparks span{position:absolute;font-size:9px;color:#f0d97a;animation:gsSpark 3.5s ease-in-out infinite;opacity:0}
-.gs-sparks span:nth-child(1){top:10%;left:20%;animation-delay:.6s}
-.gs-sparks span:nth-child(2){top:15%;left:60%;animation-delay:.9s}
-.gs-sparks span:nth-child(3){top:50%;left:80%;animation-delay:.75s}
-.gs-sparks span:nth-child(4){top:60%;left:35%;animation-delay:1.05s}
-@keyframes gsSpark{0%,40%,100%{opacity:0;transform:scale(.4)}55%,75%{opacity:1;transform:scale(1.2)}}
-.gs-robot{position:absolute;right:4px;top:50%;transform:translateY(-50%);width:44px;animation:gsRobotFloat 3.5s ease-in-out infinite}
-@keyframes gsRobotFloat{0%,100%{transform:translateY(calc(-50% + 0px))}50%{transform:translateY(calc(-50% - 5px))}}
-.gs-spray{position:absolute;top:28px;right:44px;display:flex;flex-direction:column;gap:2px}
-.gs-spray span{display:block;height:1.5px;border-radius:2px;background:linear-gradient(90deg,rgba(55,210,120,.8),transparent);animation:gsSprayShoot 3.5s ease-in-out infinite;opacity:0;transform-origin:right center}
-.gs-spray span:nth-child(1){width:22px;animation-delay:.1s;transform:rotate(-15deg)}
-.gs-spray span:nth-child(2){width:28px;animation-delay:.15s;transform:rotate(-5deg)}
-.gs-spray span:nth-child(3){width:30px;animation-delay:.2s;transform:rotate(2deg)}
-.gs-spray span:nth-child(4){width:26px;animation-delay:.25s;transform:rotate(10deg)}
-.gs-spray span:nth-child(5){width:20px;animation-delay:.3s;transform:rotate(18deg)}
-@keyframes gsSprayShoot{0%,30%,100%{opacity:0;transform:scaleX(0)}38%,55%{opacity:1;transform:scaleX(1)}}
+.gold-scene{width:100%;height:96px;margin-bottom:4px;overflow:visible}
+.gs-svg{width:100%;height:96px;overflow:visible}
+
+/* Car stroke pulse */
+.gsc-car{stroke:rgba(212,175,55,.5);stroke-width:2;animation:gsCar 3.6s ease-in-out infinite}
+@keyframes gsCar{0%,100%{stroke:rgba(212,175,55,.4)}55%,70%{stroke:rgba(212,175,55,.95);filter:drop-shadow(0 0 6px rgba(212,175,55,.4))}}
+
+/* Wet overlay on car after spray */
+.gsc-wet{animation:gsWet 3.6s ease-in-out infinite}
+@keyframes gsWet{0%,35%,100%{opacity:0}55%,75%{opacity:1}}
+
+/* Shine sweep */
+.gsc-shine{animation:gsShine 3.6s ease-in-out infinite}
+@keyframes gsShine{0%,45%,100%{opacity:0;transform:translateX(-50px)}65%{opacity:1;transform:translateX(30px)}80%{opacity:0;transform:translateX(100px)}}
+
+/* Sparkles */
+.gsk{animation:gsSpark 3.6s ease-in-out infinite}
+.gsk1{animation-delay:.7s}.gsk2{animation-delay:.9s}.gsk3{animation-delay:.8s}.gsk4{animation-delay:1s}
+@keyframes gsSpark{0%,50%,100%{opacity:0;transform:scale(.3)}65%,80%{opacity:1;transform:scale(1.3)}}
+
+/* Spray lines */
+.gsl{stroke-dasharray:80;stroke-dashoffset:80;animation:gsSprayLine 3.6s ease-in-out infinite}
+.gsl1{animation-delay:.05s}.gsl2{animation-delay:.1s}.gsl3{animation-delay:.15s}
+@keyframes gsSprayLine{0%,15%,60%,100%{stroke-dashoffset:80;opacity:0}25%,50%{stroke-dashoffset:0;opacity:1}}
+
+/* Spray droplets */
+.gsd{animation:gsDroplet 3.6s ease-in-out infinite}
+.gsd1{animation-delay:.2s}.gsd2{animation-delay:.28s}.gsd3{animation-delay:.24s}.gsd4{animation-delay:.32s}.gsd5{animation-delay:.26s}
+@keyframes gsDroplet{0%,20%,58%,100%{opacity:0;transform:scale(.2)}32%,50%{opacity:1;transform:scale(1)}}
+
+/* Steam puffs */
+.gsm{animation:gsSteam 3.6s ease-in-out infinite}
+.gsm1{animation-delay:.5s;transform-origin:55px 22px}.gsm2{animation-delay:.65s;transform-origin:72px 16px}.gsm3{animation-delay:.4s;transform-origin:38px 18px}
+@keyframes gsSteam{0%,40%,100%{r:0;opacity:0}55%{opacity:.8}75%{opacity:0}60%{r:8}}
+
+/* Robot float */
+.gsr-float{animation:gsrFloat 2.8s ease-in-out infinite}
+@keyframes gsrFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+
+/* Eye blink */
+.gsr-eyes{animation:gsrBlink 3.6s ease-in-out infinite}
+@keyframes gsrBlink{0%,90%,100%{opacity:1}93%,97%{opacity:0}}
+
+/* Spray arm sway */
+.gsr-arm-spray{transform-origin:8px 45px;animation:gsrArmSway 1.4s ease-in-out infinite}
+@keyframes gsrArmSway{0%,100%{transform:rotate(0deg)}50%{transform:rotate(-6deg)}}
+
+/* Chest dots pulse */
+.gsd-chest1{animation:gsrDot 1.2s ease-in-out infinite}
+.gsd-chest2{animation:gsrDot 1.2s ease-in-out infinite .4s}
+.gsd-chest3{animation:gsrDot 1.2s ease-in-out infinite .8s}
+@keyframes gsrDot{0%,100%{opacity:.5}50%{opacity:1}}
 .note{border-top:1px solid var(--line);padding:14px 24px;font-size:12.5px;color:var(--muted-2);display:flex;gap:8px;align-items:center}
 .note svg{width:16px;height:16px;color:var(--muted);flex-shrink:0}
 
