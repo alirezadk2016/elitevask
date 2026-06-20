@@ -168,8 +168,8 @@ section{position:relative}
 .pkg.gold .pbtn:hover{filter:brightness(1.06)}
 
 /* GOLD SCENE ANIMATION */
-.gold-scene{width:100%;height:96px;margin-bottom:4px;overflow:visible}
-.gs-svg{width:100%;height:96px;overflow:visible}
+.gold-scene{width:100%;height:78px;margin-bottom:4px;overflow:visible}
+.gs-svg{width:100%;height:78px;overflow:visible}
 
 /* Car stroke pulse */
 .gsc-car{stroke:rgba(212,175,55,.5);stroke-width:2;animation:gsCar 3.6s ease-in-out infinite}
