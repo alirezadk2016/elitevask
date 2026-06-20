@@ -510,39 +510,46 @@ export default function AdminPanel() {
                 {!bLoading && !bError && (
                   <>
                     {/* Week nav toolbar */}
-                    <div style={{ display:"flex", alignItems:"center", gap:0, marginBottom:20, background:T.bg1, border:`1px solid ${T.border}`, borderRadius:12, padding:"6px 10px", flexWrap:"wrap", gap:8 }}>
+                    <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:14, background:T.bg1, border:`1px solid rgba(255,255,255,.1)`, borderRadius:14, padding:"10px 14px", boxShadow:"0 0 0 1px rgba(55,210,120,.06), 0 4px 24px rgba(0,0,0,.5)" }}>
                       {/* Prev / Today / Next group */}
-                      <div style={{ display:"flex", borderRadius:8, overflow:"hidden", border:`1px solid ${T.border}` }}>
+                      <div style={{ display:"flex", borderRadius:9, overflow:"hidden", border:`1px solid ${T.border}`, flexShrink:0 }}>
                         <button onClick={() => setWeekOffset(w=>w-1)}
-                          style={{ padding:"7px 12px", background:"transparent", color:T.t2, border:"none", borderRight:`1px solid ${T.border}`, cursor:"pointer", display:"flex", alignItems:"center", fontFamily:FF }}>
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+                          style={{ padding:"8px 13px", background:"transparent", color:T.t2, border:"none", borderRight:`1px solid ${T.border}`, cursor:"pointer", display:"flex", alignItems:"center", fontFamily:FF, transition:"background .15s" }}
+                          onMouseEnter={e=>e.currentTarget.style.background="rgba(255,255,255,.06)"}
+                          onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
                         </button>
                         <button onClick={() => setWeekOffset(0)}
-                          style={{ padding:"7px 14px", background: weekOffset===0 ? T.accentDim : "transparent", color: weekOffset===0 ? T.accent : T.t2, border:"none", borderRight:`1px solid ${T.border}`, cursor:"pointer", fontSize:12, fontWeight:600, fontFamily:FF }}>
+                          style={{ padding:"8px 16px", background: weekOffset===0 ? T.accentDim : "transparent", color: weekOffset===0 ? T.accent : T.t2, border:"none", borderRight:`1px solid ${T.border}`, cursor:"pointer", fontSize:12, fontWeight:700, fontFamily:FF, letterSpacing:".2px", transition:"background .15s, color .15s" }}>
                           I dag
                         </button>
                         <button onClick={() => setWeekOffset(w=>w+1)}
-                          style={{ padding:"7px 12px", background:"transparent", color:T.t2, border:"none", cursor:"pointer", display:"flex", alignItems:"center", fontFamily:FF }}>
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                          style={{ padding:"8px 13px", background:"transparent", color:T.t2, border:"none", cursor:"pointer", display:"flex", alignItems:"center", fontFamily:FF, transition:"background .15s" }}
+                          onMouseEnter={e=>e.currentTarget.style.background="rgba(255,255,255,.06)"}
+                          onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
                         </button>
                       </div>
 
+                      {/* Divider */}
+                      <div style={{ width:1, height:28, background:T.border, flexShrink:0 }}/>
+
                       {/* Week label */}
-                      <div style={{ display:"flex", alignItems:"baseline", gap:6 }}>
-                        <span style={{ fontSize:16, fontWeight:700, color:T.t1, letterSpacing:"-.2px" }}>{weekLabel.range}</span>
-                        <span style={{ fontSize:12, color:T.t3 }}>{weekLabel.year}</span>
-                        <span style={{ fontSize:11, color:T.t4, background:"rgba(255,255,255,.05)", borderRadius:6, padding:"2px 7px", marginLeft:2 }}>uge {weekLabel.num}</span>
+                      <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+                        <span style={{ fontSize:15, fontWeight:700, color:T.t1, letterSpacing:"-.3px" }}>{weekLabel.range}</span>
+                        <span style={{ fontSize:12, color:T.t3, fontWeight:500 }}>{weekLabel.year}</span>
+                        <span style={{ fontSize:11, color:T.t4, background:"rgba(255,255,255,.05)", border:`1px solid ${T.border}`, borderRadius:6, padding:"2px 8px", letterSpacing:".3px" }}>uge {weekLabel.num}</span>
                       </div>
 
                       {/* Stats */}
-                      <div style={{ marginLeft:"auto", display:"flex", gap:6 }}>
+                      <div style={{ marginLeft:"auto", display:"flex", gap:8, alignItems:"center" }}>
                         {activeThisWeek > 0 && (
-                          <span style={{ display:"flex", alignItems:"center", gap:5, fontSize:12, fontWeight:600, color:T.accent, background:T.accentDim, border:`1px solid ${T.accentBorder}`, borderRadius:7, padding:"4px 10px" }}>
-                            <span style={{ width:6, height:6, borderRadius:"50%", background:T.accent, display:"inline-block" }}/>
+                          <span style={{ display:"flex", alignItems:"center", gap:5, fontSize:12, fontWeight:600, color:T.accent, background:T.accentDim, border:`1px solid ${T.accentBorder}`, borderRadius:8, padding:"5px 11px" }}>
+                            <span style={{ width:6, height:6, borderRadius:"50%", background:T.accent, display:"inline-block", boxShadow:`0 0 6px ${T.accent}` }}/>
                             {activeThisWeek} denne uge
                           </span>
                         )}
-                        <span style={{ fontSize:12, color:T.t3, background:"rgba(255,255,255,.04)", border:`1px solid ${T.border}`, borderRadius:7, padding:"4px 10px" }}>
+                        <span style={{ fontSize:12, color:T.t3, background:"rgba(255,255,255,.04)", border:`1px solid ${T.border}`, borderRadius:8, padding:"5px 11px", fontWeight:500 }}>
                           {totalActive} i alt
                         </span>
                       </div>
