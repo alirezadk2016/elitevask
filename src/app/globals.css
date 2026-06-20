@@ -849,3 +849,15 @@ section{position:relative}
   .portal-wrap{padding:0 16px}
   .portal-booking-row span:last-child{max-width:55%}
 }
+
+/* ====== GOOGLE RATING BADGE ====== */
+.google-rating-badge{display:inline-flex;align-items:center;gap:7px;margin-top:18px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:50px;padding:7px 14px 7px 10px;text-decoration:none;transition:background .2s}
+.google-rating-badge:hover{background:rgba(255,255,255,.14)}
+.gr-stars{color:#FBBC05;font-size:13px;letter-spacing:1px}
+.gr-text{color:rgba(255,255,255,.75);font-size:12px;font-weight:600}
+
+/* ====== REVIEW PROMPT (after booking) ====== */
+.review-prompt{background:rgba(55,210,120,.08);border:1px solid rgba(55,210,120,.2);border-radius:12px;padding:16px 18px;margin-top:20px;text-align:center}
+.review-prompt p{color:rgba(255,255,255,.8);font-size:14px;margin:0 0 10px;line-height:1.5}
+.review-prompt a{display:inline-flex;align-items:center;gap:6px;background:white;color:#333;border-radius:8px;padding:9px 18px;font-size:13px;font-weight:700;text-decoration:none;transition:opacity .2s}
+.review-prompt a:hover{opacity:.85}
