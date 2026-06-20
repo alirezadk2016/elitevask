@@ -10,7 +10,15 @@ const HTML = `<!-- FOOTER -->
     <div class="col"><h5 data-i18n="foot_s2">Kontakt</h5><a href="tel:+4524440321">+45 24 44 03 21</a><a href="mailto:info@elite-vask.dk">info@elite-vask.dk</a><a href="https://instagram.com/elitevasksjaelland">@elitevasksjaelland</a><a href="https://www.facebook.com/share/14ciFraNT4M/">Facebook</a></div>
   </div>
   <div class="footer-bottom"><span>Rent • Effektivt • Miljøvenligt</span><span class="foot-legal"><a href="/handelsbetingelser">Handelsbetingelser</a> · <a href="/privatpolitik">Privatpolitik</a> · <a href="/cookies">Cookies</a></span></div>
-  <a href="https://www.instagram.com/alireza__tak" target="_blank" rel="noopener" class="mak-credit"><span class="mak-dot"></span><span class="mak-text">Website by</span><span class="mak-name">MAK</span><span class="mak-dot"></span></a>
+  <a href="https://www.instagram.com/alireza__tak" target="_blank" rel="noopener" class="mak-credit">
+    <span class="mak-line"></span>
+    <span class="mak-badge">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+      <span class="mak-label">crafted by</span>
+      <span class="mak-sig">MAK</span>
+    </span>
+    <span class="mak-line"></span>
+  </a>
 </div></footer>`;
 export default function Footer() {
   return <div dangerouslySetInnerHTML={{ __html: HTML }} />;

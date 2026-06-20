@@ -375,10 +375,14 @@ section{position:relative}
 .footer .col a:hover{color:var(--green)}
 .footer-bottom{border-top:1px solid var(--line);padding:20px 0 24px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-size:12.5px;color:var(--muted-2)}
 .foot-legal a{color:var(--muted-2);text-decoration:none}.foot-legal a:hover{color:var(--green)}
-.mak-credit{display:flex;align-items:center;justify-content:center;gap:10px;padding:18px 0 6px;user-select:none;text-decoration:none;transition:opacity .2s}.mak-credit:hover{opacity:.7}
-.mak-dot{width:4px;height:4px;border-radius:50%;background:rgba(55,210,120,.35)}
-.mak-text{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.22);font-weight:500}
-.mak-name{font-size:13px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;background:linear-gradient(90deg,rgba(55,210,120,.5),rgba(255,255,255,.35),rgba(55,210,120,.5));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.mak-credit{display:flex;align-items:center;justify-content:center;gap:14px;padding:20px 0 6px;text-decoration:none;transition:opacity .25s}
+.mak-credit:hover{opacity:.6}
+.mak-line{flex:1;max-width:60px;height:1px;background:linear-gradient(90deg,transparent,rgba(55,210,120,.2))}
+.mak-credit .mak-line:last-child{background:linear-gradient(90deg,rgba(55,210,120,.2),transparent)}
+.mak-badge{display:inline-flex;align-items:center;gap:7px;border:1px solid rgba(255,255,255,.07);border-radius:30px;padding:5px 14px 5px 10px;background:rgba(255,255,255,.02)}
+.mak-badge svg{width:13px;height:13px;color:rgba(55,210,120,.5)}
+.mak-label{font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.2);font-weight:500}
+.mak-sig{font-size:12px;font-weight:800;letter-spacing:.3em;text-transform:uppercase;background:linear-gradient(90deg,rgba(55,210,120,.6),rgba(255,255,255,.5));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 
 /* STICKY MOBILE CTA */
 /* Use translate3d to keep on GPU layer — prevents iOS jump on address-bar show/hide */
