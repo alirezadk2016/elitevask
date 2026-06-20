@@ -1038,12 +1038,14 @@ function submitBooking(cb){
 /* ====== STEAM FACTS ACCORDION (mobile) ====== */
 (function(){
   function initSteamAcc(){
-    var items=document.querySelectorAll('.sf-acc');
+    var items=document.querySelectorAll('.sf-item');
     if(!items.length)return;
     items.forEach(function(item){
       if(item.dataset.sfBound)return;
       item.dataset.sfBound='1';
-      item.addEventListener('click',function(){
+      var row=item.querySelector('.sf-row');
+      if(!row)return;
+      row.addEventListener('click',function(){
         if(window.innerWidth>880)return;
         var isOpen=item.classList.contains('sf-open');
         items.forEach(function(i){i.classList.remove('sf-open');});

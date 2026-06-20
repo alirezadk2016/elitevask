@@ -231,13 +231,29 @@ section{position:relative}
 .steam-science-head .eyebrow{margin-bottom:12px}
 .steam-science-head .sec-title{font-size:clamp(22px,3.5vw,32px);margin-bottom:14px}
 .steam-science-head .sec-sub{max-width:540px;margin:0 auto}
+/* steam facts – desktop */
 .steam-facts{display:flex;flex-direction:column;gap:28px}
-.steam-fact{display:flex;gap:24px;align-items:flex-start;padding:28px;background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:14px;transition:border-color .2s}
+.steam-fact{display:flex;flex-direction:column;gap:0;background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:14px;transition:border-color .2s;overflow:hidden}
 .steam-fact:hover{border-color:rgba(55,210,120,.25)}
+.sf-row{display:flex;gap:20px;align-items:center;padding:24px 28px}
 .steam-fact-icon{width:52px;height:52px;border-radius:14px;background:var(--green-soft);border:1px solid rgba(55,210,120,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .steam-fact-icon svg{width:24px;height:24px;color:var(--green)}
-.steam-fact-body h4{font-size:16px;font-weight:700;color:#fff;margin-bottom:8px}
-.steam-fact-body p{font-size:14px;color:var(--muted);line-height:1.7}
+.sf-meta{flex:1;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.sf-meta h4{font-size:16px;font-weight:700;color:#fff;margin:0}
+.sf-chevron{display:none;width:18px;height:18px;color:var(--muted);flex-shrink:0;transition:transform .3s}
+.sf-body{font-size:14px;color:var(--muted);line-height:1.7;padding:0 28px 24px 100px;margin:0}
+/* mobile accordion */
+@media(max-width:880px){
+  .sf-row{padding:18px 16px;cursor:pointer;gap:14px}
+  .steam-fact-icon{width:44px;height:44px}
+  .steam-fact-icon svg{width:22px;height:22px}
+  .sf-meta h4{font-size:14px;line-height:1.3}
+  .sf-chevron{display:block}
+  .sf-body{max-height:0;overflow:hidden;padding:0 16px;transition:max-height .4s ease,padding .4s ease;font-size:13.5px}
+  .sf-item.sf-open .sf-body{max-height:300px;padding:0 16px 18px 74px}
+  .sf-item.sf-open .sf-chevron{transform:rotate(180deg);color:var(--green)}
+  .sf-item.sf-open{border-color:rgba(55,210,120,.3)}
+}
 
 /* INFO */
 .info{background:var(--bg-2);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
@@ -870,23 +886,3 @@ section{position:relative}
   .mob-google-strip .mgs-label{font-size:11px;color:var(--muted)}
 }
 
-/* ====== STEAM FACTS ACCORDION (mobile only) ====== */
-@media(max-width:880px){
-  .sf-acc{cursor:pointer;padding:0!important;overflow:hidden}
-  .sf-trigger{display:grid;grid-template-columns:44px 1fr 20px;align-items:center;gap:12px;padding:16px 16px}
-  .sf-trigger .steam-fact-icon{width:44px;height:44px;flex-shrink:0}
-  .sf-title{font-size:14px;font-weight:700;color:#fff;margin:0;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .sf-chevron{width:18px;height:18px;color:var(--muted);transition:transform .3s;justify-self:end}
-  .sf-acc.sf-open .sf-chevron{transform:rotate(180deg);color:var(--green)}
-  .sf-acc.sf-open{border-color:rgba(55,210,120,.3)!important;background:rgba(55,210,120,.04)}
-  .sf-body{max-height:0;overflow:hidden;transition:max-height .4s cubic-bezier(0.4,0,0.2,1)}
-  .sf-acc.sf-open .sf-body{max-height:400px}
-  .sf-body .steam-fact-body{padding:0 16px 18px 72px}
-  .sf-body .steam-fact-body p{font-size:13.5px;color:rgba(255,255,255,.65)!important;line-height:1.7;margin:0}
-}
-@media(min-width:881px){
-  .sf-chevron{display:none}
-  .sf-trigger{display:contents}
-  .sf-title{display:none}
-  .sf-body{max-height:none!important;overflow:visible}
-}

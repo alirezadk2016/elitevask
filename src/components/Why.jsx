@@ -14,37 +14,41 @@ const HTML = `<!-- WHY -->
       <h3 class="sec-title" data-i18n="steam_title">Derfor er dampvask overlegen</h3>
       <p class="sec-sub" data-i18n="steam_sub">Varme og tryk gør det som vand og kemi aldrig kan — skånsomt, effektivt og uden at beskadige lakken.</p>
     </div>
-    <div class="steam-facts" id="steamFacts">
-      <div class="steam-fact sf-acc" data-sf="0">
-        <div class="sf-trigger">
+    <div class="steam-facts">
+
+      <div class="steam-fact sf-item">
+        <div class="sf-row">
           <div class="steam-fact-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c1 2.5 4 6 4 9a4 4 0 0 1-8 0c0-3 3-6.5 4-9z"/><path d="M12 15v3"/><path d="M9.5 20h5"/></svg></div>
-          <h4 class="sf-title">Skånsom rensning</h4>
-          <svg class="sf-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          <div class="sf-meta">
+            <h4 data-i18n="steam_f1t">Skånsom rensning – beskytter lakken</h4>
+            <svg class="sf-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
         </div>
-        <div class="sf-body">
-          <div class="steam-fact-body"><p data-i18n="steam_f1p">Dampvask løsner snavs termisk uden børster og aggressive kemikalier – og reducerer dermed synligheden af overfladisk snavs og belægninger. Resultatet er en renere, friskere overflade uden de ridser, som roterende børster i tunnelvaske typisk efterlader.</p></div>
-        </div>
+        <p class="sf-body" data-i18n="steam_f1p">Dampvask løsner snavs termisk uden børster og aggressive kemikalier – og reducerer dermed synligheden af overfladisk snavs og belægninger. Resultatet er en renere, friskere overflade uden de ridser, som roterende børster i tunnelvaske typisk efterlader.</p>
       </div>
-      <div class="steam-fact sf-acc" data-sf="1">
-        <div class="sf-trigger">
+
+      <div class="steam-fact sf-item">
+        <div class="sf-row">
           <div class="steam-fact-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
-          <h4 class="sf-title">Naturlig dybdeglans</h4>
-          <svg class="sf-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          <div class="sf-meta">
+            <h4 data-i18n="steam_f2t">Giver lakken en naturlig dybdeglans</h4>
+            <svg class="sf-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
         </div>
-        <div class="sf-body">
-          <div class="steam-fact-body"><p data-i18n="steam_f2p">Damp renser ikke bare overfladen — den trænger ind og løsner snavs fra dybden. Resultatet er en levende, skinnende glans som fremhæver bilens originale farve og får den til at fremstå som ny.</p></div>
-        </div>
+        <p class="sf-body" data-i18n="steam_f2p">Damp renser ikke bare overfladen — den trænger ind og løsner snavs fra dybden. Resultatet er en levende, skinnende glans som fremhæver bilens originale farve og får den til at fremstå som ny.</p>
       </div>
-      <div class="steam-fact sf-acc" data-sf="2">
-        <div class="sf-trigger">
+
+      <div class="steam-fact sf-item">
+        <div class="sf-row">
           <div class="steam-fact-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg></div>
-          <h4 class="sf-title">Bedre end tunnelvask</h4>
-          <svg class="sf-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          <div class="sf-meta">
+            <h4 data-i18n="steam_f3t">Langt bedre end traditionel vandvask</h4>
+            <svg class="sf-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
         </div>
-        <div class="sf-body">
-          <div class="steam-fact-body"><p data-i18n="steam_f3p">Højtryk og aggressive kemikalier påfører lakken usynlige mikroskopiske ridser ved hvert vask. Dampvask renser intenst og skånsomt uden kemikalier — og beskytter dermed din bils lak og værdi på lang sigt.</p></div>
-        </div>
+        <p class="sf-body" data-i18n="steam_f3p">Højtryk og aggressive kemikalier påfører lakken usynlige mikroskopiske ridser ved hvert vask. Dampvask renser intenst og skånsomt uden kemikalier — og beskytter dermed din bils lak og værdi på lang sigt.</p>
       </div>
+
     </div>
   </div>
 
