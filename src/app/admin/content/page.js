@@ -20,9 +20,9 @@ const S = {
   label:   { color:"#555", fontSize:11, fontWeight:700, letterSpacing:1, textTransform:"uppercase", display:"block", marginBottom:6 },
   row:     { display:"flex", gap:10, alignItems:"flex-start" },
   smallBtn:{ padding:"10px 18px", borderRadius:8, border:"none", fontWeight:700, fontSize:13, cursor:"pointer" },
-  grid:    { display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(140px,1fr))", gap:12, marginTop:16 },
-  imgCard: { background:"#0d1410", border:"1px solid rgba(255,255,255,.07)", borderRadius:10, overflow:"hidden", position:"relative" },
-  del:     { position:"absolute", top:6, right:6, background:"rgba(0,0,0,.7)", border:"1px solid rgba(231,76,60,.4)", color:"#e74c3c", borderRadius:6, padding:"3px 8px", fontSize:11, fontWeight:700, cursor:"pointer" },
+  grid:    { display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(200px,1fr))", gap:14, marginTop:16 },
+  imgCard: { background:"#0d1410", border:"1px solid rgba(255,255,255,.07)", borderRadius:12, overflow:"hidden", position:"relative", boxShadow:"0 2px 8px rgba(0,0,0,.3)" },
+  del:     { position:"absolute", top:8, right:8, background:"rgba(231,76,60,.9)", border:"none", color:"#fff", borderRadius:8, padding:"6px 12px", fontSize:12, fontWeight:800, cursor:"pointer", display:"flex", alignItems:"center", gap:4, boxShadow:"0 2px 6px rgba(0,0,0,.4)" },
   vidCard: { background:"#0d1410", border:"1px solid rgba(255,255,255,.07)", borderRadius:10, overflow:"hidden", display:"flex", gap:12, padding:12, alignItems:"center" },
   dropzone:{ border:"2px dashed rgba(55,210,120,.25)", borderRadius:12, padding:"32px 16px", textAlign:"center", cursor:"pointer", transition:"border .2s" },
   err:     { color:"#e74c3c", fontSize:13, marginTop:8 },
@@ -207,15 +207,23 @@ export default function ContentAdmin() {
 
             {/* Gallery grid */}
             {gallery.length > 0 ? (
-              <div style={S.grid}>
-                {gallery.map(item => (
-                  <div key={item.id} style={S.imgCard}>
-                    <img src={item.url} alt={item.caption||""} style={{width:"100%",aspectRatio:"4/3",objectFit:"cover",display:"block"}} />
-                    {item.caption && <p style={{fontSize:11,color:"#666",padding:"6px 8px",margin:0}}>{item.caption}</p>}
-                    <button style={S.del} onClick={()=>deleteItem("gallery",item.id,item.source==="upload"?item.url:null)}>✕</button>
-                  </div>
-                ))}
-              </div>
+              <>
+                <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginTop:20,marginBottom:4}}>
+                  <span style={{color:"#555",fontSize:13}}>{gallery.length} {gallery.length===1?"billede":"billeder"} i galleriet</span>
+                </div>
+                <div style={S.grid}>
+                  {gallery.map(item => (
+                    <div key={item.id} style={S.imgCard}>
+                      <img src={item.url} alt={item.caption||""} style={{width:"100%",aspectRatio:"4/3",objectFit:"cover",display:"block"}} />
+                      {item.caption && <p style={{fontSize:12,color:"#888",padding:"8px 10px 6px",margin:0,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{item.caption}</p>}
+                      <button style={S.del} onClick={()=>deleteItem("gallery",item.id,item.source==="upload"?item.url:null)}>
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                        Slet
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </>
             ) : (
               <p style={{color:"#444",fontSize:14,textAlign:"center",padding:"32px 0"}}>Ingen billeder endnu</p>
             )}
