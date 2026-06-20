@@ -510,48 +510,49 @@ export default function AdminPanel() {
                 {!bLoading && !bError && (
                   <>
                     {/* Week nav toolbar */}
-                    <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:14, background:T.bg1, border:`1px solid rgba(255,255,255,.1)`, borderRadius:14, padding:"10px 14px", boxShadow:"0 0 0 1px rgba(55,210,120,.06), 0 4px 24px rgba(0,0,0,.5)" }}>
-                      {/* Prev / Today / Next group */}
-                      <div style={{ display:"flex", borderRadius:9, overflow:"hidden", border:`1px solid ${T.border}`, flexShrink:0 }}>
+                    <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:16, background:"linear-gradient(135deg,rgba(17,30,21,.98),rgba(13,22,16,.98))", border:`1px solid rgba(55,210,120,.18)`, borderRadius:16, padding:"12px 18px", boxShadow:"0 2px 16px rgba(0,0,0,.5), 0 0 0 1px rgba(55,210,120,.08)" }}>
+
+                      {/* Prev / Today / Next */}
+                      <div style={{ display:"flex", gap:4, flexShrink:0 }}>
                         <button onClick={() => setWeekOffset(w=>w-1)}
-                          style={{ padding:"8px 13px", background:"transparent", color:T.t2, border:"none", borderRight:`1px solid ${T.border}`, cursor:"pointer", display:"flex", alignItems:"center", fontFamily:FF, transition:"background .15s" }}
-                          onMouseEnter={e=>e.currentTarget.style.background="rgba(255,255,255,.06)"}
-                          onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+                          style={{ width:34, height:34, display:"flex", alignItems:"center", justifyContent:"center", background:"rgba(255,255,255,.05)", color:T.t1, border:`1px solid rgba(255,255,255,.09)`, borderRadius:9, cursor:"pointer", fontFamily:FF, transition:"all .15s" }}
+                          onMouseEnter={e=>{e.currentTarget.style.background="rgba(55,210,120,.12)";e.currentTarget.style.borderColor="rgba(55,210,120,.3)";e.currentTarget.style.color=T.accent}}
+                          onMouseLeave={e=>{e.currentTarget.style.background="rgba(255,255,255,.05)";e.currentTarget.style.borderColor="rgba(255,255,255,.09)";e.currentTarget.style.color=T.t1}}>
+                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
                         </button>
                         <button onClick={() => setWeekOffset(0)}
-                          style={{ padding:"8px 16px", background: weekOffset===0 ? T.accentDim : "transparent", color: weekOffset===0 ? T.accent : T.t2, border:"none", borderRight:`1px solid ${T.border}`, cursor:"pointer", fontSize:12, fontWeight:700, fontFamily:FF, letterSpacing:".2px", transition:"background .15s, color .15s" }}>
+                          style={{ height:34, padding:"0 16px", background: weekOffset===0 ? T.accent : "rgba(255,255,255,.05)", color: weekOffset===0 ? T.bg0 : T.t1, border: weekOffset===0 ? "none" : `1px solid rgba(255,255,255,.09)`, borderRadius:9, cursor:"pointer", fontSize:12, fontWeight:700, fontFamily:FF, letterSpacing:".3px", transition:"all .15s", boxShadow: weekOffset===0 ? `0 0 12px rgba(55,210,120,.35)` : "none" }}>
                           I dag
                         </button>
                         <button onClick={() => setWeekOffset(w=>w+1)}
-                          style={{ padding:"8px 13px", background:"transparent", color:T.t2, border:"none", cursor:"pointer", display:"flex", alignItems:"center", fontFamily:FF, transition:"background .15s" }}
-                          onMouseEnter={e=>e.currentTarget.style.background="rgba(255,255,255,.06)"}
-                          onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                          style={{ width:34, height:34, display:"flex", alignItems:"center", justifyContent:"center", background:"rgba(255,255,255,.05)", color:T.t1, border:`1px solid rgba(255,255,255,.09)`, borderRadius:9, cursor:"pointer", fontFamily:FF, transition:"all .15s" }}
+                          onMouseEnter={e=>{e.currentTarget.style.background="rgba(55,210,120,.12)";e.currentTarget.style.borderColor="rgba(55,210,120,.3)";e.currentTarget.style.color=T.accent}}
+                          onMouseLeave={e=>{e.currentTarget.style.background="rgba(255,255,255,.05)";e.currentTarget.style.borderColor="rgba(255,255,255,.09)";e.currentTarget.style.color=T.t1}}>
+                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
                         </button>
                       </div>
 
                       {/* Divider */}
-                      <div style={{ width:1, height:28, background:T.border, flexShrink:0 }}/>
+                      <div style={{ width:1, height:32, background:"rgba(255,255,255,.08)", flexShrink:0 }}/>
 
                       {/* Week label */}
-                      <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-                        <span style={{ fontSize:15, fontWeight:700, color:T.t1, letterSpacing:"-.3px" }}>{weekLabel.range}</span>
-                        <span style={{ fontSize:12, color:T.t3, fontWeight:500 }}>{weekLabel.year}</span>
-                        <span style={{ fontSize:11, color:T.t4, background:"rgba(255,255,255,.05)", border:`1px solid ${T.border}`, borderRadius:6, padding:"2px 8px", letterSpacing:".3px" }}>uge {weekLabel.num}</span>
+                      <div style={{ display:"flex", alignItems:"center", gap:10, flex:1, minWidth:0 }}>
+                        <span style={{ fontSize:17, fontWeight:800, color:T.t1, letterSpacing:"-.4px", whiteSpace:"nowrap" }}>{weekLabel.range}</span>
+                        <span style={{ fontSize:13, color:T.t3, fontWeight:500 }}>{weekLabel.year}</span>
+                        <span style={{ fontSize:11, color:T.accent, background:T.accentDim, border:`1px solid ${T.accentBorder}`, borderRadius:6, padding:"3px 9px", fontWeight:700, letterSpacing:".4px", whiteSpace:"nowrap" }}>UGE {weekLabel.num}</span>
                       </div>
 
                       {/* Stats */}
-                      <div style={{ marginLeft:"auto", display:"flex", gap:8, alignItems:"center" }}>
+                      <div style={{ display:"flex", gap:8, alignItems:"center", flexShrink:0 }}>
                         {activeThisWeek > 0 && (
-                          <span style={{ display:"flex", alignItems:"center", gap:5, fontSize:12, fontWeight:600, color:T.accent, background:T.accentDim, border:`1px solid ${T.accentBorder}`, borderRadius:8, padding:"5px 11px" }}>
-                            <span style={{ width:6, height:6, borderRadius:"50%", background:T.accent, display:"inline-block", boxShadow:`0 0 6px ${T.accent}` }}/>
+                          <div style={{ display:"flex", alignItems:"center", gap:6, fontSize:12, fontWeight:700, color:T.accent, background:T.accentDim, border:`1px solid ${T.accentBorder}`, borderRadius:9, padding:"6px 13px" }}>
+                            <span style={{ width:7, height:7, borderRadius:"50%", background:T.accent, display:"inline-block", boxShadow:`0 0 8px ${T.accent}` }}/>
                             {activeThisWeek} denne uge
-                          </span>
+                          </div>
                         )}
-                        <span style={{ fontSize:12, color:T.t3, background:"rgba(255,255,255,.04)", border:`1px solid ${T.border}`, borderRadius:8, padding:"5px 11px", fontWeight:500 }}>
+                        <div style={{ fontSize:12, color:T.t2, background:"rgba(255,255,255,.05)", border:`1px solid rgba(255,255,255,.09)`, borderRadius:9, padding:"6px 13px", fontWeight:600 }}>
                           {totalActive} i alt
-                        </span>
+                        </div>
                       </div>
                     </div>
 
