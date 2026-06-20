@@ -333,16 +333,16 @@ export default function AdminPanel() {
     const active = tab === id;
     return (
       <button onClick={() => { setTab(id); setMsg(null); setUrlInput(""); }}
-        style={{ display:"flex", alignItems:"center", gap:10, width:"100%", padding:"9px 10px", borderRadius:8, fontSize:14, fontWeight:active?600:500, color:active?T.accent:T.t2, background:active?T.accentDim:"transparent", border:"none", cursor:"pointer", fontFamily:FF, textAlign:"left", transition:"background .15s, color .15s", marginBottom:2, position:"relative" }}>
-        {icon}
+        style={{ display:"flex", alignItems:"center", gap:8, width:"100%", padding:"7px 9px", borderRadius:7, fontSize:13, fontWeight:active?600:400, color:active?T.accent:T.t3, background:active?T.accentDim:"transparent", border:"none", cursor:"pointer", fontFamily:FF, textAlign:"left", transition:"all .12s", marginBottom:1 }}>
+        <span style={{ opacity: active ? 1 : 0.7, display:"flex" }}>{icon}</span>
         <span style={{ flex:1 }}>{label}</span>
-        {badge != null && <span style={{ fontSize:11, fontWeight:700, background:active?T.accentBorder:"rgba(255,255,255,.07)", color:active?T.accent:T.t3, borderRadius:20, padding:"1px 7px" }}>{badge}</span>}
+        {badge != null && <span style={{ fontSize:10, fontWeight:700, background:active?"rgba(55,210,120,.25)":"rgba(255,255,255,.06)", color:active?T.accent:T.t4, borderRadius:10, padding:"1px 6px", minWidth:16, textAlign:"center" }}>{badge}</span>}
       </button>
     );
   };
 
   const sectionLabel = (text) => (
-    <p style={{ fontSize:10, letterSpacing:2, fontWeight:700, color:T.t3, textTransform:"uppercase", margin:"0 0 6px", padding:"0 10px" }}>{text}</p>
+    <p style={{ fontSize:9.5, letterSpacing:1.5, fontWeight:600, color:T.t4, textTransform:"uppercase", margin:"0 0 4px", padding:"0 9px" }}>{text}</p>
   );
 
   const Feedback = ({ m }) => m ? (
@@ -355,10 +355,10 @@ export default function AdminPanel() {
   ) : null;
 
   const icons = {
-    bookings: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>,
-    gallery:  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>,
-    videos:   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>,
-    refresh:  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>,
+    bookings: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2.5"/><path d="M16 2v4M8 2v4"/><path d="M3 10h18"/></svg>,
+    gallery:  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2.5"/><path d="M3 16l5-5 4 4 3-3 6 6"/><circle cx="8.5" cy="8.5" r="1.5"/></svg>,
+    videos:   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="6" width="14" height="12" rx="2.5"/><path d="M16 10l5-3v10l-5-3V10z"/></svg>,
+    refresh:  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 11-9-9c2.52 0 4.8.99 6.48 2.59L21 8"/><path d="M21 3v5h-5"/></svg>,
   };
 
   // ── MAIN RENDER ────────────────────────────────────────────────────────────
@@ -437,9 +437,10 @@ export default function AdminPanel() {
             const weekEnd = weekDays[6];
             const sM = FULL_MONTHS[weekStart.getMonth()];
             const eM = FULL_MONTHS[weekEnd.getMonth()];
-            const weekLabel = sM === eM
-              ? `Uge ${weekNum} · ${weekStart.getDate()}–${weekEnd.getDate()} ${sM} ${weekStart.getFullYear()}`
-              : `Uge ${weekNum} · ${weekStart.getDate()} ${sM} – ${weekEnd.getDate()} ${eM} ${weekStart.getFullYear()}`;
+            const dateRange = sM === eM
+              ? `${weekStart.getDate()}–${weekEnd.getDate()} ${sM}`
+              : `${weekStart.getDate()} ${sM} – ${weekEnd.getDate()} ${eM}`;
+            const weekLabel = { num: weekNum, range: dateRange, year: weekStart.getFullYear() };
 
             const weekBookings = bookings.filter(b => weekISOs.includes(b.date));
             const activeThisWeek = weekBookings.filter(b => b.status !== "cancelled").length;
@@ -482,23 +483,42 @@ export default function AdminPanel() {
 
                 {!bLoading && !bError && (
                   <>
-                    {/* Stats + nav bar */}
-                    <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:20, flexWrap:"wrap" }}>
-                      {navBtn(() => setWeekOffset(w=>w-1), <>
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M15 18l-6-6 6-6"/></svg>
-                      </>)}
-                      {navBtn(() => setWeekOffset(0), "I dag", weekOffset===0)}
-                      {navBtn(() => setWeekOffset(w=>w+1), <>
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M9 18l6-6-6-6"/></svg>
-                      </>)}
-                      <span style={{ fontSize:14, fontWeight:700, color:T.t1 }}>{weekLabel}</span>
-                      <div style={{ marginLeft:"auto", display:"flex", gap:8, flexWrap:"wrap" }}>
-                        <div style={{ background:T.accentDim, border:`1px solid ${T.accentBorder}`, borderRadius:8, padding:"6px 14px", fontSize:12, color:T.accent, fontWeight:700 }}>
-                          {activeThisWeek} denne uge
-                        </div>
-                        <div style={{ background:T.bg1, border:`1px solid ${T.border}`, borderRadius:8, padding:"6px 14px", fontSize:12, color:T.t3 }}>
+                    {/* Week nav toolbar */}
+                    <div style={{ display:"flex", alignItems:"center", gap:0, marginBottom:20, background:T.bg1, border:`1px solid ${T.border}`, borderRadius:12, padding:"6px 10px", flexWrap:"wrap", gap:8 }}>
+                      {/* Prev / Today / Next group */}
+                      <div style={{ display:"flex", borderRadius:8, overflow:"hidden", border:`1px solid ${T.border}` }}>
+                        <button onClick={() => setWeekOffset(w=>w-1)}
+                          style={{ padding:"7px 12px", background:"transparent", color:T.t2, border:"none", borderRight:`1px solid ${T.border}`, cursor:"pointer", display:"flex", alignItems:"center", fontFamily:FF }}>
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+                        </button>
+                        <button onClick={() => setWeekOffset(0)}
+                          style={{ padding:"7px 14px", background: weekOffset===0 ? T.accentDim : "transparent", color: weekOffset===0 ? T.accent : T.t2, border:"none", borderRight:`1px solid ${T.border}`, cursor:"pointer", fontSize:12, fontWeight:600, fontFamily:FF }}>
+                          I dag
+                        </button>
+                        <button onClick={() => setWeekOffset(w=>w+1)}
+                          style={{ padding:"7px 12px", background:"transparent", color:T.t2, border:"none", cursor:"pointer", display:"flex", alignItems:"center", fontFamily:FF }}>
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                        </button>
+                      </div>
+
+                      {/* Week label */}
+                      <div style={{ display:"flex", alignItems:"baseline", gap:6 }}>
+                        <span style={{ fontSize:16, fontWeight:700, color:T.t1, letterSpacing:"-.2px" }}>{weekLabel.range}</span>
+                        <span style={{ fontSize:12, color:T.t3 }}>{weekLabel.year}</span>
+                        <span style={{ fontSize:11, color:T.t4, background:"rgba(255,255,255,.05)", borderRadius:6, padding:"2px 7px", marginLeft:2 }}>uge {weekLabel.num}</span>
+                      </div>
+
+                      {/* Stats */}
+                      <div style={{ marginLeft:"auto", display:"flex", gap:6 }}>
+                        {activeThisWeek > 0 && (
+                          <span style={{ display:"flex", alignItems:"center", gap:5, fontSize:12, fontWeight:600, color:T.accent, background:T.accentDim, border:`1px solid ${T.accentBorder}`, borderRadius:7, padding:"4px 10px" }}>
+                            <span style={{ width:6, height:6, borderRadius:"50%", background:T.accent, display:"inline-block" }}/>
+                            {activeThisWeek} denne uge
+                          </span>
+                        )}
+                        <span style={{ fontSize:12, color:T.t3, background:"rgba(255,255,255,.04)", border:`1px solid ${T.border}`, borderRadius:7, padding:"4px 10px" }}>
                           {totalActive} i alt
-                        </div>
+                        </span>
                       </div>
                     </div>
 
@@ -507,21 +527,30 @@ export default function AdminPanel() {
                       <div style={{ minWidth: TIME_W + COL_W * 7 }}>
 
                         {/* Day headers */}
-                        <div style={{ display:"flex", borderBottom:`2px solid ${T.border}`, background:T.bg0 }}>
+                        <div style={{ display:"flex", borderBottom:`1px solid ${T.border}`, background:T.bg0 }}>
                           <div style={{ width:TIME_W, flexShrink:0, borderRight:`1px solid ${T.border}` }}/>
                           {weekDays.map((d, i) => {
                             const iso = toISO(d);
                             const isToday = iso === todayISO;
                             const dayBookings = bookings.filter(b => b.date === iso && b.status !== "cancelled");
+                            const isWeekend = i >= 5;
                             return (
-                              <div key={i} style={{ width:COL_W, flexShrink:0, textAlign:"center", padding:"12px 6px 10px", background:isToday?"rgba(55,210,120,.07)":"transparent", borderRight: i<6 ? `1px solid ${T.border}` : "none", position:"relative" }}>
-                                <div style={{ fontSize:10, fontWeight:800, color:isToday?T.accent:T.t3, textTransform:"uppercase", letterSpacing:1.5, marginBottom:4 }}>{DAYS[i]}</div>
-                                <div style={{ fontSize:22, fontWeight:800, color:isToday?T.accent:T.t1, lineHeight:1 }}>{d.getDate()}</div>
-                                <div style={{ fontSize:11, color:isToday?T.accent:T.t4, marginTop:2 }}>{MONTHS[d.getMonth()]}</div>
-                                {dayBookings.length > 0 && (
-                                  <div style={{ position:"absolute", top:8, right:8, width:18, height:18, borderRadius:"50%", background:isToday?T.accent:"rgba(55,210,120,.3)", display:"flex", alignItems:"center", justifyContent:"center" }}>
-                                    <span style={{ fontSize:10, fontWeight:800, color:isToday?T.bg0:T.accent }}>{dayBookings.length}</span>
+                              <div key={i} style={{ width:COL_W, flexShrink:0, textAlign:"center", padding:"10px 6px 8px", background:isToday?"rgba(55,210,120,.06)":isWeekend?"rgba(255,255,255,.015)":"transparent", borderRight: i<6 ? `1px solid ${T.border}` : "none" }}>
+                                <div style={{ fontSize:10, fontWeight:600, color:isToday?T.accent:isWeekend?"rgba(255,255,255,.2)":T.t4, textTransform:"uppercase", letterSpacing:1, marginBottom:6 }}>{DAYS[i]}</div>
+                                {/* Date circle — filled for today */}
+                                <div style={{ display:"inline-flex", alignItems:"center", justifyContent:"center", width:32, height:32, borderRadius:"50%", background:isToday?T.accent:"transparent", marginBottom:4 }}>
+                                  <span style={{ fontSize:16, fontWeight:700, color:isToday?T.bg0:isWeekend?"rgba(255,255,255,.35)":T.t1, lineHeight:1 }}>{d.getDate()}</span>
+                                </div>
+                                {/* Booking dots */}
+                                {dayBookings.length > 0 ? (
+                                  <div style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:3, marginTop:2 }}>
+                                    {dayBookings.slice(0,4).map((_,di) => (
+                                      <span key={di} style={{ width:5, height:5, borderRadius:"50%", background:isToday?T.accent:T.accentBorder, flexShrink:0 }}/>
+                                    ))}
+                                    {dayBookings.length > 4 && <span style={{ fontSize:9, color:T.accent, fontWeight:700 }}>+{dayBookings.length-4}</span>}
                                   </div>
+                                ) : (
+                                  <div style={{ height:9 }}/>
                                 )}
                               </div>
                             );
