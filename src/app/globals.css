@@ -699,6 +699,8 @@ section{position:relative}
 .legal-wrap ul li{margin-bottom:4px}
 .legal-wrap a{color:var(--green);text-decoration:underline;text-decoration-color:rgba(55,210,120,.4)}
 .legal-wrap a:hover{text-decoration-color:var(--green)}
+.legal-wrap a.btn{color:#062313;text-decoration:none}
+.legal-wrap a.btn-ghost{color:#fff}
 .cookie-table{width:100%;border-collapse:collapse;margin:12px 0 24px;font-size:14px}
 .cookie-table th{text-align:left;padding:10px 14px;background:var(--surface);color:var(--txt);font-weight:600;border-bottom:2px solid var(--line-2)}
 .cookie-table td{padding:10px 14px;color:var(--muted);border-bottom:1px solid var(--line)}
