@@ -103,7 +103,7 @@ export async function PATCH(request) {
   }
 }
 
-// Delete booking completely
+// Delete booking completely (also sends cancellation email)
 export async function DELETE(request) {
   if (!checkAuth(request)) return Response.json({ error: 'unauthorized' }, { status: 401 });
   const { token } = await request.json().catch(() => ({}));
@@ -116,6 +116,9 @@ export async function DELETE(request) {
       const data = typeof booking === 'string' ? JSON.parse(booking) : booking;
       if (data.date && data.slots) {
         await Promise.all(data.slots.map(t => kv.del(`slot:${data.date}:${t}`)));
+      }
+      if (data.status !== 'cancelled') {
+        await sendCancelEmails(data).catch(() => {});
       }
     }
     await kv.del(`booking:${token}`);

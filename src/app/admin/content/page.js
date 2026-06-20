@@ -435,34 +435,41 @@ export default function AdminPanel() {
             const weekISOs = weekDays.map(toISO);
             const weekNum = getWeekNumber(weekStart);
             const weekEnd = weekDays[6];
-            const startDay = weekStart.getDate();
-            const endDay = weekEnd.getDate();
-            const startMonth = FULL_MONTHS[weekStart.getMonth()];
-            const endMonth = FULL_MONTHS[weekEnd.getMonth()];
-            const weekLabel = startMonth === endMonth
-              ? `Uge ${weekNum} · ${startDay}–${endDay} ${startMonth} ${weekStart.getFullYear()}`
-              : `Uge ${weekNum} · ${startDay} ${startMonth}–${endDay} ${endMonth} ${weekStart.getFullYear()}`;
+            const sM = FULL_MONTHS[weekStart.getMonth()];
+            const eM = FULL_MONTHS[weekEnd.getMonth()];
+            const weekLabel = sM === eM
+              ? `Uge ${weekNum} · ${weekStart.getDate()}–${weekEnd.getDate()} ${sM} ${weekStart.getFullYear()}`
+              : `Uge ${weekNum} · ${weekStart.getDate()} ${sM} – ${weekEnd.getDate()} ${eM} ${weekStart.getFullYear()}`;
 
-            const bookingsThisWeek = bookings.filter(b => weekISOs.includes(b.date));
-            const activeThisWeek = bookingsThisWeek.filter(b => b.status !== "cancelled").length;
+            const weekBookings = bookings.filter(b => weekISOs.includes(b.date));
+            const activeThisWeek = weekBookings.filter(b => b.status !== "cancelled").length;
+            const totalActive = bookings.filter(b => b.status !== "cancelled").length;
 
-            const HOURS = Array.from({length:12}, (_,i) => i + 8); // 8..19
+            // 08:00 → 20:00 = 13 hours
+            const HOURS = Array.from({length:13}, (_,i) => i + 8);
+            const ROW_H = 68;
+            const COL_W = narrow ? 120 : 140;
+            const TIME_W = 52;
 
-            function timeToSlot(timeStr) {
-              if (!timeStr) return null;
-              const [h,m] = timeStr.split(":").map(Number);
-              return { h, m };
-            }
-
-            function slotsNeeded(b) {
+            function slotCount(b) {
               if (b.slotsNeeded) return b.slotsNeeded;
-              const pkg = (b.pkg||"").toLowerCase();
-              if (pkg.includes("stor")) return 4;
-              if (pkg.includes("mellem")) return 3;
+              const p = (b.pkg||"").toLowerCase();
+              if (p.includes("stor") || p.includes("varebil")) return 4;
+              if (p.includes("mellem")) return 3;
               return 2;
             }
 
-            const btnBase = { border:"none", cursor:"pointer", fontFamily:FF, fontWeight:600, fontSize:13, borderRadius:8, padding:"7px 14px" };
+            function bookingStartHour(b) {
+              if (!b.time) return null;
+              const [h] = b.time.split(":").map(Number);
+              return h;
+            }
+
+            const navBtn = (onClick, children, active) => (
+              <button onClick={onClick} style={{ display:"flex", alignItems:"center", gap:6, padding:"8px 16px", background:active?T.accentDim:T.bg1, color:active?T.accent:T.t2, border:`1px solid ${active?T.accentBorder:T.border}`, borderRadius:9, fontWeight:600, fontSize:13, cursor:"pointer", fontFamily:FF, whiteSpace:"nowrap" }}>
+                {children}
+              </button>
+            );
 
             return (
               <>
@@ -475,45 +482,47 @@ export default function AdminPanel() {
 
                 {!bLoading && !bError && (
                   <>
-                    {/* Week stats bar */}
-                    <div style={{ display:"flex", alignItems:"center", gap:16, marginBottom:20, flexWrap:"wrap" }}>
-                      <div style={{ background:T.accentDim, border:`1px solid ${T.accentBorder}`, borderRadius:10, padding:"8px 16px", fontSize:13, color:T.accent, fontWeight:600 }}>
-                        {activeThisWeek} aktive bookinger denne uge
-                      </div>
-                      <div style={{ background:T.bg1, border:`1px solid ${T.border}`, borderRadius:10, padding:"8px 16px", fontSize:13, color:T.t3 }}>
-                        {bookings.filter(b=>b.status!=="cancelled").length} i alt
+                    {/* Stats + nav bar */}
+                    <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:20, flexWrap:"wrap" }}>
+                      {navBtn(() => setWeekOffset(w=>w-1), <>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M15 18l-6-6 6-6"/></svg>
+                      </>)}
+                      {navBtn(() => setWeekOffset(0), "I dag", weekOffset===0)}
+                      {navBtn(() => setWeekOffset(w=>w+1), <>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M9 18l6-6-6-6"/></svg>
+                      </>)}
+                      <span style={{ fontSize:14, fontWeight:700, color:T.t1 }}>{weekLabel}</span>
+                      <div style={{ marginLeft:"auto", display:"flex", gap:8, flexWrap:"wrap" }}>
+                        <div style={{ background:T.accentDim, border:`1px solid ${T.accentBorder}`, borderRadius:8, padding:"6px 14px", fontSize:12, color:T.accent, fontWeight:700 }}>
+                          {activeThisWeek} denne uge
+                        </div>
+                        <div style={{ background:T.bg1, border:`1px solid ${T.border}`, borderRadius:8, padding:"6px 14px", fontSize:12, color:T.t3 }}>
+                          {totalActive} i alt
+                        </div>
                       </div>
                     </div>
 
-                    {/* Week navigation */}
-                    <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:16, flexWrap:"wrap" }}>
-                      <button onClick={() => setWeekOffset(w=>w-1)} style={{ ...btnBase, background:T.bg1, color:T.t2, border:`1px solid ${T.border}` }}>
-                        ← Forrige
-                      </button>
-                      <button onClick={() => setWeekOffset(0)} style={{ ...btnBase, background:weekOffset===0?T.accentDim:T.bg1, color:weekOffset===0?T.accent:T.t2, border:`1px solid ${weekOffset===0?T.accentBorder:T.border}` }}>
-                        I dag
-                      </button>
-                      <button onClick={() => setWeekOffset(w=>w+1)} style={{ ...btnBase, background:T.bg1, color:T.t2, border:`1px solid ${T.border}` }}>
-                        Næste →
-                      </button>
-                      <span style={{ fontSize:14, fontWeight:700, color:T.t1, marginLeft:6 }}>{weekLabel}</span>
-                    </div>
+                    {/* Calendar */}
+                    <div style={{ overflowX:"auto", borderRadius:14, border:`1px solid ${T.border}`, background:T.bg1, boxShadow:T.shadow }}>
+                      <div style={{ minWidth: TIME_W + COL_W * 7 }}>
 
-                    {/* Calendar grid */}
-                    <div style={{ overflowX:"auto", borderRadius:14, border:`1px solid ${T.border}`, background:T.bg1 }}>
-                      <div style={{ minWidth: 50 + 7 * 110, display:"flex", flexDirection:"column" }}>
-
-                        {/* Header row */}
-                        <div style={{ display:"flex", borderBottom:`1px solid ${T.border}` }}>
-                          <div style={{ width:50, flexShrink:0, borderRight:`1px solid ${T.border}`, padding:"10px 0" }}/>
+                        {/* Day headers */}
+                        <div style={{ display:"flex", borderBottom:`2px solid ${T.border}`, background:T.bg0 }}>
+                          <div style={{ width:TIME_W, flexShrink:0, borderRight:`1px solid ${T.border}` }}/>
                           {weekDays.map((d, i) => {
                             const iso = toISO(d);
                             const isToday = iso === todayISO;
+                            const dayBookings = bookings.filter(b => b.date === iso && b.status !== "cancelled");
                             return (
-                              <div key={i} style={{ flex:1, minWidth:110, textAlign:"center", padding:"10px 4px", background:isToday?T.accentDim:"transparent", borderRight: i<6 ? `1px solid ${T.border}` : "none" }}>
-                                <div style={{ fontSize:11, fontWeight:700, color:isToday?T.accent:T.t3, textTransform:"uppercase", letterSpacing:1 }}>{DAYS[i]}</div>
-                                <div style={{ fontSize:16, fontWeight:800, color:isToday?T.accent:T.t1, marginTop:2 }}>{d.getDate()}</div>
-                                <div style={{ fontSize:11, color:isToday?T.accent:T.t4 }}>{MONTHS[d.getMonth()]}</div>
+                              <div key={i} style={{ width:COL_W, flexShrink:0, textAlign:"center", padding:"12px 6px 10px", background:isToday?"rgba(55,210,120,.07)":"transparent", borderRight: i<6 ? `1px solid ${T.border}` : "none", position:"relative" }}>
+                                <div style={{ fontSize:10, fontWeight:800, color:isToday?T.accent:T.t3, textTransform:"uppercase", letterSpacing:1.5, marginBottom:4 }}>{DAYS[i]}</div>
+                                <div style={{ fontSize:22, fontWeight:800, color:isToday?T.accent:T.t1, lineHeight:1 }}>{d.getDate()}</div>
+                                <div style={{ fontSize:11, color:isToday?T.accent:T.t4, marginTop:2 }}>{MONTHS[d.getMonth()]}</div>
+                                {dayBookings.length > 0 && (
+                                  <div style={{ position:"absolute", top:8, right:8, width:18, height:18, borderRadius:"50%", background:isToday?T.accent:"rgba(55,210,120,.3)", display:"flex", alignItems:"center", justifyContent:"center" }}>
+                                    <span style={{ fontSize:10, fontWeight:800, color:isToday?T.bg0:T.accent }}>{dayBookings.length}</span>
+                                  </div>
+                                )}
                               </div>
                             );
                           })}
@@ -522,52 +531,62 @@ export default function AdminPanel() {
                         {/* Time rows */}
                         {HOURS.map((hour, hi) => {
                           const isLast = hi === HOURS.length - 1;
+                          const nowHour = new Date().getHours();
+                          const isCurrentHour = weekOffset === 0 && hour === nowHour;
                           return (
-                            <div key={hour} style={{ display:"flex", borderBottom: isLast ? "none" : `1px solid ${T.border}`, minHeight:60 }}>
+                            <div key={hour} style={{ display:"flex", borderBottom: isLast?"none":`1px solid ${T.border}`, minHeight:ROW_H, position:"relative" }}>
                               {/* Time label */}
-                              <div style={{ width:50, flexShrink:0, borderRight:`1px solid ${T.border}`, padding:"4px 8px 0", textAlign:"right" }}>
-                                <span style={{ fontSize:11, color:T.t4, fontWeight:600 }}>{String(hour).padStart(2,"0")}:00</span>
+                              <div style={{ width:TIME_W, flexShrink:0, borderRight:`1px solid ${T.border}`, padding:"6px 8px 0", textAlign:"right", paddingTop:8 }}>
+                                <span style={{ fontSize:11, color:isCurrentHour?T.accent:T.t4, fontWeight:isCurrentHour?700:500, fontVariantNumeric:"tabular-nums" }}>
+                                  {String(hour).padStart(2,"0")}:00
+                                </span>
                               </div>
+
                               {/* Day cells */}
                               {weekDays.map((d, di) => {
                                 const iso = toISO(d);
                                 const isToday = iso === todayISO;
-                                const cellBookings = bookings.filter(b => {
-                                  if (b.date !== iso) return false;
-                                  const slot = timeToSlot(b.time);
-                                  if (!slot) return false;
-                                  return slot.h === hour && slot.m < 30;
-                                }).concat(bookings.filter(b => {
-                                  if (b.date !== iso) return false;
-                                  const slot = timeToSlot(b.time);
-                                  if (!slot) return false;
-                                  return slot.h === hour && slot.m >= 30;
-                                }));
-                                // Only show bookings that START in this hour cell
-                                const startingHere = bookings.filter(b => {
-                                  if (b.date !== iso) return false;
-                                  const slot = timeToSlot(b.time);
-                                  if (!slot) return false;
-                                  return slot.h === hour;
-                                });
+                                const startingHere = bookings.filter(b => b.date === iso && bookingStartHour(b) === hour);
                                 return (
-                                  <div key={di} style={{ flex:1, minWidth:110, borderRight: di<6 ? `1px solid ${T.border}` : "none", padding:"3px 4px", background:isToday?"rgba(55,210,120,.03)":"transparent", position:"relative", minHeight:60, display:"flex", flexDirection:"column", gap:3 }}>
+                                  <div key={di} style={{ width:COL_W, flexShrink:0, borderRight: di<6 ? `1px solid ${T.border}` : "none", padding:"3px 4px", background:isToday?"rgba(55,210,120,.025)":"transparent", position:"relative", minHeight:ROW_H, display:"flex", flexDirection:"column", gap:3 }}>
                                     {startingHere.map(b => {
-                                      const slots = slotsNeeded(b);
+                                      const slots = slotCount(b);
                                       const durationMin = slots * 30;
-                                      const cancelled = b.status === "cancelled";
-                                      const completed = b.status === "completed";
-                                      const bgColor = cancelled ? T.dangerDim : T.accentDim;
-                                      const borderColor = cancelled ? T.dangerBorder : T.accentBorder;
-                                      const textColor = cancelled ? T.danger : T.accent;
-                                      const heightPx = Math.max(54, (durationMin / 60) * 60 - 6);
+                                      const heightPx = Math.round((durationMin / 60) * ROW_H) - 6;
+                                      const isCancelled = b.status === "cancelled";
+                                      const isPending = b.status === "pending";
+
+                                      // Rich color per status
+                                      const cardBg    = isCancelled ? "rgba(229,83,75,.1)"     : isPending ? "rgba(212,175,55,.1)" : "rgba(55,210,120,.13)";
+                                      const cardBor   = isCancelled ? "rgba(229,83,75,.35)"    : isPending ? "rgba(212,175,55,.35)" : "rgba(55,210,120,.4)";
+                                      const cardLeft  = isCancelled ? T.danger                 : isPending ? T.gold                : T.accent;
+                                      const cardText  = isCancelled ? T.danger                 : isPending ? T.gold                : T.accent;
+
                                       return (
                                         <div key={b.token}
                                           onClick={() => { setSelectedBooking(b); setModalState("idle"); }}
-                                          style={{ background:bgColor, border:`1px solid ${borderColor}`, borderRadius:8, padding:"5px 7px", cursor:"pointer", overflow:"hidden", height:heightPx, boxSizing:"border-box", display:"flex", flexDirection:"column", justifyContent:"space-between", transition:"opacity .15s", opacity: cancelled ? .6 : 1 }}>
-                                          <div style={{ fontSize:12, fontWeight:700, color:textColor, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{b.name || "Ukendt"}</div>
-                                          <div style={{ fontSize:11, color:textColor, opacity:.8, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{b.pkg || "-"}</div>
-                                          <div style={{ fontSize:11, fontWeight:600, color:textColor }}>{b.price || ""}</div>
+                                          style={{ background:cardBg, border:`1px solid ${cardBor}`, borderLeft:`3px solid ${cardLeft}`, borderRadius:8, padding:"6px 8px", cursor:"pointer", height:heightPx, minHeight:42, boxSizing:"border-box", display:"flex", flexDirection:"column", justifyContent:"space-between", overflow:"hidden", transition:"filter .15s, transform .1s", opacity:isCancelled?.55:1, WebkitTapHighlightColor:"transparent" }}
+                                          onMouseEnter={e => { e.currentTarget.style.filter="brightness(1.2)"; e.currentTarget.style.transform="scale(1.01)"; }}
+                                          onMouseLeave={e => { e.currentTarget.style.filter=""; e.currentTarget.style.transform=""; }}
+                                        >
+                                          <div>
+                                            <div style={{ display:"flex", alignItems:"center", gap:4, marginBottom:2 }}>
+                                              {isCancelled
+                                                ? <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke={cardText} strokeWidth="3" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                                : <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke={cardText} strokeWidth="3" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>}
+                                              <span style={{ fontSize:12, fontWeight:800, color:cardText, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap", flex:1 }}>{b.name || "Ukendt"}</span>
+                                            </div>
+                                            <div style={{ fontSize:10, color:cardText, opacity:.75, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{b.pkg || "-"}</div>
+                                          </div>
+                                          <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+                                            <span style={{ fontSize:10, fontWeight:700, color:cardText }}>{b.time} · {durationMin}min</span>
+                                            {b.phone && (
+                                              <a href={`tel:${b.phone}`} onClick={e => e.stopPropagation()}
+                                                style={{ display:"flex", alignItems:"center", justifyContent:"center", width:22, height:22, borderRadius:6, background:"rgba(255,255,255,.12)", color:cardText, textDecoration:"none", flexShrink:0 }}>
+                                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.15 1.28 2 2 0 012.11 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+                                              </a>
+                                            )}
+                                          </div>
                                         </div>
                                       );
                                     })}
@@ -580,11 +599,11 @@ export default function AdminPanel() {
                       </div>
                     </div>
 
-                    {bookings.length === 0 && (
+                    {bookings.length === 0 && !bLoading && (
                       <div style={{ textAlign:"center", padding:"60px 0" }}>
                         <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke={T.t4} strokeWidth="1.5" strokeLinecap="round" style={{ marginBottom:16, opacity:.4 }}><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                         <p style={{ fontSize:16, fontWeight:700, color:T.t2, margin:"0 0 6px" }}>Ingen bookinger endnu</p>
-                        <p style={{ fontSize:13, color:T.t3, margin:0 }}>Nye bookinger vises her</p>
+                        <p style={{ fontSize:13, color:T.t3, margin:0 }}>Nye bookinger vises automatisk her</p>
                       </div>
                     )}
                   </>
@@ -807,9 +826,18 @@ export default function AdminPanel() {
 
               {/* Header */}
               <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", marginBottom:20 }}>
-                <div>
-                  <div style={{ fontSize:20, fontWeight:800, color:T.t1, marginBottom:6 }}>{b.name || "Ukendt"}</div>
-                  <span style={{ fontSize:12, fontWeight:700, padding:"4px 12px", borderRadius:20, background:"rgba(0,0,0,.3)", color:statusColor }}>{statusLabel}</span>
+                <div style={{ flex:1, minWidth:0, marginRight:12 }}>
+                  <div style={{ fontSize:20, fontWeight:800, color:T.t1, marginBottom:8, lineHeight:1.2 }}>{b.name || "Ukendt"}</div>
+                  <div style={{ display:"flex", alignItems:"center", gap:8, flexWrap:"wrap" }}>
+                    <span style={{ fontSize:12, fontWeight:700, padding:"4px 12px", borderRadius:20, background:"rgba(0,0,0,.4)", color:statusColor, border:`1px solid ${statusColor}33` }}>{statusLabel}</span>
+                    {b.phone && (
+                      <a href={`tel:${b.phone}`}
+                        style={{ display:"flex", alignItems:"center", gap:6, padding:"4px 12px", borderRadius:20, background:T.accentDim, border:`1px solid ${T.accentBorder}`, color:T.accent, fontSize:12, fontWeight:700, textDecoration:"none" }}>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.15 1.28 2 2 0 012.11 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+                        {b.phone}
+                      </a>
+                    )}
+                  </div>
                 </div>
                 <button onClick={() => setSelectedBooking(null)}
                   style={{ width:36, height:36, borderRadius:"50%", background:"rgba(255,255,255,.08)", border:`1px solid ${T.border}`, color:T.t2, fontSize:16, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:FF, flexShrink:0 }}>
@@ -900,21 +928,33 @@ export default function AdminPanel() {
               )}
 
               {modalState === "confirmCancel" && (
-                <div style={{ background:"rgba(0,0,0,.3)", border:`1px solid ${T.border}`, borderRadius:12, padding:"16px 18px" }}>
-                  <p style={{ color:T.t2, fontSize:13, margin:"0 0 12px", lineHeight:1.5 }}>Send annullerings-e-mail til kunden?</p>
+                <div style={{ background:"rgba(0,0,0,.3)", border:`1px solid ${T.dangerBorder}`, borderRadius:12, padding:"16px 18px" }}>
+                  <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:10 }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={T.gold} strokeWidth="2.5" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    <span style={{ color:T.t1, fontSize:14, fontWeight:700 }}>Annuller booking</span>
+                  </div>
+                  <p style={{ color:T.t2, fontSize:13, margin:"0 0 14px", lineHeight:1.6 }}>
+                    Kunden modtager en annullerings-e-mail automatisk. Tidslottet frigives til nye bookinger.
+                  </p>
                   <div style={{ display:"flex", gap:8 }}>
-                    <button onClick={doCancel} style={{ flex:1, padding:"10px 0", background:"#c0392b", color:"#fff", border:"none", borderRadius:9, fontWeight:700, fontSize:13, cursor:"pointer", fontFamily:FF }}>Ja, annuller</button>
-                    <button onClick={() => setModalState("idle")} style={{ flex:1, padding:"10px 0", background:"rgba(255,255,255,.07)", color:T.t3, border:"none", borderRadius:9, fontWeight:600, fontSize:13, cursor:"pointer", fontFamily:FF }}>Tilbage</button>
+                    <button onClick={doCancel} style={{ flex:1, padding:"11px 0", background:"#c0392b", color:"#fff", border:"none", borderRadius:9, fontWeight:700, fontSize:14, cursor:"pointer", fontFamily:FF }}>Send e-mail og annuller</button>
+                    <button onClick={() => setModalState("idle")} style={{ flex:1, padding:"11px 0", background:"rgba(255,255,255,.07)", color:T.t3, border:"none", borderRadius:9, fontWeight:600, fontSize:13, cursor:"pointer", fontFamily:FF }}>Tilbage</button>
                   </div>
                 </div>
               )}
 
               {modalState === "confirmDelete" && (
-                <div style={{ background:"rgba(0,0,0,.3)", border:`1px solid ${T.border}`, borderRadius:12, padding:"16px 18px" }}>
-                  <p style={{ color:T.t2, fontSize:13, margin:"0 0 12px", lineHeight:1.5 }}>Slet booking permanent? Kan ikke fortrydes.</p>
+                <div style={{ background:"rgba(0,0,0,.3)", border:`1px solid ${T.dangerBorder}`, borderRadius:12, padding:"16px 18px" }}>
+                  <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:10 }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={T.danger} strokeWidth="2.5" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    <span style={{ color:T.t1, fontSize:14, fontWeight:700 }}>Slet permanent</span>
+                  </div>
+                  <p style={{ color:T.t2, fontSize:13, margin:"0 0 14px", lineHeight:1.6 }}>
+                    Bookingen slettes fuldstændigt. Kunden modtager en annullerings-e-mail. Kan ikke fortrydes.
+                  </p>
                   <div style={{ display:"flex", gap:8 }}>
-                    <button onClick={doDelete} style={{ flex:1, padding:"10px 0", background:"#c0392b", color:"#fff", border:"none", borderRadius:9, fontWeight:700, fontSize:13, cursor:"pointer", fontFamily:FF }}>Ja, slet</button>
-                    <button onClick={() => setModalState("idle")} style={{ flex:1, padding:"10px 0", background:"rgba(255,255,255,.07)", color:T.t3, border:"none", borderRadius:9, fontWeight:600, fontSize:13, cursor:"pointer", fontFamily:FF }}>Tilbage</button>
+                    <button onClick={doDelete} style={{ flex:1, padding:"11px 0", background:"#c0392b", color:"#fff", border:"none", borderRadius:9, fontWeight:700, fontSize:14, cursor:"pointer", fontFamily:FF }}>Send e-mail og slet</button>
+                    <button onClick={() => setModalState("idle")} style={{ flex:1, padding:"11px 0", background:"rgba(255,255,255,.07)", color:T.t3, border:"none", borderRadius:9, fontWeight:600, fontSize:13, cursor:"pointer", fontFamily:FF }}>Tilbage</button>
                   </div>
                 </div>
               )}
