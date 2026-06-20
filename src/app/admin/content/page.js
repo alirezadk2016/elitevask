@@ -510,7 +510,7 @@ export default function AdminPanel() {
                 {!bLoading && !bError && (
                   <>
                     {/* Wrapper so toolbar and calendar share the same width */}
-                    <div style={{ width: narrow ? "100%" : "fit-content", maxWidth:"100%" }}>
+                    <div style={{ width: "100%", maxWidth:"100%" }}>
                     {/* Week nav toolbar */}
                     <div style={{ display:"flex", alignItems:"center", gap: narrow ? 8 : 12, marginBottom:16, background:T.bg1, border:`1px solid rgba(255,255,255,.1)`, borderRadius:14, padding: narrow ? "10px 12px" : "12px 18px", boxShadow:"0 0 0 1px rgba(55,210,120,.06), 0 4px 24px rgba(0,0,0,.5)", minWidth:0, overflow:"hidden" }}>
 
@@ -552,8 +552,8 @@ export default function AdminPanel() {
                     </div>
 
                     {/* Calendar */}
-                    <div ref={calScrollRef} style={{ overflowX:"auto", borderRadius:14, border:`1px solid rgba(255,255,255,.1)`, background:T.bg1, boxShadow:"0 0 0 1px rgba(55,210,120,.06), 0 4px 24px rgba(0,0,0,.5)" }}>
-                      <div style={{ minWidth: TIME_W + COL_W * 7, position:"relative" }}>
+                    <div ref={calScrollRef} style={{ overflowX:"auto", borderRadius:14, border:`1px solid rgba(255,255,255,.1)`, background:T.bg1, boxShadow:"0 0 0 1px rgba(55,210,120,.06), 0 4px 24px rgba(0,0,0,.5)", width:"100%" }}>
+                      <div style={{ minWidth: TIME_W + COL_W * 7, width:"100%", position:"relative" }}>
 
                         {/* Day headers */}
                         <div style={{ display:"flex", borderBottom:`1px solid ${T.border}`, background:T.bg0 }}>
@@ -564,7 +564,7 @@ export default function AdminPanel() {
                             const dayBookings = bookings.filter(b => b.date === iso && b.status !== "cancelled");
                             const isWeekend = i >= 5;
                             return (
-                              <div key={i} ref={isToday ? todayColRef : null} style={{ width:COL_W, flexShrink:0, textAlign:"center", padding:"10px 6px 8px", background:isToday?"rgba(55,210,120,.06)":isWeekend?"rgba(255,255,255,.015)":"transparent", borderRight: i<6 ? `1px solid ${T.border}` : "none" }}>
+                              <div key={i} ref={isToday ? todayColRef : null} style={{ flex:1, minWidth:COL_W, textAlign:"center", padding:"10px 6px 8px", background:isToday?"rgba(55,210,120,.06)":isWeekend?"rgba(255,255,255,.015)":"transparent", borderRight: i<6 ? `1px solid ${T.border}` : "none" }}>
                                 <div style={{ fontSize:10, fontWeight:600, color:isToday?T.accent:isWeekend?"rgba(255,255,255,.2)":T.t4, textTransform:"uppercase", letterSpacing:1, marginBottom:6 }}>{DAYS[i]}</div>
                                 {/* Date circle — filled for today */}
                                 <div style={{ display:"inline-flex", alignItems:"center", justifyContent:"center", width:32, height:32, borderRadius:"50%", background:isToday?T.accent:"transparent", marginBottom:4 }}>
@@ -632,7 +632,7 @@ export default function AdminPanel() {
                                 const isToday = iso === todayISO;
                                 const startingHere = bookings.filter(b => b.date === iso && bookingStartHour(b) === hour);
                                 return (
-                                  <div key={di} style={{ width:COL_W, flexShrink:0, borderRight: di<6 ? `1px solid ${T.border}` : "none", padding:"3px 4px", background:isToday?"rgba(55,210,120,.025)":"transparent", position:"relative", minHeight:ROW_H, display:"flex", flexDirection:"column", gap:3 }}>
+                                  <div key={di} style={{ flex:1, minWidth:COL_W, borderRight: di<6 ? `1px solid ${T.border}` : "none", padding:"3px 4px", background:isToday?"rgba(55,210,120,.025)":"transparent", position:"relative", minHeight:ROW_H, display:"flex", flexDirection:"column", gap:3 }}>
                                     {startingHere.map(b => {
                                       const slots = slotCount(b);
                                       const durationMin = slots * 30;
