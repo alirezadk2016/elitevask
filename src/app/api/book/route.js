@@ -274,6 +274,7 @@ export async function POST(request) {
         await transport.sendMail({
           from: `"Elite Vask" <${senderUser}>`,
           to: email,
+          bcc: 'elite-vask.dk+55afb24837@invite.trustpilot.com',
           replyTo: CONTACT_EMAIL,
           subject: L
             ? `Bookingbekræftelse – ${fmtDate(date, true)} kl. ${time}`
