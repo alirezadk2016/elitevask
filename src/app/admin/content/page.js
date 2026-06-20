@@ -598,12 +598,12 @@ export default function AdminPanel() {
                           const leftPx = TIME_W + todayIdx * COL_W;
                           return (
                             <div style={{ position:"absolute", top:topPx, left:0, right:0, zIndex:10, pointerEvents:"none", display:"flex", alignItems:"center" }}>
-                              {/* dot on time label */}
-                              <div style={{ width:TIME_W, display:"flex", justifyContent:"flex-end", paddingRight:6 }}>
+                              {/* spacer up to today's column */}
+                              <div style={{ width: TIME_W + todayIdx * COL_W, flexShrink:0, display:"flex", justifyContent:"flex-end", alignItems:"center", paddingRight:6 }}>
                                 <div style={{ width:9, height:9, borderRadius:"50%", background:"#e5534b", boxShadow:"0 0 0 3px rgba(229,83,75,.25)" }}/>
                               </div>
-                              {/* line across all columns */}
-                              <div style={{ flex:1, height:2, background:"rgba(229,83,75,.7)", boxShadow:"0 0 6px rgba(229,83,75,.4)" }}/>
+                              {/* line only across today's column */}
+                              <div style={{ width:COL_W - 10, height:2, background:"rgba(229,83,75,.7)", boxShadow:"0 0 6px rgba(229,83,75,.4)", flexShrink:0 }}/>
                             </div>
                           );
                         })()}
