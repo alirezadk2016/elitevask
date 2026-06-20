@@ -666,7 +666,7 @@ section{position:relative}
   .work-grid{grid-template-columns:1fr 1fr}
   .footer-grid{grid-template-columns:1fr}
   .footer-bottom{padding-bottom:4px}
-  .mak-credit{padding-bottom:calc(80px + env(safe-area-inset-bottom))}
+  .mak-credit{padding:8px 0 calc(76px + env(safe-area-inset-bottom))}
   .opt-grid{grid-template-columns:1fr}
   .hero.hero-img{padding:0;min-height:calc(100svh - 88px)}
   .hero-inner{padding:16px 0}
