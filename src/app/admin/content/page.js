@@ -437,7 +437,7 @@ export default function AdminPanel() {
         )}
 
         {/* MAIN CONTENT */}
-        <main style={{ padding: narrow ? "16px 12px" : "28px 28px", width:"100%", boxSizing:"border-box", overflow:"hidden" }}>
+        <main style={{ padding: narrow ? "16px 12px" : "28px 28px", width:"100%", boxSizing:"border-box", minWidth:0 }}>
 
           {/* Page title + badge */}
           <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:28 }}>
@@ -549,7 +549,7 @@ export default function AdminPanel() {
                     </div>
 
                     {/* Calendar */}
-                    <div ref={calScrollRef} style={{ overflowX:"auto", borderRadius:14, border:`1px solid rgba(255,255,255,.1)`, background:T.bg1, boxShadow:"0 0 0 1px rgba(55,210,120,.06), 0 4px 24px rgba(0,0,0,.5)" }}>
+                    <div ref={calScrollRef} style={{ overflowX:"auto", borderRadius:14, border:`1px solid rgba(255,255,255,.1)`, background:T.bg1, boxShadow:"0 0 0 1px rgba(55,210,120,.06), 0 4px 24px rgba(0,0,0,.5)", maxWidth:"100%" }}>
                       <div style={{ minWidth: TIME_W + COL_W * 7, position:"relative" }}>
 
                         {/* Day headers */}
