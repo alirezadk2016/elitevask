@@ -509,6 +509,8 @@ export default function AdminPanel() {
 
                 {!bLoading && !bError && (
                   <>
+                    {/* Wrapper so toolbar and calendar share the same width */}
+                    <div style={{ width: narrow ? "100%" : "fit-content", maxWidth:"100%" }}>
                     {/* Week nav toolbar */}
                     <div style={{ display:"flex", alignItems:"center", gap: narrow ? 8 : 12, marginBottom:16, background:T.bg1, border:`1px solid rgba(255,255,255,.1)`, borderRadius:14, padding: narrow ? "10px 12px" : "12px 18px", boxShadow:"0 0 0 1px rgba(55,210,120,.06), 0 4px 24px rgba(0,0,0,.5)", minWidth:0, overflow:"hidden" }}>
 
@@ -550,7 +552,7 @@ export default function AdminPanel() {
                     </div>
 
                     {/* Calendar */}
-                    <div ref={calScrollRef} style={{ overflowX:"auto", borderRadius:14, border:`1px solid rgba(255,255,255,.1)`, background:T.bg1, boxShadow:"0 0 0 1px rgba(55,210,120,.06), 0 4px 24px rgba(0,0,0,.5)", width:"fit-content", maxWidth:"100%" }}>
+                    <div ref={calScrollRef} style={{ overflowX:"auto", borderRadius:14, border:`1px solid rgba(255,255,255,.1)`, background:T.bg1, boxShadow:"0 0 0 1px rgba(55,210,120,.06), 0 4px 24px rgba(0,0,0,.5)" }}>
                       <div style={{ minWidth: TIME_W + COL_W * 7, position:"relative" }}>
 
                         {/* Day headers */}
@@ -689,6 +691,7 @@ export default function AdminPanel() {
                         <p style={{ fontSize:13, color:T.t3, margin:0 }}>Nye bookinger vises automatisk her</p>
                       </div>
                     )}
+                    </div>{/* end wrapper */}
                   </>
                 )}
               </>
