@@ -31,7 +31,7 @@ function toEmbedUrl(url) {
   return url;
 }
 
-const SECRET_KEY = "ev_admin_secret";
+const SECRET_KEY = "adm";
 
 export default function ContentAdmin() {
   const [secret, setSecret]               = useState("");
