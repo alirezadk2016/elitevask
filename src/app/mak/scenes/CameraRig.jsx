@@ -8,7 +8,7 @@ import { useUniverseStore } from '../state/universeStore'
 import { galaxies, getGalaxyById } from '../data/universe'
 
 // Camera positions per level
-const UNIVERSE_POS = new THREE.Vector3(0, 18, 58)
+const UNIVERSE_POS = new THREE.Vector3(0, 8, 32)
 const UNIVERSE_TARGET = new THREE.Vector3(0, 0, 0)
 
 function getGalaxyPos(galaxyId) {
@@ -16,7 +16,7 @@ function getGalaxyPos(galaxyId) {
   if (!g) return UNIVERSE_POS.clone()
   const [x, y, z] = g.position
   // Camera sits in front of the galaxy
-  return new THREE.Vector3(x * 0.35, y + 6, z + 28)
+  return new THREE.Vector3(x * 0.4, y + 3, z + 16)
 }
 
 function getGalaxyTarget(galaxyId) {
@@ -31,7 +31,7 @@ function getPlanetPos(galaxyId) {
   const g = getGalaxyById(galaxyId)
   if (!g) return UNIVERSE_POS.clone()
   const [x, y, z] = g.position
-  return new THREE.Vector3(x * 0.3 + 6, y + 2, z + 14)
+  return new THREE.Vector3(x * 0.4 + 4, y + 2, z + 9)
 }
 
 export default function CameraRig({ mouseX, mouseY }) {

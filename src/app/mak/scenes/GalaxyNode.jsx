@@ -4,7 +4,7 @@ import { Html } from '@react-three/drei'
 import * as THREE from 'three'
 import { useUniverseStore } from '../state/universeStore'
 
-const DISC_PARTICLES = 4000
+const DISC_PARTICLES = 5000
 
 // Fresnel rim-light shader — glows at silhouette edges like a real emission nebula
 const fresnelVert = `
@@ -52,7 +52,7 @@ export default function GalaxyNode({ galaxy }) {
       const arm   = Math.floor(Math.random() * 3)
       const frac  = i / DISC_PARTICLES
       const angle = (arm / 3) * Math.PI * 2 + frac * Math.PI * 5
-      const r     = 0.4 + frac * 5.5
+      const r     = 0.5 + frac * 4.0
       const noise = (Math.random() - 0.5) * (r * 0.45)
 
       pos[i * 3]     = Math.cos(angle) * r + noise
@@ -100,7 +100,7 @@ export default function GalaxyNode({ galaxy }) {
   return (
     <group position={position} visible={visible}>
       {/* Layered pulsing halos */}
-      {[3.0, 4.2, 5.8].map((r, i) => (
+      {[2.0, 3.2, 4.5].map((r, i) => (
         <mesh key={i} ref={el => halos.current[i] = el}>
           <sphereGeometry args={[r, 12, 12]} />
           <meshBasicMaterial color={glowColor} transparent opacity={0.06} side={THREE.BackSide} />
@@ -109,7 +109,7 @@ export default function GalaxyNode({ galaxy }) {
 
       {/* Fresnel rim glow shell */}
       <mesh>
-        <sphereGeometry args={[1.6, 32, 32]} />
+        <sphereGeometry args={[2.2, 32, 32]} />
         <shaderMaterial
           vertexShader={fresnelVert}
           fragmentShader={fresnelFrag}
@@ -129,7 +129,7 @@ export default function GalaxyNode({ galaxy }) {
         </bufferGeometry>
         <pointsMaterial
           vertexColors
-          size={0.055}
+          size={0.18}
           transparent
           opacity={hovered ? 0.95 : 0.6}
           sizeAttenuation
@@ -145,11 +145,11 @@ export default function GalaxyNode({ galaxy }) {
         onPointerOver={() => { setHovered(true); document.body.style.cursor = 'pointer' }}
         onPointerOut={() => { setHovered(false); document.body.style.cursor = 'none' }}
       >
-        <sphereGeometry args={[0.75, 32, 32]} />
+        <sphereGeometry args={[1.4, 32, 32]} />
         <meshStandardMaterial
           color={baseColor}
           emissive={baseColor}
-          emissiveIntensity={hovered ? 4.5 : 2.2}
+          emissiveIntensity={hovered ? 6.0 : 3.5}
           roughness={0}
           metalness={0.2}
         />

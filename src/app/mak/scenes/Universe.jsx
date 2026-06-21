@@ -174,7 +174,7 @@ export default function Universe() {
         gl={{ antialias: true, alpha: false, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.2 }}
         style={{ position: 'absolute', inset: 0 }}
       >
-        <fog attach="fog" args={['#00010a', 90, 220]} />
+        <fog attach="fog" args={['#00010a', 60, 120]} />
         <SceneLights />
 
         <Suspense fallback={null}>
@@ -190,9 +190,9 @@ export default function Universe() {
 
           <EffectComposer>
             <Bloom
-              intensity={1.6}
-              luminanceThreshold={0.15}
-              luminanceSmoothing={0.85}
+              intensity={2.5}
+              luminanceThreshold={0.08}
+              luminanceSmoothing={0.9}
               mipmapBlur
             />
             <ChromaticAberration
