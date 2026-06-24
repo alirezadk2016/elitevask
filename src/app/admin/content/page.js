@@ -32,7 +32,39 @@ const T = {
 
 const FF = "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
 
-const MONTHS = ["jan","feb","mar","apr","maj","jun","jul","aug","sep","okt","nov","dec"];
+const DEFAULT_PRICES = {
+  lille:   { hele:800,  udv:500,  indv:600,  guld:2000 },
+  mellem:  { hele:950,  udv:550,  indv:700,  guld:2200 },
+  stor:    { hele:1100, udv:650,  indv:850,  guld:2350 },
+  varebil: { hele:1400, udv:750,  indv:750,  guld:2200 },
+};
+
+const DEFAULT_FAQ = [
+  {q:{da:"Kan dampvask skade lakken?",en:"Can steam washing damage the paintwork?"},a:{da:"Nej – dampvask er faktisk skånsom for lakken end traditionel højtryk- eller tunnelvask. Vi bruger professionel damp ved kontrolleret temperatur og bløde mikrofiberklude. Der bruges ingen roterende børster, der kan ridse, og ingen aggressive kemikalier, der kan angribe lakken. Metoden er anbefalet til biler med keramisk coating, poleret lak og sarte overflader.",en:"No – steam washing is actually gentler on paintwork than traditional high-pressure or tunnel washing. We use professional steam at controlled temperature and soft microfibre cloths. No rotating brushes that can scratch, and no aggressive chemicals that attack the paint. The method is recommended for cars with ceramic coating, polished paint and delicate surfaces."}},
+  {q:{da:"Hvor lang tid tager det?",en:"How long does it take?"},a:{da:"Det afhænger af bilstørrelse og pakke: Lille bil: 100–120 min, Mellemstor bil: 120–180 min, Stor bil / SUV: 150–200 min, Varebil: 90–180 min. Vi er altid præcise med vores tidsestimater og holder dig opdateret undervejs.",en:"It depends on car size and package: Small car: 100–120 min, Medium car: 120–180 min, Large car / SUV: 150–200 min, Van: 90–180 min. We always give accurate time estimates and keep you updated throughout."}},
+  {q:{da:"Skal jeg være hjemme?",en:"Do I need to be home?"},a:{da:"Ikke nødvendigvis. Mange kunder er på arbejde, mens vi vasker bilen. Det eneste krav er, at bilen er tilgængelig og at der er fri adgang rundt om den.",en:"Not necessarily. Many customers are at work while we wash the car. The only requirement is that the car is accessible and there is clear space around it."}},
+  {q:{da:"Vasker I elbiler?",en:"Do you wash electric cars?"},a:{da:"Ja, vi vasker alle typer elbiler – Tesla, Polestar, VW ID, Hyundai Ioniq og alle andre mærker. Dampvask er faktisk ideelt til elbiler: vi bruger minimalt vand, ingen aggressive kemikalier der kan påvirke tætninger og elektronik.",en:"Yes, we wash all types of electric cars – Tesla, Polestar, VW ID, Hyundai Ioniq and all other brands. Steam washing is actually ideal for EVs: we use minimal water, no aggressive chemicals that could affect seals and electronics."}},
+  {q:{da:"Hvad hvis det regner?",en:"What if it rains?"},a:{da:"Let regn er sjældent et problem – vi kan vaske under overdækning, i carporte eller i garager. Ved kraftigt regn kontakter vi dig dagen inden og tilbyder at ombooke til nærmeste ledige tid helt uden gebyr.",en:"Light rain is rarely a problem – we can wash under cover, in carports or in garages. In heavy rain we contact you the day before and offer to rebook to the nearest available time completely free of charge."}},
+  {q:{da:"Hvad koster mobil bilvask?",en:"What does mobile car wash cost?"},a:{da:"Prisen afhænger af biltype og pakke: Udvendig vask: fra 500 kr, Hel bil (ind & ud): fra 800 kr, Guld pakke (inkl. motorrens + lakforsegling): fra 2.000 kr. Kørsel til din adresse på Sjælland er gratis.",en:"Price depends on car type and package: Exterior wash: from 500 kr, Full car (in & out): from 800 kr, Gold package (incl. engine clean + paint protection): from 2,000 kr. Travel to your address on Zealand is free."}},
+  {q:{da:"Hvor lang tid tager vasken?",en:"How long does the wash take?"},a:{da:"Det afhænger af bilstørrelse og pakke: Lille bil: 100–120 min, Mellemstor bil: 120–180 min, Stor bil / SUV: 150–200 min, Varebil: 90–180 min.",en:"It depends on car size and package: Small car: 100–120 min, Medium car: 120–180 min, Large car / SUV: 150–200 min, Van: 90–180 min."}},
+  {q:{da:"Kommer I til min adresse?",en:"Do you come to my address?"},a:{da:"Ja – det er hele idéen! Vi er 100% mobile og kører ud til dig, uanset om du er hjemme, på arbejdet eller i sommerhuset. Du behøver slet ikke flytte dig. Vi medbringer alt udstyr.",en:"Yes – that's the whole idea! We are 100% mobile and drive to you, whether you're at home, at work or at the summer house. You don't need to move. We bring all equipment."}},
+  {q:{da:"Er dampvask sikkert for min bil?",en:"Is steam washing safe for my car?"},a:{da:"Ja, dampvask er faktisk skånsomt for bilen end traditionel højtryk- eller tunnelvask. Vi bruger professionelle, pH-neutrale produkter og varm damp der løsner snavs uden at ridse lakken.",en:"Yes, steam washing is actually gentler for your car than traditional high-pressure or tunnel washing. We use professional, pH-neutral products and hot steam that loosens dirt without scratching the paint."}},
+  {q:{da:"Arbejder I i hele Sjælland?",en:"Do you work all over Zealand?"},a:{da:"Ja! Vi dækker hele Sjælland – postnumre 1000–4799 – inkl. Storkøbenhavn, Nordsjælland, Køge, Roskilde, Næstved, Ringsted og omegn. Kørsel er gratis til alle adresser inden for serviceområdet.",en:"Yes! We cover all of Zealand – postcodes 1000–4799 – including Greater Copenhagen, North Zealand, Køge, Roskilde, Næstved, Ringsted and surrounding areas. Travel is free to all addresses within the service area."}},
+  {q:{da:"Hvad er inkluderet i Guld pakken?",en:"What is included in the Gold package?"},a:{da:"Guld pakken er vores mest komplette behandling og inkluderer alt: Komplet udvendig dampvask, Grundig indvendig rens, Professionel motorrens, Lak- & glansbeskyttelse (lakforsegling), Interiørbeskyttelse, Dybderens ved uheld.",en:"The Gold package is our most complete treatment and includes everything: Complete exterior steam wash, Thorough interior clean, Professional engine clean, Paint & gloss protection (paint sealant), Interior protection, Deep clean if needed."}},
+  {q:{da:"Kan I vaske leasingbiler?",en:"Can you clean lease cars?"},a:{da:"Ja, vi klargør leasingbiler til aflevering. Vi sørger for at bilen fremstår ren og velholdt – både udvendigt og indvendigt – så du undgår ekstraomkostninger ved aflevering.",en:"Yes, we prepare lease cars for return. We ensure the car looks clean and well-maintained – both inside and out – so you avoid extra costs at return."}},
+  {q:{da:"Hvad er forskellen på dampvask og almindelig bilvask?",en:"What is the difference between steam wash and regular wash?"},a:{da:"Traditionel bilvask (tunnelvask eller højtryk) ridser lakken over tid med børster og aggressive kemikalier. Dampvask bruger varme og tryk til at løsne snavs skånsomt – uden børster, uden aggressive kemikalier og med op til 90% mindre vandforbrug.",en:"Traditional car washing (tunnel wash or high pressure) scratches the paint over time with brushes and aggressive chemicals. Steam washing uses heat and pressure to gently loosen dirt – without brushes, without aggressive chemicals and with up to 90% less water."}},
+  {q:{da:"Skal jeg forberede bilen inden I kommer?",en:"Do I need to prepare the car before you arrive?"},a:{da:"Det er ikke nødvendigt, men du er velkommen til at fjerne løse genstande og personlige ejendele fra kabinen. Sørg blot for at bilen er tilgængelig og at der er fri plads rundt om den.",en:"It's not necessary, but you're welcome to remove loose items and personal belongings from the cabin. Just make sure the car is accessible and there's clear space around it."}},
+  {q:{da:"Kan I vaske elbiler og hybridbiler?",en:"Can you wash electric and hybrid cars?"},a:{da:"Ja, vi vasker alle typer elbiler og hybridbiler. Dampvask er faktisk ideel til elbiler – vi bruger minimalt vand og ingen aggressive kemikalier, der kan påvirke tætninger og elektronik.",en:"Yes, we wash all types of electric and hybrid cars. Steam washing is actually ideal for EVs – we use minimal water and no aggressive chemicals that could affect seals and electronics."}},
+  {q:{da:"Hvad er forskellen på udvendig, indvendig og hel vask?",en:"What is the difference between exterior, interior and full wash?"},a:{da:"Udvendig vask dækker karosseri, ruder, fælge og dæk. Indvendig vask dækker sæder, gulvmåtter, instrumentbræt, dørpaneler og ruder indefra. Hel vask er kombinationen af begge og er den mest populære løsning.",en:"Exterior wash covers bodywork, windows, rims and tyres. Interior wash covers seats, floor mats, dashboard, door panels and windows from inside. Full wash is the combination of both and is our most popular option."}},
+  {q:{da:"Hvad sker der, hvis det regner på min bookingdag?",en:"What happens if it rains on my booking day?"},a:{da:"Vi kontakter dig dagen inden og tilbyder enten at fortsætte (let regn er sjældent et problem indendørs eller under overdækning) eller at ombooke til nærmeste ledige tid uden ekstra gebyr.",en:"We contact you the day before and offer either to continue (light rain is rarely a problem indoors or under cover) or to rebook to the nearest available time at no extra charge."}},
+  {q:{da:"Bruger I kemikalier, der kan skade lakken?",en:"Do you use chemicals that can damage the paintwork?"},a:{da:"Nej. Vi bruger miljøvenlige rengøringsmidler, der er testet til brug på biloverflader. Dampvasken kræver desuden langt færre kemikalier end traditionel bilvask.",en:"No. We use eco-friendly cleaning agents tested for use on car surfaces. Steam washing also requires far fewer chemicals than traditional car washing."}},
+  {q:{da:"Kan I vaske bilen, selvom den er meget beskidt eller fuld af dyrehår?",en:"Can you wash the car even if it is very dirty or full of pet hair?"},a:{da:"Ja. Vi er vant til biler i alle tilstande – fra leasingbiler klar til aflevering til familievogne med sæsoners ophobede snavs og kæledyrhår.",en:"Yes. We are used to cars in all conditions – from lease cars ready for return to family vehicles with seasons of accumulated dirt and pet hair."}},
+  {q:{da:"Tilbyder I erhvervsaftaler til virksomheder med flåder?",en:"Do you offer business agreements for companies with fleets?"},a:{da:"Ja, vi laver aftaler med virksomheder, der har behov for regelmæssig vask af firmabiler, varevogne eller hele flåder. Kontakt os på info@elite-vask.dk for et tilbud tilpasset jeres behov.",en:"Yes, we make agreements with companies that need regular washing of company cars, vans or entire fleets. Contact us at info@elite-vask.dk for a quote tailored to your needs."}},
+  {q:{da:"Hvad er jeres aflysningspolitik?",en:"What is your cancellation policy?"},a:{da:"Du kan aflyse eller ombooke gratis op til 24 timer inden din booking. Ved aflysning kortere end 24 timer forbeholder vi os retten til at opkræve et aflysningsgebyr på 150 kr.",en:"You can cancel or rebook for free up to 24 hours before your booking. For cancellations less than 24 hours in advance, we reserve the right to charge a cancellation fee of 150 kr."}},
+  {q:{da:"Rengør I sæder af læder og stof forskelligt?",en:"Do you clean leather and fabric seats differently?"},a:{da:"Ja. Læder behandles med skånsom rengøring og afsluttes med en fugtighedscreme. Stofbeklædning damprenses, hvilket løsner snavs, fjerner lugt og dræber bakterier.",en:"Yes. Leather is treated with gentle cleaning and finished with a moisturising cream. Fabric upholstery is steam cleaned, which loosens dirt, removes odours and kills bacteria."}},
+];
+
+const MONTHS =["jan","feb","mar","apr","maj","jun","jul","aug","sep","okt","nov","dec"];
 const FULL_MONTHS = ["januar","februar","marts","april","maj","juni","juli","august","september","oktober","november","december"];
 const DAYS = ["Man","Tir","Ons","Tor","Fre","Lør","Søn"];
 
@@ -220,6 +252,9 @@ export default function AdminPanel() {
   const [editingExt, setEditingExt]       = useState(null);
   const [cmsLoading, setCmsLoading]       = useState(false);
   const [cmsMsg, setCmsMsg]               = useState(null);
+  const [pricesFromDefault, setPricesFromDefault] = useState(false);
+  const [albumInput, setAlbumInput]               = useState("");
+  const [galleryAlbum, setGalleryAlbum]           = useState("alle");
 
   const fileRef = useRef();
   const todayColRef = useRef();
@@ -286,7 +321,13 @@ export default function AdminPanel() {
     else if (type === "videos")  setVideos(data.items || []);
     else if (type === "faq")     setFaqItems(data.items || []);
     else if (type === "extras")  setExtrasItems(data.items || []);
-    else if (type === "packages") { setPricesData(data.prices || {}); setPriceEdits(data.prices || {}); }
+    else if (type === "packages") {
+      const hasPrices = data.prices && Object.keys(data.prices).length > 0;
+      const prices = hasPrices ? data.prices : DEFAULT_PRICES;
+      setPricesData(prices);
+      setPriceEdits(prices);
+      setPricesFromDefault(!hasPrices);
+    }
   }
 
   useEffect(() => {
@@ -302,7 +343,7 @@ export default function AdminPanel() {
     const res = await fetch("/api/admin/content", {
       method:"POST",
       headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" },
-      body: JSON.stringify({ type, url:urlInput.trim(), caption:captionInput, title:captionInput }),
+      body: JSON.stringify({ type, url:urlInput.trim(), caption:captionInput, title:captionInput, album: type === "gallery" ? albumInput : undefined }),
     });
     const data = await res.json();
     setCLoading(false);
@@ -314,7 +355,7 @@ export default function AdminPanel() {
     if (!file) return;
     setUploadProgress(0); setMsg(null);
     const form = new FormData();
-    form.append("file", file); form.append("type", type); form.append("caption", captionInput);
+    form.append("file", file); form.append("type", type); form.append("caption", captionInput); if (type === "gallery" && albumInput) form.append("album", albumInput);
     const xhr = new XMLHttpRequest();
     xhr.upload.onprogress = (e) => { if (e.lengthComputable) setUploadProgress(Math.round((e.loaded/e.total)*100)); };
     xhr.onload = () => {
@@ -783,19 +824,38 @@ export default function AdminPanel() {
                   </button>
                 </div>
                 <input style={{ width:"100%", padding:"11px 14px", borderRadius:8, border:`1px solid ${T.border}`, background:T.bg0, color:T.t1, fontSize:14, outline:"none", fontFamily:FF, marginTop:8, boxSizing:"border-box" }} placeholder="Billedtekst (valgfri)" value={captionInput} onChange={e => setCaptionInput(e.target.value)} />
+                <select value={albumInput} onChange={e => setAlbumInput(e.target.value)}
+                  style={{ width:"100%", padding:"11px 14px", borderRadius:8, border:`1px solid ${T.border}`, background:T.bg0, color:albumInput?T.t1:T.t4, fontSize:14, outline:"none", fontFamily:FF, marginTop:8, boxSizing:"border-box", cursor:"pointer" }}>
+                  <option value="">Album (valgfri)</option>
+                  {["Udvendig","Indvendig","Motor","Sæder","Karosseri","Andet"].map(a => <option key={a} value={a}>{a}</option>)}
+                </select>
                 <Feedback m={msg} />
               </div>
 
               {gallery.length > 0 && (
-                <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:16 }}>
+                <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:12 }}>
                   <span style={{ fontSize:11, letterSpacing:2, fontWeight:700, color:T.t3, textTransform:"uppercase" }}>Billeder i galleriet</span>
                   <span style={{ background:T.bg2, color:T.t3, borderRadius:20, padding:"2px 9px", fontSize:12 }}>{gallery.length}</span>
                 </div>
               )}
 
-              {gallery.length > 0 ? (
-                <div style={{ display:"grid", gridTemplateColumns:`repeat(auto-fill, minmax(${narrow?"160px":"220px"},1fr))`, gap:14 }}>
-                  {gallery.map(item => (
+              {gallery.length > 0 ? (() => {
+                const albums = ["alle", ...Array.from(new Set(gallery.map(i => i.album).filter(Boolean)))];
+                const filteredGallery = galleryAlbum === "alle" ? gallery : gallery.filter(i => i.album === galleryAlbum);
+                return (
+                  <>
+                    {albums.length > 1 && (
+                      <div style={{ display:"flex", gap:6, flexWrap:"wrap", marginBottom:16 }}>
+                        {albums.map(alb => (
+                          <button key={alb} onClick={() => setGalleryAlbum(alb)}
+                            style={{ padding:"6px 14px", borderRadius:20, border:`1px solid ${galleryAlbum===alb?T.accentBorder:T.border}`, background:galleryAlbum===alb?T.accentDim:"transparent", color:galleryAlbum===alb?T.accent:T.t3, fontSize:12, fontWeight:600, cursor:"pointer", fontFamily:FF }}>
+                            {alb === "alle" ? `Alle (${gallery.length})` : `${alb} (${gallery.filter(i=>i.album===alb).length})`}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                    <div style={{ display:"grid", gridTemplateColumns:`repeat(auto-fill, minmax(${narrow?"160px":"220px"},1fr))`, gap:14 }}>
+                      {filteredGallery.map(item => (
                     <div key={item.id}
                       style={{ position:"relative", borderRadius:12, overflow:"hidden", background:T.bg1, border:`1px solid ${hoveredId===item.id?T.accentBorder:T.border}`, boxShadow:hoveredId===item.id?T.shadowL:T.shadow, transition:"border .2s, box-shadow .2s, transform .15s", transform:hoveredId===item.id?"translateY(-2px)":"none", cursor:"pointer" }}
                       onMouseEnter={() => setHoveredId(item.id)}
@@ -818,9 +878,11 @@ export default function AdminPanel() {
                         </div>
                       </div>
                     </div>
-                  ))}
-                </div>
-              ) : (
+                      ))}
+                    </div>
+                  </>
+                );
+              })() : (
                 <div style={{ padding:"72px 24px", textAlign:"center" }}>
                   <svg width="72" height="72" viewBox="0 0 24 24" fill="none" stroke={T.t4} strokeWidth="1.5" strokeLinecap="round" style={{ marginBottom:20, opacity:.4 }}><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
                   <p style={{ fontSize:17, fontWeight:700, color:T.t2, margin:"0 0 6px" }}>Ingen billeder endnu</p>
@@ -962,12 +1024,46 @@ export default function AdminPanel() {
                     })}
                   </div>
                 )}
-                {faqItems.length === 0 && (
-                  <div style={{ padding:"60px 24px", textAlign:"center" }}>
-                    <p style={{ fontSize:17, fontWeight:700, color:T.t2, margin:"0 0 6px" }}>Ingen FAQ-punkter endnu</p>
-                    <p style={{ fontSize:13, color:T.t3, margin:0 }}>Tilføj dit første spørgsmål ovenfor</p>
-                  </div>
-                )}
+                {faqItems.length === 0 && (() => {
+                  async function seedAllFaq() {
+                    setCmsLoading(true); setCmsMsg(null);
+                    for (const faq of DEFAULT_FAQ) {
+                      await fetch("/api/admin/content", {
+                        method:"POST",
+                        headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" },
+                        body: JSON.stringify({ type:"faq", item:{ q:faq.q, a:faq.a } }),
+                      });
+                    }
+                    setCmsLoading(false);
+                    setCmsMsg({ type:"ok", text:"Alle standarddata gemt!" });
+                    fetchContent("faq");
+                  }
+                  return (
+                    <>
+                      <div style={{ marginBottom:16, background:"rgba(55,210,120,.06)", border:`1px solid ${T.accentBorder}`, borderRadius:10, padding:"12px 16px", display:"flex", alignItems:"center", justifyContent:"space-between", gap:12, flexWrap:"wrap" }}>
+                        <span style={{ fontSize:13, color:T.accent, fontWeight:600 }}>Viser standarddata — klik 'Gem alle' for at gøre dem redigerbare</span>
+                        <button onClick={seedAllFaq} disabled={cmsLoading}
+                          style={{ padding:"8px 18px", background:T.accent, color:T.bg0, border:"none", borderRadius:8, fontWeight:700, fontSize:13, cursor:cmsLoading?"not-allowed":"pointer", opacity:cmsLoading?.6:1, fontFamily:FF, whiteSpace:"nowrap" }}>
+                          {cmsLoading ? "Gemmer…" : "Gem alle standarddata"}
+                        </button>
+                      </div>
+                      <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
+                        {DEFAULT_FAQ.map((faq, idx) => (
+                          <div key={idx} style={{ background:T.bg1, border:`1px solid ${T.border}`, borderRadius:12, padding:20, opacity:.7 }}>
+                            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:8 }}>
+                              <span style={{ fontSize:10, color:T.t4, fontWeight:700, letterSpacing:.5 }}>#{idx+1} — standarddata</span>
+                            </div>
+                            <p style={{ fontSize:14, fontWeight:700, color:T.t2, margin:"0 0 4px" }}>{faq.q.da}</p>
+                            <p style={{ fontSize:13, color:T.t3, margin:"0 0 8px", lineHeight:1.6 }}>{faq.a.da}</p>
+                            <p style={{ fontSize:12, color:T.t4, margin:"0 0 2px", fontStyle:"italic" }}>{faq.q.en}</p>
+                            <p style={{ fontSize:12, color:T.t4, margin:0, fontStyle:"italic", lineHeight:1.5 }}>{faq.a.en}</p>
+                          </div>
+                        ))}
+                      </div>
+                      <Feedback m={cmsMsg} />
+                    </>
+                  );
+                })()}
               </>
             );
           })()}
@@ -988,7 +1084,7 @@ export default function AdminPanel() {
               });
               const data = await res.json();
               setCmsLoading(false);
-              if (data.ok) { setCmsMsg({ type:"ok", text:"Priser gemt!" }); setPricesData({...priceEdits}); }
+              if (data.ok) { setCmsMsg({ type:"ok", text:"Priser gemt!" }); setPricesData({...priceEdits}); setPricesFromDefault(false); }
               else setCmsMsg({ type:"err", text:"Fejl – prøv igen" });
             }
 
@@ -1003,6 +1099,11 @@ export default function AdminPanel() {
 
             return (
               <>
+                {pricesFromDefault && (
+                  <div style={{ marginBottom:16, background:"rgba(55,210,120,.06)", border:`1px solid ${T.accentBorder}`, borderRadius:10, padding:"12px 16px" }}>
+                    <span style={{ fontSize:13, color:T.accent, fontWeight:600 }}>Viser standardpriser — rediger og klik 'Gem priser' for at gemme</span>
+                  </div>
+                )}
                 <div style={{ background:T.bg1, border:`1px solid ${T.border}`, borderRadius:16, padding:24, marginBottom:16, overflowX:"auto" }}>
                   <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:20 }}>
                     <p style={{ fontSize:10, letterSpacing:2, fontWeight:700, color:T.t3, textTransform:"uppercase", margin:0 }}>Prismatrix (kr.)</p>
