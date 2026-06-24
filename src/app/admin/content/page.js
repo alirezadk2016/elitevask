@@ -201,6 +201,26 @@ export default function AdminPanel() {
   const [narrow, setNarrow]               = useState(false);
   const [loginErr, setLoginErr]           = useState("");
   const [nowTime, setNowTime]             = useState(() => new Date());
+
+  // CMS state — FAQ, Priser, Ekstra
+  const [faqItems, setFaqItems]           = useState([]);
+  const [extrasItems, setExtrasItems]     = useState([]);
+  const [pricesData, setPricesData]       = useState({});
+  const [faqNewQda, setFaqNewQda]         = useState("");
+  const [faqNewQen, setFaqNewQen]         = useState("");
+  const [faqNewAda, setFaqNewAda]         = useState("");
+  const [faqNewAen, setFaqNewAen]         = useState("");
+  const [extNewNameDa, setExtNewNameDa]   = useState("");
+  const [extNewNameEn, setExtNewNameEn]   = useState("");
+  const [extNewDescDa, setExtNewDescDa]   = useState("");
+  const [extNewDescEn, setExtNewDescEn]   = useState("");
+  const [extNewPrice, setExtNewPrice]     = useState("");
+  const [priceEdits, setPriceEdits]       = useState({});
+  const [editingFaq, setEditingFaq]       = useState(null);
+  const [editingExt, setEditingExt]       = useState(null);
+  const [cmsLoading, setCmsLoading]       = useState(false);
+  const [cmsMsg, setCmsMsg]               = useState(null);
+
   const fileRef = useRef();
   const todayColRef = useRef();
   const calScrollRef = useRef();
@@ -262,12 +282,18 @@ export default function AdminPanel() {
   async function fetchContent(type) {
     const res = await fetch(`/api/admin/content?type=${type}`, { headers:{ Authorization:`Bearer ${secret}` } });
     const data = await res.json();
-    if (type === "gallery") setGallery(data.items || []);
-    else setVideos(data.items || []);
+    if (type === "gallery")  setGallery(data.items || []);
+    else if (type === "videos")  setVideos(data.items || []);
+    else if (type === "faq")     setFaqItems(data.items || []);
+    else if (type === "extras")  setExtrasItems(data.items || []);
+    else if (type === "packages") { setPricesData(data.prices || {}); setPriceEdits(data.prices || {}); }
   }
 
   useEffect(() => {
     if (authed && (tab === "gallery" || tab === "videos")) fetchContent(tab);
+    if (authed && tab === "faq")      fetchContent("faq");
+    if (authed && tab === "extras")   fetchContent("extras");
+    if (authed && tab === "priser")   fetchContent("packages");
   }, [authed, tab]);
 
   async function addUrl(type) {
@@ -384,6 +410,9 @@ export default function AdminPanel() {
     bookings: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2.5"/><path d="M16 2v4M8 2v4"/><path d="M3 10h18"/></svg>,
     gallery:  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2.5"/><path d="M3 16l5-5 4 4 3-3 6 6"/><circle cx="8.5" cy="8.5" r="1.5"/></svg>,
     videos:   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="6" width="14" height="12" rx="2.5"/><path d="M16 10l5-3v10l-5-3V10z"/></svg>,
+    faq:      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>,
+    priser:   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>,
+    extras:   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>,
     refresh:  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 11-9-9c2.52 0 4.8.99 6.48 2.59L21 8"/><path d="M21 3v5h-5"/></svg>,
   };
 
@@ -423,11 +452,16 @@ export default function AdminPanel() {
             {navItem("gallery", "Galleri", icons.gallery, gallery.length || undefined)}
             {navItem("videos",  "Videoer",  icons.videos,  videos.length  || undefined)}
             <div style={{ height:1, background:T.border, margin:"14px 4px" }}/>
+            {sectionLabel("CMS")}
+            {navItem("faq",    "FAQ",    icons.faq,    faqItems.length   || undefined)}
+            {navItem("priser", "Priser", icons.priser)}
+            {navItem("extras", "Ekstra", icons.extras, extrasItems.length || undefined)}
+            <div style={{ height:1, background:T.border, margin:"14px 4px" }}/>
             <p style={{ fontSize:11, color:T.t4, padding:"0 10px", margin:0 }}>Session aktiv</p>
           </aside>
         ) : (
           <div style={{ display:"flex", gap:8, padding:"16px 16px 0", overflowX:"auto" }}>
-            {[["bookings","Bookinger",icons.bookings],["gallery","Galleri",icons.gallery],["videos","Videoer",icons.videos]].map(([id,label,icon]) => (
+            {[["bookings","Bookinger",icons.bookings],["gallery","Galleri",icons.gallery],["videos","Videoer",icons.videos],["faq","FAQ",icons.faq],["priser","Priser",icons.priser],["extras","Ekstra",icons.extras]].map(([id,label,icon]) => (
               <button key={id} onClick={() => { setTab(id); setMsg(null); setUrlInput(""); }}
                 style={{ display:"flex", alignItems:"center", gap:6, padding:"8px 16px", borderRadius:8, border:`1px solid ${tab===id?T.accentBorder:T.border}`, background:tab===id?T.accentDim:"transparent", color:tab===id?T.accent:T.t3, fontSize:13, fontWeight:600, cursor:"pointer", fontFamily:FF, whiteSpace:"nowrap" }}>
                 {icon}{label}
@@ -442,10 +476,10 @@ export default function AdminPanel() {
           {/* Page title + badge */}
           <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:28 }}>
             <h1 style={{ fontSize:22, fontWeight:800, color:T.t1, margin:0, letterSpacing:"-.3px" }}>
-              {tab === "bookings" ? "Bookinger" : tab === "gallery" ? "Galleri" : "Videoer"}
+              {tab === "bookings" ? "Bookinger" : tab === "gallery" ? "Galleri" : tab === "videos" ? "Videoer" : tab === "faq" ? "FAQ" : tab === "priser" ? "Priser" : "Ekstra ydelser"}
             </h1>
             <span style={{ background:T.accentDim, color:T.accent, borderRadius:20, padding:"3px 12px", fontSize:12, fontWeight:700 }}>
-              {tab === "bookings" ? `${activeBookings} aktive` : tab === "gallery" ? `${gallery.length} ${gallery.length===1?"billede":"billeder"}` : `${videos.length} ${videos.length===1?"video":"videoer"}`}
+              {tab === "bookings" ? `${activeBookings} aktive` : tab === "gallery" ? `${gallery.length} ${gallery.length===1?"billede":"billeder"}` : tab === "videos" ? `${videos.length} ${videos.length===1?"video":"videoer"}` : tab === "faq" ? `${faqItems.length} spørgsmål` : tab === "priser" ? "Prismatrix" : `${extrasItems.length} ydelser`}
             </span>
           </div>
 
@@ -799,6 +833,356 @@ export default function AdminPanel() {
               )}
             </>
           )}
+
+          {/* ── FAQ ── */}
+          {tab === "faq" && (() => {
+            async function addFaq(e) {
+              e.preventDefault();
+              if (!faqNewQda.trim() || !faqNewAda.trim()) return;
+              setCmsLoading(true); setCmsMsg(null);
+              const res = await fetch("/api/admin/content", {
+                method:"POST",
+                headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" },
+                body: JSON.stringify({ type:"faq", item:{ q:faqNewQda.trim(), a:faqNewAda.trim(), qEn:faqNewQen.trim(), aEn:faqNewAen.trim() } }),
+              });
+              const data = await res.json();
+              setCmsLoading(false);
+              if (data.ok) { setCmsMsg({ type:"ok", text:"Tilføjet!" }); setFaqNewQda(""); setFaqNewAda(""); setFaqNewQen(""); setFaqNewAen(""); fetchContent("faq"); }
+              else setCmsMsg({ type:"err", text:"Fejl – prøv igen" });
+            }
+            async function saveFaq(item) {
+              setCmsLoading(true); setCmsMsg(null);
+              const res = await fetch("/api/admin/content", {
+                method:"PUT",
+                headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" },
+                body: JSON.stringify({ type:"faq", id:item.id, item:{ q:item.q, a:item.a, qEn:item.qEn||"", aEn:item.aEn||"" } }),
+              });
+              const data = await res.json();
+              setCmsLoading(false);
+              if (data.ok) { setCmsMsg({ type:"ok", text:"Gemt!" }); setEditingFaq(null); fetchContent("faq"); }
+              else setCmsMsg({ type:"err", text:"Fejl – prøv igen" });
+            }
+            async function deleteFaq(id) {
+              if (!confirm("Slet dette FAQ-punkt?")) return;
+              await fetch("/api/admin/content", { method:"DELETE", headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" }, body:JSON.stringify({ type:"faq", id }) });
+              fetchContent("faq");
+            }
+            const inp = (val, onChange, ph, rows) => rows
+              ? <textarea value={val} onChange={e=>onChange(e.target.value)} placeholder={ph} rows={rows} style={{ width:"100%", padding:"10px 13px", borderRadius:8, border:`1px solid ${T.border}`, background:T.bg0, color:T.t1, fontSize:13, outline:"none", fontFamily:FF, boxSizing:"border-box", resize:"vertical" }} />
+              : <input value={val} onChange={e=>onChange(e.target.value)} placeholder={ph} style={{ width:"100%", padding:"10px 13px", borderRadius:8, border:`1px solid ${T.border}`, background:T.bg0, color:T.t1, fontSize:13, outline:"none", fontFamily:FF, boxSizing:"border-box" }} />;
+            return (
+              <>
+                <div style={{ background:T.bg1, border:`1px solid ${T.border}`, borderRadius:16, padding:24, marginBottom:28 }}>
+                  <p style={{ fontSize:10, letterSpacing:2, fontWeight:700, color:T.t3, textTransform:"uppercase", margin:"0 0 16px" }}>Tilføj spørgsmål</p>
+                  <form onSubmit={addFaq} style={{ display:"flex", flexDirection:"column", gap:8 }}>
+                    <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8 }}>
+                      <div>
+                        <p style={{ fontSize:11, color:T.t4, margin:"0 0 4px", fontWeight:600 }}>Spørgsmål (DA)</p>
+                        {inp(faqNewQda, setFaqNewQda, "Spørgsmål på dansk…")}
+                      </div>
+                      <div>
+                        <p style={{ fontSize:11, color:T.t4, margin:"0 0 4px", fontWeight:600 }}>Question (EN)</p>
+                        {inp(faqNewQen, setFaqNewQen, "Question in English…")}
+                      </div>
+                      <div>
+                        <p style={{ fontSize:11, color:T.t4, margin:"0 0 4px", fontWeight:600 }}>Svar (DA)</p>
+                        {inp(faqNewAda, setFaqNewAda, "Svar på dansk…", 3)}
+                      </div>
+                      <div>
+                        <p style={{ fontSize:11, color:T.t4, margin:"0 0 4px", fontWeight:600 }}>Answer (EN)</p>
+                        {inp(faqNewAen, setFaqNewAen, "Answer in English…", 3)}
+                      </div>
+                    </div>
+                    <button type="submit" disabled={cmsLoading||!faqNewQda.trim()||!faqNewAda.trim()}
+                      style={{ padding:"11px 0", background:T.accent, color:T.bg0, fontWeight:700, fontSize:14, borderRadius:8, border:"none", cursor:(cmsLoading||!faqNewQda.trim()||!faqNewAda.trim())?"not-allowed":"pointer", opacity:(cmsLoading||!faqNewQda.trim()||!faqNewAda.trim())?.4:1, fontFamily:FF }}>
+                      {cmsLoading ? "…" : "Tilføj"}
+                    </button>
+                  </form>
+                  <Feedback m={cmsMsg} />
+                </div>
+
+                {faqItems.length > 0 && (
+                  <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
+                    {faqItems.map((item, idx) => {
+                      const isEditing = editingFaq?.id === item.id;
+                      const draft = isEditing ? editingFaq : item;
+                      return (
+                        <div key={item.id} style={{ background:T.bg1, border:`1px solid ${isEditing?T.accentBorder:T.border}`, borderRadius:12, padding:20 }}>
+                          {isEditing ? (
+                            <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
+                              <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8 }}>
+                                <div>
+                                  <p style={{ fontSize:11, color:T.t4, margin:"0 0 4px", fontWeight:600 }}>Spørgsmål (DA)</p>
+                                  {inp(draft.q, v=>setEditingFaq(d=>({...d,q:v})), "Spørgsmål…")}
+                                </div>
+                                <div>
+                                  <p style={{ fontSize:11, color:T.t4, margin:"0 0 4px", fontWeight:600 }}>Question (EN)</p>
+                                  {inp(draft.qEn||"", v=>setEditingFaq(d=>({...d,qEn:v})), "Question…")}
+                                </div>
+                                <div>
+                                  <p style={{ fontSize:11, color:T.t4, margin:"0 0 4px", fontWeight:600 }}>Svar (DA)</p>
+                                  {inp(draft.a, v=>setEditingFaq(d=>({...d,a:v})), "Svar…", 3)}
+                                </div>
+                                <div>
+                                  <p style={{ fontSize:11, color:T.t4, margin:"0 0 4px", fontWeight:600 }}>Answer (EN)</p>
+                                  {inp(draft.aEn||"", v=>setEditingFaq(d=>({...d,aEn:v})), "Answer…", 3)}
+                                </div>
+                              </div>
+                              <div style={{ display:"flex", gap:8 }}>
+                                <button onClick={() => saveFaq(draft)} disabled={cmsLoading}
+                                  style={{ flex:1, padding:"9px 0", background:T.accent, color:T.bg0, border:"none", borderRadius:8, fontWeight:700, fontSize:13, cursor:"pointer", fontFamily:FF }}>Gem</button>
+                                <button onClick={() => setEditingFaq(null)}
+                                  style={{ flex:1, padding:"9px 0", background:"rgba(255,255,255,.06)", color:T.t3, border:"none", borderRadius:8, fontWeight:600, fontSize:13, cursor:"pointer", fontFamily:FF }}>Annuller</button>
+                              </div>
+                            </div>
+                          ) : (
+                            <div>
+                              <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:8 }}>
+                                <span style={{ fontSize:10, color:T.accent, fontWeight:700, letterSpacing:.5 }}>#{idx+1}</span>
+                                <div style={{ display:"flex", gap:6 }}>
+                                  <button onClick={() => setEditingFaq({...item})}
+                                    style={{ padding:"5px 12px", background:T.accentDim, border:`1px solid ${T.accentBorder}`, borderRadius:6, color:T.accent, fontSize:12, fontWeight:600, cursor:"pointer", fontFamily:FF }}>Rediger</button>
+                                  <button onClick={() => deleteFaq(item.id)}
+                                    style={{ padding:"5px 12px", background:T.dangerDim, border:`1px solid ${T.dangerBorder}`, borderRadius:6, color:T.danger, fontSize:12, fontWeight:600, cursor:"pointer", fontFamily:FF }}>Slet</button>
+                                </div>
+                              </div>
+                              <p style={{ fontSize:14, fontWeight:700, color:T.t1, margin:"0 0 4px" }}>{item.q}</p>
+                              <p style={{ fontSize:13, color:T.t2, margin:"0 0 8px", lineHeight:1.6 }}>{item.a}</p>
+                              {item.qEn && <p style={{ fontSize:12, color:T.t4, margin:"0 0 2px", fontStyle:"italic" }}>{item.qEn}</p>}
+                              {item.aEn && <p style={{ fontSize:12, color:T.t4, margin:0, fontStyle:"italic", lineHeight:1.5 }}>{item.aEn}</p>}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+                {faqItems.length === 0 && (
+                  <div style={{ padding:"60px 24px", textAlign:"center" }}>
+                    <p style={{ fontSize:17, fontWeight:700, color:T.t2, margin:"0 0 6px" }}>Ingen FAQ-punkter endnu</p>
+                    <p style={{ fontSize:13, color:T.t3, margin:0 }}>Tilføj dit første spørgsmål ovenfor</p>
+                  </div>
+                )}
+              </>
+            );
+          })()}
+
+          {/* ── PRISER ── */}
+          {tab === "priser" && (() => {
+            const CARS = ["lille","mellem","stor","varebil"];
+            const CAR_LABELS = { lille:"Lille bil", mellem:"Mellemstor bil", stor:"Stor bil / SUV", varebil:"Varebil" };
+            const PKGS = ["basis","komplet","premium","deluxe"];
+            const PKG_LABELS = { basis:"Basis", komplet:"Komplet", premium:"Premium", deluxe:"Deluxe" };
+
+            async function savePrices() {
+              setCmsLoading(true); setCmsMsg(null);
+              const res = await fetch("/api/admin/content", {
+                method:"POST",
+                headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" },
+                body: JSON.stringify({ type:"packages", prices:priceEdits }),
+              });
+              const data = await res.json();
+              setCmsLoading(false);
+              if (data.ok) { setCmsMsg({ type:"ok", text:"Priser gemt!" }); setPricesData({...priceEdits}); }
+              else setCmsMsg({ type:"err", text:"Fejl – prøv igen" });
+            }
+
+            function setPrice(carId, pkgId, val) {
+              setPriceEdits(prev => ({
+                ...prev,
+                [carId]: { ...(prev[carId]||{}), [pkgId]: val }
+              }));
+            }
+
+            const hasChanges = JSON.stringify(priceEdits) !== JSON.stringify(pricesData);
+
+            return (
+              <>
+                <div style={{ background:T.bg1, border:`1px solid ${T.border}`, borderRadius:16, padding:24, marginBottom:16, overflowX:"auto" }}>
+                  <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:20 }}>
+                    <p style={{ fontSize:10, letterSpacing:2, fontWeight:700, color:T.t3, textTransform:"uppercase", margin:0 }}>Prismatrix (kr.)</p>
+                    <button onClick={savePrices} disabled={cmsLoading||!hasChanges}
+                      style={{ padding:"9px 20px", background:hasChanges&&!cmsLoading?T.accent:"rgba(55,210,120,.2)", color:T.bg0, border:"none", borderRadius:8, fontWeight:700, fontSize:13, cursor:hasChanges&&!cmsLoading?"pointer":"not-allowed", opacity:hasChanges&&!cmsLoading?1:.5, fontFamily:FF }}>
+                      {cmsLoading ? "Gemmer…" : "Gem priser"}
+                    </button>
+                  </div>
+                  <table style={{ width:"100%", borderCollapse:"collapse", minWidth:400 }}>
+                    <thead>
+                      <tr>
+                        <th style={{ textAlign:"left", padding:"8px 10px", fontSize:11, color:T.t4, fontWeight:700, letterSpacing:.5, textTransform:"uppercase", borderBottom:`1px solid ${T.border}` }}>Biltype</th>
+                        {PKGS.map(p => (
+                          <th key={p} style={{ textAlign:"center", padding:"8px 10px", fontSize:11, color:T.accent, fontWeight:700, letterSpacing:.5, textTransform:"uppercase", borderBottom:`1px solid ${T.border}` }}>{PKG_LABELS[p]}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {CARS.map((carId, ri) => (
+                        <tr key={carId} style={{ background: ri%2===0?"transparent":"rgba(255,255,255,.02)" }}>
+                          <td style={{ padding:"10px 10px", fontSize:13, color:T.t1, fontWeight:600, borderBottom:`1px solid rgba(255,255,255,.04)`, whiteSpace:"nowrap" }}>{CAR_LABELS[carId]}</td>
+                          {PKGS.map(pkgId => {
+                            const val = (priceEdits[carId]||{})[pkgId] || "";
+                            return (
+                              <td key={pkgId} style={{ padding:"8px 6px", borderBottom:`1px solid rgba(255,255,255,.04)` }}>
+                                <input
+                                  type="number" min="0" step="1"
+                                  value={val}
+                                  onChange={e => setPrice(carId, pkgId, e.target.value)}
+                                  placeholder="–"
+                                  style={{ width:"100%", padding:"8px 10px", borderRadius:7, border:`1px solid ${T.border}`, background:T.bg0, color:T.accent, fontSize:14, fontWeight:700, outline:"none", fontFamily:FF, textAlign:"center", boxSizing:"border-box" }}
+                                />
+                              </td>
+                            );
+                          })}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  <Feedback m={cmsMsg} />
+                </div>
+                <p style={{ fontSize:12, color:T.t4, margin:0 }}>Priser vises som "kr. X" på hjemmesiden. Tomme felter bruger standardpriser fra koden.</p>
+              </>
+            );
+          })()}
+
+          {/* ── EKSTRA ── */}
+          {tab === "extras" && (() => {
+            async function addExtra(e) {
+              e.preventDefault();
+              if (!extNewNameDa.trim()) return;
+              setCmsLoading(true); setCmsMsg(null);
+              const res = await fetch("/api/admin/content", {
+                method:"POST",
+                headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" },
+                body: JSON.stringify({ type:"extras", item:{ name:extNewNameDa.trim(), nameEn:extNewNameEn.trim(), desc:extNewDescDa.trim(), descEn:extNewDescEn.trim(), price:extNewPrice.trim() } }),
+              });
+              const data = await res.json();
+              setCmsLoading(false);
+              if (data.ok) { setCmsMsg({ type:"ok", text:"Tilføjet!" }); setExtNewNameDa(""); setExtNewNameEn(""); setExtNewDescDa(""); setExtNewDescEn(""); setExtNewPrice(""); fetchContent("extras"); }
+              else setCmsMsg({ type:"err", text:"Fejl – prøv igen" });
+            }
+            async function saveExtra(item) {
+              setCmsLoading(true); setCmsMsg(null);
+              const res = await fetch("/api/admin/content", {
+                method:"PUT",
+                headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" },
+                body: JSON.stringify({ type:"extras", id:item.id, item:{ name:item.name, nameEn:item.nameEn||"", desc:item.desc||"", descEn:item.descEn||"", price:item.price||"" } }),
+              });
+              const data = await res.json();
+              setCmsLoading(false);
+              if (data.ok) { setCmsMsg({ type:"ok", text:"Gemt!" }); setEditingExt(null); fetchContent("extras"); }
+              else setCmsMsg({ type:"err", text:"Fejl – prøv igen" });
+            }
+            async function deleteExtra(id) {
+              if (!confirm("Slet denne ydelse?")) return;
+              await fetch("/api/admin/content", { method:"DELETE", headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" }, body:JSON.stringify({ type:"extras", id }) });
+              fetchContent("extras");
+            }
+            const inp = (val, onChange, ph) => <input value={val} onChange={e=>onChange(e.target.value)} placeholder={ph} style={{ width:"100%", padding:"10px 13px", borderRadius:8, border:`1px solid ${T.border}`, background:T.bg0, color:T.t1, fontSize:13, outline:"none", fontFamily:FF, boxSizing:"border-box" }} />;
+            return (
+              <>
+                <div style={{ background:T.bg1, border:`1px solid ${T.border}`, borderRadius:16, padding:24, marginBottom:28 }}>
+                  <p style={{ fontSize:10, letterSpacing:2, fontWeight:700, color:T.t3, textTransform:"uppercase", margin:"0 0 16px" }}>Tilføj ekstra ydelse</p>
+                  <form onSubmit={addExtra} style={{ display:"flex", flexDirection:"column", gap:8 }}>
+                    <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8 }}>
+                      <div>
+                        <p style={{ fontSize:11, color:T.t4, margin:"0 0 4px", fontWeight:600 }}>Navn (DA) *</p>
+                        {inp(extNewNameDa, setExtNewNameDa, "f.eks. Polering")}
+                      </div>
+                      <div>
+                        <p style={{ fontSize:11, color:T.t4, margin:"0 0 4px", fontWeight:600 }}>Name (EN)</p>
+                        {inp(extNewNameEn, setExtNewNameEn, "e.g. Polishing")}
+                      </div>
+                      <div>
+                        <p style={{ fontSize:11, color:T.t4, margin:"0 0 4px", fontWeight:600 }}>Beskrivelse (DA)</p>
+                        {inp(extNewDescDa, setExtNewDescDa, "Kort beskrivelse…")}
+                      </div>
+                      <div>
+                        <p style={{ fontSize:11, color:T.t4, margin:"0 0 4px", fontWeight:600 }}>Description (EN)</p>
+                        {inp(extNewDescEn, setExtNewDescEn, "Short description…")}
+                      </div>
+                    </div>
+                    <div>
+                      <p style={{ fontSize:11, color:T.t4, margin:"0 0 4px", fontWeight:600 }}>Pris (kr.)</p>
+                      <input type="number" min="0" step="1" value={extNewPrice} onChange={e=>setExtNewPrice(e.target.value)} placeholder="f.eks. 299" style={{ padding:"10px 13px", borderRadius:8, border:`1px solid ${T.border}`, background:T.bg0, color:T.accent, fontSize:14, fontWeight:700, outline:"none", fontFamily:FF, width:160 }} />
+                    </div>
+                    <button type="submit" disabled={cmsLoading||!extNewNameDa.trim()}
+                      style={{ padding:"11px 0", background:T.accent, color:T.bg0, fontWeight:700, fontSize:14, borderRadius:8, border:"none", cursor:(cmsLoading||!extNewNameDa.trim())?"not-allowed":"pointer", opacity:(cmsLoading||!extNewNameDa.trim())?.4:1, fontFamily:FF }}>
+                      {cmsLoading ? "…" : "Tilføj ydelse"}
+                    </button>
+                  </form>
+                  <Feedback m={cmsMsg} />
+                </div>
+
+                {extrasItems.length > 0 && (
+                  <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
+                    {extrasItems.map((item, idx) => {
+                      const isEditing = editingExt?.id === item.id;
+                      const draft = isEditing ? editingExt : item;
+                      return (
+                        <div key={item.id} style={{ background:T.bg1, border:`1px solid ${isEditing?T.accentBorder:T.border}`, borderRadius:12, padding:20 }}>
+                          {isEditing ? (
+                            <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
+                              <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8 }}>
+                                <div>
+                                  <p style={{ fontSize:11, color:T.t4, margin:"0 0 4px", fontWeight:600 }}>Navn (DA)</p>
+                                  {inp(draft.name, v=>setEditingExt(d=>({...d,name:v})), "Navn…")}
+                                </div>
+                                <div>
+                                  <p style={{ fontSize:11, color:T.t4, margin:"0 0 4px", fontWeight:600 }}>Name (EN)</p>
+                                  {inp(draft.nameEn||"", v=>setEditingExt(d=>({...d,nameEn:v})), "Name…")}
+                                </div>
+                                <div>
+                                  <p style={{ fontSize:11, color:T.t4, margin:"0 0 4px", fontWeight:600 }}>Beskrivelse (DA)</p>
+                                  {inp(draft.desc||"", v=>setEditingExt(d=>({...d,desc:v})), "Beskrivelse…")}
+                                </div>
+                                <div>
+                                  <p style={{ fontSize:11, color:T.t4, margin:"0 0 4px", fontWeight:600 }}>Description (EN)</p>
+                                  {inp(draft.descEn||"", v=>setEditingExt(d=>({...d,descEn:v})), "Description…")}
+                                </div>
+                              </div>
+                              <div>
+                                <p style={{ fontSize:11, color:T.t4, margin:"0 0 4px", fontWeight:600 }}>Pris (kr.)</p>
+                                <input type="number" min="0" step="1" value={draft.price||""} onChange={e=>setEditingExt(d=>({...d,price:e.target.value}))} style={{ padding:"10px 13px", borderRadius:8, border:`1px solid ${T.border}`, background:T.bg0, color:T.accent, fontSize:14, fontWeight:700, outline:"none", fontFamily:FF, width:160 }} />
+                              </div>
+                              <div style={{ display:"flex", gap:8 }}>
+                                <button onClick={() => saveExtra(draft)} disabled={cmsLoading}
+                                  style={{ flex:1, padding:"9px 0", background:T.accent, color:T.bg0, border:"none", borderRadius:8, fontWeight:700, fontSize:13, cursor:"pointer", fontFamily:FF }}>Gem</button>
+                                <button onClick={() => setEditingExt(null)}
+                                  style={{ flex:1, padding:"9px 0", background:"rgba(255,255,255,.06)", color:T.t3, border:"none", borderRadius:8, fontWeight:600, fontSize:13, cursor:"pointer", fontFamily:FF }}>Annuller</button>
+                              </div>
+                            </div>
+                          ) : (
+                            <div style={{ display:"flex", alignItems:"center", gap:16 }}>
+                              <div style={{ flex:1, minWidth:0 }}>
+                                <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:4 }}>
+                                  <span style={{ fontSize:14, fontWeight:700, color:T.t1 }}>{item.name}</span>
+                                  {item.nameEn && <span style={{ fontSize:12, color:T.t4, fontStyle:"italic" }}>/ {item.nameEn}</span>}
+                                  {item.price && <span style={{ fontSize:13, fontWeight:700, color:T.accent, background:T.accentDim, borderRadius:6, padding:"2px 8px" }}>kr. {item.price}</span>}
+                                </div>
+                                {item.desc && <p style={{ fontSize:12, color:T.t3, margin:0, lineHeight:1.5 }}>{item.desc}</p>}
+                              </div>
+                              <div style={{ display:"flex", gap:6, flexShrink:0 }}>
+                                <button onClick={() => setEditingExt({...item})}
+                                  style={{ padding:"6px 12px", background:T.accentDim, border:`1px solid ${T.accentBorder}`, borderRadius:6, color:T.accent, fontSize:12, fontWeight:600, cursor:"pointer", fontFamily:FF }}>Rediger</button>
+                                <button onClick={() => deleteExtra(item.id)}
+                                  style={{ padding:"6px 12px", background:T.dangerDim, border:`1px solid ${T.dangerBorder}`, borderRadius:6, color:T.danger, fontSize:12, fontWeight:600, cursor:"pointer", fontFamily:FF }}>Slet</button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+                {extrasItems.length === 0 && (
+                  <div style={{ padding:"60px 24px", textAlign:"center" }}>
+                    <p style={{ fontSize:17, fontWeight:700, color:T.t2, margin:"0 0 6px" }}>Ingen ekstra ydelser endnu</p>
+                    <p style={{ fontSize:13, color:T.t3, margin:0 }}>Tilføj din første ydelse ovenfor</p>
+                  </div>
+                )}
+              </>
+            );
+          })()}
 
           {/* ── VIDEOS ── */}
           {tab === "videos" && (
