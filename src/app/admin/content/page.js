@@ -64,6 +64,15 @@ const DEFAULT_FAQ = [
   {q:{da:"Rengør I sæder af læder og stof forskelligt?",en:"Do you clean leather and fabric seats differently?"},a:{da:"Ja. Læder behandles med skånsom rengøring og afsluttes med en fugtighedscreme. Stofbeklædning damprenses, hvilket løsner snavs, fjerner lugt og dræber bakterier.",en:"Yes. Leather is treated with gentle cleaning and finished with a moisturising cream. Fabric upholstery is steam cleaned, which loosens dirt, removes odours and kills bacteria."}},
 ];
 
+const DEFAULT_EXTRAS = [
+  {id:"motor", name:{da:"Motorrens",en:"Engine clean"}, price:400, desc:{da:"Grundig afrensning af motorrum",en:"Thorough engine bay cleaning"}},
+  {id:"lak",   name:{da:"Lak & glansbeskyttelse",en:"Paint & gloss protection"}, price:300, desc:{da:"Udvendig – langvarig ekstra glans",en:"Exterior – long-lasting gloss"}},
+  {id:"pleje", name:{da:"Indvendig pleje & beskyttelse",en:"Interior care & protection"}, price:200, desc:{da:"Beskytter og fornyer interiøret",en:"Protects and renews the interior"}},
+  {id:"haar",  name:{da:"Fjernelse af dyrehår",en:"Pet hair removal"}, price:300, desc:{da:"Effektiv fjernelse af hår og fnug",en:"Effective removal of hair and lint"}},
+  {id:"saede", name:{da:"Sæderens (stof)",en:"Seat clean (fabric)"}, price:400, desc:{da:"Dybderens af stofsæder",en:"Deep clean of fabric seats"}},
+  {id:"barnesaede", name:{da:"Barnesæde rens",en:"Child seat cleaning"}, price:100, desc:{da:"Grundig og sikker rengøring",en:"Thorough and safe cleaning"}},
+];
+
 const MONTHS =["jan","feb","mar","apr","maj","jun","jul","aug","sep","okt","nov","dec"];
 const FULL_MONTHS = ["januar","februar","marts","april","maj","juni","juli","august","september","oktober","november","december"];
 const DAYS = ["Man","Tir","Ons","Tor","Fre","Lør","Søn"];
@@ -250,6 +259,7 @@ export default function AdminPanel() {
   const [priceEdits, setPriceEdits]       = useState({});
   const [editingFaq, setEditingFaq]       = useState(null);
   const [editingExt, setEditingExt]       = useState(null);
+  const [editingGallery, setEditingGallery] = useState(null);
   const [cmsLoading, setCmsLoading]       = useState(false);
   const [cmsMsg, setCmsMsg]               = useState(null);
   const [pricesFromDefault, setPricesFromDefault] = useState(false);
@@ -425,7 +435,7 @@ export default function AdminPanel() {
   const navItem = (id, label, icon, badge) => {
     const active = tab === id;
     return (
-      <button onClick={() => { setTab(id); setMsg(null); setUrlInput(""); setCmsMsg(null); setEditingFaq(null); setEditingExt(null); }}
+      <button onClick={() => { setTab(id); setMsg(null); setUrlInput(""); setCmsMsg(null); setEditingFaq(null); setEditingExt(null); setEditingGallery(null); }}
         style={{ display:"flex", alignItems:"center", gap:8, width:"100%", padding:"7px 9px", borderRadius:7, fontSize:13, fontWeight:active?600:400, color:active?T.accent:T.t3, background:active?T.accentDim:"transparent", border:"none", cursor:"pointer", fontFamily:FF, textAlign:"left", transition:"all .12s", marginBottom:1 }}>
         <span style={{ opacity: active ? 1 : 0.7, display:"flex" }}>{icon}</span>
         <span style={{ flex:1 }}>{label}</span>
@@ -503,7 +513,7 @@ export default function AdminPanel() {
         ) : (
           <div style={{ display:"flex", gap:8, padding:"16px 16px 0", overflowX:"auto" }}>
             {[["bookings","Bookinger",icons.bookings],["gallery","Galleri",icons.gallery],["videos","Videoer",icons.videos],["faq","FAQ",icons.faq],["priser","Priser",icons.priser],["extras","Ekstra",icons.extras]].map(([id,label,icon]) => (
-              <button key={id} onClick={() => { setTab(id); setMsg(null); setUrlInput(""); setCmsMsg(null); setEditingFaq(null); setEditingExt(null); }}
+              <button key={id} onClick={() => { setTab(id); setMsg(null); setUrlInput(""); setCmsMsg(null); setEditingFaq(null); setEditingExt(null); setEditingGallery(null); }}
                 style={{ display:"flex", alignItems:"center", gap:6, padding:"8px 16px", borderRadius:8, border:`1px solid ${tab===id?T.accentBorder:T.border}`, background:tab===id?T.accentDim:"transparent", color:tab===id?T.accent:T.t3, fontSize:13, fontWeight:600, cursor:"pointer", fontFamily:FF, whiteSpace:"nowrap" }}>
                 {icon}{label}
               </button>
@@ -855,30 +865,81 @@ export default function AdminPanel() {
                       </div>
                     )}
                     <div style={{ display:"grid", gridTemplateColumns:`repeat(auto-fill, minmax(${narrow?"160px":"220px"},1fr))`, gap:14 }}>
-                      {filteredGallery.map(item => (
+                      {filteredGallery.map(item => {
+                  const isEditingThis = editingGallery?.id === item.id;
+                  return (
                     <div key={item.id}
-                      style={{ position:"relative", borderRadius:12, overflow:"hidden", background:T.bg1, border:`1px solid ${hoveredId===item.id?T.accentBorder:T.border}`, boxShadow:hoveredId===item.id?T.shadowL:T.shadow, transition:"border .2s, box-shadow .2s, transform .15s", transform:hoveredId===item.id?"translateY(-2px)":"none", cursor:"pointer" }}
+                      style={{ borderRadius:12, overflow:"hidden", background:T.bg1, border:`1px solid ${hoveredId===item.id?T.accentBorder:T.border}`, boxShadow:hoveredId===item.id?T.shadowL:T.shadow, transition:"border .2s, box-shadow .2s, transform .15s", transform:hoveredId===item.id?"translateY(-2px)":"none", display:"flex", flexDirection:"column" }}
                       onMouseEnter={() => setHoveredId(item.id)}
                       onMouseLeave={() => setHoveredId(null)}
                     >
-                      <img src={item.url} alt={item.caption||""} style={{ width:"100%", aspectRatio:"4/3", objectFit:"cover", display:"block" }} />
-                      <div style={{ position:"absolute", inset:0, background:"linear-gradient(to top, rgba(8,17,10,.92) 0%, rgba(8,17,10,.3) 55%, transparent 100%)", display:"flex", flexDirection:"column", justifyContent:"flex-end", padding:12, opacity:hoveredId===item.id?1:0, transition:"opacity .2s" }}>
-                        {item.caption && <p style={{ fontSize:12, color:T.t1, fontWeight:500, margin:"0 0 10px", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{item.caption}</p>}
-                        <div style={{ display:"flex", gap:6 }}>
-                          <button onClick={() => setPreviewItem(item)}
-                            style={{ flex:1, padding:"7px 0", background:"rgba(255,255,255,.1)", border:"1px solid rgba(255,255,255,.15)", borderRadius:8, color:T.t1, fontSize:12, fontWeight:600, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", gap:5, fontFamily:FF }}>
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                            Vis
-                          </button>
-                          <button onClick={() => deleteItem("gallery", item.id, item.source==="upload"?item.url:null)}
-                            style={{ flex:1, padding:"7px 0", background:T.dangerDim, border:`1px solid ${T.dangerBorder}`, borderRadius:8, color:T.danger, fontSize:12, fontWeight:600, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", gap:5, fontFamily:FF }}>
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
-                            Slet
-                          </button>
-                        </div>
+                      {/* Image */}
+                      <div style={{ position:"relative", overflow:"hidden" }}>
+                        <img src={item.url} alt={item.caption||""} style={{ width:"100%", aspectRatio:"4/3", objectFit:"cover", display:"block", cursor:"pointer" }} onClick={() => setPreviewItem(item)} />
+                        {item.album && (
+                          <span style={{ position:"absolute", top:8, left:8, fontSize:10, fontWeight:700, color:T.bg0, background:T.accent, borderRadius:4, padding:"2px 7px", letterSpacing:.3 }}>{item.album}</span>
+                        )}
                       </div>
+
+                      {/* Inline edit form */}
+                      {isEditingThis ? (
+                        <div style={{ padding:"12px 12px 10px", display:"flex", flexDirection:"column", gap:8 }}>
+                          <input
+                            value={editingGallery.caption}
+                            onChange={e => setEditingGallery(d => ({...d, caption:e.target.value}))}
+                            placeholder="Billedtekst…"
+                            style={{ width:"100%", padding:"8px 10px", borderRadius:7, border:`1px solid ${T.accentBorder}`, background:T.bg0, color:T.t1, fontSize:12, outline:"none", fontFamily:FF, boxSizing:"border-box" }}
+                          />
+                          <select
+                            value={editingGallery.album}
+                            onChange={e => setEditingGallery(d => ({...d, album:e.target.value}))}
+                            style={{ width:"100%", padding:"8px 10px", borderRadius:7, border:`1px solid ${T.border}`, background:T.bg0, color:editingGallery.album?T.t1:T.t4, fontSize:12, outline:"none", fontFamily:FF, cursor:"pointer" }}
+                          >
+                            <option value="">Intet album</option>
+                            {["Udvendig","Indvendig","Motor","Sæder","Karosseri","Andet"].map(a => <option key={a} value={a}>{a}</option>)}
+                          </select>
+                          <div style={{ display:"flex", gap:6 }}>
+                            <button
+                              onClick={async () => {
+                                await fetch("/api/admin/content", {
+                                  method:"PUT",
+                                  headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" },
+                                  body: JSON.stringify({ type:"gallery", id:item.id, item:{ caption:editingGallery.caption, album:editingGallery.album } }),
+                                });
+                                setEditingGallery(null);
+                                fetchContent("gallery");
+                              }}
+                              style={{ flex:1, padding:"7px 0", background:T.accent, color:T.bg0, border:"none", borderRadius:7, fontWeight:700, fontSize:12, cursor:"pointer", fontFamily:FF }}
+                            >Gem</button>
+                            <button
+                              onClick={() => setEditingGallery(null)}
+                              style={{ flex:1, padding:"7px 0", background:"rgba(255,255,255,.06)", color:T.t3, border:"none", borderRadius:7, fontWeight:600, fontSize:12, cursor:"pointer", fontFamily:FF }}
+                            >Annuller</button>
+                          </div>
+                        </div>
+                      ) : (
+                        /* Always-visible bottom bar */
+                        <div style={{ padding:"8px 10px", display:"flex", gap:5, alignItems:"center", borderTop:`1px solid ${T.border}` }}>
+                          {item.caption
+                            ? <span style={{ flex:1, fontSize:11, color:T.t3, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap", minWidth:0 }}>{item.caption}</span>
+                            : <span style={{ flex:1 }}/>}
+                          <button
+                            onClick={() => setPreviewItem(item)}
+                            style={{ padding:"5px 9px", background:T.accentDim, border:`1px solid ${T.accentBorder}`, borderRadius:6, color:T.accent, fontSize:11, fontWeight:600, cursor:"pointer", fontFamily:FF, whiteSpace:"nowrap" }}
+                          >Vis</button>
+                          <button
+                            onClick={() => setEditingGallery({ id:item.id, caption:item.caption||"", album:item.album||"" })}
+                            style={{ padding:"5px 9px", background:"rgba(255,255,255,.06)", border:`1px solid ${T.border}`, borderRadius:6, color:T.t2, fontSize:11, fontWeight:600, cursor:"pointer", fontFamily:FF, whiteSpace:"nowrap" }}
+                          >✏</button>
+                          <button
+                            onClick={() => deleteItem("gallery", item.id, item.source==="upload"?item.url:null)}
+                            style={{ padding:"5px 9px", background:T.dangerDim, border:`1px solid ${T.dangerBorder}`, borderRadius:6, color:T.danger, fontSize:11, fontWeight:600, cursor:"pointer", fontFamily:FF, whiteSpace:"nowrap" }}
+                          >Slet</button>
+                        </div>
+                      )}
                     </div>
-                      ))}
+                  );
+                })}
                     </div>
                   </>
                 );
@@ -1049,14 +1110,24 @@ export default function AdminPanel() {
                       </div>
                       <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
                         {DEFAULT_FAQ.map((faq, idx) => (
-                          <div key={idx} style={{ background:T.bg1, border:`1px solid ${T.border}`, borderRadius:12, padding:20, opacity:.7 }}>
-                            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:8 }}>
-                              <span style={{ fontSize:10, color:T.t4, fontWeight:700, letterSpacing:.5 }}>#{idx+1} — standarddata</span>
+                          <div key={idx} style={{ background:T.bg1, border:`1px solid ${T.border}`, borderRadius:12, padding:20, display:"flex", gap:12, alignItems:"flex-start" }}>
+                            <div style={{ flex:1, minWidth:0 }}>
+                              <span style={{ fontSize:10, color:T.t4, fontWeight:700, letterSpacing:.5 }}>#{idx+1}</span>
+                              <p style={{ fontSize:14, fontWeight:700, color:T.t2, margin:"4px 0 4px" }}>{faq.q.da}</p>
+                              <p style={{ fontSize:12, color:T.t3, margin:"0 0 4px", lineHeight:1.5 }}>{faq.a.da}</p>
+                              {faq.q.en && <p style={{ fontSize:11, color:T.t4, margin:0, fontStyle:"italic" }}>{faq.q.en}</p>}
                             </div>
-                            <p style={{ fontSize:14, fontWeight:700, color:T.t2, margin:"0 0 4px" }}>{faq.q.da}</p>
-                            <p style={{ fontSize:13, color:T.t3, margin:"0 0 8px", lineHeight:1.6 }}>{faq.a.da}</p>
-                            <p style={{ fontSize:12, color:T.t4, margin:"0 0 2px", fontStyle:"italic" }}>{faq.q.en}</p>
-                            <p style={{ fontSize:12, color:T.t4, margin:0, fontStyle:"italic", lineHeight:1.5 }}>{faq.a.en}</p>
+                            <button
+                              onClick={async () => {
+                                await fetch("/api/admin/content", {
+                                  method:"POST",
+                                  headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" },
+                                  body: JSON.stringify({ type:"faq", item:{ q:faq.q, a:faq.a } }),
+                                });
+                                fetchContent("faq");
+                              }}
+                              style={{ padding:"6px 14px", background:T.accentDim, border:`1px solid ${T.accentBorder}`, borderRadius:7, color:T.accent, fontSize:12, fontWeight:700, cursor:"pointer", fontFamily:FF, whiteSpace:"nowrap", flexShrink:0 }}
+                            >+ Tilføj</button>
                           </div>
                         ))}
                       </div>
@@ -1285,12 +1356,58 @@ export default function AdminPanel() {
                     })}
                   </div>
                 )}
-                {extrasItems.length === 0 && (
-                  <div style={{ padding:"60px 24px", textAlign:"center" }}>
-                    <p style={{ fontSize:17, fontWeight:700, color:T.t2, margin:"0 0 6px" }}>Ingen ekstra ydelser endnu</p>
-                    <p style={{ fontSize:13, color:T.t3, margin:0 }}>Tilføj din første ydelse ovenfor</p>
-                  </div>
-                )}
+                {extrasItems.length === 0 && (() => {
+                  async function seedAllExtras() {
+                    setCmsLoading(true); setCmsMsg(null);
+                    for (const ext of DEFAULT_EXTRAS) {
+                      await fetch("/api/admin/content", {
+                        method:"POST",
+                        headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" },
+                        body: JSON.stringify({ type:"extras", item:{ name:ext.name, desc:ext.desc, price:ext.price } }),
+                      });
+                    }
+                    setCmsLoading(false);
+                    setCmsMsg({ type:"ok", text:"Alle standarddata gemt!" });
+                    fetchContent("extras");
+                  }
+                  return (
+                    <>
+                      <div style={{ marginBottom:16, background:"rgba(55,210,120,.06)", border:`1px solid ${T.accentBorder}`, borderRadius:10, padding:"12px 16px", display:"flex", alignItems:"center", justifyContent:"space-between", gap:12, flexWrap:"wrap" }}>
+                        <span style={{ fontSize:13, color:T.accent, fontWeight:600 }}>Viser standardydelser — klik 'Gem alle' for at gøre dem redigerbare</span>
+                        <button onClick={seedAllExtras} disabled={cmsLoading}
+                          style={{ padding:"8px 18px", background:T.accent, color:T.bg0, border:"none", borderRadius:8, fontWeight:700, fontSize:13, cursor:cmsLoading?"not-allowed":"pointer", opacity:cmsLoading?.6:1, fontFamily:FF, whiteSpace:"nowrap" }}>
+                          {cmsLoading ? "Gemmer…" : "Gem alle standarddata"}
+                        </button>
+                      </div>
+                      <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
+                        {DEFAULT_EXTRAS.map((ext, idx) => (
+                          <div key={idx} style={{ background:T.bg1, border:`1px solid ${T.border}`, borderRadius:12, padding:20, display:"flex", gap:12, alignItems:"center" }}>
+                            <div style={{ flex:1, minWidth:0 }}>
+                              <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:4 }}>
+                                <span style={{ fontSize:14, fontWeight:700, color:T.t2 }}>{ext.name.da}</span>
+                                {ext.name.en && <span style={{ fontSize:12, color:T.t4, fontStyle:"italic" }}>/ {ext.name.en}</span>}
+                                <span style={{ fontSize:13, fontWeight:700, color:T.accent, background:T.accentDim, borderRadius:6, padding:"2px 8px" }}>kr. {ext.price}</span>
+                              </div>
+                              {ext.desc?.da && <p style={{ fontSize:12, color:T.t3, margin:0, lineHeight:1.5 }}>{ext.desc.da}</p>}
+                            </div>
+                            <button
+                              onClick={async () => {
+                                await fetch("/api/admin/content", {
+                                  method:"POST",
+                                  headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" },
+                                  body: JSON.stringify({ type:"extras", item:{ name:ext.name, desc:ext.desc, price:ext.price } }),
+                                });
+                                fetchContent("extras");
+                              }}
+                              style={{ padding:"6px 14px", background:T.accentDim, border:`1px solid ${T.accentBorder}`, borderRadius:7, color:T.accent, fontSize:12, fontWeight:700, cursor:"pointer", fontFamily:FF, whiteSpace:"nowrap", flexShrink:0 }}
+                            >+ Tilføj</button>
+                          </div>
+                        ))}
+                      </div>
+                      <Feedback m={cmsMsg} />
+                    </>
+                  );
+                })()}
               </>
             );
           })()}

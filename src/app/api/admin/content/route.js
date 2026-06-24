@@ -33,6 +33,7 @@ export async function POST(req) {
     const file = form.get('file');
     const type = form.get('type') || 'gallery';
     const caption = form.get('caption') || '';
+    const album = form.get('album') || '';
 
     if (!file) return Response.json({ error: 'no_file' }, { status: 400 });
 
@@ -44,6 +45,7 @@ export async function POST(req) {
       id: Date.now().toString(),
       url: blob.url,
       caption,
+      ...(album ? { album } : {}),
       source: 'upload',
       uploadedAt: new Date().toISOString(),
     };
@@ -91,7 +93,7 @@ export async function POST(req) {
     }
 
     // URL-based (gallery / videos)
-    const { url, caption = '', title = '' } = body;
+    const { url, caption = '', title = '', album = '' } = body;
     if (!url) return Response.json({ error: 'no_url' }, { status: 400 });
 
     item = {
@@ -99,6 +101,7 @@ export async function POST(req) {
       url,
       caption,
       title,
+      ...(album ? { album } : {}),
       source: 'url',
       uploadedAt: new Date().toISOString(),
     };
@@ -121,11 +124,11 @@ export async function PUT(req) {
   const body = await req.json();
   const { type, id, item: updated } = body;
 
-  if (!id || !updated || (type !== 'faq' && type !== 'extras')) {
+  if (!id || !updated || (type !== 'faq' && type !== 'extras' && type !== 'gallery')) {
     return Response.json({ error: 'invalid_request' }, { status: 400 });
   }
 
-  const key = type === 'faq' ? 'content:faq' : 'content:extras';
+  const key = type === 'faq' ? 'content:faq' : type === 'extras' ? 'content:extras' : `content:${type}`;
   const existing = await kv.get(key) || [];
   const updated_list = existing.map(i => i.id === id ? { ...i, ...updated, id } : i);
   await kv.set(key, updated_list);
