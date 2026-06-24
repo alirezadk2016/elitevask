@@ -130,28 +130,34 @@ function renderFaq(){
   var INIT=4;
   var g=document.getElementById('faqList');g.innerHTML='';
   var old=document.getElementById('faqMoreBtn');if(old)old.remove();
+  var items=[];
   FAQ.forEach(function(f,i){
     var el=document.createElement('div');el.className='qa';
-    if(i>=INIT)el.setAttribute('data-faq-extra','1');
+    if(i>=INIT){el.setAttribute('data-faq-extra','1');el.style.display='none';}
     el.innerHTML='<button>'+((f.q&&f.q[LANG])||(typeof f.q==='string'?f.q:'')||'')+'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button><div class="ans"><p>'+((f.a&&f.a[LANG])||(typeof f.a==='string'?f.a:'')||'')+'</p></div>';
     el.querySelector('button').addEventListener('click',function(){el.classList.toggle('open');});
     g.appendChild(el);
+    items.push(el);
   });
   if(FAQ.length>INIT){
-    var wrap=document.createElement('div');wrap.id='faqMoreBtn';wrap.style.cssText='text-align:center;margin-top:18px;';
+    var wrap=document.createElement('div');wrap.id='faqMoreBtn';wrap.style.cssText='text-align:center;padding:20px 0 4px;';
     var btn=document.createElement('button');
     btn.className='faq-more-btn';
-    btn.innerHTML=I18N[LANG].faqMore||'Se alle spørgsmål <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>';
     var expanded=false;
+    function setLabel(){
+      btn.innerHTML=expanded
+        ?((I18N[LANG].faqLess||'Vis færre')+' <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="18 15 12 9 6 15"/></svg>')
+        :((I18N[LANG].faqMore||'Se alle spørgsmål')+' <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>');
+    }
+    setLabel();
     btn.addEventListener('click',function(){
       expanded=!expanded;
       document.querySelectorAll('[data-faq-extra]').forEach(function(el){el.style.display=expanded?'':'none';});
-      btn.innerHTML=expanded?(I18N[LANG].faqLess||'Vis færre <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="18 15 12 9 6 15"/></svg>'):(I18N[LANG].faqMore||'Se alle spørgsmål <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>');
-      if(expanded){setTimeout(function(){document.querySelectorAll('[data-faq-extra]')[0].scrollIntoView({behavior:'smooth',block:'nearest'});},50);}
+      setLabel();
+      if(!expanded){wrap.scrollIntoView({behavior:'smooth',block:'nearest'});}
     });
-    document.querySelectorAll('[data-faq-extra]').forEach(function(el){el.style.display='none';});
-    wrap.appendChild(btn);
-    g.after(wrap);
+    /* Insert button right after the 4th item so it's always at the fold */
+    if(items[INIT-1]){items[INIT-1].after(wrap);}else{g.appendChild(wrap);}
   }
 }
 /* ====== I18N APPLY ====== */
