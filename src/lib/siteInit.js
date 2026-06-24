@@ -154,7 +154,14 @@ function renderFaq(){
       expanded=!expanded;
       document.querySelectorAll('[data-faq-extra]').forEach(function(el){el.style.display=expanded?'':'none';});
       setLabel();
-      if(!expanded){wrap.scrollIntoView({behavior:'smooth',block:'nearest'});}
+      if(expanded){
+        /* Move button to after the last item */
+        items[items.length-1].after(wrap);
+      } else {
+        /* Move button back to after item 4 and scroll to it */
+        items[INIT-1].after(wrap);
+        wrap.scrollIntoView({behavior:'smooth',block:'nearest'});
+      }
     });
     wrap.appendChild(btn);
     /* Insert button right after the 4th item so it's always at the fold */
