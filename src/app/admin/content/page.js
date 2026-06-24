@@ -257,13 +257,15 @@ export default function AdminPanel() {
   const [extNewDescEn, setExtNewDescEn]   = useState("");
   const [extNewPrice, setExtNewPrice]     = useState("");
   const [priceEdits, setPriceEdits]       = useState({});
-  const [editingFaq, setEditingFaq]       = useState(null);
   const [editingExt, setEditingExt]       = useState(null);
   const [editingGallery, setEditingGallery] = useState(null);
+  const [expandedFaqId, setExpandedFaqId] = useState(null);
+  const [faqDrafts, setFaqDrafts]         = useState({});
+  const [addFaqOpen, setAddFaqOpen]       = useState(false);
   const [cmsLoading, setCmsLoading]       = useState(false);
   const [cmsMsg, setCmsMsg]               = useState(null);
   const [pricesFromDefault, setPricesFromDefault] = useState(false);
-  const [albumInput, setAlbumInput]               = useState("");
+  const [albumInput, setAlbumInput]               = useState("Enkelt");
   const [galleryAlbum, setGalleryAlbum]           = useState("alle");
 
   const fileRef = useRef();
@@ -435,7 +437,7 @@ export default function AdminPanel() {
   const navItem = (id, label, icon, badge) => {
     const active = tab === id;
     return (
-      <button onClick={() => { setTab(id); setMsg(null); setUrlInput(""); setCmsMsg(null); setEditingFaq(null); setEditingExt(null); setEditingGallery(null); }}
+      <button onClick={() => { setTab(id); setMsg(null); setUrlInput(""); setCmsMsg(null); setExpandedFaqId(null); setFaqDrafts({}); setAddFaqOpen(false); setEditingExt(null); setEditingGallery(null); }}
         style={{ display:"flex", alignItems:"center", gap:8, width:"100%", padding:"7px 9px", borderRadius:7, fontSize:13, fontWeight:active?600:400, color:active?T.accent:T.t3, background:active?T.accentDim:"transparent", border:"none", cursor:"pointer", fontFamily:FF, textAlign:"left", transition:"all .12s", marginBottom:1 }}>
         <span style={{ opacity: active ? 1 : 0.7, display:"flex" }}>{icon}</span>
         <span style={{ flex:1 }}>{label}</span>
@@ -513,7 +515,7 @@ export default function AdminPanel() {
         ) : (
           <div style={{ display:"flex", gap:8, padding:"16px 16px 0", overflowX:"auto" }}>
             {[["bookings","Bookinger",icons.bookings],["gallery","Galleri",icons.gallery],["videos","Videoer",icons.videos],["faq","FAQ",icons.faq],["priser","Priser",icons.priser],["extras","Ekstra",icons.extras]].map(([id,label,icon]) => (
-              <button key={id} onClick={() => { setTab(id); setMsg(null); setUrlInput(""); setCmsMsg(null); setEditingFaq(null); setEditingExt(null); setEditingGallery(null); }}
+              <button key={id} onClick={() => { setTab(id); setMsg(null); setUrlInput(""); setCmsMsg(null); setExpandedFaqId(null); setFaqDrafts({}); setAddFaqOpen(false); setEditingExt(null); setEditingGallery(null); }}
                 style={{ display:"flex", alignItems:"center", gap:6, padding:"8px 16px", borderRadius:8, border:`1px solid ${tab===id?T.accentBorder:T.border}`, background:tab===id?T.accentDim:"transparent", color:tab===id?T.accent:T.t3, fontSize:13, fontWeight:600, cursor:"pointer", fontFamily:FF, whiteSpace:"nowrap" }}>
                 {icon}{label}
               </button>
@@ -835,9 +837,9 @@ export default function AdminPanel() {
                 </div>
                 <input style={{ width:"100%", padding:"11px 14px", borderRadius:8, border:`1px solid ${T.border}`, background:T.bg0, color:T.t1, fontSize:14, outline:"none", fontFamily:FF, marginTop:8, boxSizing:"border-box" }} placeholder="Billedtekst (valgfri)" value={captionInput} onChange={e => setCaptionInput(e.target.value)} />
                 <select value={albumInput} onChange={e => setAlbumInput(e.target.value)}
-                  style={{ width:"100%", padding:"11px 14px", borderRadius:8, border:`1px solid ${T.border}`, background:T.bg0, color:albumInput?T.t1:T.t4, fontSize:14, outline:"none", fontFamily:FF, marginTop:8, boxSizing:"border-box", cursor:"pointer" }}>
-                  <option value="">Album (valgfri)</option>
-                  {["Udvendig","Indvendig","Motor","Sæder","Karosseri","Andet"].map(a => <option key={a} value={a}>{a}</option>)}
+                  style={{ width:"100%", padding:"11px 14px", borderRadius:8, border:`1px solid ${T.border}`, background:T.bg0, color:T.t1, fontSize:14, outline:"none", fontFamily:FF, marginTop:8, boxSizing:"border-box", cursor:"pointer" }}>
+                  <option value="Enkelt">Enkelt billede</option>
+                  <option value="Før & Efter">Før & Efter</option>
                 </select>
                 <Feedback m={msg} />
               </div>
@@ -850,23 +852,30 @@ export default function AdminPanel() {
               )}
 
               {gallery.length > 0 ? (() => {
-                const albums = ["alle", ...Array.from(new Set(gallery.map(i => i.album).filter(Boolean)))];
-                const filteredGallery = galleryAlbum === "alle" ? gallery : gallery.filter(i => i.album === galleryAlbum);
+                const beKeywords = /f\xf8r|efter|before|after/i;
+                const categorized = gallery.map(i => ({...i, _cat:(i.album==="F\xf8r & Efter"||beKeywords.test(i.caption||"")||beKeywords.test(i.album||""))?"F\xf8r & Efter":"Enkelt"}));
+                const beforeAfter = categorized.filter(i => i._cat==="F\xf8r & Efter");
+                const enkelt = categorized.filter(i => i._cat==="Enkelt");
+                const filteredGallery = galleryAlbum==="alle" ? categorized : galleryAlbum==="F\xf8r & Efter" ? beforeAfter : enkelt;
+                const catTabs = ["alle","F\xf8r & Efter","Enkelt"];
                 return (
                   <>
-                    {albums.length > 1 && (
-                      <div style={{ display:"flex", gap:6, flexWrap:"wrap", marginBottom:16 }}>
-                        {albums.map(alb => (
+                    <div style={{ display:"flex", gap:6, flexWrap:"wrap", marginBottom:16 }}>
+                      {catTabs.map(alb => {
+                        const count = alb==="alle" ? gallery.length : alb==="F\xf8r & Efter" ? beforeAfter.length : enkelt.length;
+                        const active = galleryAlbum===alb;
+                        return (
                           <button key={alb} onClick={() => setGalleryAlbum(alb)}
-                            style={{ padding:"6px 14px", borderRadius:20, border:`1px solid ${galleryAlbum===alb?T.accentBorder:T.border}`, background:galleryAlbum===alb?T.accentDim:"transparent", color:galleryAlbum===alb?T.accent:T.t3, fontSize:12, fontWeight:600, cursor:"pointer", fontFamily:FF }}>
-                            {alb === "alle" ? `Alle (${gallery.length})` : `${alb} (${gallery.filter(i=>i.album===alb).length})`}
+                            style={{ padding:"6px 14px", borderRadius:20, border:`1px solid ${active?T.accentBorder:T.border}`, background:active?T.accentDim:"transparent", color:active?T.accent:T.t3, fontSize:12, fontWeight:600, cursor:"pointer", fontFamily:FF }}>
+                            {alb==="alle" ? `Alle (${count})` : `${alb} (${count})`}
                           </button>
-                        ))}
-                      </div>
-                    )}
+                        );
+                      })}
+                    </div>
                     <div style={{ display:"grid", gridTemplateColumns:`repeat(auto-fill, minmax(${narrow?"160px":"220px"},1fr))`, gap:14 }}>
                       {filteredGallery.map(item => {
                   const isEditingThis = editingGallery?.id === item.id;
+                  const isBE = item._cat==="F\xf8r & Efter";
                   return (
                     <div key={item.id}
                       style={{ borderRadius:12, overflow:"hidden", background:T.bg1, border:`1px solid ${hoveredId===item.id?T.accentBorder:T.border}`, boxShadow:hoveredId===item.id?T.shadowL:T.shadow, transition:"border .2s, box-shadow .2s, transform .15s", transform:hoveredId===item.id?"translateY(-2px)":"none", display:"flex", flexDirection:"column" }}
@@ -876,9 +885,7 @@ export default function AdminPanel() {
                       {/* Image */}
                       <div style={{ position:"relative", overflow:"hidden" }}>
                         <img src={item.url} alt={item.caption||""} style={{ width:"100%", aspectRatio:"4/3", objectFit:"cover", display:"block", cursor:"pointer" }} onClick={() => setPreviewItem(item)} />
-                        {item.album && (
-                          <span style={{ position:"absolute", top:8, left:8, fontSize:10, fontWeight:700, color:T.bg0, background:T.accent, borderRadius:4, padding:"2px 7px", letterSpacing:.3 }}>{item.album}</span>
-                        )}
+                        <span style={{ position:"absolute", top:8, left:8, fontSize:10, fontWeight:700, color:T.bg0, background:isBE?T.gold:T.accent, borderRadius:4, padding:"2px 7px", letterSpacing:.3 }}>{item._cat}</span>
                       </div>
 
                       {/* Inline edit form */}
@@ -895,8 +902,8 @@ export default function AdminPanel() {
                             onChange={e => setEditingGallery(d => ({...d, album:e.target.value}))}
                             style={{ width:"100%", padding:"8px 10px", borderRadius:7, border:`1px solid ${T.border}`, background:T.bg0, color:editingGallery.album?T.t1:T.t4, fontSize:12, outline:"none", fontFamily:FF, cursor:"pointer" }}
                           >
-                            <option value="">Intet album</option>
-                            {["Udvendig","Indvendig","Motor","Sæder","Karosseri","Andet"].map(a => <option key={a} value={a}>{a}</option>)}
+                            <option value="Enkelt">Enkelt billede</option>
+                            <option value="F\xf8r & Efter">F\xf8r &amp; Efter</option>
                           </select>
                           <div style={{ display:"flex", gap:6 }}>
                             <button
@@ -959,6 +966,10 @@ export default function AdminPanel() {
 
           {/* ── FAQ ── */}
           {tab === "faq" && (() => {
+            function getDraft(item) {
+              if (faqDrafts[item.id]) return faqDrafts[item.id];
+              return { qDa:item.q?.da||item.q||"", qEn:item.q?.en||item.qEn||"", aDa:item.a?.da||item.a||"", aEn:item.a?.en||item.aEn||"" };
+            }
             async function addFaq(e) {
               e.preventDefault();
               if (!faqNewQda.trim() || !faqNewAda.trim()) return;
@@ -970,19 +981,22 @@ export default function AdminPanel() {
               });
               const data = await res.json();
               setCmsLoading(false);
-              if (data.ok) { setCmsMsg({ type:"ok", text:"Tilføjet!" }); setFaqNewQda(""); setFaqNewAda(""); setFaqNewQen(""); setFaqNewAen(""); fetchContent("faq"); }
+              if (data.ok) { setCmsMsg({ type:"ok", text:"Tilføjet!" }); setFaqNewQda(""); setFaqNewAda(""); setFaqNewQen(""); setFaqNewAen(""); setAddFaqOpen(false); fetchContent("faq"); }
               else setCmsMsg({ type:"err", text:"Fejl – prøv igen" });
             }
-            async function saveFaq(item) {
+            async function saveFaqItem(id) {
+              const item = faqItems.find(i => i.id === id);
+              if (!item) return;
+              const draft = getDraft(item);
               setCmsLoading(true); setCmsMsg(null);
               const res = await fetch("/api/admin/content", {
                 method:"PUT",
                 headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" },
-                body: JSON.stringify({ type:"faq", id:item.id, item:{ q:{da:item.qDa||"", en:item.qEn||item.qDa||""}, a:{da:item.aDa||"", en:item.aEn||item.aDa||""} } }),
+                body: JSON.stringify({ type:"faq", id, item:{ q:{da:draft.qDa||"", en:draft.qEn||draft.qDa||""}, a:{da:draft.aDa||"", en:draft.aEn||draft.aDa||""} } }),
               });
               const data = await res.json();
               setCmsLoading(false);
-              if (data.ok) { setCmsMsg({ type:"ok", text:"Gemt!" }); setEditingFaq(null); fetchContent("faq"); }
+              if (data.ok) { setCmsMsg({ type:"ok", text:"Gemt!" }); setExpandedFaqId(null); setFaqDrafts(d => { const n={...d}; delete n[id]; return n; }); fetchContent("faq"); }
               else setCmsMsg({ type:"err", text:"Fejl – prøv igen" });
             }
             async function deleteFaq(id) {
@@ -990,151 +1004,134 @@ export default function AdminPanel() {
               await fetch("/api/admin/content", { method:"DELETE", headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" }, body:JSON.stringify({ type:"faq", id }) });
               fetchContent("faq");
             }
-            const inp = (val, onChange, ph, rows) => rows
-              ? <textarea value={val} onChange={e=>onChange(e.target.value)} placeholder={ph} rows={rows} style={{ width:"100%", padding:"10px 13px", borderRadius:8, border:`1px solid ${T.border}`, background:T.bg0, color:T.t1, fontSize:13, outline:"none", fontFamily:FF, boxSizing:"border-box", resize:"vertical" }} />
-              : <input value={val} onChange={e=>onChange(e.target.value)} placeholder={ph} style={{ width:"100%", padding:"10px 13px", borderRadius:8, border:`1px solid ${T.border}`, background:T.bg0, color:T.t1, fontSize:13, outline:"none", fontFamily:FF, boxSizing:"border-box" }} />;
+            async function seedAllFaq() {
+              setCmsLoading(true); setCmsMsg(null);
+              for (const faq of DEFAULT_FAQ) {
+                await fetch("/api/admin/content", { method:"POST", headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" }, body: JSON.stringify({ type:"faq", item:{ q:faq.q, a:faq.a } }) });
+              }
+              setCmsLoading(false); setCmsMsg({ type:"ok", text:"Alle standarddata gemt!" }); fetchContent("faq");
+            }
+            const txStyle = { width:"100%", padding:"9px 12px", borderRadius:7, border:`1px solid ${T.border}`, background:T.bg0, color:T.t1, fontSize:13, outline:"none", fontFamily:FF, boxSizing:"border-box", resize:"vertical" };
             return (
               <>
-                <div style={{ background:T.bg1, border:`1px solid ${T.border}`, borderRadius:16, padding:24, marginBottom:28 }}>
-                  <p style={{ fontSize:10, letterSpacing:2, fontWeight:700, color:T.t3, textTransform:"uppercase", margin:"0 0 16px" }}>Tilføj spørgsmål</p>
-                  <form onSubmit={addFaq} style={{ display:"flex", flexDirection:"column", gap:8 }}>
-                    <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8 }}>
-                      <div>
-                        <p style={{ fontSize:11, color:T.t4, margin:"0 0 4px", fontWeight:600 }}>Spørgsmål (DA)</p>
-                        {inp(faqNewQda, setFaqNewQda, "Spørgsmål på dansk…")}
-                      </div>
-                      <div>
-                        <p style={{ fontSize:11, color:T.t4, margin:"0 0 4px", fontWeight:600 }}>Question (EN)</p>
-                        {inp(faqNewQen, setFaqNewQen, "Question in English…")}
-                      </div>
-                      <div>
-                        <p style={{ fontSize:11, color:T.t4, margin:"0 0 4px", fontWeight:600 }}>Svar (DA)</p>
-                        {inp(faqNewAda, setFaqNewAda, "Svar på dansk…", 3)}
-                      </div>
-                      <div>
-                        <p style={{ fontSize:11, color:T.t4, margin:"0 0 4px", fontWeight:600 }}>Answer (EN)</p>
-                        {inp(faqNewAen, setFaqNewAen, "Answer in English…", 3)}
-                      </div>
+                {/* ADD NEW — collapsible at top */}
+                <div style={{ background:T.bg1, border:`1px solid ${addFaqOpen?T.accentBorder:T.border}`, borderRadius:12, marginBottom:16, overflow:"hidden", transition:"border .15s" }}>
+                  <button onClick={() => setAddFaqOpen(o => !o)}
+                    style={{ width:"100%", display:"flex", alignItems:"center", gap:10, padding:"14px 18px", background:"transparent", border:"none", cursor:"pointer", fontFamily:FF, textAlign:"left" }}>
+                    <span style={{ width:24, height:24, borderRadius:6, background:addFaqOpen?T.accent:T.accentDim, border:`1px solid ${T.accentBorder}`, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, transition:"background .15s" }}>
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={addFaqOpen?T.bg0:T.accent} strokeWidth="3" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    </span>
+                    <span style={{ flex:1, fontSize:14, fontWeight:700, color:T.t1 }}>Tilføj nyt spørgsmål</span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={T.t3} strokeWidth="2.5" strokeLinecap="round" style={{ transform:addFaqOpen?"rotate(180deg)":"none", transition:"transform .2s" }}><polyline points="6 9 12 15 18 9"/></svg>
+                  </button>
+                  {addFaqOpen && (
+                    <div style={{ padding:"0 18px 18px", borderTop:`1px solid ${T.border}` }}>
+                      <form onSubmit={addFaq} style={{ display:"flex", flexDirection:"column", gap:8, paddingTop:14 }}>
+                        <div style={{ display:"grid", gridTemplateColumns:narrow?"1fr":"1fr 1fr", gap:8 }}>
+                          <div>
+                            <p style={{ fontSize:11, color:T.t4, margin:"0 0 4px", fontWeight:600 }}>Spørgsmål (DA) *</p>
+                            <input value={faqNewQda} onChange={e=>setFaqNewQda(e.target.value)} placeholder="Spørgsmål på dansk…" style={{...txStyle, resize:"none"}} />
+                          </div>
+                          <div>
+                            <p style={{ fontSize:11, color:T.t4, margin:"0 0 4px", fontWeight:600 }}>Question (EN)</p>
+                            <input value={faqNewQen} onChange={e=>setFaqNewQen(e.target.value)} placeholder="Question in English…" style={{...txStyle, resize:"none"}} />
+                          </div>
+                          <div>
+                            <p style={{ fontSize:11, color:T.t4, margin:"0 0 4px", fontWeight:600 }}>Svar (DA) *</p>
+                            <textarea value={faqNewAda} onChange={e=>setFaqNewAda(e.target.value)} placeholder="Svar på dansk…" rows={3} style={txStyle} />
+                          </div>
+                          <div>
+                            <p style={{ fontSize:11, color:T.t4, margin:"0 0 4px", fontWeight:600 }}>Answer (EN)</p>
+                            <textarea value={faqNewAen} onChange={e=>setFaqNewAen(e.target.value)} placeholder="Answer in English…" rows={3} style={txStyle} />
+                          </div>
+                        </div>
+                        <button type="submit" disabled={cmsLoading||!faqNewQda.trim()||!faqNewAda.trim()}
+                          style={{ padding:"11px 0", background:T.accent, color:T.bg0, fontWeight:700, fontSize:14, borderRadius:8, border:"none", cursor:(cmsLoading||!faqNewQda.trim()||!faqNewAda.trim())?"not-allowed":"pointer", opacity:(cmsLoading||!faqNewQda.trim()||!faqNewAda.trim())?.4:1, fontFamily:FF }}>
+                          {cmsLoading ? "…" : "Tilføj spørgsmål"}
+                        </button>
+                      </form>
                     </div>
-                    <button type="submit" disabled={cmsLoading||!faqNewQda.trim()||!faqNewAda.trim()}
-                      style={{ padding:"11px 0", background:T.accent, color:T.bg0, fontWeight:700, fontSize:14, borderRadius:8, border:"none", cursor:(cmsLoading||!faqNewQda.trim()||!faqNewAda.trim())?"not-allowed":"pointer", opacity:(cmsLoading||!faqNewQda.trim()||!faqNewAda.trim())?.4:1, fontFamily:FF }}>
-                      {cmsLoading ? "…" : "Tilføj"}
-                    </button>
-                  </form>
-                  <Feedback m={cmsMsg} />
+                  )}
                 </div>
 
-                {faqItems.length > 0 && (
-                  <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
+                <Feedback m={cmsMsg} />
+
+                {/* ACCORDION LIST */}
+                {faqItems.length > 0 ? (
+                  <div style={{ display:"flex", flexDirection:"column", gap:5 }}>
                     {faqItems.map((item, idx) => {
-                      const isEditing = editingFaq?.id === item.id;
-                      // Support both nested {da,en} format (KV) and flat (legacy)
-                      const qDa = item.q?.da || item.q || "";
-                      const qEn = item.q?.en || item.qEn || "";
-                      const aDa = item.a?.da || item.a || "";
-                      const aEn = item.a?.en || item.aEn || "";
-                      const draft = isEditing ? editingFaq : { qDa, qEn, aDa, aEn };
+                      const isOpen = expandedFaqId === item.id;
+                      const draft = getDraft(item);
+                      const titleDa = item.q?.da || item.q || "(intet spørgsmål)";
                       return (
-                        <div key={item.id} style={{ background:T.bg1, border:`1px solid ${isEditing?T.accentBorder:T.border}`, borderRadius:12, padding:20 }}>
-                          {isEditing ? (
-                            <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
-                              <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8 }}>
+                        <div key={item.id} style={{ background:T.bg1, border:`1px solid ${isOpen?T.accentBorder:T.border}`, borderRadius:11, overflow:"hidden", transition:"border .15s" }}>
+                          <div style={{ display:"flex", alignItems:"center" }}>
+                            <button onClick={() => setExpandedFaqId(isOpen ? null : item.id)}
+                              style={{ flex:1, display:"flex", alignItems:"center", gap:10, padding:"13px 16px", background:"transparent", border:"none", cursor:"pointer", fontFamily:FF, textAlign:"left", minWidth:0 }}>
+                              <span style={{ fontSize:11, fontWeight:700, color:isOpen?T.accent:T.t4, minWidth:22, flexShrink:0 }}>#{idx+1}</span>
+                              <span style={{ flex:1, fontSize:14, fontWeight:isOpen?700:500, color:isOpen?T.t1:T.t2, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{titleDa}</span>
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={isOpen?T.accent:T.t4} strokeWidth="2.5" strokeLinecap="round" style={{ transform:isOpen?"rotate(180deg)":"none", transition:"transform .2s", flexShrink:0 }}><polyline points="6 9 12 15 18 9"/></svg>
+                            </button>
+                            <button onClick={() => deleteFaq(item.id)}
+                              style={{ padding:"13px 14px", background:"transparent", border:"none", borderLeft:`1px solid ${T.border}`, cursor:"pointer", color:T.t4, display:"flex", alignItems:"center", flexShrink:0, transition:"color .15s" }}
+                              onMouseEnter={e => e.currentTarget.style.color=T.danger}
+                              onMouseLeave={e => e.currentTarget.style.color=T.t4}>
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+                            </button>
+                          </div>
+                          {isOpen && (
+                            <div style={{ borderTop:`1px solid ${T.border}`, padding:"14px 16px", display:"flex", flexDirection:"column", gap:10 }}>
+                              <div style={{ display:"grid", gridTemplateColumns:narrow?"1fr":"1fr 1fr", gap:8 }}>
                                 <div>
                                   <p style={{ fontSize:11, color:T.t4, margin:"0 0 4px", fontWeight:600 }}>Spørgsmål (DA)</p>
-                                  {inp(draft.qDa||"", v=>setEditingFaq(d=>({...d,qDa:v})), "Spørgsmål…")}
+                                  <input value={draft.qDa} onChange={e => setFaqDrafts(d => ({...d, [item.id]:{...getDraft(item), qDa:e.target.value}}))} style={{...txStyle, resize:"none"}} />
                                 </div>
                                 <div>
                                   <p style={{ fontSize:11, color:T.t4, margin:"0 0 4px", fontWeight:600 }}>Question (EN)</p>
-                                  {inp(draft.qEn||"", v=>setEditingFaq(d=>({...d,qEn:v})), "Question…")}
+                                  <input value={draft.qEn} onChange={e => setFaqDrafts(d => ({...d, [item.id]:{...getDraft(item), qEn:e.target.value}}))} style={{...txStyle, resize:"none"}} />
                                 </div>
                                 <div>
                                   <p style={{ fontSize:11, color:T.t4, margin:"0 0 4px", fontWeight:600 }}>Svar (DA)</p>
-                                  {inp(draft.aDa||"", v=>setEditingFaq(d=>({...d,aDa:v})), "Svar…", 3)}
+                                  <textarea value={draft.aDa} onChange={e => setFaqDrafts(d => ({...d, [item.id]:{...getDraft(item), aDa:e.target.value}}))} rows={4} style={txStyle} />
                                 </div>
                                 <div>
                                   <p style={{ fontSize:11, color:T.t4, margin:"0 0 4px", fontWeight:600 }}>Answer (EN)</p>
-                                  {inp(draft.aEn||"", v=>setEditingFaq(d=>({...d,aEn:v})), "Answer…", 3)}
+                                  <textarea value={draft.aEn} onChange={e => setFaqDrafts(d => ({...d, [item.id]:{...getDraft(item), aEn:e.target.value}}))} rows={4} style={txStyle} />
                                 </div>
                               </div>
                               <div style={{ display:"flex", gap:8 }}>
-                                <button onClick={() => saveFaq(draft)} disabled={cmsLoading}
-                                  style={{ flex:1, padding:"9px 0", background:T.accent, color:T.bg0, border:"none", borderRadius:8, fontWeight:700, fontSize:13, cursor:"pointer", fontFamily:FF }}>Gem</button>
-                                <button onClick={() => setEditingFaq(null)}
-                                  style={{ flex:1, padding:"9px 0", background:"rgba(255,255,255,.06)", color:T.t3, border:"none", borderRadius:8, fontWeight:600, fontSize:13, cursor:"pointer", fontFamily:FF }}>Annuller</button>
+                                <button onClick={() => saveFaqItem(item.id)} disabled={cmsLoading}
+                                  style={{ flex:1, padding:"10px 0", background:T.accent, color:T.bg0, border:"none", borderRadius:8, fontWeight:700, fontSize:13, cursor:"pointer", fontFamily:FF }}>Gem ændringer</button>
+                                <button onClick={() => { setExpandedFaqId(null); setFaqDrafts(d => { const n={...d}; delete n[item.id]; return n; }); }}
+                                  style={{ flex:1, padding:"10px 0", background:"rgba(255,255,255,.06)", color:T.t3, border:"none", borderRadius:8, fontWeight:600, fontSize:13, cursor:"pointer", fontFamily:FF }}>Annuller</button>
                               </div>
-                            </div>
-                          ) : (
-                            <div>
-                              <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:8 }}>
-                                <span style={{ fontSize:10, color:T.accent, fontWeight:700, letterSpacing:.5 }}>#{idx+1}</span>
-                                <div style={{ display:"flex", gap:6 }}>
-                                  <button onClick={() => setEditingFaq({ id:item.id, qDa, qEn, aDa, aEn })}
-                                    style={{ padding:"5px 12px", background:T.accentDim, border:`1px solid ${T.accentBorder}`, borderRadius:6, color:T.accent, fontSize:12, fontWeight:600, cursor:"pointer", fontFamily:FF }}>Rediger</button>
-                                  <button onClick={() => deleteFaq(item.id)}
-                                    style={{ padding:"5px 12px", background:T.dangerDim, border:`1px solid ${T.dangerBorder}`, borderRadius:6, color:T.danger, fontSize:12, fontWeight:600, cursor:"pointer", fontFamily:FF }}>Slet</button>
-                                </div>
-                              </div>
-                              <p style={{ fontSize:14, fontWeight:700, color:T.t1, margin:"0 0 4px" }}>{qDa}</p>
-                              <p style={{ fontSize:13, color:T.t2, margin:"0 0 8px", lineHeight:1.6 }}>{aDa}</p>
-                              {qEn && <p style={{ fontSize:12, color:T.t4, margin:"0 0 2px", fontStyle:"italic" }}>{qEn}</p>}
-                              {aEn && <p style={{ fontSize:12, color:T.t4, margin:0, fontStyle:"italic", lineHeight:1.5 }}>{aEn}</p>}
                             </div>
                           )}
                         </div>
                       );
                     })}
                   </div>
+                ) : (
+                  <>
+                    <div style={{ marginBottom:12, background:"rgba(55,210,120,.06)", border:`1px solid ${T.accentBorder}`, borderRadius:10, padding:"12px 16px", display:"flex", alignItems:"center", justifyContent:"space-between", gap:12, flexWrap:"wrap" }}>
+                      <span style={{ fontSize:13, color:T.accent, fontWeight:600 }}>Viser standarddata — gem enkeltvis eller alle på én gang</span>
+                      <button onClick={seedAllFaq} disabled={cmsLoading}
+                        style={{ padding:"8px 18px", background:T.accent, color:T.bg0, border:"none", borderRadius:8, fontWeight:700, fontSize:13, cursor:cmsLoading?"not-allowed":"pointer", opacity:cmsLoading?.6:1, fontFamily:FF, whiteSpace:"nowrap" }}>
+                        {cmsLoading ? "Gemmer…" : "Gem alle"}
+                      </button>
+                    </div>
+                    <div style={{ display:"flex", flexDirection:"column", gap:5 }}>
+                      {DEFAULT_FAQ.map((faq, idx) => (
+                        <div key={idx} style={{ background:T.bg1, border:`1px solid ${T.border}`, borderRadius:11, display:"flex", alignItems:"center", padding:"12px 16px", gap:10 }}>
+                          <span style={{ fontSize:11, fontWeight:700, color:T.t4, minWidth:22, flexShrink:0 }}>#{idx+1}</span>
+                          <span style={{ flex:1, fontSize:14, color:T.t2, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{faq.q.da}</span>
+                          <button onClick={async () => { await fetch("/api/admin/content", { method:"POST", headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" }, body:JSON.stringify({ type:"faq", item:{ q:faq.q, a:faq.a } }) }); fetchContent("faq"); }}
+                            style={{ padding:"5px 12px", background:T.accentDim, border:`1px solid ${T.accentBorder}`, borderRadius:7, color:T.accent, fontSize:12, fontWeight:700, cursor:"pointer", fontFamily:FF, whiteSpace:"nowrap", flexShrink:0 }}>+ Gem</button>
+                        </div>
+                      ))}
+                    </div>
+                  </>
                 )}
-                {faqItems.length === 0 && (() => {
-                  async function seedAllFaq() {
-                    setCmsLoading(true); setCmsMsg(null);
-                    for (const faq of DEFAULT_FAQ) {
-                      await fetch("/api/admin/content", {
-                        method:"POST",
-                        headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" },
-                        body: JSON.stringify({ type:"faq", item:{ q:faq.q, a:faq.a } }),
-                      });
-                    }
-                    setCmsLoading(false);
-                    setCmsMsg({ type:"ok", text:"Alle standarddata gemt!" });
-                    fetchContent("faq");
-                  }
-                  return (
-                    <>
-                      <div style={{ marginBottom:16, background:"rgba(55,210,120,.06)", border:`1px solid ${T.accentBorder}`, borderRadius:10, padding:"12px 16px", display:"flex", alignItems:"center", justifyContent:"space-between", gap:12, flexWrap:"wrap" }}>
-                        <span style={{ fontSize:13, color:T.accent, fontWeight:600 }}>Viser standarddata — klik 'Gem alle' for at gøre dem redigerbare</span>
-                        <button onClick={seedAllFaq} disabled={cmsLoading}
-                          style={{ padding:"8px 18px", background:T.accent, color:T.bg0, border:"none", borderRadius:8, fontWeight:700, fontSize:13, cursor:cmsLoading?"not-allowed":"pointer", opacity:cmsLoading?.6:1, fontFamily:FF, whiteSpace:"nowrap" }}>
-                          {cmsLoading ? "Gemmer…" : "Gem alle standarddata"}
-                        </button>
-                      </div>
-                      <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
-                        {DEFAULT_FAQ.map((faq, idx) => (
-                          <div key={idx} style={{ background:T.bg1, border:`1px solid ${T.border}`, borderRadius:12, padding:20, display:"flex", gap:12, alignItems:"flex-start" }}>
-                            <div style={{ flex:1, minWidth:0 }}>
-                              <span style={{ fontSize:10, color:T.t4, fontWeight:700, letterSpacing:.5 }}>#{idx+1}</span>
-                              <p style={{ fontSize:14, fontWeight:700, color:T.t2, margin:"4px 0 4px" }}>{faq.q.da}</p>
-                              <p style={{ fontSize:12, color:T.t3, margin:"0 0 4px", lineHeight:1.5 }}>{faq.a.da}</p>
-                              {faq.q.en && <p style={{ fontSize:11, color:T.t4, margin:0, fontStyle:"italic" }}>{faq.q.en}</p>}
-                            </div>
-                            <button
-                              onClick={async () => {
-                                await fetch("/api/admin/content", {
-                                  method:"POST",
-                                  headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" },
-                                  body: JSON.stringify({ type:"faq", item:{ q:faq.q, a:faq.a } }),
-                                });
-                                fetchContent("faq");
-                              }}
-                              style={{ padding:"6px 14px", background:T.accentDim, border:`1px solid ${T.accentBorder}`, borderRadius:7, color:T.accent, fontSize:12, fontWeight:700, cursor:"pointer", fontFamily:FF, whiteSpace:"nowrap", flexShrink:0 }}
-                            >+ Tilføj</button>
-                          </div>
-                        ))}
-                      </div>
-                      <Feedback m={cmsMsg} />
-                    </>
-                  );
-                })()}
               </>
             );
           })()}
