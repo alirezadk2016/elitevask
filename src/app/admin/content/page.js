@@ -1012,6 +1012,10 @@ export default function AdminPanel() {
             }
             async function seedAllFaq() {
               setCmsLoading(true); setCmsMsg(null);
+              // Delete existing items first to avoid duplicates
+              for (const item of faqItems) {
+                await fetch("/api/admin/content", { method:"DELETE", headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" }, body:JSON.stringify({ type:"faq", id:item.id }) });
+              }
               for (const faq of DEFAULT_FAQ) {
                 await fetch("/api/admin/content", { method:"POST", headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" }, body: JSON.stringify({ type:"faq", item:{ q:faq.q, a:faq.a } }) });
               }
@@ -1125,9 +1129,22 @@ export default function AdminPanel() {
                   </div>
                 ) : null}
                 {faqItems.length > 0 && faqItems.length < 5 && (
-                  <button onClick={seedAllFaq} disabled={cmsLoading} style={{ marginTop:10, width:"100%", padding:"11px 0", background:T.accentDim, border:`1px solid ${T.accentBorder}`, borderRadius:9, color:T.accent, fontWeight:700, fontSize:13, cursor:cmsLoading?"not-allowed":"pointer", fontFamily:FF }}>
-                    {cmsLoading ? "Gemmer…" : "Gem alle standarddata (udfyld offentlig FAQ)"}
-                  </button>
+                  <>
+                    <button onClick={seedAllFaq} disabled={cmsLoading} style={{ marginTop:10, width:"100%", padding:"11px 0", background:T.accent, border:"none", borderRadius:9, color:T.bg0, fontWeight:700, fontSize:13, cursor:cmsLoading?"not-allowed":"pointer", fontFamily:FF }}>
+                      {cmsLoading ? "Gemmer…" : "Gem alle standarddata (erstatter nuværende)"}
+                    </button>
+                    <p style={{ fontSize:11, color:T.t4, margin:"18px 0 8px", letterSpacing:1, fontWeight:700, textTransform:"uppercase" }}>Eller gem enkeltvis:</p>
+                    <div style={{ display:"flex", flexDirection:"column", gap:5 }}>
+                      {DEFAULT_FAQ.map((faq, idx) => (
+                        <div key={idx} style={{ background:T.bg1, border:`1px solid ${T.border}`, borderRadius:11, display:"flex", alignItems:"center", padding:"12px 16px", gap:10 }}>
+                          <span style={{ fontSize:11, fontWeight:700, color:T.t4, minWidth:22, flexShrink:0 }}>#{idx+1}</span>
+                          <span style={{ flex:1, fontSize:14, color:T.t2, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{faq.q.da}</span>
+                          <button type="button" onClick={async () => { await fetch("/api/admin/content", { method:"POST", headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" }, body:JSON.stringify({ type:"faq", item:{ q:faq.q, a:faq.a } }) }); fetchContent("faq"); }}
+                            style={{ padding:"5px 12px", background:T.accentDim, border:`1px solid ${T.accentBorder}`, borderRadius:7, color:T.accent, fontSize:12, fontWeight:700, cursor:"pointer", fontFamily:FF, whiteSpace:"nowrap", flexShrink:0 }}>+ Gem</button>
+                        </div>
+                      ))}
+                    </div>
+                  </>
                 )}
                 {faqItems.length === 0 && (
                   <>
