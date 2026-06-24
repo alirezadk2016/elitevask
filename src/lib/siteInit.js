@@ -142,6 +142,7 @@ function renderFaq(){
   if(FAQ.length>INIT){
     var wrap=document.createElement('div');wrap.id='faqMoreBtn';wrap.style.cssText='text-align:center;padding:20px 0 4px;';
     var btn=document.createElement('button');
+    btn.type='button';
     btn.className='faq-more-btn';
     var expanded=false;
     function setLabel(){
