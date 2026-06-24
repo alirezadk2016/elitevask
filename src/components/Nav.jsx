@@ -24,7 +24,7 @@ const HTML = `<!-- NAV -->
 <div class="nav-drawer" id="navDrawer">
   <a href="#vaelg" class="drawer-link" data-i18n="nav_choose">Se priser</a>
   <a href="#arbejde" class="drawer-link" data-i18n="nav_work">Vores arbejde</a>
-  <a href="#faq" class="drawer-link">FAQ</a>
+  <a href="/faq" class="drawer-link">FAQ</a>
   <a href="#kontakt" class="drawer-link" data-i18n="nav_contact">Kontakt</a>
   <div class="drawer-sep"></div>
   <div class="drawer-lang">
