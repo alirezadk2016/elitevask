@@ -8,15 +8,19 @@ function authorized(req) {
   return h === `Bearer ${AUTH}`;
 }
 
-// GET /api/admin/content?type=gallery|videos
+// GET /api/admin/content?type=gallery|videos|faq|extras|packages
 export async function GET(req) {
   if (!authorized(req)) return Response.json({ error: 'unauthorized' }, { status: 401 });
   const type = new URL(req.url).searchParams.get('type') || 'gallery';
+  if (type === 'packages') {
+    const prices = await kv.get('content:prices') || {};
+    return Response.json({ prices });
+  }
   const items = await kv.get(`content:${type}`) || [];
   return Response.json({ items });
 }
 
-// POST /api/admin/content — add item
+// POST /api/admin/content — add item or update prices
 export async function POST(req) {
   if (!authorized(req)) return Response.json({ error: 'unauthorized' }, { status: 401 });
 
@@ -24,7 +28,7 @@ export async function POST(req) {
   let item;
 
   if (contentType.includes('multipart/form-data')) {
-    // File upload via Vercel Blob
+    // File upload via Vercel Blob (gallery only)
     const form = await req.formData();
     const file = form.get('file');
     const type = form.get('type') || 'gallery';
@@ -49,10 +53,45 @@ export async function POST(req) {
     return Response.json({ ok: true, item });
 
   } else {
-    // URL-based
     const body = await req.json();
-    const { type = 'gallery', url, caption = '', title = '' } = body;
+    const { type = 'gallery' } = body;
 
+    // Packages: replace entire price matrix
+    if (type === 'packages') {
+      const { prices } = body;
+      if (!prices || typeof prices !== 'object') {
+        return Response.json({ error: 'invalid_prices' }, { status: 400 });
+      }
+      await kv.set('content:prices', prices);
+      return Response.json({ ok: true });
+    }
+
+    // FAQ item
+    if (type === 'faq') {
+      const { item: faqItem } = body;
+      if (!faqItem || !faqItem.q || !faqItem.a) {
+        return Response.json({ error: 'invalid_item' }, { status: 400 });
+      }
+      const newItem = { id: Date.now().toString(), ...faqItem };
+      const existing = await kv.get('content:faq') || [];
+      await kv.set('content:faq', [...existing, newItem]);
+      return Response.json({ ok: true, item: newItem });
+    }
+
+    // Extras item
+    if (type === 'extras') {
+      const { item: extItem } = body;
+      if (!extItem || !extItem.name) {
+        return Response.json({ error: 'invalid_item' }, { status: 400 });
+      }
+      const newItem = { id: Date.now().toString(), ...extItem };
+      const existing = await kv.get('content:extras') || [];
+      await kv.set('content:extras', [...existing, newItem]);
+      return Response.json({ ok: true, item: newItem });
+    }
+
+    // URL-based (gallery / videos)
+    const { url, caption = '', title = '' } = body;
     if (!url) return Response.json({ error: 'no_url' }, { status: 400 });
 
     item = {
@@ -65,7 +104,6 @@ export async function POST(req) {
     };
 
     if (type === 'videos') {
-      // Detect platform and extract embed URL
       item.platform = url.includes('youtube') || url.includes('youtu.be') ? 'youtube' : 'vimeo';
       item.embedUrl = getEmbedUrl(url);
       item.thumbnail = getThumbnail(url);
@@ -77,26 +115,47 @@ export async function POST(req) {
   }
 }
 
+// PUT /api/admin/content — update individual faq/extras item
+export async function PUT(req) {
+  if (!authorized(req)) return Response.json({ error: 'unauthorized' }, { status: 401 });
+  const body = await req.json();
+  const { type, id, item: updated } = body;
+
+  if (!id || !updated || (type !== 'faq' && type !== 'extras')) {
+    return Response.json({ error: 'invalid_request' }, { status: 400 });
+  }
+
+  const key = type === 'faq' ? 'content:faq' : 'content:extras';
+  const existing = await kv.get(key) || [];
+  const updated_list = existing.map(i => i.id === id ? { ...i, ...updated, id } : i);
+  await kv.set(key, updated_list);
+  return Response.json({ ok: true });
+}
+
 // DELETE /api/admin/content
 export async function DELETE(req) {
   if (!authorized(req)) return Response.json({ error: 'unauthorized' }, { status: 401 });
   const { type = 'gallery', id, blobUrl } = await req.json();
+
+  if (type === 'packages') {
+    await kv.del('content:prices');
+    return Response.json({ ok: true });
+  }
 
   // Delete from Blob storage if it was an upload
   if (blobUrl) {
     try { await del(blobUrl); } catch {}
   }
 
-  const existing = await kv.get(`content:${type}`) || [];
-  await kv.set(`content:${type}`, existing.filter(i => i.id !== id));
+  const key = type === 'faq' ? 'content:faq' : type === 'extras' ? 'content:extras' : `content:${type}`;
+  const existing = await kv.get(key) || [];
+  await kv.set(key, existing.filter(i => i.id !== id));
   return Response.json({ ok: true });
 }
 
 function getEmbedUrl(url) {
-  // YouTube
   const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
   if (ytMatch) return `https://www.youtube.com/embed/${ytMatch[1]}`;
-  // Vimeo
   const vmMatch = url.match(/vimeo\.com\/(\d+)/);
   if (vmMatch) return `https://player.vimeo.com/video/${vmMatch[1]}`;
   return url;
