@@ -1063,6 +1063,12 @@ export default function AdminPanel() {
                 <Feedback m={cmsMsg} />
 
                 {/* ACCORDION LIST */}
+                {faqItems.length > 0 && faqItems.length < 5 && (
+                  <div style={{ marginBottom:12, background:"rgba(245,166,35,.08)", border:"1px solid rgba(245,166,35,.35)", borderRadius:10, padding:"11px 16px", fontSize:13, color:"#f5a623", display:"flex", alignItems:"center", gap:8 }}>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    <span>Kun {faqItems.length} spørgsmål gemt — offentlig side viser standarddata indtil du har gemt mindst 5. Klik <strong>Gem alle standarddata</strong> nedenfor for at udfylde.</span>
+                  </div>
+                )}
                 {faqItems.length > 0 ? (
                   <div style={{ display:"flex", flexDirection:"column", gap:5 }}>
                     {faqItems.map((item, idx) => {
@@ -1117,7 +1123,13 @@ export default function AdminPanel() {
                       );
                     })}
                   </div>
-                ) : (
+                ) : null}
+                {faqItems.length > 0 && faqItems.length < 5 && (
+                  <button onClick={seedAllFaq} disabled={cmsLoading} style={{ marginTop:10, width:"100%", padding:"11px 0", background:T.accentDim, border:`1px solid ${T.accentBorder}`, borderRadius:9, color:T.accent, fontWeight:700, fontSize:13, cursor:cmsLoading?"not-allowed":"pointer", fontFamily:FF }}>
+                    {cmsLoading ? "Gemmer…" : "Gem alle standarddata (udfyld offentlig FAQ)"}
+                  </button>
+                )}
+                {faqItems.length === 0 && (
                   <>
                     <div style={{ marginBottom:12, background:"rgba(55,210,120,.06)", border:`1px solid ${T.accentBorder}`, borderRadius:10, padding:"12px 16px", display:"flex", alignItems:"center", justifyContent:"space-between", gap:12, flexWrap:"wrap" }}>
                       <span style={{ fontSize:13, color:T.accent, fontWeight:600 }}>Viser standarddata — gem enkeltvis eller alle på én gang</span>
