@@ -211,6 +211,19 @@ function BookingCard({ b, secret, onCancel, onDelete }) {
   );
 }
 
+function Feedback({ m }) {
+  if (!m) return null;
+  const ok = m.type === "ok";
+  return (
+    <div style={{ marginTop:12, display:"flex", alignItems:"center", gap:8, background:ok?T.accentDim:T.dangerDim, border:`1px solid ${ok?T.accentBorder:T.dangerBorder}`, borderRadius:8, padding:"10px 14px", fontSize:13, color:ok?T.accent:T.danger }}>
+      {ok
+        ? <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+        : <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/></svg>}
+      {m.text}
+    </div>
+  );
+}
+
 // ── Main Admin Panel ──────────────────────────────────────────────────────────
 export default function AdminPanel() {
   const [secret, setSecret]               = useState("");
@@ -279,11 +292,12 @@ export default function AdminPanel() {
     return () => window.removeEventListener("resize", check);
   }, []);
 
-  // Update current time every 10 seconds for accurate time line
+  // Update current time every 10 seconds — only when bookings tab is active
   useEffect(() => {
+    if (tab !== "bookings") return;
     const id = setInterval(() => setNowTime(new Date()), 10000);
     return () => clearInterval(id);
-  }, []);
+  }, [tab]);
 
   // Auto-scroll calendar to today column on mobile
   useEffect(() => {
@@ -450,14 +464,6 @@ export default function AdminPanel() {
     <p style={{ fontSize:9.5, letterSpacing:1.5, fontWeight:600, color:T.t4, textTransform:"uppercase", margin:"0 0 4px", padding:"0 9px" }}>{text}</p>
   );
 
-  const Feedback = ({ m }) => m ? (
-    <div style={{ marginTop:12, display:"flex", alignItems:"center", gap:8, background:m.type==="ok"?T.accentDim:T.dangerDim, border:`1px solid ${m.type==="ok"?T.accentBorder:T.dangerBorder}`, borderRadius:8, padding:"10px 14px", fontSize:13, color:m.type==="ok"?T.accent:T.danger }}>
-      {m.type==="ok"
-        ? <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-        : <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/></svg>}
-      {m.text}
-    </div>
-  ) : null;
 
   const icons = {
     bookings: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2.5"/><path d="M16 2v4M8 2v4"/><path d="M3 10h18"/></svg>,
@@ -1016,7 +1022,7 @@ export default function AdminPanel() {
               <>
                 {/* ADD NEW — collapsible at top */}
                 <div style={{ background:T.bg1, border:`1px solid ${addFaqOpen?T.accentBorder:T.border}`, borderRadius:12, marginBottom:16, overflow:"hidden", transition:"border .15s" }}>
-                  <button onClick={() => setAddFaqOpen(o => !o)}
+                  <button type="button" onClick={() => setAddFaqOpen(o => !o)}
                     style={{ width:"100%", display:"flex", alignItems:"center", gap:10, padding:"14px 18px", background:"transparent", border:"none", cursor:"pointer", fontFamily:FF, textAlign:"left" }}>
                     <span style={{ width:24, height:24, borderRadius:6, background:addFaqOpen?T.accent:T.accentDim, border:`1px solid ${T.accentBorder}`, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, transition:"background .15s" }}>
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={addFaqOpen?T.bg0:T.accent} strokeWidth="3" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
