@@ -395,6 +395,17 @@ section{position:relative}
 .faq-more-btn:hover{background:rgba(55,210,120,.13);border-color:var(--green);transform:translateY(-1px)}
 .faq-more-btn svg{transition:transform .2s}
 
+/* FAQ dedicated page - details accordion */
+.faq-page-item{border-bottom:1px solid var(--line,rgba(255,255,255,.08))}
+.faq-page-item summary{list-style:none;cursor:pointer;font-size:15.5px;font-weight:600;color:var(--txt,#e9f1ec);padding:20px 0;display:flex;justify-content:space-between;align-items:center;gap:16px;user-select:none}
+.faq-page-item summary::-webkit-details-marker{display:none}
+.faq-page-item summary span{flex:1}
+.faq-page-icon{flex-shrink:0;transition:transform .22s ease}
+.faq-page-item[open] .faq-page-icon{transform:rotate(45deg)}
+.faq-page-ans{overflow:hidden;animation:faqOpen .28s ease}
+.faq-page-ans p{font-size:14.5px;color:var(--muted,#94a89c);padding:0 0 20px;line-height:1.7;margin:0}
+@keyframes faqOpen{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+
 /* LOCAL SEO */
 .local{text-align:center}
 .local-chips{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:30px}
