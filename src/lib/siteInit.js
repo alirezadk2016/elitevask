@@ -1,5 +1,17 @@
 // Auto-extracted from original elitevask.html — runs once on mount.
 export function initSite(overrides){overrides=overrides||{};
+// Document/window-level listeners below accumulate on every init (React
+// StrictMode runs effects twice in dev; client-side navigation back to the
+// homepage re-runs initSite). Tie all global listeners to an AbortController
+// that we abort at the start of each run, so stale handlers are torn down
+// instead of stacking up. Element-level listeners attach to fresh DOM each
+// run, so they don't need this.
+var __sig;
+if(typeof window!=='undefined'){
+  if(window.__evAbort){try{window.__evAbort.abort();}catch(e){}}
+  window.__evAbort=new AbortController();
+  __sig=window.__evAbort.signal;
+}
 var CARS=[
   {id:"lille",label:{da:"Lille bil",en:"Small car"},ex:{da:"Aygo, Up!, i10",en:"Aygo, Up!, i10"},time:{da:"100–120 min",en:"100–120 min"},prices:{hele:800,udv:500,indv:600,guld:2000},svg:'<path d="M18 44 Q16 30 24 26 L34 24 Q40 18 50 17 L70 18 Q82 20 90 28 L100 36 Q104 38 104 42 L104 46 Q104 48 100 48 L96 48"/><path d="M18 44 L18 46 Q18 48 22 48 L26 48"/><path d="M44 48 L78 48"/><circle cx="36" cy="48" r="8"/><circle cx="36" cy="48" r="3"/><circle cx="88" cy="48" r="8"/><circle cx="88" cy="48" r="3"/><path d="M34 25 Q40 20 48 19 L48 33 L26 33 Q24 28 34 25"/><path d="M52 19 L66 19 Q76 21 82 28 L82 33 L52 33 Z"/>'},
   {id:"mellem",label:{da:"Mellem bil",en:"Medium car"},ex:{da:"Golf, Focus, i20",en:"Golf, Focus, i20"},time:{da:"120–180 min",en:"120–180 min"},prices:{hele:950,udv:550,indv:700,guld:2200},svg:'<path d="M8 44 Q6 32 16 28 L30 24 Q42 16 58 16 L78 17 Q94 19 106 27 L114 34 Q116 36 116 40 L116 46 Q116 48 112 48 L106 48"/><path d="M8 44 L8 46 Q8 48 12 48 L16 48"/><path d="M38 48 L82 48"/><circle cx="28" cy="48" r="8.5"/><circle cx="28" cy="48" r="3"/><circle cx="92" cy="48" r="8.5"/><circle cx="92" cy="48" r="3"/><path d="M32 24 Q42 17 56 17 L56 31 L22 31 Q22 27 32 24"/><path d="M60 17 L76 18 Q90 20 102 28 L60 31 Z"/>'},
@@ -134,8 +146,8 @@ function renderFaq(){
   FAQ.forEach(function(f,i){
     var el=document.createElement('div');el.className='qa';
     if(i>=INIT){el.setAttribute('data-faq-extra','1');el.style.display='none';}
-    el.innerHTML='<button>'+((f.q&&f.q[LANG])||(typeof f.q==='string'?f.q:'')||'')+'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button><div class="ans"><p>'+((f.a&&f.a[LANG])||(typeof f.a==='string'?f.a:'')||'')+'</p></div>';
-    el.querySelector('button').addEventListener('click',function(){el.classList.toggle('open');});
+    el.innerHTML='<button type="button" aria-expanded="false">'+((f.q&&f.q[LANG])||(typeof f.q==='string'?f.q:'')||'')+'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button><div class="ans"><p>'+((f.a&&f.a[LANG])||(typeof f.a==='string'?f.a:'')||'')+'</p></div>';
+    el.querySelector('button').addEventListener('click',function(){var open=el.classList.toggle('open');this.setAttribute('aria-expanded',open?'true':'false');});
     g.appendChild(el);
     items.push(el);
   });
@@ -173,6 +185,7 @@ function renderFaq(){
 function applyLang(){
   document.documentElement.lang=LANG;
   document.querySelectorAll('[data-i18n]').forEach(function(e){var k=e.getAttribute('data-i18n');if(I18N[LANG][k]!==undefined)e.textContent=I18N[LANG][k];});
+  document.querySelectorAll('[data-lang]').forEach(function(x){var active=x.getAttribute('data-lang')===LANG;x.classList.toggle('on',active);x.setAttribute('aria-pressed',active?'true':'false');});
   renderCars();renderFaq();if(selCar)renderCalc();
 }
 document.querySelectorAll('.lang button').forEach(function(b){
@@ -187,7 +200,7 @@ document.addEventListener('click',function(e){
   document.querySelectorAll('.pkg-tab').forEach(function(t){t.classList.remove('on');});
   tab.classList.add('on');
   if(window.innerWidth<=880){document.querySelectorAll('#pkgs .pkg').forEach(function(p,j){p.style.display=j===idx?'':'none';});}
-});
+},{signal:__sig});
 
 /* ====== PLATE LOOKUP (main page) ====== */
 function mapDmrToCar(data){
@@ -305,11 +318,11 @@ if(flowBook3){flowBook3.addEventListener('click',function(e){e.preventDefault();
   }
   var drag=false;
   sl.addEventListener('mousedown',function(e){drag=true;setPos(e.clientX);});
-  window.addEventListener('mousemove',function(e){if(drag)setPos(e.clientX);});
-  window.addEventListener('mouseup',function(){drag=false;});
+  window.addEventListener('mousemove',function(e){if(drag)setPos(e.clientX);},{signal:__sig});
+  window.addEventListener('mouseup',function(){drag=false;},{signal:__sig});
   sl.addEventListener('touchstart',function(e){drag=true;setPos(e.touches[0].clientX);},{passive:true});
   sl.addEventListener('touchmove',function(e){if(drag)setPos(e.touches[0].clientX);},{passive:true});
-  window.addEventListener('touchend',function(){drag=false;});
+  window.addEventListener('touchend',function(){drag=false;},{signal:__sig});
 })();
 
 /* ====== BOOKING WIZARD ====== */
@@ -797,7 +810,7 @@ function submitBooking(cb){
     if(e.key==='Escape')close();
     if(e.key==='ArrowLeft')prev();
     if(e.key==='ArrowRight')next();
-  });
+  },{signal:__sig});
   // swipe support
   var tx=0;
   lb.addEventListener('touchstart',function(e){tx=e.touches[0].clientX;},{passive:true});
@@ -1044,12 +1057,16 @@ function submitBooking(cb){
   var chatbot=document.querySelector('.chatbot');
   if(chatbot){
     var dismissed=false;
-    // Mini re-open button
-    var mini=document.createElement('button');
-    mini.className='chat-mini-btn';
-    mini.setAttribute('aria-label','Åbn chat');
-    mini.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>';
-    document.body.appendChild(mini);
+    // Mini re-open button (reuse across re-inits)
+    var mini=document.querySelector('.chat-mini-btn');
+    if(!mini){
+      mini=document.createElement('button');
+      mini.type='button';
+      mini.className='chat-mini-btn';
+      mini.setAttribute('aria-label','Åbn chat');
+      mini.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>';
+      document.body.appendChild(mini);
+    }
     function dismissChat(){
       dismissed=true;
       chatbot.classList.add('chat-dismissed');
@@ -1144,13 +1161,17 @@ function submitBooking(cb){
   var btn=document.getElementById('menuBtn');
   var drawer=document.getElementById('navDrawer');
   if(!btn||!drawer)return;
+  function setDrawer(open){
+    drawer.classList.toggle('open',open);
+    btn.classList.toggle('open',open);
+    btn.setAttribute('aria-expanded',open?'true':'false');
+  }
   btn.addEventListener('click',function(){
-    drawer.classList.toggle('open');
-    btn.classList.toggle('open');
+    setDrawer(!drawer.classList.contains('open'));
   });
   // close on any drawer link click
   drawer.querySelectorAll('.drawer-link,.drawer-book,.drawer-call').forEach(function(el){
-    el.addEventListener('click',function(){drawer.classList.remove('open');btn.classList.remove('open');});
+    el.addEventListener('click',function(){setDrawer(false);});
   });
   // lang buttons in drawer
   drawer.querySelectorAll('[data-lang]').forEach(function(el){
@@ -1158,15 +1179,19 @@ function submitBooking(cb){
       LANG=el.getAttribute('data-lang');
       localStorage.setItem('lang',LANG);
       applyLang();
-      drawer.classList.remove('open');btn.classList.remove('open');
+      setDrawer(false);
     });
   });
   // close on outside click
   document.addEventListener('click',function(e){
     if(drawer.classList.contains('open')&&!drawer.contains(e.target)&&e.target!==btn&&!btn.contains(e.target)){
-      drawer.classList.remove('open');btn.classList.remove('open');
+      setDrawer(false);
     }
-  });
+  },{signal:__sig});
+  // close on Escape
+  document.addEventListener('keydown',function(e){
+    if(e.key==='Escape'&&drawer.classList.contains('open')){setDrawer(false);btn.focus();}
+  },{signal:__sig});
 })();
 
 /* ====== BILPLEJE GUIDE DROPDOWN ====== */
@@ -1178,8 +1203,8 @@ function submitBooking(cb){
   function closeGuide(){btn.setAttribute('aria-expanded','false');panel.classList.remove('open');panel.setAttribute('aria-hidden','true');}
   btn.addEventListener('click',function(e){e.stopPropagation();panel.classList.contains('open')?closeGuide():openGuide();});
   document.getElementById('guideDropdownClose').addEventListener('click',closeGuide);
-  document.addEventListener('click',function(e){if(!panel.contains(e.target)&&e.target!==btn)closeGuide();});
-  document.addEventListener('keydown',function(e){if(e.key==='Escape')closeGuide();});
+  document.addEventListener('click',function(e){if(!panel.contains(e.target)&&e.target!==btn)closeGuide();},{signal:__sig});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')closeGuide();},{signal:__sig});
 })();
 
 /* ====== DESKTOP PARALLAX ONLY ====== */
@@ -1189,18 +1214,23 @@ if(window.innerWidth>880){
     window.addEventListener('scroll',function(){
       var y=window.scrollY;
       heroBg.style.transform='translateY('+Math.round(y*0.25)+'px)';
-    },{passive:true});
+    },{passive:true,signal:__sig});
   }
 }
 
 /* ====== SCROLL TO TOP ====== */
 (function(){
-  var btn=document.createElement('button');
-  btn.className='scroll-top';
-  btn.setAttribute('aria-label','Scroll to top');
-  btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M18 15l-6-6-6 6"/></svg>';
-  document.body.appendChild(btn);
-  btn.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});
+  // Reuse an existing button across re-inits instead of appending a new one each time.
+  var btn=document.querySelector('.scroll-top');
+  if(!btn){
+    btn=document.createElement('button');
+    btn.type='button';
+    btn.className='scroll-top';
+    btn.setAttribute('aria-label','Scroll to top');
+    btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" aria-hidden="true"><path d="M18 15l-6-6-6 6"/></svg>';
+    document.body.appendChild(btn);
+  }
+  btn.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});},{signal:__sig});
   var ticking=false;
   window.addEventListener('scroll',function(){
     if(!ticking){
@@ -1210,12 +1240,12 @@ if(window.innerWidth>880){
       });
       ticking=true;
     }
-  },{passive:true});
+  },{passive:true,signal:__sig});
 })();
 
 window.toggleWhyCard=function(){
   var card=document.getElementById('whyCard');
-  if(card) card.classList.toggle('open');
+  if(card){ var open=card.classList.toggle('open'); card.setAttribute('aria-expanded',open?'true':'false'); }
 };
 
 applyLang();

@@ -22,7 +22,9 @@ a{color:inherit;text-decoration:none}
 img{max-width:100%;display:block}
 .wrap{max-width:1140px;margin:0 auto;padding:0 24px}
 section{position:relative}
-[data-i18n]{}
+/* Keyboard focus fallback — several controls strip outlines with no replacement.
+   :focus-visible only shows for keyboard users, not mouse clicks. */
+a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible,[tabindex]:focus-visible,summary:focus-visible{outline:2px solid var(--green);outline-offset:2px;border-radius:4px}
 
 /* TRUST BAR */
 .trustbar{background:#081009;border-bottom:1px solid var(--line);font-size:12.5px;color:var(--muted)}
@@ -620,7 +622,7 @@ section{position:relative}
 .chat-toggle{width:48px;height:48px;border-radius:50%;background:rgba(15,30,20,.65);backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);border:1px solid rgba(55,210,120,.28);box-shadow:0 8px 32px rgba(0,0,0,.4),0 0 0 1px rgba(55,210,120,.08),inset 0 1px 0 rgba(55,210,120,.15);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--green);transition:transform .2s,box-shadow .2s}
 .chat-toggle:hover{transform:scale(1.08);box-shadow:0 12px 40px rgba(0,0,0,.5),0 0 0 1px rgba(55,210,120,.18),inset 0 1px 0 rgba(55,210,120,.2)}
 .chat-badge{position:absolute;top:-4px;right:-4px;width:20px;height:20px;border-radius:50%;background:#e53;color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;border:2px solid var(--bg)}
-.chat-window{position:absolute;bottom:70px;right:0;width:360px;max-height:85vh;background:var(--surface);border:1px solid var(--line-2);border-radius:var(--r);box-shadow:0 24px 70px rgba(0,0,0,.5);overflow:hidden;display:flex;flex-direction:column;position:relative}
+.chat-window{position:absolute;bottom:70px;right:0;width:360px;max-height:85vh;background:var(--surface);border:1px solid var(--line-2);border-radius:var(--r);box-shadow:0 24px 70px rgba(0,0,0,.5);overflow:hidden;display:flex;flex-direction:column}
 .chat-window.opening{animation:chatWinIn .3s cubic-bezier(.34,1.4,.64,1)}
 @keyframes chatWinIn{from{opacity:0;transform:translateY(16px) scale(.97)}to{opacity:1;transform:none}}
 /* chat intro animation */
@@ -747,9 +749,11 @@ section{position:relative}
   .wiz-plate-lookup{width:100%}
 }
 @media(max-width:520px){
-  html,body{overflow-x:clip;max-width:100vw}
-  *{box-sizing:border-box;max-width:100%}
-  .pkg-tab,.ch-chip{max-width:none}
+  html,body{overflow-x:clip}
+  /* Constrain only media/table elements, not every node — a universal
+     max-width:100% clamps flex scroll children (e.g. the package tabs) and
+     forces a full-DOM style recalc. overflow-x:clip on body handles the rest. */
+  img,svg,video,table,pre,iframe{max-width:100%}
   .wrap{padding:0 16px}
   .car-grid{grid-template-columns:1fr 1fr;gap:11px}.car svg.cs{width:84px;height:46px}
   .work-grid{grid-template-columns:1fr 1fr}
@@ -863,7 +867,6 @@ section{position:relative}
 .cancel-icon{font-size:48px;margin-bottom:16px}
 .cancel-loading{text-align:center;padding:60px 0;color:var(--muted)}
 .cancel-spinner{width:36px;height:36px;border:3px solid var(--line-2);border-top-color:var(--green);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px}
-@keyframes spin{to{transform:rotate(360deg)}}
 
 /* ADDRESS AUTOCOMPLETE DROPDOWN */
 .ac-drop{position:absolute;top:100%;left:0;right:0;z-index:200;background:var(--surface);border:1px solid var(--line-2);border-radius:var(--r-sm);margin-top:2px;list-style:none;padding:4px 0;box-shadow:0 8px 24px rgba(0,0,0,.35);max-height:220px;overflow-y:auto}
@@ -981,3 +984,14 @@ section{position:relative}
 }
 
 @keyframes calPulse{0%{transform:scale(1);opacity:.7}70%{transform:scale(2.2);opacity:0}100%{transform:scale(2.2);opacity:0}}
+
+/* Respect users who ask for reduced motion: neutralise the many infinite
+   decorative animations (pulse, steam, parallax, spinners) and smooth scroll. */
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{
+    animation-duration:.001ms!important;
+    animation-iteration-count:1!important;
+    transition-duration:.001ms!important;
+  }
+}

@@ -2,7 +2,7 @@ const HTML = `<!-- INFO -->
 <section class="sec info"><div class="wrap">
   <div class="center"><div class="eyebrow" data-i18n="info_eyebrow">Om Elite Vask</div><h2 class="sec-title" data-i18n="info_title">Mød holdet bag</h2><p class="sec-sub" data-i18n="info_sub">Her fortæller vi snart mere om os og det udstyr, vi bruger.</p></div>
   <div class="info-grid">
-    <div class="info-card info-card-why" id="whyCard" onclick="toggleWhyCard()">
+    <div class="info-card info-card-why" id="whyCard" role="button" tabindex="0" aria-expanded="false" aria-controls="whyBody" onclick="toggleWhyCard()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleWhyCard()}">
       <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div>
       <div class="why-header">
         <h4 data-i18n="info1t">Hvorfor vælge Elite Vask?</h4>

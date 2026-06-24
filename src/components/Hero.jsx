@@ -1,6 +1,6 @@
 const HTML = `<!-- HERO -->
 <section class="hero hero-img">
-  <img src="/hero.jpg.png" alt="Elite Vask dampvask" class="hero-bg-img" />
+  <img src="/hero.jpg.png" alt="Elite Vask dampvask" class="hero-bg-img" fetchpriority="high" decoding="async" />
   <div class="hero-overlay"></div>
   <div class="wrap hero-inner">
     <div class="badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg><span data-i18n="hero_badge">Vi kører til dig – hele Sjælland</span></div>
@@ -11,11 +11,11 @@ const HTML = `<!-- HERO -->
       <span class="flow-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
       <a href="#vaelg" class="flow-step flow-link"><span class="fn">2</span><span data-i18n="flow2">Se pris</span></a>
       <span class="flow-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-      <a href="#" class="flow-step flow-link" id="flowBook3"><span class="fn">3</span><span data-i18n="flow3">Book tid</span></a>
+      <a href="#vaelg" class="flow-step flow-link" id="flowBook3"><span class="fn">3</span><span data-i18n="flow3">Book tid</span></a>
     </div>
     <div class="hero-cta">
       <a href="#vaelg" class="btn btn-green btn-lg"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg><span data-i18n="hero_cta1">Se priser</span></a>
-      <button class="btn btn-ghost btn-lg" data-book data-i18n="hero_cta2">Book med det samme</button>
+      <button type="button" class="btn btn-ghost btn-lg" data-book data-i18n="hero_cta2">Book med det samme</button>
     </div>
   </div>
 </section>`;
