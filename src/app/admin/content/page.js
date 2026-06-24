@@ -1082,13 +1082,13 @@ export default function AdminPanel() {
                       return (
                         <div key={item.id} style={{ background:T.bg1, border:`1px solid ${isOpen?T.accentBorder:T.border}`, borderRadius:11, overflow:"hidden", transition:"border .15s" }}>
                           <div style={{ display:"flex", alignItems:"center" }}>
-                            <button onClick={() => setExpandedFaqId(isOpen ? null : item.id)}
+                            <button type="button" onClick={() => setExpandedFaqId(isOpen ? null : item.id)}
                               style={{ flex:1, display:"flex", alignItems:"center", gap:10, padding:"13px 16px", background:"transparent", border:"none", cursor:"pointer", fontFamily:FF, textAlign:"left", minWidth:0 }}>
                               <span style={{ fontSize:11, fontWeight:700, color:isOpen?T.accent:T.t4, minWidth:22, flexShrink:0 }}>#{idx+1}</span>
                               <span style={{ flex:1, fontSize:14, fontWeight:isOpen?700:500, color:isOpen?T.t1:T.t2, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{titleDa}</span>
                               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={isOpen?T.accent:T.t4} strokeWidth="2.5" strokeLinecap="round" style={{ transform:isOpen?"rotate(180deg)":"none", transition:"transform .2s", flexShrink:0 }}><polyline points="6 9 12 15 18 9"/></svg>
                             </button>
-                            <button onClick={() => deleteFaq(item.id)}
+                            <button type="button" onClick={() => deleteFaq(item.id)}
                               style={{ padding:"13px 14px", background:"transparent", border:"none", borderLeft:`1px solid ${T.border}`, cursor:"pointer", color:T.t4, display:"flex", alignItems:"center", flexShrink:0, transition:"color .15s" }}
                               onMouseEnter={e => e.currentTarget.style.color=T.danger}
                               onMouseLeave={e => e.currentTarget.style.color=T.t4}>
@@ -1100,25 +1100,25 @@ export default function AdminPanel() {
                               <div style={{ display:"grid", gridTemplateColumns:narrow?"1fr":"1fr 1fr", gap:8 }}>
                                 <div>
                                   <p style={{ fontSize:11, color:T.t4, margin:"0 0 4px", fontWeight:600 }}>Spørgsmål (DA)</p>
-                                  <input value={draft.qDa} onChange={e => setFaqDrafts(d => ({...d, [item.id]:{...getDraft(item), qDa:e.target.value}}))} style={{...txStyle, resize:"none"}} />
+                                  <input value={draft.qDa} onChange={e => { const v=e.target.value; setFaqDrafts(d => { const cur=d[item.id]||{qDa:item.q?.da||"",qEn:item.q?.en||"",aDa:item.a?.da||"",aEn:item.a?.en||""}; return {...d,[item.id]:{...cur,qDa:v}}; }); }} style={{...txStyle, resize:"none"}} />
                                 </div>
                                 <div>
                                   <p style={{ fontSize:11, color:T.t4, margin:"0 0 4px", fontWeight:600 }}>Question (EN)</p>
-                                  <input value={draft.qEn} onChange={e => setFaqDrafts(d => ({...d, [item.id]:{...getDraft(item), qEn:e.target.value}}))} style={{...txStyle, resize:"none"}} />
+                                  <input value={draft.qEn} onChange={e => { const v=e.target.value; setFaqDrafts(d => { const cur=d[item.id]||{qDa:item.q?.da||"",qEn:item.q?.en||"",aDa:item.a?.da||"",aEn:item.a?.en||""}; return {...d,[item.id]:{...cur,qEn:v}}; }); }} style={{...txStyle, resize:"none"}} />
                                 </div>
                                 <div>
                                   <p style={{ fontSize:11, color:T.t4, margin:"0 0 4px", fontWeight:600 }}>Svar (DA)</p>
-                                  <textarea value={draft.aDa} onChange={e => setFaqDrafts(d => ({...d, [item.id]:{...getDraft(item), aDa:e.target.value}}))} rows={4} style={txStyle} />
+                                  <textarea value={draft.aDa} onChange={e => { const v=e.target.value; setFaqDrafts(d => { const cur=d[item.id]||{qDa:item.q?.da||"",qEn:item.q?.en||"",aDa:item.a?.da||"",aEn:item.a?.en||""}; return {...d,[item.id]:{...cur,aDa:v}}; }); }} rows={4} style={txStyle} />
                                 </div>
                                 <div>
                                   <p style={{ fontSize:11, color:T.t4, margin:"0 0 4px", fontWeight:600 }}>Answer (EN)</p>
-                                  <textarea value={draft.aEn} onChange={e => setFaqDrafts(d => ({...d, [item.id]:{...getDraft(item), aEn:e.target.value}}))} rows={4} style={txStyle} />
+                                  <textarea value={draft.aEn} onChange={e => { const v=e.target.value; setFaqDrafts(d => { const cur=d[item.id]||{qDa:item.q?.da||"",qEn:item.q?.en||"",aDa:item.a?.da||"",aEn:item.a?.en||""}; return {...d,[item.id]:{...cur,aEn:v}}; }); }} rows={4} style={txStyle} />
                                 </div>
                               </div>
                               <div style={{ display:"flex", gap:8 }}>
-                                <button onClick={() => saveFaqItem(item.id)} disabled={cmsLoading}
+                                <button type="button" onClick={() => saveFaqItem(item.id)} disabled={cmsLoading}
                                   style={{ flex:1, padding:"10px 0", background:T.accent, color:T.bg0, border:"none", borderRadius:8, fontWeight:700, fontSize:13, cursor:"pointer", fontFamily:FF }}>Gem ændringer</button>
-                                <button onClick={() => { setExpandedFaqId(null); setFaqDrafts(d => { const n={...d}; delete n[item.id]; return n; }); }}
+                                <button type="button" onClick={() => { setExpandedFaqId(null); setFaqDrafts(d => { const n={...d}; delete n[item.id]; return n; }); }}
                                   style={{ flex:1, padding:"10px 0", background:"rgba(255,255,255,.06)", color:T.t3, border:"none", borderRadius:8, fontWeight:600, fontSize:13, cursor:"pointer", fontFamily:FF }}>Annuller</button>
                               </div>
                             </div>
