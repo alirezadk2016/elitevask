@@ -68,6 +68,7 @@ function fmtKr(n){return Math.round(n).toLocaleString('da-DK')+' kr';}
 function driveFee(){return 0;}
 
 /* ====== RENDER CARS ====== */
+function activateCar(c){selCar=c;renderCars();renderCalc();var cal=document.getElementById('calc');cal.classList.add('show');}
 function renderCars(){
   var g=document.getElementById('carGrid');g.innerHTML='';
   CARS.forEach(function(c){
@@ -75,7 +76,8 @@ function renderCars(){
     if(selCar&&selCar.id===c.id)d.classList.add('on');
     var minPrice=Math.min(c.prices.udv,c.prices.indv,c.prices.hele);
     d.innerHTML='<svg class="cs" viewBox="0 0 120 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><g transform="translate(120,0) scale(-1,1)">'+c.svg+'</g></svg><div class="nm">'+c.label[LANG]+'</div><div class="ex">'+c.ex[LANG]+'</div><div class="car-price">'+(LANG==='da'?'Fra ':'From ')+fmtKr(minPrice)+'</div>';
-    d.addEventListener('click',function(){selCar=c;renderCars();renderCalc();var cal=document.getElementById('calc');cal.classList.add('show');setTimeout(function(){cal.scrollIntoView({behavior:'smooth',block:'nearest'});},60);});
+    d.addEventListener('mouseenter',function(){activateCar(c);});
+    d.addEventListener('click',function(){activateCar(c);setTimeout(function(){document.getElementById('calc').scrollIntoView({behavior:'smooth',block:'nearest'});},60);});
     g.appendChild(d);
   });
 }
@@ -128,7 +130,7 @@ function renderFaq(){
   var g=document.getElementById('faqList');g.innerHTML='';
   FAQ.forEach(function(f){
     var el=document.createElement('div');el.className='qa';
-    el.innerHTML='<button>'+f.q[LANG]+'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button><div class="ans"><p>'+f.a[LANG]+'</p></div>';
+    el.innerHTML='<button>'+((f.q&&f.q[LANG])||(typeof f.q==='string'?f.q:'')||'')+'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button><div class="ans"><p>'+((f.a&&f.a[LANG])||(typeof f.a==='string'?f.a:'')||'')+'</p></div>';
     el.querySelector('button').addEventListener('click',function(){el.classList.toggle('open');});
     g.appendChild(el);
   });

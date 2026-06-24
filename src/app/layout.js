@@ -43,6 +43,20 @@ const JSONLD = [
 },
 {
   "@context":"https://schema.org",
+  "@type":"Service",
+  "name":"Mobil bil dampvask",
+  "serviceType":"Car Wash",
+  "provider":{"@type":"LocalBusiness","name":"Elite Vask"},
+  "areaServed":{"@type":"State","name":"Sjælland","addressCountry":"DK"},
+  "description":"Professionel mobil bil dampvask på Sjælland. Vi kører til din adresse og vasker din bil med damp – skånsomt, effektivt og miljøvenligt.",
+  "offers":[
+    {"@type":"Offer","name":"Udvendig dampvask","price":"500","priceCurrency":"DKK","eligibleRegion":{"@type":"State","name":"Sjælland"}},
+    {"@type":"Offer","name":"Hel bil (ind & ud)","price":"800","priceCurrency":"DKK","eligibleRegion":{"@type":"State","name":"Sjælland"}},
+    {"@type":"Offer","name":"Guld pakke","price":"2000","priceCurrency":"DKK","eligibleRegion":{"@type":"State","name":"Sjælland"}}
+  ]
+},
+{
+  "@context":"https://schema.org",
   "@type":"FAQPage",
   "mainEntity":[
     {"@type":"Question","name":"Hvad koster mobil bilvask?","acceptedAnswer":{"@type":"Answer","text":"Prisen afhænger af biltype og pakke. En komplet vask starter fra 799 kr. Vælg din biltype på siden for at se den præcise pris."}},
