@@ -23,7 +23,9 @@ const HTML = `<!-- CAR SELECTOR + CALCULATOR -->
         <span class="ch-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><polyline points="20 6 9 17 4 12"/></svg><span data-i18n="chip_pay">Betal efter vask</span></span>
       </div>
     </div>
-    <div class="pkg-tabs" id="pkgTabs"></div>
+    <div class="pkg-tabs-wrap">
+      <div class="pkg-tabs" id="pkgTabs"></div>
+    </div>
     <div class="pkgs" id="pkgs"></div>
     <div class="note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><span data-i18n="calc_note">Priserne er vejledende. Gratis kørsel til hele Sjælland. Endelig pris bekræftes ved booking.</span></div>
   </div>
