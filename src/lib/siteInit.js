@@ -156,6 +156,7 @@ function renderFaq(){
       setLabel();
       if(!expanded){wrap.scrollIntoView({behavior:'smooth',block:'nearest'});}
     });
+    wrap.appendChild(btn);
     /* Insert button right after the 4th item so it's always at the fold */
     if(items[INIT-1]){items[INIT-1].after(wrap);}else{g.appendChild(wrap);}
   }
