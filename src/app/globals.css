@@ -391,6 +391,9 @@ section{position:relative}
 .qa .ans{max-height:0;overflow:hidden;transition:max-height .35s ease}
 .qa.open .ans{max-height:600px}
 .qa .ans p{font-size:14.5px;color:var(--muted);padding:0 0 20px;line-height:1.65}
+.faq-more-btn{display:inline-flex;align-items:center;gap:8px;padding:12px 28px;border:1.5px solid rgba(55,210,120,.35);border-radius:50px;background:rgba(55,210,120,.06);color:var(--green);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:background .2s,border-color .2s,transform .15s}
+.faq-more-btn:hover{background:rgba(55,210,120,.13);border-color:var(--green);transform:translateY(-1px)}
+.faq-more-btn svg{transition:transform .2s}
 
 /* LOCAL SEO */
 .local{text-align:center}
