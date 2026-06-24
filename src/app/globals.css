@@ -155,13 +155,12 @@ section{position:relative}
 .pkg .drive-free{font-size:12.5px;font-weight:600;color:var(--green);display:flex;align-items:center;gap:6px}
 .pkg .drive-free svg{color:var(--green)}
 .pkg-save{display:inline-block;font-size:11px;font-weight:700;color:var(--green);background:var(--green-soft);border:1px solid rgba(55,210,120,.25);border-radius:20px;padding:3px 10px;margin:4px 0 10px;letter-spacing:.3px}
-.pkg ul{list-style:none}
+.pkg ul{list-style:none;flex:1}
 .pkg li{font-size:12.8px;color:var(--muted);padding:6px 0;display:flex;gap:9px;align-items:flex-start;border-bottom:1px solid var(--line)}
 .pkg li:last-of-type{border-bottom:none;margin-bottom:16px}
 .pkg li svg{width:14px;height:14px;color:var(--green);flex-shrink:0;margin-top:3px}
 .pkg.gold li svg{color:var(--gold)}
-.pkg ul{flex:1}
-.pkg .pbtn{width:100%;border:1px solid var(--green);background:transparent;color:var(--green);padding:12px;margin-top:auto}
+.pkg .pbtn{width:100%;border:1px solid var(--green);background:transparent;color:var(--green);padding:12px;margin-top:auto;cursor:pointer;font-family:inherit}
 .pkg .pbtn:hover{background:var(--green-soft)}
 .pkg.pop .pbtn{background:var(--green);color:#062313}
 .pkg.pop .pbtn:hover{background:#48e088}

@@ -384,7 +384,7 @@ export default function AdminPanel() {
   const navItem = (id, label, icon, badge) => {
     const active = tab === id;
     return (
-      <button onClick={() => { setTab(id); setMsg(null); setUrlInput(""); }}
+      <button onClick={() => { setTab(id); setMsg(null); setUrlInput(""); setCmsMsg(null); setEditingFaq(null); setEditingExt(null); }}
         style={{ display:"flex", alignItems:"center", gap:8, width:"100%", padding:"7px 9px", borderRadius:7, fontSize:13, fontWeight:active?600:400, color:active?T.accent:T.t3, background:active?T.accentDim:"transparent", border:"none", cursor:"pointer", fontFamily:FF, textAlign:"left", transition:"all .12s", marginBottom:1 }}>
         <span style={{ opacity: active ? 1 : 0.7, display:"flex" }}>{icon}</span>
         <span style={{ flex:1 }}>{label}</span>
@@ -462,7 +462,7 @@ export default function AdminPanel() {
         ) : (
           <div style={{ display:"flex", gap:8, padding:"16px 16px 0", overflowX:"auto" }}>
             {[["bookings","Bookinger",icons.bookings],["gallery","Galleri",icons.gallery],["videos","Videoer",icons.videos],["faq","FAQ",icons.faq],["priser","Priser",icons.priser],["extras","Ekstra",icons.extras]].map(([id,label,icon]) => (
-              <button key={id} onClick={() => { setTab(id); setMsg(null); setUrlInput(""); }}
+              <button key={id} onClick={() => { setTab(id); setMsg(null); setUrlInput(""); setCmsMsg(null); setEditingFaq(null); setEditingExt(null); }}
                 style={{ display:"flex", alignItems:"center", gap:6, padding:"8px 16px", borderRadius:8, border:`1px solid ${tab===id?T.accentBorder:T.border}`, background:tab===id?T.accentDim:"transparent", color:tab===id?T.accent:T.t3, fontSize:13, fontWeight:600, cursor:"pointer", fontFamily:FF, whiteSpace:"nowrap" }}>
                 {icon}{label}
               </button>
@@ -843,7 +843,7 @@ export default function AdminPanel() {
               const res = await fetch("/api/admin/content", {
                 method:"POST",
                 headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" },
-                body: JSON.stringify({ type:"faq", item:{ q:faqNewQda.trim(), a:faqNewAda.trim(), qEn:faqNewQen.trim(), aEn:faqNewAen.trim() } }),
+                body: JSON.stringify({ type:"faq", item:{ q:{da:faqNewQda.trim(), en:faqNewQen.trim()||faqNewQda.trim()}, a:{da:faqNewAda.trim(), en:faqNewAen.trim()||faqNewAda.trim()} } }),
               });
               const data = await res.json();
               setCmsLoading(false);
@@ -855,7 +855,7 @@ export default function AdminPanel() {
               const res = await fetch("/api/admin/content", {
                 method:"PUT",
                 headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" },
-                body: JSON.stringify({ type:"faq", id:item.id, item:{ q:item.q, a:item.a, qEn:item.qEn||"", aEn:item.aEn||"" } }),
+                body: JSON.stringify({ type:"faq", id:item.id, item:{ q:{da:item.qDa||"", en:item.qEn||item.qDa||""}, a:{da:item.aDa||"", en:item.aEn||item.aDa||""} } }),
               });
               const data = await res.json();
               setCmsLoading(false);
@@ -905,7 +905,12 @@ export default function AdminPanel() {
                   <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
                     {faqItems.map((item, idx) => {
                       const isEditing = editingFaq?.id === item.id;
-                      const draft = isEditing ? editingFaq : item;
+                      // Support both nested {da,en} format (KV) and flat (legacy)
+                      const qDa = item.q?.da || item.q || "";
+                      const qEn = item.q?.en || item.qEn || "";
+                      const aDa = item.a?.da || item.a || "";
+                      const aEn = item.a?.en || item.aEn || "";
+                      const draft = isEditing ? editingFaq : { qDa, qEn, aDa, aEn };
                       return (
                         <div key={item.id} style={{ background:T.bg1, border:`1px solid ${isEditing?T.accentBorder:T.border}`, borderRadius:12, padding:20 }}>
                           {isEditing ? (
@@ -913,7 +918,7 @@ export default function AdminPanel() {
                               <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8 }}>
                                 <div>
                                   <p style={{ fontSize:11, color:T.t4, margin:"0 0 4px", fontWeight:600 }}>Spørgsmål (DA)</p>
-                                  {inp(draft.q, v=>setEditingFaq(d=>({...d,q:v})), "Spørgsmål…")}
+                                  {inp(draft.qDa||"", v=>setEditingFaq(d=>({...d,qDa:v})), "Spørgsmål…")}
                                 </div>
                                 <div>
                                   <p style={{ fontSize:11, color:T.t4, margin:"0 0 4px", fontWeight:600 }}>Question (EN)</p>
@@ -921,7 +926,7 @@ export default function AdminPanel() {
                                 </div>
                                 <div>
                                   <p style={{ fontSize:11, color:T.t4, margin:"0 0 4px", fontWeight:600 }}>Svar (DA)</p>
-                                  {inp(draft.a, v=>setEditingFaq(d=>({...d,a:v})), "Svar…", 3)}
+                                  {inp(draft.aDa||"", v=>setEditingFaq(d=>({...d,aDa:v})), "Svar…", 3)}
                                 </div>
                                 <div>
                                   <p style={{ fontSize:11, color:T.t4, margin:"0 0 4px", fontWeight:600 }}>Answer (EN)</p>
@@ -940,16 +945,16 @@ export default function AdminPanel() {
                               <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:8 }}>
                                 <span style={{ fontSize:10, color:T.accent, fontWeight:700, letterSpacing:.5 }}>#{idx+1}</span>
                                 <div style={{ display:"flex", gap:6 }}>
-                                  <button onClick={() => setEditingFaq({...item})}
+                                  <button onClick={() => setEditingFaq({ id:item.id, qDa, qEn, aDa, aEn })}
                                     style={{ padding:"5px 12px", background:T.accentDim, border:`1px solid ${T.accentBorder}`, borderRadius:6, color:T.accent, fontSize:12, fontWeight:600, cursor:"pointer", fontFamily:FF }}>Rediger</button>
                                   <button onClick={() => deleteFaq(item.id)}
                                     style={{ padding:"5px 12px", background:T.dangerDim, border:`1px solid ${T.dangerBorder}`, borderRadius:6, color:T.danger, fontSize:12, fontWeight:600, cursor:"pointer", fontFamily:FF }}>Slet</button>
                                 </div>
                               </div>
-                              <p style={{ fontSize:14, fontWeight:700, color:T.t1, margin:"0 0 4px" }}>{item.q}</p>
-                              <p style={{ fontSize:13, color:T.t2, margin:"0 0 8px", lineHeight:1.6 }}>{item.a}</p>
-                              {item.qEn && <p style={{ fontSize:12, color:T.t4, margin:"0 0 2px", fontStyle:"italic" }}>{item.qEn}</p>}
-                              {item.aEn && <p style={{ fontSize:12, color:T.t4, margin:0, fontStyle:"italic", lineHeight:1.5 }}>{item.aEn}</p>}
+                              <p style={{ fontSize:14, fontWeight:700, color:T.t1, margin:"0 0 4px" }}>{qDa}</p>
+                              <p style={{ fontSize:13, color:T.t2, margin:"0 0 8px", lineHeight:1.6 }}>{aDa}</p>
+                              {qEn && <p style={{ fontSize:12, color:T.t4, margin:"0 0 2px", fontStyle:"italic" }}>{qEn}</p>}
+                              {aEn && <p style={{ fontSize:12, color:T.t4, margin:0, fontStyle:"italic", lineHeight:1.5 }}>{aEn}</p>}
                             </div>
                           )}
                         </div>
@@ -971,8 +976,8 @@ export default function AdminPanel() {
           {tab === "priser" && (() => {
             const CARS = ["lille","mellem","stor","varebil"];
             const CAR_LABELS = { lille:"Lille bil", mellem:"Mellemstor bil", stor:"Stor bil / SUV", varebil:"Varebil" };
-            const PKGS = ["basis","komplet","premium","deluxe"];
-            const PKG_LABELS = { basis:"Basis", komplet:"Komplet", premium:"Premium", deluxe:"Deluxe" };
+            const PKGS = ["hele","udv","indv","guld"];
+            const PKG_LABELS = { hele:"Hele bilen", udv:"Udvendig", indv:"Indvendig", guld:"Guld pakke" };
 
             async function savePrices() {
               setCmsLoading(true); setCmsMsg(null);
@@ -1053,7 +1058,7 @@ export default function AdminPanel() {
               const res = await fetch("/api/admin/content", {
                 method:"POST",
                 headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" },
-                body: JSON.stringify({ type:"extras", item:{ name:extNewNameDa.trim(), nameEn:extNewNameEn.trim(), desc:extNewDescDa.trim(), descEn:extNewDescEn.trim(), price:extNewPrice.trim() } }),
+                body: JSON.stringify({ type:"extras", item:{ name:{da:extNewNameDa.trim(), en:extNewNameEn.trim()||extNewNameDa.trim()}, desc:{da:extNewDescDa.trim(), en:extNewDescEn.trim()||extNewDescDa.trim()}, price:Number(extNewPrice)||0 } }),
               });
               const data = await res.json();
               setCmsLoading(false);
@@ -1065,7 +1070,7 @@ export default function AdminPanel() {
               const res = await fetch("/api/admin/content", {
                 method:"PUT",
                 headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" },
-                body: JSON.stringify({ type:"extras", id:item.id, item:{ name:item.name, nameEn:item.nameEn||"", desc:item.desc||"", descEn:item.descEn||"", price:item.price||"" } }),
+                body: JSON.stringify({ type:"extras", id:item.id, item:{ name:{da:item.nameDa||"", en:item.nameEn||item.nameDa||""}, desc:{da:item.descDa||"", en:item.descEn||item.descDa||""}, price:Number(item.price)||0 } }),
               });
               const data = await res.json();
               setCmsLoading(false);
@@ -1115,9 +1120,14 @@ export default function AdminPanel() {
 
                 {extrasItems.length > 0 && (
                   <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
-                    {extrasItems.map((item, idx) => {
+                    {extrasItems.map((item) => {
                       const isEditing = editingExt?.id === item.id;
-                      const draft = isEditing ? editingExt : item;
+                      // Support both nested {da,en} format (KV) and flat (legacy)
+                      const nameDa = item.name?.da || item.name || "";
+                      const nameEn = item.name?.en || item.nameEn || "";
+                      const descDa = item.desc?.da || item.desc || "";
+                      const descEn = item.desc?.en || item.descEn || "";
+                      const draft = isEditing ? editingExt : { nameDa, nameEn, descDa, descEn, price: item.price||"" };
                       return (
                         <div key={item.id} style={{ background:T.bg1, border:`1px solid ${isEditing?T.accentBorder:T.border}`, borderRadius:12, padding:20 }}>
                           {isEditing ? (
@@ -1125,7 +1135,7 @@ export default function AdminPanel() {
                               <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8 }}>
                                 <div>
                                   <p style={{ fontSize:11, color:T.t4, margin:"0 0 4px", fontWeight:600 }}>Navn (DA)</p>
-                                  {inp(draft.name, v=>setEditingExt(d=>({...d,name:v})), "Navn…")}
+                                  {inp(draft.nameDa||"", v=>setEditingExt(d=>({...d,nameDa:v})), "Navn…")}
                                 </div>
                                 <div>
                                   <p style={{ fontSize:11, color:T.t4, margin:"0 0 4px", fontWeight:600 }}>Name (EN)</p>
@@ -1133,7 +1143,7 @@ export default function AdminPanel() {
                                 </div>
                                 <div>
                                   <p style={{ fontSize:11, color:T.t4, margin:"0 0 4px", fontWeight:600 }}>Beskrivelse (DA)</p>
-                                  {inp(draft.desc||"", v=>setEditingExt(d=>({...d,desc:v})), "Beskrivelse…")}
+                                  {inp(draft.descDa||"", v=>setEditingExt(d=>({...d,descDa:v})), "Beskrivelse…")}
                                 </div>
                                 <div>
                                   <p style={{ fontSize:11, color:T.t4, margin:"0 0 4px", fontWeight:600 }}>Description (EN)</p>
@@ -1155,14 +1165,14 @@ export default function AdminPanel() {
                             <div style={{ display:"flex", alignItems:"center", gap:16 }}>
                               <div style={{ flex:1, minWidth:0 }}>
                                 <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:4 }}>
-                                  <span style={{ fontSize:14, fontWeight:700, color:T.t1 }}>{item.name}</span>
-                                  {item.nameEn && <span style={{ fontSize:12, color:T.t4, fontStyle:"italic" }}>/ {item.nameEn}</span>}
-                                  {item.price && <span style={{ fontSize:13, fontWeight:700, color:T.accent, background:T.accentDim, borderRadius:6, padding:"2px 8px" }}>kr. {item.price}</span>}
+                                  <span style={{ fontSize:14, fontWeight:700, color:T.t1 }}>{nameDa}</span>
+                                  {nameEn && <span style={{ fontSize:12, color:T.t4, fontStyle:"italic" }}>/ {nameEn}</span>}
+                                  {item.price ? <span style={{ fontSize:13, fontWeight:700, color:T.accent, background:T.accentDim, borderRadius:6, padding:"2px 8px" }}>kr. {item.price}</span> : null}
                                 </div>
-                                {item.desc && <p style={{ fontSize:12, color:T.t3, margin:0, lineHeight:1.5 }}>{item.desc}</p>}
+                                {descDa && <p style={{ fontSize:12, color:T.t3, margin:0, lineHeight:1.5 }}>{descDa}</p>}
                               </div>
                               <div style={{ display:"flex", gap:6, flexShrink:0 }}>
-                                <button onClick={() => setEditingExt({...item})}
+                                <button onClick={() => setEditingExt({ id:item.id, nameDa, nameEn, descDa, descEn, price:item.price||"" })}
                                   style={{ padding:"6px 12px", background:T.accentDim, border:`1px solid ${T.accentBorder}`, borderRadius:6, color:T.accent, fontSize:12, fontWeight:600, cursor:"pointer", fontFamily:FF }}>Rediger</button>
                                 <button onClick={() => deleteExtra(item.id)}
                                   style={{ padding:"6px 12px", background:T.dangerDim, border:`1px solid ${T.dangerBorder}`, borderRadius:6, color:T.danger, fontSize:12, fontWeight:600, cursor:"pointer", fontFamily:FF }}>Slet</button>
