@@ -3,6 +3,7 @@ import TrustBar from "@/components/TrustBar";
 import Nav from "@/components/Nav";
 import Hero from "@/components/Hero";
 import Pricing from "@/components/Pricing";
+import LiveVideo from "@/components/LiveVideo";
 import Stats from "@/components/Stats";
 import Steps from "@/components/Steps";
 import Work from "@/components/Work";
@@ -30,6 +31,7 @@ export default function Page() {
       <span id="top"></span>
       <Hero />
       <Pricing />
+      <LiveVideo />
       <Stats />
       <Steps />
       <Work />

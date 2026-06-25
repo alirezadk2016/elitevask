@@ -84,6 +84,16 @@ const JSONLD = [
 },
 {
   "@context":"https://schema.org",
+  "@type":"VideoObject",
+  "name":"Elite Vask – professionel mobil dampvask i aktion",
+  "description":"Se Elite Vask udføre professionel mobil dampvask på stedet – fra snavset til skinnende ren bil.",
+  "thumbnailUrl":"https://www.elite-vask.dk/gallery/steam-bmw.jpg",
+  "contentUrl":"https://www.elite-vask.dk/gallery/elite-vask-demo.mp4",
+  "uploadDate":"2026-05-12",
+  "publisher":{"@id":"https://www.elite-vask.dk/#business"}
+},
+{
+  "@context":"https://schema.org",
   "@type":"FAQPage",
   "mainEntity":[
     {"@type":"Question","name":"Hvad koster mobil bilvask?","acceptedAnswer":{"@type":"Answer","text":"Prisen afhænger af biltype og pakke. En komplet vask starter fra 799 kr. Vælg din biltype på siden for at se den præcise pris."}},
