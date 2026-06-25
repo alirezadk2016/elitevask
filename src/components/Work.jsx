@@ -39,19 +39,22 @@ const HTML = `<!-- BEFORE/AFTER + GALLERY -->
     <h2 class="sec-title" data-i18n="gal_title">Flere billeder fra vores arbejde</h2>
     <p class="sec-sub" data-i18n="gal_sub2">Flere eksempler på bilvask hjemme og bilrengøring hjemme hos kunden – klik for fuld størrelse.</p>
   </div>
-  <div class="gallery-nav-wrap" id="galleryNavWrap">
-    <div class="gallery" id="gallery">
-      ${galItem('/gallery/steam-bmw.jpg', 'g_bmw', 'Dampvask · BMW', 'Dampvask af BMW')}
-      ${galItem('/gallery/steam-hood.jpg', 'g_hood', 'Motorhjelm · damp', 'Dampvask af motorhjelm')}
-      ${galItem('/gallery/aerial-wash.jpg', 'g_onsite', 'Mobil dampvask · på stedet', 'Mobil dampvask på stedet')}
-    </div>
-    <button class="gal-nav-btn gal-nav-prev" id="galPrev" aria-label="Forrige">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+  <div class="gcar-wrap" id="galleryNavWrap">
+    <button class="gcar-btn gcar-prev" id="galPrev" aria-label="Forrige">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
     </button>
-    <button class="gal-nav-btn gal-nav-next" id="galNext" aria-label="Næste">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+    <div class="gcar-viewport" id="galViewport">
+      <div class="gcar-track" id="gallery">
+        ${galItem('/gallery/steam-bmw.jpg', 'g_bmw', 'Dampvask · BMW', 'Dampvask af BMW')}
+        ${galItem('/gallery/steam-hood.jpg', 'g_hood', 'Motorhjelm · damp', 'Dampvask af motorhjelm')}
+        ${galItem('/gallery/aerial-wash.jpg', 'g_onsite', 'Mobil dampvask · på stedet', 'Mobil dampvask på stedet')}
+      </div>
+    </div>
+    <button class="gcar-btn gcar-next" id="galNext" aria-label="Næste">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
     </button>
   </div>
+  <div class="gcar-dots" id="galDots"></div>
   <div class="gallery-cta-row">
     <a href="/galleri#galleri" class="gallery-cta" data-i18n="see_all_gallery">Se hele galleriet</a>
   </div>
