@@ -797,6 +797,7 @@ function submitBooking(cb){
     cur=idx;img.src=items[cur];lb.classList.add('open');document.body.style.overflow='hidden';
     document.getElementById('lbPrev').style.display=items.length>1?'':'none';
     document.getElementById('lbNext').style.display=items.length>1?'':'none';
+    window.__lbItems=items;window.__lbOpen=open;
   }
   function close(){lb.classList.remove('open');document.body.style.overflow='';img.src='';}
   function prev(){cur=(cur-1+items.length)%items.length;img.src=items[cur];}
@@ -805,6 +806,7 @@ function submitBooking(cb){
     items.push(g.dataset.full||g.querySelector('img')?.src||'');
     g.addEventListener('click',function(){open(i);});
   });
+  window.__lbItems=items;window.__lbOpen=open;
   document.getElementById('lbClose').addEventListener('click',close);
   document.getElementById('lbPrev').addEventListener('click',function(e){e.stopPropagation();prev();});
   document.getElementById('lbNext').addEventListener('click',function(e){e.stopPropagation();next();});
@@ -1171,50 +1173,68 @@ function submitBooking(cb){
   if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',initSteamAcc);}else{setTimeout(initSteamAcc,0);}
 })();
 
-// Dynamic gallery loader intentionally disabled on homepage.
-// KV-added gallery items are shown on /galleri (GalleryClient.jsx) instead.
+/* ====== GALLERY PAGINATION ====== */
 (function(){
+  var GAL_PER=6,galPage=0;
+
+  function initPagination(){
+    var wrap=document.getElementById('galleryNavWrap');
+    if(!wrap)return;
+    var grid=document.getElementById('gallery');
+    var prev=document.getElementById('galPrev');
+    var next=document.getElementById('galNext');
+    if(!grid||!prev||!next)return;
+
+    function update(){
+      var items=Array.from(grid.querySelectorAll('.gitem'));
+      var total=items.length;
+      var maxPage=Math.max(0,Math.ceil(total/GAL_PER)-1);
+      items.forEach(function(item,i){
+        item.style.display=(i>=galPage*GAL_PER&&i<(galPage+1)*GAL_PER)?'':'none';
+      });
+      prev.style.display=galPage>0?'':'none';
+      next.style.display=(total>GAL_PER&&galPage<maxPage)?'':'none';
+    }
+
+    prev.addEventListener('click',function(){galPage--;update();});
+    next.addEventListener('click',function(){galPage++;update();});
+    update();
+    wrap.__galUpdate=update;
+  }
+
   function loadDynamicGallery(){
-    return; // gallery items belong on /galleri, not the homepage
     var grid=document.getElementById('gallery');
     if(!grid)return;
     fetch('/api/content/gallery')
       .then(function(r){return r.json();})
       .then(function(data){
-        var items=data.items||[];
-        if(!items.length)return;
-        items.forEach(function(item){
+        var kvItems=data.items||[];
+        kvItems.forEach(function(item){
           var fig=document.createElement('figure');
           fig.className='gitem gitem-dynamic';
           fig.dataset.full=item.url;
           var img=document.createElement('img');
-          img.src=item.url;
-          img.alt=item.caption||'Galleri';
-          img.loading='lazy';
-          var cap=document.createElement('figcaption');
-          cap.textContent=item.caption||'';
+          img.src=item.url;img.alt=item.caption||'Galleri';img.loading='lazy';
           fig.appendChild(img);
-          if(item.caption)fig.appendChild(cap);
+          if(item.caption){var cap=document.createElement('figcaption');cap.textContent=item.caption;fig.appendChild(cap);}
           grid.appendChild(fig);
-          // bind lightbox click
-          var idx=Array.from(grid.querySelectorAll('.gitem')).indexOf(fig);
-          fig.addEventListener('click',function(){
-            var lb=document.getElementById('lightbox');
-            var lbImg=document.getElementById('lbImg');
-            if(!lb||!lbImg)return;
-            var allItems=Array.from(grid.querySelectorAll('.gitem'));
-            var srcs=allItems.map(function(g){return g.dataset.full||g.querySelector('img')?.src||'';});
-            var cur=allItems.indexOf(fig);
-            lbImg.src=srcs[cur];
-            lb.classList.add('open');
-            document.body.style.overflow='hidden';
-          });
+          var idx=(window.__lbItems||[]).length;
+          if(window.__lbItems)window.__lbItems.push(item.url);
+          fig.addEventListener('click',function(){if(window.__lbOpen)window.__lbOpen(idx);});
         });
+        var wrap=document.getElementById('galleryNavWrap');
+        if(wrap&&wrap.__galUpdate)wrap.__galUpdate();
       })
       .catch(function(){});
   }
-  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',loadDynamicGallery);}
-  else{setTimeout(loadDynamicGallery,100);}
+
+  function init(){
+    initPagination();
+    loadDynamicGallery();
+  }
+
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',init);}
+  else{setTimeout(init,100);}
 })();
 
 /* ====== HAMBURGER DRAWER ====== */
