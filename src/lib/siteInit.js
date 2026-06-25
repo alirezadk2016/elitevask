@@ -115,7 +115,7 @@ function renderCalc(){
     var saveBadge='';
     var btnTxt=pk.pop?(LANG==="da"?"Bestil mest populære":"Order most popular"):(LANG==="da"?"Bestil denne pakke":"Order this package");
     var goldScene=pk.gold?'<div class="gold-emblem" aria-hidden="true"><span class="ge-halo"></span><svg class="ge-crown" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l4.5 3.2L12 5l4.5 6.7L21 8.5l-1.6 9.5H4.6L3 8.5z"/><circle cx="3" cy="8.5" r="1"/><circle cx="21" cy="8.5" r="1"/><circle cx="12" cy="4.2" r="1"/></svg><span class="ge-shine"></span><span class="ge-spark s1">✦</span><span class="ge-spark s2">✦</span></div>':'';
-    el.innerHTML=goldScene+tag+'<div class="pn">'+pk.name[LANG]+'</div><div class="pd">'+pk.desc[LANG]+'</div>'+saveBadge+'<div class="price">'+fmtKr(price)+'</div><div class="ps">'+(LANG==="da"?"inkl. moms":"incl. VAT")+'</div>'+driveLine+totLine+'<ul>'+feats+'</ul><button class="btn pbtn">'+btnTxt+'</button>';
+    el.innerHTML=goldScene+'<div class="pkg-badge-row">'+tag+'</div><div class="pn">'+pk.name[LANG]+'</div><div class="pd">'+pk.desc[LANG]+'</div>'+saveBadge+'<div class="price">'+fmtKr(price)+'</div><div class="ps">'+(LANG==="da"?"inkl. moms":"incl. VAT")+'</div>'+driveLine+totLine+'<ul>'+feats+'</ul><button class="btn pbtn">'+btnTxt+'</button>';
     el.querySelector('.pbtn').addEventListener('click',function(){openWiz(selCar,pk);});
     p.appendChild(el);
   });

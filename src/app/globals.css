@@ -147,7 +147,8 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 .pkg:last-child{border-right:none}
 .pkg.pop{background:var(--surface-2);border-top:3px solid var(--green)}
 .pkg.gold{border-top:3px solid var(--gold);background:radial-gradient(130% 90% at 50% 0%,rgba(212,175,55,.10) 0%,rgba(212,175,55,.035) 38%,transparent 68%),linear-gradient(180deg,rgba(212,175,55,.04),transparent 55%);box-shadow:inset 0 1px 0 rgba(255,234,150,.22),inset 0 0 0 1px rgba(212,175,55,.13)}
-.pkg .tag{display:inline-block;font-size:10.5px;font-weight:700;padding:3px 10px;border-radius:99px;margin-bottom:11px;background:var(--green);color:#062313}
+.pkg-badge-row{min-height:24px;margin-bottom:14px;display:flex;align-items:center}
+.pkg .tag{display:inline-block;font-size:10.5px;font-weight:700;padding:3px 10px;border-radius:99px;background:var(--green);color:#062313}
 .pkg.gold .tag{background:linear-gradient(135deg,#f6e394,var(--gold));color:#2b2206;box-shadow:0 2px 12px rgba(212,175,55,.32);letter-spacing:.5px;text-transform:uppercase;font-size:10px}
 .pkg .pn{font-size:17px;font-weight:800;color:#fff;letter-spacing:-.2px}
 .pkg.gold .pn{color:#f5e08f;text-shadow:0 0 20px rgba(212,175,55,.28)}
@@ -161,9 +162,10 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 .pkg .drive-free{font-size:12.5px;font-weight:600;color:var(--green);display:flex;align-items:center;gap:6px}
 .pkg .drive-free svg{color:var(--green)}
 .pkg-save{display:inline-block;font-size:11px;font-weight:700;color:var(--green);background:var(--green-soft);border:1px solid rgba(55,210,120,.25);border-radius:20px;padding:3px 10px;margin:4px 0 10px;letter-spacing:.3px}
-.pkg ul{list-style:none;flex:1}
+.pkg ul{list-style:none;flex:1;padding-bottom:18px;margin-bottom:18px;border-bottom:1px solid var(--line)}
+.pkg.gold ul{border-bottom-color:rgba(212,175,55,.16)}
 .pkg li{font-size:12.8px;color:var(--muted);padding:7px 0;display:flex;gap:10px;align-items:flex-start}
-.pkg li:last-of-type{margin-bottom:18px}
+.pkg li:last-of-type{margin-bottom:0}
 .pkg li svg{width:14px;height:14px;color:var(--green);flex-shrink:0;margin-top:3px}
 .pkg.gold li svg{color:var(--gold)}
 .pkg.gold li{border-bottom-color:rgba(212,175,55,.14);color:#cdbf95}
@@ -175,7 +177,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 .pkg.gold .pbtn:hover{filter:brightness(1.06);box-shadow:0 9px 26px rgba(212,175,55,.4)}
 
 /* GOLD PREMIUM EMBLEM */
-.gold-emblem{position:relative;width:60px;height:60px;margin:0 auto 12px}
+.gold-emblem{position:absolute;top:20px;right:18px;width:46px;height:46px;z-index:2}
 .gold-emblem::before{content:"";position:absolute;inset:5px;border-radius:50%;border:1px solid rgba(212,175,55,.5);box-shadow:inset 0 0 14px rgba(212,175,55,.22)}
 .ge-halo{position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle,rgba(212,175,55,.30),rgba(212,175,55,.06) 58%,transparent 72%);animation:geHalo 3.6s ease-in-out infinite}
 @keyframes geHalo{0%,100%{transform:scale(1);opacity:.85}50%{transform:scale(1.14);opacity:1}}
