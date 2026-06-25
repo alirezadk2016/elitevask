@@ -1044,6 +1044,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 .gal-lb-close:hover,.gal-lb-nav:hover{background:rgba(212,175,55,.2);border-color:rgba(212,175,55,.5)}
 /* guide index */
 .guide-index-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+@media(max-width:860px){.guide-index-grid{grid-template-columns:repeat(2,1fr)}}
 .guide-index-card{display:flex;flex-direction:column;background:linear-gradient(180deg,var(--surface-2),var(--bg-2));border:1px solid var(--line);border-radius:18px;padding:30px 26px;transition:transform .3s cubic-bezier(.22,1,.36,1),border-color .25s ease,box-shadow .35s ease}
 .guide-index-card:hover{transform:translateY(-5px);border-color:rgba(212,175,55,.4);box-shadow:0 22px 56px rgba(0,0,0,.45),0 0 0 1px rgba(212,175,55,.1)}
 .guide-index-card .guide-card-icon{font-size:34px;margin-bottom:16px}

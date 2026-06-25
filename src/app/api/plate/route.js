@@ -30,11 +30,11 @@ export async function GET(request) {
     (await trySynsbasenHtml(clean));
 
   if (result) {
-    console.log(`[plate] OK ${clean} → weight=${result.weight} cat=${result.category}`);
+    // console.log(`[plate] OK ${clean} → weight=${result.weight} cat=${result.category}`);
     return Response.json(result);
   }
 
-  console.log(`[plate] all sources failed for ${clean}`);
+  // console.log(`[plate] all sources failed for ${clean}`);
   return Response.json({ error: 'Not found' }, { status: 404 });
 }
 
@@ -79,7 +79,7 @@ async function tryTjekbil(plate) {
           redirect: 'follow',
         }
       );
-      console.log(`[tjekbil/${path}] status=${res.status}`);
+      // console.log(`[tjekbil/${path}] status=${res.status}`);
       if (!res.ok) continue;
 
       const html = await res.text();
@@ -89,15 +89,15 @@ async function tryTjekbil(plate) {
         try {
           const nd = JSON.parse(m[1]);
           const w = deepFindWeight(nd);
-          console.log(`[tjekbil/${path}] __NEXT_DATA__ weight=${w}`);
+          // console.log(`[tjekbil/${path}] __NEXT_DATA__ weight=${w}`);
           if (w) return { weight: w, category: categorize(w) };
         } catch {}
       }
       const w = parseWeightHtml(html);
-      console.log(`[tjekbil/${path}] html weight=${w}`);
+      // console.log(`[tjekbil/${path}] html weight=${w}`);
       if (w) return { weight: w, category: categorize(w) };
     } catch (e) {
-      console.log(`[tjekbil/${path}] err=${e?.message}`);
+      // console.log(`[tjekbil/${path}] err=${e?.message}`);
     }
   }
   return null;
@@ -116,14 +116,14 @@ async function trySynsbasenApi(plate) {
         signal: AbortSignal.timeout(7000),
       }
     );
-    console.log(`[synsbasen-api] status=${res.status}`);
+    // console.log(`[synsbasen-api] status=${res.status}`);
     if (!res.ok) return null;
     const raw = await res.json();
     const w = deepFindWeight(raw);
-    console.log(`[synsbasen-api] weight=${w}`);
+    // console.log(`[synsbasen-api] weight=${w}`);
     return w ? { weight: w, category: categorize(w) } : null;
   } catch (e) {
-    console.log(`[synsbasen-api] err=${e?.message}`);
+    // console.log(`[synsbasen-api] err=${e?.message}`);
     return null;
   }
 }
@@ -142,14 +142,14 @@ async function tryDMR(plate) {
         signal: AbortSignal.timeout(9000),
       }
     );
-    console.log(`[dmr] status=${res.status}`);
+    // console.log(`[dmr] status=${res.status}`);
     if (!res.ok) return null;
     const raw = await res.json();
     const w = deepFindWeight(raw);
-    console.log(`[dmr] weight=${w}`);
+    // console.log(`[dmr] weight=${w}`);
     return w ? { weight: w, category: categorize(w) } : null;
   } catch (e) {
-    console.log(`[dmr] err=${e?.message}`);
+    // console.log(`[dmr] err=${e?.message}`);
     return null;
   }
 }
@@ -168,14 +168,14 @@ async function trySynsbasenHtml(plate) {
         signal: AbortSignal.timeout(10000),
       }
     );
-    console.log(`[synsbasen-html] status=${res.status}`);
+    // console.log(`[synsbasen-html] status=${res.status}`);
     if (!res.ok) return null;
     const html = await res.text();
     const w = parseWeightHtml(html);
-    console.log(`[synsbasen-html] weight=${w}`);
+    // console.log(`[synsbasen-html] weight=${w}`);
     return w ? { weight: w, category: categorize(w) } : null;
   } catch (e) {
-    console.log(`[synsbasen-html] err=${e?.message}`);
+    // console.log(`[synsbasen-html] err=${e?.message}`);
     return null;
   }
 }

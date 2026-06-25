@@ -351,7 +351,7 @@ export async function POST(request) {
             `,
           }),
         });
-        console.log(`[book] Customer confirmation sent to ${email}`);
+        // confirmation sent
       } catch (err) {
         console.error(`[book] Customer email FAILED to ${email}:`, err.message);
       }
@@ -360,7 +360,6 @@ export async function POST(request) {
     return Response.json({ ok: true, ...(cancelToken ? { token: cancelToken } : {}) });
   }
 
-  console.warn('[book] No SMTP — booking logged only.');
-  console.log('BOOKING:', { token: cancelToken, name, date, time, pkg, car });
+  console.warn('[book] No SMTP configured — booking not emailed.');
   return Response.json({ ok: true, warn: 'no_smtp', ...(cancelToken ? { token: cancelToken } : {}) });
 }

@@ -334,7 +334,7 @@ export default function AdminPanel() {
 
   useEffect(() => {
     try {
-      const saved = sessionStorage.getItem("adm") || localStorage.getItem("adm");
+      const saved = sessionStorage.getItem("adm");
       if (saved) { setSecret(saved); setAuthed(true); loadBookings(saved); }
     } catch {}
   }, [loadBookings]);
@@ -343,7 +343,7 @@ export default function AdminPanel() {
     e.preventDefault();
     const r = await fetch("/api/admin/bookings", { headers:{ Authorization:`Bearer ${secretInput}` } });
     if (r.ok) {
-      try { sessionStorage.setItem("adm", secretInput); localStorage.setItem("adm", secretInput); } catch {}
+      try { sessionStorage.setItem("adm", secretInput); } catch {}
       const data = await r.json();
       setBookings(data.bookings || []);
       setSecret(secretInput); setAuthed(true);
