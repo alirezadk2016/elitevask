@@ -1,5 +1,5 @@
-function baCard(before, after, capKey, capText, altBefore, altAfter) {
-  return `<figure class="ba-card">
+function baCard(before, after, capKey, capText, altBefore, altAfter, featured) {
+  return `<figure class="ba-card${featured ? ' ba-card--featured' : ''}">
     <div class="ba-slider">
       <img class="ba-before" src="${before}" alt="${altBefore}" loading="lazy">
       <img class="ba-after" src="${after}" alt="${altAfter}" loading="lazy">
@@ -24,7 +24,7 @@ const HTML = `<!-- BEFORE/AFTER + GALLERY -->
   </div>
 
   <div class="ba-gallery">
-    ${baCard('/gallery/img01.jpg', '/gallery/img02.jpg', 'ba_c1', 'Motorrens · Peugeot', 'Motorrum før dampvask', 'Motorrum efter dampvask')}
+    ${baCard('/gallery/img01.jpg', '/gallery/img02.jpg', 'ba_c1', 'Motorrens · Peugeot', 'Motorrum før dampvask', 'Motorrum efter dampvask', true)}
     ${baCard('/gallery/seat-before.jpg', '/gallery/seat-after.jpg', 'ba_c3', 'Sæderens · stofsæder', 'Sæderens før', 'Sæderens efter')}
     ${baCard('/gallery/interior-before.jpg', '/gallery/interior-after.jpg', 'ba_c4', 'Interiør · kabine', 'Interiør før', 'Interiør efter')}
     ${baCard('/gallery/floor-before.jpg', '/gallery/floor-after.jpg', 'ba_c5', 'Fodrum · måtter', 'Fodrum før', 'Fodrum efter')}
