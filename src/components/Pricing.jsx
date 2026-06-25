@@ -27,6 +27,11 @@ const HTML = `<!-- CAR SELECTOR + CALCULATOR -->
       <div class="pkg-tabs" id="pkgTabs"></div>
     </div>
     <div class="pkgs" id="pkgs"></div>
+    <div class="calc-trust">
+      <div class="ct-item"><span class="ct-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></span><span class="ct-tx"><strong data-i18n="trust1t">Forsikret & professionel</strong><span data-i18n="trust1p">Erfarne fagfolk · fuldt forsikret arbejde</span></span></div>
+      <div class="ct-item"><span class="ct-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg></span><span class="ct-tx"><strong data-i18n="trust2t">Ingen forudbetaling</strong><span data-i18n="trust2p">Du betaler først, når bilen er ren</span></span></div>
+      <div class="ct-item"><span class="ct-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 15 9l7 .5-5.5 4.5L18 21l-6-3.8L6 21l1.5-7L2 9.5 9 9Z"/></svg></span><span class="ct-tx"><strong data-i18n="trust3t">Tilfredshedsgaranti</strong><span data-i18n="trust3p">Ikke tilfreds? Så finder vi en løsning</span></span></div>
+    </div>
     <div class="note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><span data-i18n="calc_note">Priserne er vejledende. Gratis kørsel til hele Sjælland. Endelig pris bekræftes ved booking.</span></div>
   </div>
 </div></section>`;
