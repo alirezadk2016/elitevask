@@ -28,10 +28,32 @@ export async function POST(req) {
   let item;
 
   if (contentType.includes('multipart/form-data')) {
-    // File upload via Vercel Blob (gallery only)
     const form = await req.formData();
-    const file = form.get('file');
     const type = form.get('type') || 'gallery';
+
+    // Before/after pair: two files (before + after)
+    if (type === 'beforeafter') {
+      const beforeFile = form.get('before');
+      const afterFile = form.get('after');
+      const caption = form.get('caption') || '';
+      if (!beforeFile || !afterFile) return Response.json({ error: 'need_two_files' }, { status: 400 });
+      const b = await put(`elite-vask/beforeafter/${Date.now()}-b-${beforeFile.name}`, beforeFile, { access: 'public' });
+      const a = await put(`elite-vask/beforeafter/${Date.now()}-a-${afterFile.name}`, afterFile, { access: 'public' });
+      const baItem = {
+        id: Date.now().toString(),
+        before: b.url,
+        after: a.url,
+        caption,
+        source: 'upload',
+        uploadedAt: new Date().toISOString(),
+      };
+      const existingBa = await kv.get('content:beforeafter') || [];
+      await kv.set('content:beforeafter', [baItem, ...existingBa]);
+      return Response.json({ ok: true, item: baItem });
+    }
+
+    // File upload via Vercel Blob (gallery)
+    const file = form.get('file');
     const caption = form.get('caption') || '';
     const album = form.get('album') || '';
 
@@ -92,6 +114,16 @@ export async function POST(req) {
       return Response.json({ ok: true, item: newItem });
     }
 
+    // Before/after via URLs
+    if (type === 'beforeafter') {
+      const { before, after, caption = '' } = body;
+      if (!before || !after) return Response.json({ error: 'need_two_urls' }, { status: 400 });
+      const baItem = { id: Date.now().toString(), before, after, caption, source: 'url', uploadedAt: new Date().toISOString() };
+      const existingBa = await kv.get('content:beforeafter') || [];
+      await kv.set('content:beforeafter', [baItem, ...existingBa]);
+      return Response.json({ ok: true, item: baItem });
+    }
+
     // URL-based (gallery / videos)
     const { url, caption = '', title = '', album = '' } = body;
     if (!url) return Response.json({ error: 'no_url' }, { status: 400 });
@@ -124,11 +156,11 @@ export async function PUT(req) {
   const body = await req.json();
   const { type, id, item: updated } = body;
 
-  if (!id || !updated || (type !== 'faq' && type !== 'extras' && type !== 'gallery')) {
+  if (!id || !updated || (type !== 'faq' && type !== 'extras' && type !== 'gallery' && type !== 'beforeafter')) {
     return Response.json({ error: 'invalid_request' }, { status: 400 });
   }
 
-  const key = type === 'faq' ? 'content:faq' : type === 'extras' ? 'content:extras' : `content:${type}`;
+  const key = `content:${type}`;
   const existing = await kv.get(key) || [];
   const updated_list = existing.map(i => i.id === id ? { ...i, ...updated, id } : i);
   await kv.set(key, updated_list);
@@ -138,7 +170,7 @@ export async function PUT(req) {
 // DELETE /api/admin/content
 export async function DELETE(req) {
   if (!authorized(req)) return Response.json({ error: 'unauthorized' }, { status: 401 });
-  const { type = 'gallery', id, blobUrl } = await req.json();
+  const { type = 'gallery', id, blobUrl, blobUrls } = await req.json();
 
   if (type === 'packages') {
     await kv.del('content:prices');
@@ -149,8 +181,12 @@ export async function DELETE(req) {
   if (blobUrl) {
     try { await del(blobUrl); } catch {}
   }
+  // Before/after items hold two blob URLs
+  if (Array.isArray(blobUrls)) {
+    for (const u of blobUrls) { try { await del(u); } catch {} }
+  }
 
-  const key = type === 'faq' ? 'content:faq' : type === 'extras' ? 'content:extras' : `content:${type}`;
+  const key = `content:${type}`;
   const existing = await kv.get(key) || [];
   await kv.set(key, existing.filter(i => i.id !== id));
   return Response.json({ ok: true });

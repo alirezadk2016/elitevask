@@ -281,6 +281,18 @@ export default function AdminPanel() {
   const [albumInput, setAlbumInput]               = useState("Enkelt");
   const [galleryAlbum, setGalleryAlbum]           = useState("alle");
 
+  // Før & efter state
+  const [beforeAfter, setBeforeAfter]             = useState([]);
+  const [baBeforeFile, setBaBeforeFile]           = useState(null);
+  const [baAfterFile, setBaAfterFile]             = useState(null);
+  const [baBeforeUrl, setBaBeforeUrl]             = useState("");
+  const [baAfterUrl, setBaAfterUrl]               = useState("");
+  const [baCaption, setBaCaption]                 = useState("");
+  const [baLoading, setBaLoading]                 = useState(false);
+  const [editingBA, setEditingBA]                 = useState(null);
+  const baBeforeRef = useRef();
+  const baAfterRef = useRef();
+
   const fileRef = useRef();
   const todayColRef = useRef();
   const calScrollRef = useRef();
@@ -347,6 +359,7 @@ export default function AdminPanel() {
     else if (type === "videos")  setVideos(data.items || []);
     else if (type === "faq")     setFaqItems(data.items || []);
     else if (type === "extras")  setExtrasItems(data.items || []);
+    else if (type === "beforeafter") setBeforeAfter(data.items || []);
     else if (type === "packages") {
       const hasPrices = data.prices && Object.keys(data.prices).length > 0;
       const prices = hasPrices ? data.prices : DEFAULT_PRICES;
@@ -361,6 +374,7 @@ export default function AdminPanel() {
     if (authed && tab === "faq")      fetchContent("faq");
     if (authed && tab === "extras")   fetchContent("extras");
     if (authed && tab === "priser")   fetchContent("packages");
+    if (authed && tab === "beforeafter") fetchContent("beforeafter");
   }, [authed, tab]);
 
   async function addUrl(type) {
@@ -404,6 +418,76 @@ export default function AdminPanel() {
       body: JSON.stringify({ type, id, blobUrl:blobUrl||null }),
     });
     fetchContent(type);
+  }
+
+  async function uploadBeforeAfter() {
+    if (!baBeforeFile || !baAfterFile) return;
+    setBaLoading(true); setMsg(null);
+    try {
+      const form = new FormData();
+      form.append("type", "beforeafter");
+      form.append("before", baBeforeFile);
+      form.append("after", baAfterFile);
+      form.append("caption", baCaption);
+      const res = await fetch("/api/admin/content", {
+        method:"POST",
+        headers:{ Authorization:`Bearer ${secret}` },
+        body: form,
+      });
+      const data = await res.json();
+      if (data.ok) {
+        setMsg({ type:"ok", text:"Uploadet!" });
+        setBaBeforeFile(null); setBaAfterFile(null); setBaCaption("");
+        if (baBeforeRef.current) baBeforeRef.current.value = "";
+        if (baAfterRef.current) baAfterRef.current.value = "";
+        fetchContent("beforeafter");
+      } else setMsg({ type:"err", text:data.error || "Upload fejlede" });
+    } catch { setMsg({ type:"err", text:"Netværksfejl" }); }
+    finally { setBaLoading(false); }
+  }
+
+  async function addBeforeAfterUrl() {
+    if (!baBeforeUrl.trim() || !baAfterUrl.trim()) return;
+    setBaLoading(true); setMsg(null);
+    try {
+      const res = await fetch("/api/admin/content", {
+        method:"POST",
+        headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" },
+        body: JSON.stringify({ type:"beforeafter", before:baBeforeUrl.trim(), after:baAfterUrl.trim(), caption:baCaption }),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        setMsg({ type:"ok", text:"Tilføjet!" });
+        setBaBeforeUrl(""); setBaAfterUrl(""); setBaCaption("");
+        fetchContent("beforeafter");
+      } else setMsg({ type:"err", text:data.error || "Fejl – prøv igen" });
+    } catch { setMsg({ type:"err", text:"Netværksfejl" }); }
+    finally { setBaLoading(false); }
+  }
+
+  async function saveBeforeAfterCaption(id) {
+    setBaLoading(true); setMsg(null);
+    try {
+      const res = await fetch("/api/admin/content", {
+        method:"PUT",
+        headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" },
+        body: JSON.stringify({ type:"beforeafter", id, item:{ caption:editingBA?.caption||"" } }),
+      });
+      const data = await res.json();
+      if (data.ok) { setMsg({ type:"ok", text:"Gemt!" }); setEditingBA(null); fetchContent("beforeafter"); }
+      else setMsg({ type:"err", text:"Fejl – prøv igen" });
+    } catch { setMsg({ type:"err", text:"Netværksfejl" }); }
+    finally { setBaLoading(false); }
+  }
+
+  async function deleteBeforeAfter(item) {
+    if (!confirm("Slet dette før/efter-par?")) return;
+    await fetch("/api/admin/content", {
+      method:"DELETE",
+      headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" },
+      body: JSON.stringify({ type:"beforeafter", id:item.id, blobUrls: item.source === "upload" ? [item.before, item.after] : undefined }),
+    });
+    fetchContent("beforeafter");
   }
 
   function onDrop(e, type) {
@@ -472,6 +556,7 @@ export default function AdminPanel() {
     faq:      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>,
     priser:   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>,
     extras:   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>,
+    beforeafter: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="11" height="14" rx="2"/><rect x="11" y="5" width="11" height="14" rx="2"/><line x1="12" y1="3" x2="12" y2="21"/></svg>,
     refresh:  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 11-9-9c2.52 0 4.8.99 6.48 2.59L21 8"/><path d="M21 3v5h-5"/></svg>,
   };
 
@@ -510,6 +595,7 @@ export default function AdminPanel() {
             {sectionLabel("Indhold")}
             {navItem("gallery", "Galleri", icons.gallery, gallery.length || undefined)}
             {navItem("videos",  "Videoer",  icons.videos,  videos.length  || undefined)}
+            {navItem("beforeafter", "Før & efter", icons.beforeafter, beforeAfter.length || undefined)}
             <div style={{ height:1, background:T.border, margin:"14px 4px" }}/>
             {sectionLabel("CMS")}
             {navItem("faq",    "FAQ",    icons.faq,    faqItems.length   || undefined)}
@@ -520,7 +606,7 @@ export default function AdminPanel() {
           </aside>
         ) : (
           <div style={{ display:"flex", gap:8, padding:"16px 16px 0", overflowX:"auto" }}>
-            {[["bookings","Bookinger",icons.bookings],["gallery","Galleri",icons.gallery],["videos","Videoer",icons.videos],["faq","FAQ",icons.faq],["priser","Priser",icons.priser],["extras","Ekstra",icons.extras]].map(([id,label,icon]) => (
+            {[["bookings","Bookinger",icons.bookings],["gallery","Galleri",icons.gallery],["videos","Videoer",icons.videos],["beforeafter","Før & efter",icons.beforeafter],["faq","FAQ",icons.faq],["priser","Priser",icons.priser],["extras","Ekstra",icons.extras]].map(([id,label,icon]) => (
               <button key={id} onClick={() => { setTab(id); setMsg(null); setUrlInput(""); setCmsMsg(null); setExpandedFaqId(null); setFaqDrafts({}); setAddFaqOpen(false); setEditingExt(null); setEditingGallery(null); }}
                 style={{ display:"flex", alignItems:"center", gap:6, padding:"8px 16px", borderRadius:8, border:`1px solid ${tab===id?T.accentBorder:T.border}`, background:tab===id?T.accentDim:"transparent", color:tab===id?T.accent:T.t3, fontSize:13, fontWeight:600, cursor:"pointer", fontFamily:FF, whiteSpace:"nowrap" }}>
                 {icon}{label}
@@ -535,10 +621,10 @@ export default function AdminPanel() {
           {/* Page title + badge */}
           <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:28 }}>
             <h1 style={{ fontSize:22, fontWeight:800, color:T.t1, margin:0, letterSpacing:"-.3px" }}>
-              {tab === "bookings" ? "Bookinger" : tab === "gallery" ? "Galleri" : tab === "videos" ? "Videoer" : tab === "faq" ? "FAQ" : tab === "priser" ? "Priser" : "Ekstra ydelser"}
+              {tab === "bookings" ? "Bookinger" : tab === "gallery" ? "Galleri" : tab === "videos" ? "Videoer" : tab === "beforeafter" ? "Før & efter" : tab === "faq" ? "FAQ" : tab === "priser" ? "Priser" : "Ekstra ydelser"}
             </h1>
             <span style={{ background:T.accentDim, color:T.accent, borderRadius:20, padding:"3px 12px", fontSize:12, fontWeight:700 }}>
-              {tab === "bookings" ? `${activeBookings} aktive` : tab === "gallery" ? `${gallery.length} ${gallery.length===1?"billede":"billeder"}` : tab === "videos" ? `${videos.length} ${videos.length===1?"video":"videoer"}` : tab === "faq" ? `${faqItems.length} spørgsmål` : tab === "priser" ? "Prismatrix" : `${extrasItems.length} ydelser`}
+              {tab === "bookings" ? `${activeBookings} aktive` : tab === "gallery" ? `${gallery.length} ${gallery.length===1?"billede":"billeder"}` : tab === "videos" ? `${videos.length} ${videos.length===1?"video":"videoer"}` : tab === "beforeafter" ? `${beforeAfter.length} ${beforeAfter.length===1?"par":"par"}` : tab === "faq" ? `${faqItems.length} spørgsmål` : tab === "priser" ? "Prismatrix" : `${extrasItems.length} ydelser`}
             </span>
           </div>
 
@@ -965,6 +1051,118 @@ export default function AdminPanel() {
                     style={{ padding:"10px 20px", background:T.accentDim, border:`1px solid ${T.accentBorder}`, borderRadius:8, color:T.accent, fontSize:13, fontWeight:600, cursor:"pointer", fontFamily:FF }}>
                     Upload billede
                   </button>
+                </div>
+              )}
+            </>
+          )}
+
+          {/* ── FØR & EFTER ── */}
+          {tab === "beforeafter" && (
+            <>
+              <div style={{ background:T.bg1, border:`1px solid ${T.border}`, borderRadius:16, padding:24, marginBottom:32 }}>
+                <p style={{ fontSize:10, letterSpacing:2, fontWeight:700, color:T.t3, textTransform:"uppercase", margin:"0 0 16px" }}>Tilføj før/efter-par</p>
+
+                {/* File uploads */}
+                <div style={{ display:"grid", gridTemplateColumns:narrow?"1fr":"1fr 1fr", gap:12 }}>
+                  <div>
+                    <p style={{ fontSize:11, color:T.t4, margin:"0 0 6px", fontWeight:600 }}>Før-billede</p>
+                    <div onClick={() => baBeforeRef.current?.click()}
+                      style={{ border:`2px dashed ${baBeforeFile?T.accentBorder:"rgba(55,210,120,.2)"}`, borderRadius:10, padding:"22px 14px", textAlign:"center", cursor:"pointer", background:baBeforeFile?"rgba(55,210,120,.04)":"transparent" }}>
+                      <p style={{ fontSize:13, color:baBeforeFile?T.accent:T.t3, margin:0, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{baBeforeFile ? baBeforeFile.name : "Vælg før-billede"}</p>
+                      <input ref={baBeforeRef} type="file" accept="image/*" style={{ display:"none" }} onChange={e => setBaBeforeFile(e.target.files[0] || null)} />
+                    </div>
+                  </div>
+                  <div>
+                    <p style={{ fontSize:11, color:T.t4, margin:"0 0 6px", fontWeight:600 }}>Efter-billede</p>
+                    <div onClick={() => baAfterRef.current?.click()}
+                      style={{ border:`2px dashed ${baAfterFile?T.accentBorder:"rgba(55,210,120,.2)"}`, borderRadius:10, padding:"22px 14px", textAlign:"center", cursor:"pointer", background:baAfterFile?"rgba(55,210,120,.04)":"transparent" }}>
+                      <p style={{ fontSize:13, color:baAfterFile?T.accent:T.t3, margin:0, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{baAfterFile ? baAfterFile.name : "Vælg efter-billede"}</p>
+                      <input ref={baAfterRef} type="file" accept="image/*" style={{ display:"none" }} onChange={e => setBaAfterFile(e.target.files[0] || null)} />
+                    </div>
+                  </div>
+                </div>
+
+                <input style={{ width:"100%", padding:"11px 14px", borderRadius:8, border:`1px solid ${T.border}`, background:T.bg0, color:T.t1, fontSize:14, outline:"none", fontFamily:FF, marginTop:12, boxSizing:"border-box" }} placeholder="Billedtekst (valgfri)" value={baCaption} onChange={e => setBaCaption(e.target.value)} />
+
+                <button onClick={uploadBeforeAfter} disabled={baLoading||!baBeforeFile||!baAfterFile}
+                  style={{ width:"100%", marginTop:12, padding:"12px 0", background:T.accent, color:T.bg0, fontWeight:700, fontSize:14, borderRadius:8, border:"none", cursor:(baLoading||!baBeforeFile||!baAfterFile)?"not-allowed":"pointer", opacity:(baLoading||!baBeforeFile||!baAfterFile)?.4:1, fontFamily:FF }}>
+                  {baLoading ? "…" : "Upload"}
+                </button>
+
+                {/* Divider */}
+                <div style={{ display:"flex", alignItems:"center", gap:12, margin:"20px 0" }}>
+                  <div style={{ flex:1, height:1, background:T.border }}/>
+                  <span style={{ fontSize:11, color:T.t4, letterSpacing:1, textTransform:"uppercase", whiteSpace:"nowrap" }}>eller URL</span>
+                  <div style={{ flex:1, height:1, background:T.border }}/>
+                </div>
+
+                <div style={{ display:"grid", gridTemplateColumns:narrow?"1fr":"1fr 1fr", gap:8 }}>
+                  <input style={{ width:"100%", padding:"11px 14px", borderRadius:8, border:`1px solid ${T.border}`, background:T.bg0, color:T.t1, fontSize:14, outline:"none", fontFamily:FF, boxSizing:"border-box" }} placeholder="Før-URL https://…" value={baBeforeUrl} onChange={e => setBaBeforeUrl(e.target.value)} />
+                  <input style={{ width:"100%", padding:"11px 14px", borderRadius:8, border:`1px solid ${T.border}`, background:T.bg0, color:T.t1, fontSize:14, outline:"none", fontFamily:FF, boxSizing:"border-box" }} placeholder="Efter-URL https://…" value={baAfterUrl} onChange={e => setBaAfterUrl(e.target.value)} />
+                </div>
+                <button onClick={addBeforeAfterUrl} disabled={baLoading||!baBeforeUrl.trim()||!baAfterUrl.trim()}
+                  style={{ width:"100%", marginTop:8, padding:"11px 0", background:T.accentDim, color:T.accent, fontWeight:700, fontSize:13, borderRadius:8, border:`1px solid ${T.accentBorder}`, cursor:(baLoading||!baBeforeUrl.trim()||!baAfterUrl.trim())?"not-allowed":"pointer", opacity:(baLoading||!baBeforeUrl.trim()||!baAfterUrl.trim())?.4:1, fontFamily:FF }}>
+                  Tilføj via URL
+                </button>
+                <Feedback m={msg} />
+              </div>
+
+              {beforeAfter.length > 0 ? (
+                <div style={{ display:"grid", gridTemplateColumns:`repeat(auto-fill, minmax(${narrow?"260px":"300px"},1fr))`, gap:14 }}>
+                  {beforeAfter.map(item => {
+                    const isEditingThis = editingBA?.id === item.id;
+                    return (
+                      <div key={item.id}
+                        style={{ borderRadius:12, overflow:"hidden", background:T.bg1, border:`1px solid ${hoveredId===item.id?T.accentBorder:T.border}`, boxShadow:hoveredId===item.id?T.shadowL:T.shadow, transition:"border .2s, box-shadow .2s", display:"flex", flexDirection:"column" }}
+                        onMouseEnter={() => setHoveredId(item.id)}
+                        onMouseLeave={() => setHoveredId(null)}
+                      >
+                        <div style={{ display:"flex", gap:2, padding:8 }}>
+                          <div style={{ flex:1, position:"relative" }}>
+                            <span style={{ position:"absolute", top:6, left:6, fontSize:10, fontWeight:700, color:T.bg0, background:T.gold, borderRadius:4, padding:"2px 7px" }}>Før</span>
+                            <img src={item.before} alt="" style={{ width:"100%", height:104, objectFit:"cover", borderRadius:8, display:"block" }} />
+                          </div>
+                          <div style={{ flex:1, position:"relative" }}>
+                            <span style={{ position:"absolute", top:6, left:6, fontSize:10, fontWeight:700, color:T.bg0, background:T.accent, borderRadius:4, padding:"2px 7px" }}>Efter</span>
+                            <img src={item.after} alt="" style={{ width:"100%", height:104, objectFit:"cover", borderRadius:8, display:"block" }} />
+                          </div>
+                        </div>
+
+                        {isEditingThis ? (
+                          <div style={{ padding:"4px 10px 12px", display:"flex", flexDirection:"column", gap:8 }}>
+                            <input
+                              value={editingBA.caption}
+                              onChange={e => setEditingBA(d => ({...d, caption:e.target.value}))}
+                              placeholder="Billedtekst…"
+                              style={{ width:"100%", padding:"8px 10px", borderRadius:7, border:`1px solid ${T.accentBorder}`, background:T.bg0, color:T.t1, fontSize:12, outline:"none", fontFamily:FF, boxSizing:"border-box" }}
+                            />
+                            <div style={{ display:"flex", gap:6 }}>
+                              <button onClick={() => saveBeforeAfterCaption(item.id)}
+                                style={{ flex:1, padding:"7px 0", background:T.accent, color:T.bg0, border:"none", borderRadius:7, fontWeight:700, fontSize:12, cursor:"pointer", fontFamily:FF }}>Gem</button>
+                              <button onClick={() => setEditingBA(null)}
+                                style={{ flex:1, padding:"7px 0", background:"rgba(255,255,255,.06)", color:T.t3, border:"none", borderRadius:7, fontWeight:600, fontSize:12, cursor:"pointer", fontFamily:FF }}>Annuller</button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div style={{ padding:"8px 10px", display:"flex", gap:5, alignItems:"center", borderTop:`1px solid ${T.border}` }}>
+                            {item.caption
+                              ? <span style={{ flex:1, fontSize:11, color:T.t3, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap", minWidth:0 }}>{item.caption}</span>
+                              : <span style={{ flex:1 }}/>}
+                            <button onClick={() => setEditingBA({ id:item.id, caption:item.caption||"" })}
+                              style={{ padding:"5px 11px", background:"rgba(255,255,255,.06)", border:`1px solid ${T.border}`, borderRadius:6, color:T.t2, fontSize:11, fontWeight:600, cursor:"pointer", fontFamily:FF, whiteSpace:"nowrap" }}>Rediger</button>
+                            <button onClick={() => deleteBeforeAfter(item)}
+                              style={{ padding:"5px 11px", background:T.dangerDim, border:`1px solid ${T.dangerBorder}`, borderRadius:6, color:T.danger, fontSize:11, fontWeight:600, cursor:"pointer", fontFamily:FF, whiteSpace:"nowrap" }}>Slet</button>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div style={{ padding:"72px 24px", textAlign:"center" }}>
+                  <svg width="72" height="72" viewBox="0 0 24 24" fill="none" stroke={T.t4} strokeWidth="1.5" strokeLinecap="round" style={{ marginBottom:20, opacity:.4 }}><rect x="2" y="5" width="11" height="14" rx="2"/><rect x="11" y="5" width="11" height="14" rx="2"/><line x1="12" y1="3" x2="12" y2="21"/></svg>
+                  <p style={{ fontSize:17, fontWeight:700, color:T.t2, margin:"0 0 6px" }}>Ingen før/efter endnu</p>
+                  <p style={{ fontSize:13, color:T.t3, margin:0 }}>Tilføj dit første par ovenfor</p>
                 </div>
               )}
             </>

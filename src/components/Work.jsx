@@ -30,6 +30,9 @@ const HTML = `<!-- BEFORE/AFTER + GALLERY -->
     ${baCard('/gallery/floor-before.jpg', '/gallery/floor-after.jpg', 'ba_c5', 'Fodrum · måtter', 'Fodrum før', 'Fodrum efter')}
     ${baCard('/gallery/roof-before.jpg', '/gallery/roof-after.jpg', 'ba_c6', 'Tagkant · algerens', 'Tagkant alger før', 'Tagkant alger efter')}
   </div>
+  <div class="gallery-cta-row">
+    <a href="/galleri#foer-efter" class="gallery-cta" data-i18n="see_all_ba">Se alle før &amp; efter</a>
+  </div>
 
   <div class="center" style="margin-top:76px">
     <div class="eyebrow" data-i18n="gal_eyebrow">Galleri</div>
@@ -40,6 +43,9 @@ const HTML = `<!-- BEFORE/AFTER + GALLERY -->
     ${galItem('/gallery/steam-bmw.jpg', 'g_bmw', 'Dampvask · BMW', 'Dampvask af BMW')}
     ${galItem('/gallery/steam-hood.jpg', 'g_hood', 'Motorhjelm · damp', 'Dampvask af motorhjelm')}
     ${galItem('/gallery/aerial-wash.jpg', 'g_onsite', 'Mobil dampvask · på stedet', 'Mobil dampvask på stedet')}
+  </div>
+  <div class="gallery-cta-row">
+    <a href="/galleri#galleri" class="gallery-cta" data-i18n="see_all_gallery">Se hele galleriet</a>
   </div>
 </div></section>`;
 export default function Work() {

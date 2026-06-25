@@ -1005,3 +1005,54 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
     transition-duration:.001ms!important;
   }
 }
+
+/* ========== GALLERY / GUIDE PAGES (luxury) ========== */
+.gallery-cta-row{text-align:center;margin-top:36px}
+.gallery-cta{display:inline-flex;align-items:center;gap:9px;padding:13px 28px;border-radius:99px;font-size:14px;font-weight:700;letter-spacing:.3px;color:#f3dd84;background:linear-gradient(180deg,rgba(212,175,55,.1),rgba(212,175,55,.04));border:1px solid rgba(212,175,55,.42);transition:transform .25s cubic-bezier(.22,1,.36,1),background .25s ease,box-shadow .3s ease,border-color .25s ease}
+.gallery-cta::after{content:"→";transition:transform .25s ease}
+.gallery-cta:hover{background:linear-gradient(180deg,rgba(212,175,55,.2),rgba(212,175,55,.08));border-color:rgba(212,175,55,.75);transform:translateY(-2px);box-shadow:0 14px 34px rgba(212,175,55,.16)}
+.gallery-cta:hover::after{transform:translateX(4px)}
+
+.gal-page{min-height:100vh;background:radial-gradient(120% 60% at 50% 0%,rgba(212,175,55,.05),transparent 50%),var(--bg);color:var(--txt)}
+.gal-topbar{position:sticky;top:0;z-index:40;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 28px;background:rgba(11,19,16,.82);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.gal-back{display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:var(--muted);transition:color .2s}
+.gal-back:hover{color:var(--green)}
+.gal-back svg{width:18px;height:18px}
+.gal-brand{display:inline-flex;align-items:center;gap:9px;font-size:15px;font-weight:800;letter-spacing:.4px;color:#fff}
+.gal-brand-mark{width:26px;height:26px;border-radius:50%;background:#fff url('/logo.jpg') center/cover no-repeat;border:1px solid var(--line)}
+.gal-book{display:inline-flex;align-items:center;background:var(--green);color:#062313;font-size:13.5px;font-weight:700;padding:9px 18px;border-radius:99px;transition:.2s}
+.gal-book:hover{background:#48e088;transform:translateY(-1px)}
+.gal-hero{max-width:760px;margin:0 auto;text-align:center;padding:64px 24px 36px}
+.gal-hero-title{font-size:clamp(30px,5vw,46px);font-weight:800;letter-spacing:-1px;color:#fff;line-height:1.1;margin-top:6px}
+.gal-hero-sub{font-size:16px;color:var(--muted);margin-top:16px;line-height:1.6}
+.gal-section{max-width:1140px;margin:0 auto;padding:30px 24px 10px}
+.gal-section-head{display:flex;align-items:center;gap:14px;margin-bottom:26px}
+.gal-section-head .sec-title{font-size:clamp(22px,3vw,30px)}
+.gal-count{display:inline-flex;align-items:center;justify-content:center;min-width:30px;height:26px;padding:0 11px;border-radius:99px;font-size:13px;font-weight:800;color:#f3dd84;background:rgba(212,175,55,.12);border:1px solid rgba(212,175,55,.3)}
+.gal-foot-cta{text-align:center;padding:50px 24px 80px}
+/* lightbox */
+.gal-lb{position:fixed;inset:0;z-index:200;background:rgba(4,8,6,.94);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:40px;animation:fade .25s ease}
+.gal-lb-fig{max-width:90vw;max-height:86vh;display:flex;flex-direction:column;align-items:center;gap:14px}
+.gal-lb-fig img{max-width:90vw;max-height:78vh;object-fit:contain;border-radius:12px;box-shadow:0 30px 80px rgba(0,0,0,.6)}
+.gal-lb-fig figcaption{font-size:14px;color:var(--muted);letter-spacing:.3px}
+.gal-lb-close,.gal-lb-nav{position:absolute;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);color:#fff;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s}
+.gal-lb-close{top:24px;right:24px;width:44px;height:44px}
+.gal-lb-close svg{width:20px;height:20px}
+.gal-lb-nav{top:50%;transform:translateY(-50%);width:50px;height:50px}
+.gal-lb-nav svg{width:24px;height:24px}
+.gal-lb-nav.l{left:24px}.gal-lb-nav.r{right:24px}
+.gal-lb-close:hover,.gal-lb-nav:hover{background:rgba(212,175,55,.2);border-color:rgba(212,175,55,.5)}
+/* guide index */
+.guide-index-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.guide-index-card{display:flex;flex-direction:column;background:linear-gradient(180deg,var(--surface-2),var(--bg-2));border:1px solid var(--line);border-radius:18px;padding:30px 26px;transition:transform .3s cubic-bezier(.22,1,.36,1),border-color .25s ease,box-shadow .35s ease}
+.guide-index-card:hover{transform:translateY(-5px);border-color:rgba(212,175,55,.4);box-shadow:0 22px 56px rgba(0,0,0,.45),0 0 0 1px rgba(212,175,55,.1)}
+.guide-index-card .guide-card-icon{font-size:34px;margin-bottom:16px}
+.guide-index-card h2{font-size:19px;font-weight:800;color:#fff;line-height:1.3;letter-spacing:-.3px}
+.guide-index-card p{font-size:14px;color:var(--muted);margin-top:10px;line-height:1.6;flex:1}
+.guide-index-card .guide-card-read{margin-top:18px;font-size:13.5px;font-weight:700;color:var(--green)}
+@media(max-width:880px){
+  .guide-index-grid{grid-template-columns:1fr}
+  .gal-topbar{padding:12px 16px}
+  .gal-lb{padding:16px}
+  .gal-lb-nav{width:42px;height:42px}.gal-lb-nav.l{left:10px}.gal-lb-nav.r{right:10px}
+}
