@@ -20,12 +20,11 @@ const HTML = `<!-- BEFORE/AFTER + GALLERY -->
   <div class="center">
     <div class="eyebrow" data-i18n="ba_eyebrow">Vores arbejde</div>
     <h2 class="sec-title" data-i18n="ba_title">Før & efter</h2>
-    <p class="sec-sub" data-i18n="ba_sub">Træk i slideren for at se forskellen. Rigtige resultater fra vores kunder.</p>
+    <p class="sec-sub" data-i18n="ba_sub">Træk i slideren og se forskellen – ægte resultater fra professionel mobil bilvask hos vores kunder.</p>
   </div>
 
   <div class="ba-gallery">
     ${baCard('/gallery/img01.jpg', '/gallery/img02.jpg', 'ba_c1', 'Motorrens · Peugeot', 'Motorrum før dampvask', 'Motorrum efter dampvask')}
-    ${baCard('/gallery/IMG_20260512_174045896_HDR.jpg', '/gallery/IMG_20260512_182945671_HDR.jpg', 'ba_c2', 'Motorrum · dybderens', 'Motorrum dybderens før', 'Motorrum dybderens efter')}
     ${baCard('/gallery/seat-before.jpg', '/gallery/seat-after.jpg', 'ba_c3', 'Sæderens · stofsæder', 'Sæderens før', 'Sæderens efter')}
     ${baCard('/gallery/interior-before.jpg', '/gallery/interior-after.jpg', 'ba_c4', 'Interiør · kabine', 'Interiør før', 'Interiør efter')}
     ${baCard('/gallery/floor-before.jpg', '/gallery/floor-after.jpg', 'ba_c5', 'Fodrum · måtter', 'Fodrum før', 'Fodrum efter')}
@@ -35,7 +34,7 @@ const HTML = `<!-- BEFORE/AFTER + GALLERY -->
   <div class="center" style="margin-top:76px">
     <div class="eyebrow" data-i18n="gal_eyebrow">Galleri</div>
     <h2 class="sec-title" data-i18n="gal_title">Flere billeder fra vores arbejde</h2>
-    <p class="sec-sub" data-i18n="gal_sub2">Et udvalg af nylige opgaver – klik for at se i fuld størrelse.</p>
+    <p class="sec-sub" data-i18n="gal_sub2">Flere eksempler på bilvask hjemme og bilrengøring hjemme hos kunden – klik for fuld størrelse.</p>
   </div>
   <div class="gallery" id="gallery">
     ${galItem('/gallery/steam-bmw.jpg', 'g_bmw', 'Dampvask · BMW', 'Dampvask af BMW')}

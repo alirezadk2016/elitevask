@@ -3,7 +3,7 @@ const HTML = `<!-- LIVE VIDEO -->
   <div class="center">
     <div class="eyebrow" data-i18n="vid_eyebrow">Live optagelse</div>
     <h2 class="sec-title" data-i18n="vid_title2">Se dampen arbejde</h2>
-    <p class="sec-sub" data-i18n="vid_sub2">Optaget på stedet hos vores kunder – præcision, kraft og omhu i hver bevægelse.</p>
+    <p class="sec-sub" data-i18n="vid_sub2">Oplev vores mobile bilpleje i aktion – optaget på stedet, mens vi arbejder hjemme hos kunden.</p>
   </div>
   <div class="lv-stage">
     <div class="lv-frame">
