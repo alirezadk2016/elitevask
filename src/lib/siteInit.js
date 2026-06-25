@@ -1175,21 +1175,51 @@ function submitBooking(cb){
 
 /* ====== BEFORE/AFTER PAGER ====== */
 (function(){
-  var BA_PER=4,baCur=0;
+  var BA_PER=4,baCur=0,baTransitioning=false;
 
-  function renderBa(){
+  function pad(n){return n<10?'0'+n:''+n;}
+
+  function applyPage(cards,pages){
     var gallery=document.getElementById('baGallery');
     var prev=document.getElementById('baPrev');
     var next=document.getElementById('baNext');
-    var dotsEl=document.getElementById('baDots');
+    var counter=document.getElementById('baCounter');
     if(!gallery||!prev||!next)return;
+
+    var isLastPage=(baCur===pages-1);
+    var pageCards=[];
+    cards.forEach(function(c,i){
+      var show=(i>=baCur*BA_PER&&i<(baCur+1)*BA_PER);
+      c.style.display=show?'':'none';
+      c.classList.remove('ba-card--featured');
+      if(show)pageCards.push({card:c,idx:i});
+    });
+
+    // if last page has only 1 card, make it featured
+    if(isLastPage&&pageCards.length===1){
+      pageCards[0].card.classList.add('ba-card--featured');
+    } else if(pageCards.length>0&&baCur===0){
+      // first card on page 0 always featured
+      pageCards[0].card.classList.add('ba-card--featured');
+    }
+
+    prev.disabled=(baCur<=0);
+    next.disabled=(baCur>=pages-1);
+    if(counter)counter.textContent=pad(baCur+1)+' / '+pad(pages);
+  }
+
+  function renderBa(animate){
+    var gallery=document.getElementById('baGallery');
+    var nav=document.querySelector('.ba-pager-nav');
+    if(!gallery)return;
 
     var cards=Array.from(gallery.querySelectorAll('.ba-card'));
     var total=cards.length;
+
     if(total<=BA_PER){
-      // no pagination needed — show all, hide nav
       cards.forEach(function(c){c.style.display='';});
-      var nav=document.querySelector('.ba-pager-nav');
+      // ensure first card is featured, rest not
+      cards.forEach(function(c,i){c.classList.toggle('ba-card--featured',i===0);});
       if(nav)nav.style.display='none';
       return;
     }
@@ -1197,24 +1227,16 @@ function submitBooking(cb){
     var pages=Math.ceil(total/BA_PER);
     baCur=Math.max(0,Math.min(baCur,pages-1));
 
-    cards.forEach(function(c,i){
-      c.style.display=(i>=baCur*BA_PER&&i<(baCur+1)*BA_PER)?'':'none';
-    });
-
-    prev.disabled=(baCur<=0);
-    next.disabled=(baCur>=pages-1);
-
-    // dots
-    if(dotsEl){
-      dotsEl.innerHTML='';
-      for(var i=0;i<pages;i++){
-        var btn=document.createElement('button');
-        btn.type='button';
-        btn.className='gcar-dot'+(i===baCur?' active':'');
-        btn.setAttribute('aria-label','Side '+(i+1));
-        (function(idx){btn.addEventListener('click',function(){baCur=idx;renderBa();});})(i);
-        dotsEl.appendChild(btn);
-      }
+    if(animate&&!baTransitioning){
+      baTransitioning=true;
+      gallery.classList.add('ba-fade','hiding');
+      setTimeout(function(){
+        applyPage(cards,pages);
+        gallery.classList.remove('hiding');
+        setTimeout(function(){baTransitioning=false;},380);
+      },200);
+    } else {
+      applyPage(cards,pages);
     }
   }
 
@@ -1225,9 +1247,9 @@ function submitBooking(cb){
     var prev=document.getElementById('baPrev');
     var next=document.getElementById('baNext');
     if(!prev||!next)return;
-    prev.addEventListener('click',function(){baCur--;renderBa();});
-    next.addEventListener('click',function(){baCur++;renderBa();});
-    renderBa();
+    prev.addEventListener('click',function(){baCur--;renderBa(true);});
+    next.addEventListener('click',function(){baCur++;renderBa(true);});
+    renderBa(false);
   }
 
   if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',initBaPager);}
@@ -1267,12 +1289,19 @@ function submitBooking(cb){
     var prev=document.getElementById('galPrev');
     var next=document.getElementById('galNext');
     var dotsEl=document.getElementById('galDots');
+    var wrap=document.getElementById('galleryNavWrap');
     if(!track||!prev||!next)return;
 
     var items=Array.from(track.children);
     var perPage=getPerPage();
     var pages=Math.ceil(items.length/perPage);
     cur=Math.max(0,Math.min(cur,pages-1));
+
+    // hide nav entirely when everything fits on 1 page
+    var showNav=(pages>1);
+    prev.style.visibility=showNav?'':'hidden';
+    next.style.visibility=showNav?'':'hidden';
+    if(dotsEl)dotsEl.style.visibility=showNav?'':'hidden';
 
     // calc item width from first item
     var itemW=items[0]?items[0].offsetWidth:0;

@@ -35,7 +35,7 @@ const HTML = `<!-- BEFORE/AFTER + GALLERY -->
       <button type="button" class="gcar-btn" id="baPrev" aria-label="Forrige" disabled>
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
       </button>
-      <div class="gcar-dots" id="baDots"></div>
+      <span class="ba-pager-counter" id="baCounter">01 / 02</span>
       <button type="button" class="gcar-btn" id="baNext" aria-label="Næste">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
       </button>
