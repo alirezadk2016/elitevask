@@ -256,6 +256,7 @@ export default function AdminPanel() {
   const [narrow, setNarrow]               = useState(false);
   const [loginErr, setLoginErr]           = useState("");
   const [nowTime, setNowTime]             = useState(() => new Date());
+  const [deleteConfirm, setDeleteConfirm] = useState(null);
 
   // CMS state — FAQ, Priser, Ekstra
   const [faqItems, setFaqItems]           = useState([]);
@@ -411,8 +412,11 @@ export default function AdminPanel() {
     xhr.send(form);
   }
 
+  function promptDelete(label, fn) {
+    setDeleteConfirm({ label, onConfirm: fn });
+  }
+
   async function deleteItem(type, id, blobUrl) {
-    if (!confirm("Slet dette element?")) return;
     await fetch("/api/admin/content", {
       method:"DELETE",
       headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" },
@@ -482,7 +486,6 @@ export default function AdminPanel() {
   }
 
   async function deleteBeforeAfter(item) {
-    if (!confirm("Slet dette før/efter-par?")) return;
     await fetch("/api/admin/content", {
       method:"DELETE",
       headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" },
@@ -989,7 +992,7 @@ export default function AdminPanel() {
                                 style={{ width:36, height:36, borderRadius:"50%", background:"rgba(255,255,255,.12)", border:"1px solid rgba(255,255,255,.25)", color:"#fff", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center" }}>
                                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                               </button>
-                              <button onClick={() => deleteItem("gallery", item.id, item.source==="upload"?item.url:null)}
+                              <button onClick={() => promptDelete("Slet dette billede fra galleriet?", () => deleteItem("gallery", item.id, item.source==="upload"?item.url:null))}
                                 style={{ width:36, height:36, borderRadius:"50%", background:"rgba(255,255,255,.12)", border:"1px solid rgba(255,255,255,.25)", color:"#fff", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center" }}>
                                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
                               </button>
@@ -1169,7 +1172,7 @@ export default function AdminPanel() {
                                 style={{ width:36, height:36, borderRadius:"50%", background:"rgba(255,255,255,.12)", border:"1px solid rgba(255,255,255,.25)", color:"#fff", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center" }}>
                                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                               </button>
-                              <button onClick={() => deleteBeforeAfter(item)}
+                              <button onClick={() => promptDelete("Slet dette før/efter-par?", () => deleteBeforeAfter(item))}
                                 style={{ width:36, height:36, borderRadius:"50%", background:"rgba(255,255,255,.12)", border:"1px solid rgba(255,255,255,.25)", color:"#fff", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center" }}>
                                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
                               </button>
@@ -1249,7 +1252,6 @@ export default function AdminPanel() {
               else setCmsMsg({ type:"err", text:"Fejl – prøv igen" });
             }
             async function deleteFaq(id) {
-              if (!confirm("Slet dette FAQ-punkt?")) return;
               await fetch("/api/admin/content", { method:"DELETE", headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" }, body:JSON.stringify({ type:"faq", id }) });
               fetchContent("faq");
             }
@@ -1331,7 +1333,7 @@ export default function AdminPanel() {
                               <span style={{ flex:1, fontSize:14, fontWeight:isOpen?700:500, color:isOpen?T.t1:T.t2, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{titleDa}</span>
                               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={isOpen?T.accent:T.t4} strokeWidth="2.5" strokeLinecap="round" style={{ transform:isOpen?"rotate(180deg)":"none", transition:"transform .2s", flexShrink:0 }}><polyline points="6 9 12 15 18 9"/></svg>
                             </button>
-                            <button type="button" onClick={() => deleteFaq(item.id)}
+                            <button type="button" onClick={() => promptDelete("Slet dette FAQ-punkt? Handlingen kan ikke fortrydes.", () => deleteFaq(item.id))}
                               style={{ padding:"13px 14px", background:"transparent", border:"none", borderLeft:`1px solid ${T.border}`, cursor:"pointer", color:T.t4, display:"flex", alignItems:"center", flexShrink:0, transition:"color .15s" }}
                               onMouseEnter={e => e.currentTarget.style.color=T.danger}
                               onMouseLeave={e => e.currentTarget.style.color=T.t4}>
@@ -1525,7 +1527,6 @@ export default function AdminPanel() {
               else setCmsMsg({ type:"err", text:"Fejl – prøv igen" });
             }
             async function deleteExtra(id) {
-              if (!confirm("Slet denne ydelse?")) return;
               await fetch("/api/admin/content", { method:"DELETE", headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" }, body:JSON.stringify({ type:"extras", id }) });
               fetchContent("extras");
             }
@@ -1621,7 +1622,7 @@ export default function AdminPanel() {
                               <div style={{ display:"flex", gap:6, flexShrink:0 }}>
                                 <button onClick={() => setEditingExt({ id:item.id, nameDa, nameEn, descDa, descEn, price:item.price||"" })}
                                   style={{ padding:"6px 12px", background:T.accentDim, border:`1px solid ${T.accentBorder}`, borderRadius:6, color:T.accent, fontSize:12, fontWeight:600, cursor:"pointer", fontFamily:FF }}>Rediger</button>
-                                <button onClick={() => deleteExtra(item.id)}
+                                <button onClick={() => promptDelete("Slet denne ekstra ydelse?", () => deleteExtra(item.id))}
                                   style={{ padding:"6px 12px", background:T.dangerDim, border:`1px solid ${T.dangerBorder}`, borderRadius:6, color:T.danger, fontSize:12, fontWeight:600, cursor:"pointer", fontFamily:FF }}>Slet</button>
                               </div>
                             </div>
@@ -1728,7 +1729,7 @@ export default function AdminPanel() {
                             style={{ padding:"7px 14px", background:T.accentDim, border:`1px solid ${T.accentBorder}`, borderRadius:8, color:T.accent, fontSize:12, fontWeight:600, cursor:"pointer", whiteSpace:"nowrap", fontFamily:FF }}>
                             {expandedVideoId===item.id?"Luk":"Vis"}
                           </button>
-                          <button onClick={() => deleteItem("videos", item.id, null)}
+                          <button onClick={() => promptDelete("Slet denne video?", () => deleteItem("videos", item.id, null))}
                             style={{ padding:"7px 14px", background:T.dangerDim, border:`1px solid ${T.dangerBorder}`, borderRadius:8, color:T.danger, fontSize:12, fontWeight:600, cursor:"pointer", whiteSpace:"nowrap", fontFamily:FF }}>
                             Slet
                           </button>
@@ -1935,6 +1936,33 @@ export default function AdminPanel() {
           </div>
         );
       })()}
+
+      {/* DELETE CONFIRMATION MODAL */}
+      {deleteConfirm && (
+        <div onClick={() => setDeleteConfirm(null)}
+          style={{ position:"fixed", inset:0, background:"rgba(0,0,0,.75)", backdropFilter:"blur(8px)", zIndex:250, display:"flex", alignItems:"center", justifyContent:"center", padding:24 }}>
+          <div onClick={e => e.stopPropagation()}
+            style={{ background:T.bg1, border:`1px solid ${T.dangerBorder}`, borderRadius:16, padding:28, maxWidth:360, width:"100%", boxShadow:T.shadowL }}>
+            <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:16 }}>
+              <div style={{ width:38, height:38, borderRadius:"50%", background:T.dangerDim, border:`1px solid ${T.dangerBorder}`, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={T.danger} strokeWidth="2.5" strokeLinecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+              </div>
+              <span style={{ fontSize:16, fontWeight:700, color:T.t1 }}>Bekræft sletning</span>
+            </div>
+            <p style={{ color:T.t2, fontSize:14, margin:"0 0 24px", lineHeight:1.6 }}>{deleteConfirm.label}</p>
+            <div style={{ display:"flex", gap:8 }}>
+              <button onClick={() => { deleteConfirm.onConfirm(); setDeleteConfirm(null); }}
+                style={{ flex:1, padding:"11px 0", background:"#c0392b", color:"#fff", border:"none", borderRadius:9, fontWeight:700, fontSize:14, cursor:"pointer", fontFamily:FF }}>
+                Slet
+              </button>
+              <button onClick={() => setDeleteConfirm(null)}
+                style={{ flex:1, padding:"11px 0", background:"rgba(255,255,255,.07)", color:T.t3, border:"none", borderRadius:9, fontWeight:600, fontSize:13, cursor:"pointer", fontFamily:FF }}>
+                Annuller
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* LIGHTBOX */}
       {previewItem && (
