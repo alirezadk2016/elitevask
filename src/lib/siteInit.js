@@ -1173,6 +1173,66 @@ function submitBooking(cb){
   if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',initSteamAcc);}else{setTimeout(initSteamAcc,0);}
 })();
 
+/* ====== BEFORE/AFTER PAGER ====== */
+(function(){
+  var BA_PER=4,baCur=0;
+
+  function renderBa(){
+    var gallery=document.getElementById('baGallery');
+    var prev=document.getElementById('baPrev');
+    var next=document.getElementById('baNext');
+    var dotsEl=document.getElementById('baDots');
+    if(!gallery||!prev||!next)return;
+
+    var cards=Array.from(gallery.querySelectorAll('.ba-card'));
+    var total=cards.length;
+    if(total<=BA_PER){
+      // no pagination needed — show all, hide nav
+      cards.forEach(function(c){c.style.display='';});
+      var nav=document.querySelector('.ba-pager-nav');
+      if(nav)nav.style.display='none';
+      return;
+    }
+
+    var pages=Math.ceil(total/BA_PER);
+    baCur=Math.max(0,Math.min(baCur,pages-1));
+
+    cards.forEach(function(c,i){
+      c.style.display=(i>=baCur*BA_PER&&i<(baCur+1)*BA_PER)?'':'none';
+    });
+
+    prev.disabled=(baCur<=0);
+    next.disabled=(baCur>=pages-1);
+
+    // dots
+    if(dotsEl){
+      dotsEl.innerHTML='';
+      for(var i=0;i<pages;i++){
+        var btn=document.createElement('button');
+        btn.className='gcar-dot'+(i===baCur?' active':'');
+        btn.setAttribute('aria-label','Side '+(i+1));
+        (function(idx){btn.addEventListener('click',function(){baCur=idx;renderBa();});})(i);
+        dotsEl.appendChild(btn);
+      }
+    }
+  }
+
+  function initBaPager(){
+    var pager=document.getElementById('baPager');
+    if(!pager||pager.__baInit)return;
+    pager.__baInit=true;
+    var prev=document.getElementById('baPrev');
+    var next=document.getElementById('baNext');
+    if(!prev||!next)return;
+    prev.addEventListener('click',function(){baCur--;renderBa();});
+    next.addEventListener('click',function(){baCur++;renderBa();});
+    renderBa();
+  }
+
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',initBaPager);}
+  else{initBaPager();}
+})();
+
 /* ====== GALLERY CAROUSEL ====== */
 (function(){
   var cur=0;

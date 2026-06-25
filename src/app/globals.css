@@ -241,6 +241,8 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 .ba-lab{position:absolute;top:14px;font-size:11px;font-weight:700;letter-spacing:1px;padding:5px 11px;border-radius:6px;text-transform:uppercase;background:rgba(8,12,10,.78);color:#fff;backdrop-filter:blur(3px)}
 .ba-lab.l{left:14px}.ba-lab.r{right:14px}
 .ba-cap{text-align:center;font-size:13.5px;color:var(--muted);margin-top:16px}
+/* BEFORE/AFTER PAGER */
+.ba-pager-nav{display:flex;align-items:center;justify-content:center;gap:16px;margin-top:32px}
 /* BEFORE/AFTER GALLERY — featured first, 3-col grid below */
 .ba-gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:44px}
 @media(max-width:640px){.ba-gallery{grid-template-columns:1fr;gap:14px}}
