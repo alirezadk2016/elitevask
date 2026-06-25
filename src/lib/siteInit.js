@@ -1286,33 +1286,39 @@ function submitBooking(cb){
 
   function render(){
     var track=document.getElementById('gallery');
+    var viewport=document.getElementById('galViewport');
     var prev=document.getElementById('galPrev');
     var next=document.getElementById('galNext');
     var dotsEl=document.getElementById('galDots');
-    var wrap=document.getElementById('galleryNavWrap');
-    if(!track||!prev||!next)return;
+    if(!track||!viewport||!prev||!next)return;
+
+    var vw=viewport.offsetWidth;
+    var perPage=getPerPage();
+    var gap=16;
+    // calculate exact item width from real viewport width
+    var itemW=Math.floor((vw-(gap*(perPage-1)))/perPage);
+
+    // apply width to all items (JS-driven, avoids % flex-basis issues)
+    Array.from(track.children).forEach(function(item){
+      item.style.width=itemW+'px';
+      item.style.flexShrink='0';
+    });
 
     var items=Array.from(track.children);
-    var perPage=getPerPage();
     var pages=Math.ceil(items.length/perPage);
     cur=Math.max(0,Math.min(cur,pages-1));
 
-    // hide nav entirely when everything fits on 1 page
     var showNav=(pages>1);
     prev.style.visibility=showNav?'':'hidden';
     next.style.visibility=showNav?'':'hidden';
     if(dotsEl)dotsEl.style.visibility=showNav?'':'hidden';
 
-    // calc item width from first item
-    var itemW=items[0]?items[0].offsetWidth:0;
-    var gap=16;
     var offset=cur*perPage*(itemW+gap);
     track.style.transform='translateX(-'+offset+'px)';
 
     prev.disabled=(cur<=0);
     next.disabled=(cur>=pages-1);
 
-    // dots
     buildDots(items.length,perPage,dotsEl);
     var dots=dotsEl?dotsEl.querySelectorAll('.gcar-dot'):[];
     dots.forEach(function(d,i){d.classList.toggle('active',i===cur);});

@@ -385,9 +385,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 .gcar-wrap{position:relative;display:flex;align-items:center;gap:0;margin-top:34px}
 .gcar-viewport{flex:1;overflow:hidden;border-radius:18px}
 .gcar-track{display:flex;gap:16px;transition:transform .5s cubic-bezier(.22,1,.36,1);will-change:transform}
-.gcar-track .gitem{flex:0 0 calc(33.333% - 11px);min-width:0}
-@media(max-width:900px){.gcar-track .gitem{flex:0 0 calc(50% - 8px)}}
-@media(max-width:540px){.gcar-track .gitem{flex:0 0 100%}}
+.gcar-track .gitem{flex-shrink:0;min-width:0} /* width set by JS */
 .gcar-btn{flex-shrink:0;width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,.06);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.14);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10;transition:background .2s,border-color .25s,transform .25s,box-shadow .2s,opacity .2s;box-shadow:0 8px 32px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.1);margin:0 10px}
 .gcar-btn:hover{background:rgba(212,175,55,.16);border-color:rgba(212,175,55,.55);transform:scale(1.1);box-shadow:0 10px 36px rgba(0,0,0,.45),0 0 0 1px rgba(212,175,55,.2),inset 0 1px 0 rgba(255,255,255,.15)}
 .gcar-btn:disabled{opacity:.2;cursor:default;pointer-events:none}
@@ -757,7 +755,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
   .ba-gallery{grid-template-columns:repeat(2,1fr);gap:16px}
   .why-grid,.info-grid,.reviews-grid{grid-template-columns:1fr}
   .ex-grid{grid-template-columns:1fr}
-  .gallery{grid-template-columns:repeat(2,1fr)}
+  .gal-page .gallery{grid-template-columns:repeat(2,1fr)}
   .contact-grid{grid-template-columns:1fr;gap:32px}
   .footer-grid{grid-template-columns:1fr 1fr;gap:30px}.footer .fb{grid-column:1/-1}
   html,body{overflow-x:clip}
