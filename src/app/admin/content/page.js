@@ -257,6 +257,9 @@ export default function AdminPanel() {
   const [loginErr, setLoginErr]           = useState("");
   const [nowTime, setNowTime]             = useState(() => new Date());
   const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [toasts, setToasts]               = useState([]);
+  const [navGuard, setNavGuard]           = useState(null);
+  const toastIdRef = useRef(0);
 
   // CMS state — FAQ, Priser, Ekstra
   const [faqItems, setFaqItems]           = useState([]);
@@ -389,8 +392,8 @@ export default function AdminPanel() {
     });
     const data = await res.json();
     setCLoading(false);
-    if (data.ok) { setMsg({ type:"ok", text:"Tilføjet!" }); setUrlInput(""); setCaptionInput(""); fetchContent(type); }
-    else setMsg({ type:"err", text:"Fejl – prøv igen" });
+    if (data.ok) { addToast("ok", "Tilføjet!"); setUrlInput(""); setCaptionInput(""); fetchContent(type); }
+    else addToast("err", "Fejl – prøv igen");
   }
 
   function uploadFile(file, type) {
@@ -403,10 +406,10 @@ export default function AdminPanel() {
     xhr.onload = () => {
       let data; try { data = JSON.parse(xhr.responseText); } catch { data = {}; }
       setUploadProgress(null);
-      if (data.ok) { setMsg({ type:"ok", text:"Uploadet!" }); setCaptionInput(""); fetchContent(type); }
-      else setMsg({ type:"err", text:data.error || "Upload fejlede" });
+      if (data.ok) { addToast("ok", "Uploadet!"); setCaptionInput(""); fetchContent(type); }
+      else addToast("err", data.error || "Upload fejlede");
     };
-    xhr.onerror = () => { setUploadProgress(null); setMsg({ type:"err", text:"Netværksfejl" }); };
+    xhr.onerror = () => { setUploadProgress(null); addToast("err", "Netværksfejl"); };
     xhr.open("POST", "/api/admin/content");
     xhr.setRequestHeader("Authorization", `Bearer ${secret}`);
     xhr.send(form);
@@ -414,6 +417,12 @@ export default function AdminPanel() {
 
   function promptDelete(label, fn) {
     setDeleteConfirm({ label, onConfirm: fn });
+  }
+
+  function addToast(type, text) {
+    const id = ++toastIdRef.current;
+    setToasts(prev => [...prev, { id, type, text }]);
+    setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 3500);
   }
 
   async function deleteItem(type, id, blobUrl) {
@@ -441,13 +450,13 @@ export default function AdminPanel() {
       });
       const data = await res.json();
       if (data.ok) {
-        setMsg({ type:"ok", text:"Uploadet!" });
+        addToast("ok", "Uploadet!");
         setBaBeforeFile(null); setBaAfterFile(null); setBaCaption("");
         if (baBeforeRef.current) baBeforeRef.current.value = "";
         if (baAfterRef.current) baAfterRef.current.value = "";
         fetchContent("beforeafter");
-      } else setMsg({ type:"err", text:data.error || "Upload fejlede" });
-    } catch { setMsg({ type:"err", text:"Netværksfejl" }); }
+      } else addToast("err", data.error || "Upload fejlede");
+    } catch { addToast("err", "Netværksfejl"); }
     finally { setBaLoading(false); }
   }
 
@@ -462,11 +471,11 @@ export default function AdminPanel() {
       });
       const data = await res.json();
       if (data.ok) {
-        setMsg({ type:"ok", text:"Tilføjet!" });
+        addToast("ok", "Tilføjet!");
         setBaBeforeUrl(""); setBaAfterUrl(""); setBaCaption("");
         fetchContent("beforeafter");
-      } else setMsg({ type:"err", text:data.error || "Fejl – prøv igen" });
-    } catch { setMsg({ type:"err", text:"Netværksfejl" }); }
+      } else addToast("err", data.error || "Fejl – prøv igen");
+    } catch { addToast("err", "Netværksfejl"); }
     finally { setBaLoading(false); }
   }
 
@@ -479,8 +488,8 @@ export default function AdminPanel() {
         body: JSON.stringify({ type:"beforeafter", id, item:{ caption:editingBA?.caption||"" } }),
       });
       const data = await res.json();
-      if (data.ok) { setMsg({ type:"ok", text:"Gemt!" }); setEditingBA(null); fetchContent("beforeafter"); }
-      else setMsg({ type:"err", text:"Fejl – prøv igen" });
+      if (data.ok) { addToast("ok", "Gemt!"); setEditingBA(null); fetchContent("beforeafter"); }
+      else addToast("err", "Fejl – prøv igen");
     } catch { setMsg({ type:"err", text:"Netværksfejl" }); }
     finally { setBaLoading(false); }
   }
@@ -539,7 +548,10 @@ export default function AdminPanel() {
   const navItem = (id, label, icon, badge) => {
     const active = tab === id;
     return (
-      <button onClick={() => { setTab(id); setMsg(null); setUrlInput(""); setCmsMsg(null); setExpandedFaqId(null); setFaqDrafts({}); setAddFaqOpen(false); setEditingExt(null); setEditingGallery(null); }}
+      <button onClick={() => {
+          if (hasUnsaved && tab !== id) { setNavGuard({ pendingTab: id }); return; }
+          setTab(id); setMsg(null); setUrlInput(""); setCmsMsg(null); setExpandedFaqId(null); setFaqDrafts({}); setAddFaqOpen(false); setEditingExt(null); setEditingGallery(null);
+        }}
         style={{ display:"flex", alignItems:"center", gap:8, width:"100%", padding:"7px 9px", borderRadius:7, fontSize:13, fontWeight:active?600:400, color:active?T.accent:T.t3, background:active?T.accentDim:"transparent", border:"none", cursor:"pointer", fontFamily:FF, textAlign:"left", transition:"all .12s", marginBottom:1 }}>
         <span style={{ opacity: active ? 1 : 0.7, display:"flex" }}>{icon}</span>
         <span style={{ flex:1 }}>{label}</span>
@@ -565,6 +577,9 @@ export default function AdminPanel() {
   };
 
   // ── MAIN RENDER ────────────────────────────────────────────────────────────
+  const hasPriceChanges = JSON.stringify(priceEdits) !== JSON.stringify(pricesData);
+  const hasUnsaved = Object.keys(faqDrafts).length > 0 || hasPriceChanges || editingExt !== null || editingGallery !== null;
+
   return (
     <div style={{ minHeight:"100dvh", background:T.bg0, fontFamily:FF, color:T.t2 }}>
 
@@ -586,6 +601,15 @@ export default function AdminPanel() {
           </button>
         )}
       </div>
+
+      {/* UNSAVED CHANGES BANNER */}
+      {hasUnsaved && (
+        <div style={{ background:"rgba(212,175,55,.1)", borderBottom:`1px solid rgba(212,175,55,.22)`, padding:"8px 20px", display:"flex", alignItems:"center", gap:8, fontSize:13 }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={T.gold} strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <span style={{ color:T.gold, fontWeight:600 }}>Du har ugemte ændringer</span>
+          <span style={{ color:"rgba(212,175,55,.55)", fontSize:12 }}>— husk at trykke Gem</span>
+        </div>
+      )}
 
       {/* LAYOUT */}
       <div style={{ display: narrow ? "block" : "grid", gridTemplateColumns:"220px 1fr", minHeight:"calc(100dvh - 52px)" }}>
@@ -611,7 +635,10 @@ export default function AdminPanel() {
         ) : (
           <div style={{ display:"flex", gap:8, padding:"16px 16px 0", overflowX:"auto" }}>
             {[["bookings","Bookinger",icons.bookings],["gallery","Galleri",icons.gallery],["videos","Videoer",icons.videos],["beforeafter","Før & efter",icons.beforeafter],["faq","FAQ",icons.faq],["priser","Priser",icons.priser],["extras","Ekstra",icons.extras]].map(([id,label,icon]) => (
-              <button key={id} onClick={() => { setTab(id); setMsg(null); setUrlInput(""); setCmsMsg(null); setExpandedFaqId(null); setFaqDrafts({}); setAddFaqOpen(false); setEditingExt(null); setEditingGallery(null); }}
+              <button key={id} onClick={() => {
+                  if (hasUnsaved && tab !== id) { setNavGuard({ pendingTab: id }); return; }
+                  setTab(id); setMsg(null); setUrlInput(""); setCmsMsg(null); setExpandedFaqId(null); setFaqDrafts({}); setAddFaqOpen(false); setEditingExt(null); setEditingGallery(null);
+                }}
                 style={{ display:"flex", alignItems:"center", gap:6, padding:"8px 16px", borderRadius:8, border:`1px solid ${tab===id?T.accentBorder:T.border}`, background:tab===id?T.accentDim:"transparent", color:tab===id?T.accent:T.t3, fontSize:13, fontWeight:600, cursor:"pointer", fontFamily:FF, whiteSpace:"nowrap" }}>
                 {icon}{label}
               </button>
@@ -937,7 +964,6 @@ export default function AdminPanel() {
                   <option value="Enkelt">Enkelt billede</option>
                   <option value="Før & Efter">Før & Efter</option>
                 </select>
-                <Feedback m={msg} />
               </div>
 
               {/* Default / Standard items */}
@@ -1108,7 +1134,6 @@ export default function AdminPanel() {
                   style={{ width:"100%", marginTop:8, padding:"11px 0", background:T.accentDim, color:T.accent, fontWeight:700, fontSize:13, borderRadius:8, border:`1px solid ${T.accentBorder}`, cursor:(baLoading||!baBeforeUrl.trim()||!baAfterUrl.trim())?"not-allowed":"pointer", opacity:(baLoading||!baBeforeUrl.trim()||!baAfterUrl.trim())?.4:1, fontFamily:FF }}>
                   Tilføj via URL
                 </button>
-                <Feedback m={msg} />
               </div>
 
               {/* Default / Standard before-after items */}
@@ -1233,8 +1258,8 @@ export default function AdminPanel() {
               });
               const data = await res.json();
               setCmsLoading(false);
-              if (data.ok) { setCmsMsg({ type:"ok", text:"Tilføjet!" }); setFaqNewQda(""); setFaqNewAda(""); setFaqNewQen(""); setFaqNewAen(""); setAddFaqOpen(false); fetchContent("faq"); }
-              else setCmsMsg({ type:"err", text:"Fejl – prøv igen" });
+              if (data.ok) { addToast("ok", "Tilføjet!"); setFaqNewQda(""); setFaqNewAda(""); setFaqNewQen(""); setFaqNewAen(""); setAddFaqOpen(false); fetchContent("faq"); }
+              else addToast("err", "Fejl – prøv igen");
             }
             async function saveFaqItem(id) {
               const item = faqItems.find(i => i.id === id);
@@ -1248,8 +1273,8 @@ export default function AdminPanel() {
               });
               const data = await res.json();
               setCmsLoading(false);
-              if (data.ok) { setCmsMsg({ type:"ok", text:"Gemt!" }); setExpandedFaqId(null); setFaqDrafts(d => { const n={...d}; delete n[id]; return n; }); fetchContent("faq"); }
-              else setCmsMsg({ type:"err", text:"Fejl – prøv igen" });
+              if (data.ok) { addToast("ok", "Gemt!"); setExpandedFaqId(null); setFaqDrafts(d => { const n={...d}; delete n[id]; return n; }); fetchContent("faq"); }
+              else addToast("err", "Fejl – prøv igen");
             }
             async function deleteFaq(id) {
               await fetch("/api/admin/content", { method:"DELETE", headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" }, body:JSON.stringify({ type:"faq", id }) });
@@ -1264,7 +1289,7 @@ export default function AdminPanel() {
               for (const faq of DEFAULT_FAQ) {
                 await fetch("/api/admin/content", { method:"POST", headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" }, body: JSON.stringify({ type:"faq", item:{ q:faq.q, a:faq.a } }) });
               }
-              setCmsLoading(false); setCmsMsg({ type:"ok", text:"Alle standarddata gemt!" }); fetchContent("faq");
+              setCmsLoading(false); addToast("ok", "Alle standarddata gemt!"); fetchContent("faq");
             }
             const txStyle = { width:"100%", padding:"9px 12px", borderRadius:7, border:`1px solid ${T.border}`, background:T.bg0, color:T.t1, fontSize:13, outline:"none", fontFamily:FF, boxSizing:"border-box", resize:"vertical" };
             return (
@@ -1308,8 +1333,6 @@ export default function AdminPanel() {
                     </div>
                   )}
                 </div>
-
-                <Feedback m={cmsMsg} />
 
                 {/* ACCORDION LIST */}
                 {faqItems.length > 0 && faqItems.length < 5 && (
@@ -1432,8 +1455,8 @@ export default function AdminPanel() {
               });
               const data = await res.json();
               setCmsLoading(false);
-              if (data.ok) { setCmsMsg({ type:"ok", text:"Priser gemt!" }); setPricesData({...priceEdits}); setPricesFromDefault(false); }
-              else setCmsMsg({ type:"err", text:"Fejl – prøv igen" });
+              if (data.ok) { addToast("ok", "Priser gemt!"); setPricesData({...priceEdits}); setPricesFromDefault(false); }
+              else addToast("err", "Fejl – prøv igen");
             }
 
             function setPrice(carId, pkgId, val) {
@@ -1491,7 +1514,6 @@ export default function AdminPanel() {
                       ))}
                     </tbody>
                   </table>
-                  <Feedback m={cmsMsg} />
                 </div>
                 <p style={{ fontSize:12, color:T.t4, margin:0 }}>Priser vises som "kr. X" på hjemmesiden. Tomme felter bruger standardpriser fra koden.</p>
               </>
@@ -1511,11 +1533,11 @@ export default function AdminPanel() {
               });
               const data = await res.json();
               setCmsLoading(false);
-              if (data.ok) { setCmsMsg({ type:"ok", text:"Tilføjet!" }); setExtNewNameDa(""); setExtNewNameEn(""); setExtNewDescDa(""); setExtNewDescEn(""); setExtNewPrice(""); fetchContent("extras"); }
-              else setCmsMsg({ type:"err", text:"Fejl – prøv igen" });
+              if (data.ok) { addToast("ok", "Tilføjet!"); setExtNewNameDa(""); setExtNewNameEn(""); setExtNewDescDa(""); setExtNewDescEn(""); setExtNewPrice(""); fetchContent("extras"); }
+              else addToast("err", "Fejl – prøv igen");
             }
             async function saveExtra(item) {
-              setCmsLoading(true); setCmsMsg(null);
+              setCmsLoading(true);
               const res = await fetch("/api/admin/content", {
                 method:"PUT",
                 headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" },
@@ -1523,8 +1545,8 @@ export default function AdminPanel() {
               });
               const data = await res.json();
               setCmsLoading(false);
-              if (data.ok) { setCmsMsg({ type:"ok", text:"Gemt!" }); setEditingExt(null); fetchContent("extras"); }
-              else setCmsMsg({ type:"err", text:"Fejl – prøv igen" });
+              if (data.ok) { addToast("ok", "Gemt!"); setEditingExt(null); fetchContent("extras"); }
+              else addToast("err", "Fejl – prøv igen");
             }
             async function deleteExtra(id) {
               await fetch("/api/admin/content", { method:"DELETE", headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" }, body:JSON.stringify({ type:"extras", id }) });
@@ -1563,7 +1585,6 @@ export default function AdminPanel() {
                       {cmsLoading ? "…" : "Tilføj ydelse"}
                     </button>
                   </form>
-                  <Feedback m={cmsMsg} />
                 </div>
 
                 {extrasItems.length > 0 && (
@@ -1643,7 +1664,7 @@ export default function AdminPanel() {
                       });
                     }
                     setCmsLoading(false);
-                    setCmsMsg({ type:"ok", text:"Alle standarddata gemt!" });
+                    addToast("ok", "Alle standarddata gemt!");
                     fetchContent("extras");
                   }
                   return (
@@ -1680,8 +1701,7 @@ export default function AdminPanel() {
                           </div>
                         ))}
                       </div>
-                      <Feedback m={cmsMsg} />
-                    </>
+                        </>
                   );
                 })()}
               </>
@@ -1699,7 +1719,6 @@ export default function AdminPanel() {
                   style={{ width:"100%", padding:12, background:T.accent, color:T.bg0, fontWeight:700, fontSize:14, borderRadius:8, border:"none", cursor:urlInput.trim()&&!cLoading?"pointer":"not-allowed", opacity:urlInput.trim()&&!cLoading?1:.4, fontFamily:FF }}>
                   {cLoading ? "Tilføjer…" : "Tilføj video"}
                 </button>
-                <Feedback m={msg} />
               </div>
 
               {videos.length > 0 && (
@@ -1936,6 +1955,54 @@ export default function AdminPanel() {
           </div>
         );
       })()}
+
+      {/* TOASTS */}
+      {toasts.length > 0 && (
+        <div style={{ position:"fixed", top:72, right:20, zIndex:310, display:"flex", flexDirection:"column", gap:8, pointerEvents:"none" }}>
+          {toasts.map(t => {
+            const ok = t.type === "ok";
+            return (
+              <div key={t.id} style={{ display:"flex", alignItems:"center", gap:10, background:ok?"rgba(13,34,20,.97)":"rgba(30,13,12,.97)", border:`1px solid ${ok?T.accentBorder:T.dangerBorder}`, borderRadius:10, padding:"11px 16px", minWidth:220, maxWidth:320, boxShadow:"0 4px 20px rgba(0,0,0,.5)" }}>
+                {ok
+                  ? <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={T.accent} strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  : <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={T.danger} strokeWidth="2.5" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>}
+                <span style={{ fontSize:13, fontWeight:600, color:ok?T.accent:T.danger, flex:1, fontFamily:FF }}>{t.text}</span>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* NAV GUARD MODAL */}
+      {navGuard && (
+        <div onClick={() => setNavGuard(null)}
+          style={{ position:"fixed", inset:0, background:"rgba(0,0,0,.75)", backdropFilter:"blur(8px)", zIndex:250, display:"flex", alignItems:"center", justifyContent:"center", padding:24 }}>
+          <div onClick={e => e.stopPropagation()}
+            style={{ background:T.bg1, border:`1px solid ${T.goldBorder}`, borderRadius:16, padding:28, maxWidth:360, width:"100%", boxShadow:T.shadowL }}>
+            <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:16 }}>
+              <div style={{ width:38, height:38, borderRadius:"50%", background:T.goldDim, border:`1px solid ${T.goldBorder}`, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={T.gold} strokeWidth="2.5" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              </div>
+              <span style={{ fontSize:16, fontWeight:700, color:T.t1 }}>Ugemte ændringer</span>
+            </div>
+            <p style={{ color:T.t2, fontSize:14, margin:"0 0 24px", lineHeight:1.6 }}>Du har ændringer der ikke er gemt. Vil du forlade denne side og miste ændringerne?</p>
+            <div style={{ display:"flex", gap:8 }}>
+              <button onClick={() => {
+                  const id = navGuard.pendingTab;
+                  setNavGuard(null);
+                  setTab(id); setMsg(null); setUrlInput(""); setCmsMsg(null); setExpandedFaqId(null); setFaqDrafts({}); setAddFaqOpen(false); setEditingExt(null); setEditingGallery(null);
+                }}
+                style={{ flex:1, padding:"11px 0", background:"rgba(245,166,35,.15)", color:T.gold, border:`1px solid ${T.goldBorder}`, borderRadius:9, fontWeight:700, fontSize:14, cursor:"pointer", fontFamily:FF }}>
+                Forlad alligevel
+              </button>
+              <button onClick={() => setNavGuard(null)}
+                style={{ flex:1, padding:"11px 0", background:T.accentDim, color:T.accent, border:`1px solid ${T.accentBorder}`, borderRadius:9, fontWeight:600, fontSize:13, cursor:"pointer", fontFamily:FF }}>
+                Bliv og gem
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* DELETE CONFIRMATION MODAL */}
       {deleteConfirm && (
