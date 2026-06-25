@@ -116,12 +116,14 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 /* CAR SELECTOR */
 .selector{background:var(--bg-2);border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:42px 0 80px}
 .car-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:40px}
-.car{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:24px 16px 18px;text-align:center;cursor:pointer;transition:transform .16s,border-color .16s,box-shadow .16s;position:relative}
-.car:hover{transform:translateY(-4px);border-color:var(--green);box-shadow:0 0 0 3px rgba(55,210,120,.18),0 16px 40px rgba(55,210,120,.22)}
+.car{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:24px 16px 18px;text-align:center;cursor:pointer;transition:transform .34s cubic-bezier(.22,1,.36,1),border-color .25s ease,box-shadow .4s cubic-bezier(.22,1,.36,1),background .25s ease;position:relative}
+.car:hover{transform:translateY(-5px);border-color:var(--green);box-shadow:0 0 0 3px rgba(55,210,120,.18),0 18px 44px rgba(55,210,120,.22)}
 .car.on{border-color:var(--green);background:var(--surface-2)}
 .car.on::after{content:"";position:absolute;top:13px;right:14px;width:20px;height:20px;border-radius:50%;background:var(--green);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='%23062313' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:center}
-.car svg.cs{width:104px;height:56px;margin:0 auto 14px;display:block;color:#7f9488;transition:color .2s,filter .25s}
+.car svg.cs{width:104px;height:56px;margin:0 auto 14px;display:block;color:#7f9488;transition:color .3s ease,filter .35s ease,transform .4s cubic-bezier(.22,1,.36,1)}
 .car:hover svg.cs,.car.on svg.cs{color:var(--green);filter:drop-shadow(0 5px 14px rgba(55,210,120,.45))}
+.car:hover svg.cs{transform:translateX(3px) scale(1.05)}
+.car.on svg.cs{transform:scale(1.04)}
 .car::before{content:"";position:absolute;inset:-3px;border-radius:calc(var(--r) + 3px);background:radial-gradient(ellipse at center,rgba(55,210,120,.15),transparent 70%);opacity:0;transition:opacity .35s;pointer-events:none;z-index:0}
 .car:hover::before{opacity:1}
 .car .nm{font-size:14.5px;font-weight:700;color:#fff}

@@ -80,7 +80,8 @@ function fmtKr(n){return Math.round(n).toLocaleString('da-DK')+' kr';}
 function driveFee(){return 0;}
 
 /* ====== RENDER CARS ====== */
-function activateCar(c){selCar=c;renderCars();renderCalc();var cal=document.getElementById('calc');cal.classList.add('show');}
+function markActiveCar(id){var g=document.getElementById('carGrid');if(!g)return;g.querySelectorAll('.car').forEach(function(d){d.classList.toggle('on',d.dataset.id===id);});}
+function activateCar(c){selCar=c;markActiveCar(c.id);renderCalc();var cal=document.getElementById('calc');cal.classList.add('show');}
 function renderCars(){
   var g=document.getElementById('carGrid');g.innerHTML='';
   CARS.forEach(function(c){
