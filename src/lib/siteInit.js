@@ -838,6 +838,20 @@ function submitBooking(cb){
   var MINI_AV='<div class="chat-mini-av"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="3" r="1.5" fill="#062313"/><line x1="12" y1="4.5" x2="12" y2="7" stroke="#062313" stroke-width="1.5" stroke-linecap="round"/><rect x="4" y="7" width="16" height="10" rx="3" fill="#062313"/><circle cx="8.5" cy="12" r="2" fill="#9afabd"/><circle cx="15.5" cy="12" r="2" fill="#9afabd"/><circle cx="8.5" cy="12" r="0.9" fill="#062313"/><circle cx="15.5" cy="12" r="0.9" fill="#062313"/><rect x="9" y="15.5" width="6" height="1.5" rx="0.75" fill="#9afabd"/></svg></div>';
   var FAQ={
     da:[
+      {keys:['hej','hey','hi ','hallo','goddag','god morgen','god aften','godaften','godmorgen','halløj','hejsa','yo ','hola'],
+       ans:['Hej! 👋 Jeg er <strong>Elite Bot</strong> fra Elite Vask – her for at hjælpe dig med alt om mobil bilvask på Sjælland. Hvad kan jeg gøre for dig i dag? 😊',
+            'Hejsa! Velkommen til Elite Vask 🌿 Jeg er <strong>Elite Bot</strong> – din personlige guide til mobil dampvask. Hvad ønsker du at vide?',
+            'Hej og velkommen! 🤖 Jeg er <strong>Elite Bot</strong> fra Elite Vask. Jeg kan svare på spørgsmål om priser, booking, dækningsområde og meget mere. Hvad kan jeg hjælpe med?'],
+       follow:['Hvad koster det?','Dækker I mit område?','Book nu','Hvad er dampvask?']},
+      {keys:['hvem er du','hvad er du','hvad kan du','elite bot','chatbot','robot','assistent','hvad hedder','fortæl om dig'],
+       ans:['Jeg er <strong>Elite Bot</strong> 🤖 – den digitale assistent for <strong>Elite Vask</strong>. Vi er en mobil dampvaskservice der kører ud til dig på hele Sjælland. Jeg kan hjælpe dig med priser, booking, svare på spørgsmål og meget mere!',
+            'Hej! Jeg er <strong>Elite Bot</strong>, lavet til at hjælpe kunder af <strong>Elite Vask</strong> – Sjællands mobile dampvaskservice 🌿 Spørg mig om pakker, priser, kørsel, og hvad dampvask egentlig er!'],
+       follow:['Hvad koster det?','Hvad er dampvask?','Book nu']},
+      {keys:['tak','mange tak','tusind tak','super','perfekt','fedt','fantastisk','dejligt','godt','flot'],
+       ans:['Det var da så lidt! 😊 Kan jeg hjælpe dig med noget mere?',
+            'Altid gerne! 🌟 Har du andre spørgsmål?',
+            'Tak for det! 💚 Lad mig endelig vide, hvis der er andet jeg kan hjælpe med.'],
+       follow:['Book nu','Hvad koster det?']},
       {keys:['pris','kost','hvad kost','priser','billig','dyr'],
        ans:['Priserne starter fra <strong>499 kr</strong> for udvendig vask og <strong>799 kr</strong> for fuld pakke. Prisen afhænger af bilstørrelse og dit postnummer. <a href="#vaelg">👉 Se alle pakker her</a>',
             'Vi har pakker fra <strong>499 kr</strong> – ingen skjulte gebyrer! Prisen beregnes efter din bil og adresse. <a href="#vaelg">Sammenlign pakker →</a>'],
@@ -894,6 +908,20 @@ function submitBooking(cb){
        follow:['Book nu','Dækker I mit område?']},
     ],
     en:[
+      {keys:['hi ','hey','hello','hiya','howdy','good morning','good evening','sup ','yo ','hola'],
+       ans:['Hi there! 👋 I\'m <strong>Elite Bot</strong> from Elite Vask – here to help you with everything about mobile car washing on Zealand. What can I do for you today? 😊',
+            'Hello and welcome! 🌿 I\'m <strong>Elite Bot</strong> – your personal guide to mobile steam car wash. What would you like to know?',
+            'Hey! 🤖 I\'m <strong>Elite Bot</strong> from Elite Vask. I can answer questions about prices, booking, coverage area and much more. How can I help?'],
+       follow:['What does it cost?','Do you cover my area?','Book now','What is steam wash?']},
+      {keys:['who are you','what are you','what can you do','elite bot','chatbot','robot','assistant','your name','about you'],
+       ans:['I\'m <strong>Elite Bot</strong> 🤖 – the digital assistant for <strong>Elite Vask</strong>. We\'re a mobile steam car wash service that drives to you anywhere on Zealand. I can help with prices, booking, questions and more!',
+            'Hi! I\'m <strong>Elite Bot</strong>, built to help customers of <strong>Elite Vask</strong> – Zealand\'s mobile steam car wash 🌿 Ask me about packages, prices, travel and what steam cleaning actually is!'],
+       follow:['What does it cost?','What is steam wash?','Book now']},
+      {keys:['thank','thanks','thank you','great','perfect','awesome','wonderful','lovely'],
+       ans:['My pleasure! 😊 Can I help you with anything else?',
+            'Always happy to help! 🌟 Any other questions?',
+            'Glad I could help! 💚 Feel free to ask if there\'s anything else.'],
+       follow:['Book now','What does it cost?']},
       {keys:['price','cost','how much','prices','cheap','expensive'],
        ans:['Prices start from <strong>499 kr</strong> for exterior wash and <strong>799 kr</strong> for a full package. Price depends on car size and zip code. <a href="#vaelg">👉 See all packages</a>',
             'We offer packages from <strong>499 kr</strong> – no hidden fees! Price is calculated based on your car and address. <a href="#vaelg">Compare packages →</a>'],
@@ -951,8 +979,8 @@ function submitBooking(cb){
     ]
   };
   var QUICK={
-    da:[{l:'💰 Hvad koster det?',q:'Hvad koster det?'},{l:'💳 Betal efter vask?',q:'Hvornår betaler jeg?'},{l:'⏱ Hvor lang tid?',q:'Hvor lang tid?'},{l:'📍 Dækker I mit område?',q:'Dækker I mit område?'},{l:'🛡️ Tilfredshedsgaranti?',q:'Har I tilfredshedsgaranti?'},{l:'🚗 Leasingbil?',q:'Kan I vaske leasingbil?'}],
-    en:[{l:'💰 What does it cost?',q:'What does it cost?'},{l:'💳 Pay after wash?',q:'When do I pay?'},{l:'⏱ How long does it take?',q:'How long does it take?'},{l:'📍 Do you cover my area?',q:'Do you cover my area?'},{l:'🛡️ Satisfaction guarantee?',q:'Do you have a satisfaction guarantee?'},{l:'🚗 Lease car?',q:'Can you clean lease cars?'}]
+    da:[{l:'💰 Hvad koster det?',q:'Hvad koster det?'},{l:'⏱ Hvor lang tid?',q:'Hvor lang tid?'},{l:'📍 Dækker I mit område?',q:'Dækker I mit område?'},{l:'🌿 Hvad er dampvask?',q:'Hvad er dampvask?'},{l:'💳 Betal efter vask?',q:'Hvornår betaler jeg?'},{l:'🛡️ Tilfredshedsgaranti?',q:'Har I tilfredshedsgaranti?'}],
+    en:[{l:'💰 What does it cost?',q:'What does it cost?'},{l:'⏱ How long does it take?',q:'How long does it take?'},{l:'📍 Do you cover my area?',q:'Do you cover my area?'},{l:'🌿 What is steam wash?',q:'What is steam wash?'},{l:'💳 Pay after wash?',q:'When do I pay?'},{l:'🛡️ Satisfaction guarantee?',q:'Do you have a satisfaction guarantee?'}]
   };
   function showTyping(){
     if(typingEl)return;
@@ -1058,8 +1086,11 @@ function submitBooking(cb){
   function showGreeting(){
     if(msgs.children.length===0){
       setTimeout(function(){
-        addMsg(LANG==='da'?'Hej! 👋 Jeg er <strong>Elite Bot</strong>. Hvad kan jeg hjælpe dig med i dag?':'Hi! 👋 I\'m <strong>Elite Bot</strong>. How can I help you today?','bot');
-        setTimeout(showQuick,350);
+        addMsg(LANG==='da'
+          ?'Hej! 👋 Jeg er <strong>Elite Bot</strong> fra Elite Vask – mobil dampvask på Sjælland 🌿<br>Hvad kan jeg hjælpe dig med i dag?'
+          :'Hi! 👋 I\'m <strong>Elite Bot</strong> from Elite Vask – mobile steam wash on Zealand 🌿<br>What can I help you with today?',
+        'bot');
+        setTimeout(showQuick,400);
       },250);
     }
   }
