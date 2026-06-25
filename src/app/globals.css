@@ -189,8 +189,9 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 .ge-spark.s1{top:0;right:6px;animation-delay:.5s}
 .ge-spark.s2{bottom:4px;left:5px;font-size:7px;animation-delay:1.3s}
 @keyframes geSpark{0%,55%,100%{opacity:0;transform:scale(.4)}68%,82%{opacity:1;transform:scale(1.2)}}
-.calc-trust{border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(3,1fr)}
-.ct-item{display:flex;align-items:center;gap:11px;padding:16px 22px;border-right:1px solid var(--line)}
+.calc-head-tagline{display:block;font-size:13px;color:rgba(255,255,255,.62);margin-top:7px;font-weight:500}
+.calc-trust{border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr)}
+.ct-item{display:flex;align-items:center;gap:11px;padding:17px 20px;border-right:1px solid var(--line)}
 .ct-item:last-child{border-right:none}
 .ct-ic{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:var(--green-soft);border:1px solid rgba(55,210,120,.22)}
 .ct-ic svg{width:17px;height:17px;color:var(--green)}
@@ -198,7 +199,8 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 .ct-tx span{display:block;font-size:11.5px;color:var(--muted-2);margin-top:2px}
 .note{border-top:1px solid var(--line);padding:14px 24px;font-size:12.5px;color:var(--muted-2);display:flex;gap:8px;align-items:center}
 .note svg{width:16px;height:16px;color:var(--muted);flex-shrink:0}
-@media(max-width:880px){.calc-trust{grid-template-columns:1fr}.ct-item{border-right:none;border-bottom:1px solid var(--line)}.ct-item:last-child{border-bottom:none}}
+@media(max-width:880px){.calc-trust{grid-template-columns:1fr 1fr}.ct-item{border-bottom:1px solid var(--line)}.ct-item:nth-child(2n){border-right:none}.ct-item:nth-last-child(-n+2){border-bottom:none}}
+@media(max-width:520px){.calc-trust{grid-template-columns:1fr}.ct-item{border-right:none}.ct-item:last-child{border-bottom:none}}
 
 /* STATS */
 .stats{background:linear-gradient(135deg,var(--green-deep),#0a3d22)}
