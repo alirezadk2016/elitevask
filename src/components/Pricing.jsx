@@ -23,6 +23,7 @@ const HTML = `<!-- CAR SELECTOR + CALCULATOR -->
       <div class="pkg-tabs" id="pkgTabs"></div>
     </div>
     <div class="pkgs" id="pkgs"></div>
+    <div class="calc-trust-head"><span class="ct-line"></span><span data-i18n="trust_head">Gælder alle pakker – altid inkluderet</span><span class="ct-line"></span></div>
     <div class="calc-trust">
       <div class="ct-item"><span class="ct-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></span><span class="ct-tx"><strong data-i18n="trust1t">Forsikret & professionel</strong><span data-i18n="trust1p">Erfarne fagfolk · fuldt forsikret arbejde</span></span></div>
       <div class="ct-item"><span class="ct-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2v-4c0-1-.7-1.8-1.5-2L16 10l-2.2-2.3c-.4-.4-1-.7-1.7-.7H5c-.6 0-1.1.4-1.4 1L2 11v6h2"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg></span><span class="ct-tx"><strong data-i18n="trust4t">Gratis kørsel</strong><span data-i18n="trust4p">Vi kører til dig – hele Sjælland</span></span></div>

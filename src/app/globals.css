@@ -115,20 +115,30 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 
 /* CAR SELECTOR */
 .selector{background:var(--bg-2);border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:42px 0 80px}
-.car-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:40px}
-.car{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:24px 16px 18px;text-align:center;cursor:pointer;transition:transform .34s cubic-bezier(.22,1,.36,1),border-color .25s ease,box-shadow .4s cubic-bezier(.22,1,.36,1),background .25s ease;position:relative}
-.car:hover{transform:translateY(-5px);border-color:var(--green);box-shadow:0 0 0 3px rgba(55,210,120,.18),0 18px 44px rgba(55,210,120,.22)}
-.car.on{border-color:var(--green);background:var(--surface-2)}
-.car.on::after{content:"";position:absolute;top:13px;right:14px;width:20px;height:20px;border-radius:50%;background:var(--green);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='%23062313' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:center}
-.car svg.cs{width:104px;height:56px;margin:0 auto 14px;display:block;color:#7f9488;transition:color .3s ease,filter .35s ease,transform .4s cubic-bezier(.22,1,.36,1)}
-.car:hover svg.cs,.car.on svg.cs{color:var(--green);filter:drop-shadow(0 5px 14px rgba(55,210,120,.45))}
-.car:hover svg.cs{transform:translateX(3px) scale(1.05)}
+.car-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:40px}
+.car{background:linear-gradient(180deg,var(--surface-2) 0%,var(--bg-2) 100%);border:1px solid var(--line);border-radius:var(--r);padding:22px 16px 18px;text-align:center;cursor:pointer;transition:transform .34s cubic-bezier(.22,1,.36,1),border-color .25s ease,box-shadow .4s cubic-bezier(.22,1,.36,1);position:relative;overflow:hidden}
+/* glossy top sheen */
+.car::after{content:"";position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.14),transparent);pointer-events:none}
+.car:hover{transform:translateY(-6px);border-color:rgba(55,210,120,.55);box-shadow:0 0 0 1px rgba(55,210,120,.25),0 22px 50px rgba(0,0,0,.45),0 14px 38px rgba(55,210,120,.16)}
+.car.on{border-color:var(--green);box-shadow:0 0 0 1px var(--green),0 18px 44px rgba(55,210,120,.2)}
+.car-check{position:absolute;top:13px;right:14px;width:22px;height:22px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;opacity:0;transform:scale(.5);transition:opacity .3s ease,transform .3s cubic-bezier(.34,1.56,.64,1);box-shadow:0 3px 10px rgba(55,210,120,.5);z-index:3}
+.car.on .car-check{opacity:1;transform:scale(1)}
+.car-check svg{width:13px;height:13px;color:#062313}
+/* SHOWROOM STAGE */
+.car-stage{position:relative;height:74px;margin:4px 0 16px;display:flex;align-items:flex-end;justify-content:center}
+.car-stage::before{content:"";position:absolute;top:-2px;left:50%;transform:translateX(-50%);width:140px;height:78px;background:radial-gradient(ellipse 60% 70% at 50% 38%,rgba(55,210,120,.16),transparent 68%);opacity:.55;transition:opacity .4s ease;pointer-events:none}
+.car:hover .car-stage::before,.car.on .car-stage::before{opacity:1}
+.car-stage::after{content:"";position:absolute;bottom:-2px;left:50%;transform:translateX(-50%);width:104px;height:12px;border-radius:50%;background:radial-gradient(ellipse,rgba(55,210,120,.35),transparent 72%);filter:blur(3px);opacity:0;transition:opacity .4s ease,width .4s ease}
+.car:hover .car-stage::after,.car.on .car-stage::after{opacity:1;width:118px}
+.car svg.cs{position:relative;z-index:1;width:108px;height:58px;display:block;color:#8aa093;transition:color .3s ease,filter .35s ease,transform .45s cubic-bezier(.22,1,.36,1)}
+.car:hover svg.cs,.car.on svg.cs{color:var(--green);filter:drop-shadow(0 6px 16px rgba(55,210,120,.5))}
+.car:hover svg.cs{transform:translateX(4px) scale(1.06)}
 .car.on svg.cs{transform:scale(1.04)}
-.car::before{content:"";position:absolute;inset:-3px;border-radius:calc(var(--r) + 3px);background:radial-gradient(ellipse at center,rgba(55,210,120,.15),transparent 70%);opacity:0;transition:opacity .35s;pointer-events:none;z-index:0}
-.car:hover::before{opacity:1}
-.car .nm{font-size:14.5px;font-weight:700;color:#fff}
-.car .ex{font-size:12px;color:var(--muted-2);margin-top:3px}
-.car .car-price{font-size:12px;color:var(--green);font-weight:700;margin-top:5px}
+.car .nm{font-size:15px;font-weight:800;color:#fff;letter-spacing:-.2px}
+.car .ex{font-size:11.5px;color:var(--muted-2);margin-top:4px;letter-spacing:.2px}
+.car .car-price{display:inline-flex;align-items:baseline;gap:5px;font-size:13.5px;color:var(--green);font-weight:800;margin-top:11px;background:rgba(55,210,120,.1);border:1px solid rgba(55,210,120,.22);border-radius:99px;padding:5px 13px;transition:background .25s ease,border-color .25s ease}
+.car:hover .car-price,.car.on .car-price{background:rgba(55,210,120,.16);border-color:rgba(55,210,120,.4)}
+.car .car-price-from{font-size:10.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
 
 /* PRICE CALCULATOR */
 .calc{margin-top:26px;border:1px solid var(--line-2);border-radius:var(--r);overflow:hidden;display:none;background:var(--surface)}
@@ -190,7 +200,9 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 .ge-spark.s2{bottom:4px;left:5px;font-size:7px;animation-delay:1.3s}
 @keyframes geSpark{0%,55%,100%{opacity:0;transform:scale(.4)}68%,82%{opacity:1;transform:scale(1.2)}}
 .calc-head-tagline{display:block;font-size:13px;color:rgba(255,255,255,.62);margin-top:7px;font-weight:500}
-.calc-trust{border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr)}
+.calc-trust-head{border-top:1px solid var(--line);display:flex;align-items:center;justify-content:center;gap:14px;padding:15px 24px 3px;font-size:11.5px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted)}
+.calc-trust-head .ct-line{flex:1;max-width:120px;height:1px;background:linear-gradient(90deg,transparent,var(--line-2),transparent)}
+.calc-trust{display:grid;grid-template-columns:repeat(4,1fr)}
 .ct-item{display:flex;align-items:center;gap:11px;padding:17px 20px;border-right:1px solid var(--line)}
 .ct-item:last-child{border-right:none}
 .ct-ic{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:var(--green-soft);border:1px solid rgba(55,210,120,.22)}
