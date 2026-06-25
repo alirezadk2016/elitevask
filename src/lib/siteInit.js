@@ -1209,6 +1209,7 @@ function submitBooking(cb){
       dotsEl.innerHTML='';
       for(var i=0;i<pages;i++){
         var btn=document.createElement('button');
+        btn.type='button';
         btn.className='gcar-dot'+(i===baCur?' active':'');
         btn.setAttribute('aria-label','Side '+(i+1));
         (function(idx){btn.addEventListener('click',function(){baCur=idx;renderBa();});})(i);

@@ -32,11 +32,11 @@ const HTML = `<!-- BEFORE/AFTER + GALLERY -->
       ${baCard('/gallery/roof-before.jpg', '/gallery/roof-after.jpg', 'ba_c6', 'Tagkant · algerens', 'Tagkant alger før', 'Tagkant alger efter')}
     </div>
     <div class="ba-pager-nav">
-      <button class="gcar-btn" id="baPrev" aria-label="Forrige" disabled>
+      <button type="button" class="gcar-btn" id="baPrev" aria-label="Forrige" disabled>
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
       </button>
       <div class="gcar-dots" id="baDots"></div>
-      <button class="gcar-btn" id="baNext" aria-label="Næste">
+      <button type="button" class="gcar-btn" id="baNext" aria-label="Næste">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
       </button>
     </div>
@@ -51,7 +51,7 @@ const HTML = `<!-- BEFORE/AFTER + GALLERY -->
     <p class="sec-sub" data-i18n="gal_sub2">Flere eksempler på bilvask hjemme og bilrengøring hjemme hos kunden – klik for fuld størrelse.</p>
   </div>
   <div class="gcar-wrap" id="galleryNavWrap">
-    <button class="gcar-btn gcar-prev" id="galPrev" aria-label="Forrige">
+    <button type="button" class="gcar-btn gcar-prev" id="galPrev" aria-label="Forrige">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
     </button>
     <div class="gcar-viewport" id="galViewport">
@@ -61,7 +61,7 @@ const HTML = `<!-- BEFORE/AFTER + GALLERY -->
         ${galItem('/gallery/aerial-wash.jpg', 'g_onsite', 'Mobil dampvask · på stedet', 'Mobil dampvask på stedet')}
       </div>
     </div>
-    <button class="gcar-btn gcar-next" id="galNext" aria-label="Næste">
+    <button type="button" class="gcar-btn gcar-next" id="galNext" aria-label="Næste">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
     </button>
   </div>
