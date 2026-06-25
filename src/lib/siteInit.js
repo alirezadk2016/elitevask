@@ -1173,9 +1173,9 @@ function submitBooking(cb){
   if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',initSteamAcc);}else{setTimeout(initSteamAcc,0);}
 })();
 
-/* ====== GALLERY PAGINATION ====== */
+/* ====== GALLERY SLIDER ====== */
 (function(){
-  var GAL_PER=6,galPage=0;
+  var SCROLL_AMT=260;
 
   function initPagination(){
     var wrap=document.getElementById('galleryNavWrap');
@@ -1185,21 +1185,20 @@ function submitBooking(cb){
     var next=document.getElementById('galNext');
     if(!grid||!prev||!next)return;
 
-    function update(){
-      var items=Array.from(grid.querySelectorAll('.gitem'));
-      var total=items.length;
-      var maxPage=Math.max(0,Math.ceil(total/GAL_PER)-1);
-      items.forEach(function(item,i){
-        item.style.display=(i>=galPage*GAL_PER&&i<(galPage+1)*GAL_PER)?'':'none';
-      });
-      prev.style.display=galPage>0?'':'none';
-      next.style.display=(total>GAL_PER&&galPage<maxPage)?'':'none';
+    function updateBtns(){
+      var atStart=grid.scrollLeft<=4;
+      var atEnd=grid.scrollLeft+grid.clientWidth>=grid.scrollWidth-4;
+      prev.disabled=atStart;
+      next.disabled=atEnd;
+      prev.style.display='';
+      next.style.display='';
     }
 
-    prev.addEventListener('click',function(){galPage--;update();});
-    next.addEventListener('click',function(){galPage++;update();});
-    update();
-    wrap.__galUpdate=update;
+    prev.addEventListener('click',function(){grid.scrollBy({left:-SCROLL_AMT,behavior:'smooth'});});
+    next.addEventListener('click',function(){grid.scrollBy({left:SCROLL_AMT,behavior:'smooth'});});
+    grid.addEventListener('scroll',updateBtns,{passive:true});
+    updateBtns();
+    wrap.__galUpdate=updateBtns;
   }
 
   function loadDynamicGallery(){

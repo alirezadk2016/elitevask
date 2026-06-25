@@ -45,10 +45,10 @@ const HTML = `<!-- BEFORE/AFTER + GALLERY -->
       ${galItem('/gallery/steam-hood.jpg', 'g_hood', 'Motorhjelm · damp', 'Dampvask af motorhjelm')}
       ${galItem('/gallery/aerial-wash.jpg', 'g_onsite', 'Mobil dampvask · på stedet', 'Mobil dampvask på stedet')}
     </div>
-    <button class="gal-nav-btn gal-nav-prev" id="galPrev" aria-label="Forrige" style="display:none">
+    <button class="gal-nav-btn gal-nav-prev" id="galPrev" aria-label="Forrige">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
     </button>
-    <button class="gal-nav-btn gal-nav-next" id="galNext" aria-label="Næste" style="display:none">
+    <button class="gal-nav-btn gal-nav-next" id="galNext" aria-label="Næste">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
     </button>
   </div>
