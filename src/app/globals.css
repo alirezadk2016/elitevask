@@ -230,7 +230,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 .step p{font-size:13.5px;color:var(--muted)}
 
 /* BEFORE/AFTER GALLERY */
-.work{background:radial-gradient(ellipse 100% 60% at 50% 0%,rgba(55,210,120,.04) 0%,transparent 55%),var(--bg-2);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.work{background:radial-gradient(ellipse 100% 60% at 50% 0%,rgba(55,210,120,.04) 0%,transparent 55%),var(--bg-2);border-top:1px solid var(--line);border-bottom:1px solid var(--line);overflow:hidden}
 .ba-feature{max-width:760px;margin:44px auto 0}
 .ba-slider{position:relative;border-radius:var(--r);overflow:hidden;border:1px solid var(--line);user-select:none;touch-action:pan-y;cursor:ew-resize;aspect-ratio:4/3;background:#0a0f0c}
 .ba-slider img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none}

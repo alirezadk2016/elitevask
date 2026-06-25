@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect, useRef, useCallback } from "react";
+import { DEFAULT_ALBUM, DEFAULT_BEFORE_AFTER } from "@/lib/galleryData";
 
 const T = {
   bg0:          "#08110a",
@@ -936,116 +937,116 @@ export default function AdminPanel() {
                 <Feedback m={msg} />
               </div>
 
-              {gallery.length > 0 && (
+              {/* Default / Standard items */}
+              <div style={{ marginBottom:28 }}>
                 <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:12 }}>
-                  <span style={{ fontSize:11, letterSpacing:2, fontWeight:700, color:T.t3, textTransform:"uppercase" }}>Billeder i galleriet</span>
-                  <span style={{ background:T.bg2, color:T.t3, borderRadius:20, padding:"2px 9px", fontSize:12 }}>{gallery.length}</span>
+                  <span style={{ fontSize:10, letterSpacing:2, fontWeight:700, color:T.t3, textTransform:"uppercase" }}>Standardbilleder ({DEFAULT_ALBUM.length})</span>
                 </div>
-              )}
-
-              {gallery.length > 0 ? (() => {
-                const beKeywords = /f\xf8r|efter|before|after/i;
-                const categorized = gallery.map(i => ({...i, _cat:(i.album==="F\xf8r & Efter"||beKeywords.test(i.caption||"")||beKeywords.test(i.album||""))?"F\xf8r & Efter":"Enkelt"}));
-                const beforeAfter = categorized.filter(i => i._cat==="F\xf8r & Efter");
-                const enkelt = categorized.filter(i => i._cat==="Enkelt");
-                const filteredGallery = galleryAlbum==="alle" ? categorized : galleryAlbum==="F\xf8r & Efter" ? beforeAfter : enkelt;
-                const catTabs = ["alle","F\xf8r & Efter","Enkelt"];
-                return (
-                  <>
-                    <div style={{ display:"flex", gap:6, flexWrap:"wrap", marginBottom:16 }}>
-                      {catTabs.map(alb => {
-                        const count = alb==="alle" ? gallery.length : alb==="F\xf8r & Efter" ? beforeAfter.length : enkelt.length;
-                        const active = galleryAlbum===alb;
-                        return (
-                          <button key={alb} onClick={() => setGalleryAlbum(alb)}
-                            style={{ padding:"6px 14px", borderRadius:20, border:`1px solid ${active?T.accentBorder:T.border}`, background:active?T.accentDim:"transparent", color:active?T.accent:T.t3, fontSize:12, fontWeight:600, cursor:"pointer", fontFamily:FF }}>
-                            {alb==="alle" ? `Alle (${count})` : `${alb} (${count})`}
-                          </button>
-                        );
-                      })}
-                    </div>
-                    <div style={{ display:"grid", gridTemplateColumns:`repeat(auto-fill, minmax(${narrow?"160px":"220px"},1fr))`, gap:14 }}>
-                      {filteredGallery.map(item => {
-                  const isEditingThis = editingGallery?.id === item.id;
-                  const isBE = item._cat==="F\xf8r & Efter";
-                  return (
-                    <div key={item.id}
-                      style={{ borderRadius:12, overflow:"hidden", background:T.bg1, border:`1px solid ${hoveredId===item.id?T.accentBorder:T.border}`, boxShadow:hoveredId===item.id?T.shadowL:T.shadow, transition:"border .2s, box-shadow .2s, transform .15s", transform:hoveredId===item.id?"translateY(-2px)":"none", display:"flex", flexDirection:"column" }}
-                      onMouseEnter={() => setHoveredId(item.id)}
-                      onMouseLeave={() => setHoveredId(null)}
-                    >
-                      {/* Image */}
+                <div style={{ display:"grid", gridTemplateColumns:`repeat(auto-fill, minmax(${narrow?"160px":"220px"},1fr))`, gap:14 }}>
+                  {DEFAULT_ALBUM.map(item => (
+                    <div key={item.id} style={{ borderRadius:12, overflow:"hidden", background:T.bg1, border:`1px solid ${T.border}`, boxShadow:T.shadow, display:"flex", flexDirection:"column" }}>
                       <div style={{ position:"relative", overflow:"hidden" }}>
-                        <img src={item.url} alt={item.caption||""} style={{ width:"100%", aspectRatio:"4/3", objectFit:"cover", display:"block", cursor:"pointer" }} onClick={() => setPreviewItem(item)} />
-                        <span style={{ position:"absolute", top:8, left:8, fontSize:10, fontWeight:700, color:T.bg0, background:isBE?T.gold:T.accent, borderRadius:4, padding:"2px 7px", letterSpacing:.3 }}>{item._cat}</span>
+                        <img src={item.url} alt={item.caption||""} style={{ width:"100%", aspectRatio:"4/3", objectFit:"cover", display:"block" }} />
+                        <span style={{ position:"absolute", top:8, right:8, background:"rgba(212,175,55,.15)", color:"#d4af37", border:"1px solid rgba(212,175,55,.3)", borderRadius:20, padding:"2px 10px", fontSize:11, fontWeight:700 }}>Standard</span>
                       </div>
-
-                      {/* Inline edit form */}
-                      {isEditingThis ? (
-                        <div style={{ padding:"12px 12px 10px", display:"flex", flexDirection:"column", gap:8 }}>
-                          <input
-                            value={editingGallery.caption}
-                            onChange={e => setEditingGallery(d => ({...d, caption:e.target.value}))}
-                            placeholder="Billedtekst…"
-                            style={{ width:"100%", padding:"8px 10px", borderRadius:7, border:`1px solid ${T.accentBorder}`, background:T.bg0, color:T.t1, fontSize:12, outline:"none", fontFamily:FF, boxSizing:"border-box" }}
-                          />
-                          <select
-                            value={editingGallery.album}
-                            onChange={e => setEditingGallery(d => ({...d, album:e.target.value}))}
-                            style={{ width:"100%", padding:"8px 10px", borderRadius:7, border:`1px solid ${T.border}`, background:T.bg0, color:editingGallery.album?T.t1:T.t4, fontSize:12, outline:"none", fontFamily:FF, cursor:"pointer" }}
-                          >
-                            <option value="Enkelt">Enkelt billede</option>
-                            <option value="F\xf8r & Efter">F\xf8r &amp; Efter</option>
-                          </select>
-                          <div style={{ display:"flex", gap:6 }}>
-                            <button
-                              onClick={async () => {
-                                await fetch("/api/admin/content", {
-                                  method:"PUT",
-                                  headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" },
-                                  body: JSON.stringify({ type:"gallery", id:item.id, item:{ caption:editingGallery.caption, album:editingGallery.album } }),
-                                });
-                                setEditingGallery(null);
-                                fetchContent("gallery");
-                              }}
-                              style={{ flex:1, padding:"7px 0", background:T.accent, color:T.bg0, border:"none", borderRadius:7, fontWeight:700, fontSize:12, cursor:"pointer", fontFamily:FF }}
-                            >Gem</button>
-                            <button
-                              onClick={() => setEditingGallery(null)}
-                              style={{ flex:1, padding:"7px 0", background:"rgba(255,255,255,.06)", color:T.t3, border:"none", borderRadius:7, fontWeight:600, fontSize:12, cursor:"pointer", fontFamily:FF }}
-                            >Annuller</button>
-                          </div>
-                        </div>
-                      ) : (
-                        /* Always-visible bottom bar */
-                        <div style={{ padding:"8px 10px", display:"flex", gap:5, alignItems:"center", borderTop:`1px solid ${T.border}` }}>
-                          {item.caption
-                            ? <span style={{ flex:1, fontSize:11, color:T.t3, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap", minWidth:0 }}>{item.caption}</span>
-                            : <span style={{ flex:1 }}/>}
-                          <button
-                            onClick={() => setPreviewItem(item)}
-                            style={{ padding:"5px 9px", background:T.accentDim, border:`1px solid ${T.accentBorder}`, borderRadius:6, color:T.accent, fontSize:11, fontWeight:600, cursor:"pointer", fontFamily:FF, whiteSpace:"nowrap" }}
-                          >Vis</button>
-                          <button
-                            onClick={() => setEditingGallery({ id:item.id, caption:item.caption||"", album:item.album||"" })}
-                            style={{ padding:"5px 9px", background:"rgba(255,255,255,.06)", border:`1px solid ${T.border}`, borderRadius:6, color:T.t2, fontSize:11, fontWeight:600, cursor:"pointer", fontFamily:FF, whiteSpace:"nowrap" }}
-                          >✏</button>
-                          <button
-                            onClick={() => deleteItem("gallery", item.id, item.source==="upload"?item.url:null)}
-                            style={{ padding:"5px 9px", background:T.dangerDim, border:`1px solid ${T.dangerBorder}`, borderRadius:6, color:T.danger, fontSize:11, fontWeight:600, cursor:"pointer", fontFamily:FF, whiteSpace:"nowrap" }}
-                          >Slet</button>
+                      {item.caption && (
+                        <div style={{ padding:"8px 10px", borderTop:`1px solid ${T.border}` }}>
+                          <span style={{ fontSize:11, color:T.t3, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap", display:"block" }}>{item.caption}</span>
                         </div>
                       )}
                     </div>
-                  );
-                })}
-                    </div>
-                  </>
-                );
-              })() : (
-                <div style={{ padding:"72px 24px", textAlign:"center" }}>
+                  ))}
+                </div>
+              </div>
+
+              {/* KV / uploaded items */}
+              {gallery.length > 0 && (
+                <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:12 }}>
+                  <span style={{ fontSize:10, letterSpacing:2, fontWeight:700, color:T.t3, textTransform:"uppercase" }}>Egne billeder ({gallery.length})</span>
+                </div>
+              )}
+
+              {gallery.length > 0 ? (
+                <div style={{ display:"grid", gridTemplateColumns:`repeat(auto-fill, minmax(${narrow?"160px":"220px"},1fr))`, gap:14 }}>
+                  {gallery.map(item => {
+                    const isEditingThis = editingGallery?.id === item.id;
+                    return (
+                      <div key={item.id}
+                        style={{ borderRadius:12, overflow:"hidden", background:T.bg1, border:`1px solid ${hoveredId===item.id?T.accentBorder:T.border}`, boxShadow:hoveredId===item.id?T.shadowL:T.shadow, transition:"border .2s, box-shadow .2s, transform .15s", transform:hoveredId===item.id?"translateY(-2px)":"none", display:"flex", flexDirection:"column" }}
+                        onMouseEnter={() => setHoveredId(item.id)}
+                        onMouseLeave={() => setHoveredId(null)}
+                      >
+                        {/* Image with hover overlay */}
+                        <div style={{ position:"relative", overflow:"hidden" }}>
+                          <img src={item.url} alt={item.caption||""} style={{ width:"100%", aspectRatio:"4/3", objectFit:"cover", display:"block" }} />
+                          {!isEditingThis && (
+                            <div style={{ position:"absolute", inset:0, background:"rgba(0,0,0,.55)", display:"flex", alignItems:"center", justifyContent:"center", gap:8, opacity:hoveredId===item.id?1:0, transition:".2s" }}>
+                              <button onClick={() => setPreviewItem(item)}
+                                style={{ width:36, height:36, borderRadius:"50%", background:"rgba(255,255,255,.12)", border:"1px solid rgba(255,255,255,.25)", color:"#fff", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center" }}>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                              </button>
+                              <button onClick={() => setEditingGallery({ id:item.id, caption:item.caption||"", album:item.album||"" })}
+                                style={{ width:36, height:36, borderRadius:"50%", background:"rgba(255,255,255,.12)", border:"1px solid rgba(255,255,255,.25)", color:"#fff", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center" }}>
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                              </button>
+                              <button onClick={() => deleteItem("gallery", item.id, item.source==="upload"?item.url:null)}
+                                style={{ width:36, height:36, borderRadius:"50%", background:"rgba(255,255,255,.12)", border:"1px solid rgba(255,255,255,.25)", color:"#fff", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center" }}>
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+                              </button>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Inline edit form */}
+                        {isEditingThis && (
+                          <div style={{ padding:"12px 12px 10px", display:"flex", flexDirection:"column", gap:8 }}>
+                            <input
+                              value={editingGallery.caption}
+                              onChange={e => setEditingGallery(d => ({...d, caption:e.target.value}))}
+                              placeholder="Billedtekst…"
+                              style={{ width:"100%", padding:"8px 10px", borderRadius:7, border:`1px solid ${T.accentBorder}`, background:T.bg0, color:T.t1, fontSize:12, outline:"none", fontFamily:FF, boxSizing:"border-box" }}
+                            />
+                            <select
+                              value={editingGallery.album}
+                              onChange={e => setEditingGallery(d => ({...d, album:e.target.value}))}
+                              style={{ width:"100%", padding:"8px 10px", borderRadius:7, border:`1px solid ${T.border}`, background:T.bg0, color:editingGallery.album?T.t1:T.t4, fontSize:12, outline:"none", fontFamily:FF, cursor:"pointer" }}
+                            >
+                              <option value="Enkelt">Enkelt billede</option>
+                              <option value="F\xf8r & Efter">F\xf8r &amp; Efter</option>
+                            </select>
+                            <div style={{ display:"flex", gap:6 }}>
+                              <button
+                                onClick={async () => {
+                                  await fetch("/api/admin/content", {
+                                    method:"PUT",
+                                    headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" },
+                                    body: JSON.stringify({ type:"gallery", id:item.id, item:{ caption:editingGallery.caption, album:editingGallery.album } }),
+                                  });
+                                  setEditingGallery(null);
+                                  fetchContent("gallery");
+                                }}
+                                style={{ flex:1, padding:"7px 0", background:T.accent, color:T.bg0, border:"none", borderRadius:7, fontWeight:700, fontSize:12, cursor:"pointer", fontFamily:FF }}
+                              >Gem</button>
+                              <button
+                                onClick={() => setEditingGallery(null)}
+                                style={{ flex:1, padding:"7px 0", background:"rgba(255,255,255,.06)", color:T.t3, border:"none", borderRadius:7, fontWeight:600, fontSize:12, cursor:"pointer", fontFamily:FF }}
+                              >Annuller</button>
+                            </div>
+                          </div>
+                        )}
+                        {!isEditingThis && item.caption && (
+                          <div style={{ padding:"8px 10px", borderTop:`1px solid ${T.border}` }}>
+                            <span style={{ fontSize:11, color:T.t3, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap", display:"block" }}>{item.caption}</span>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div style={{ padding:"48px 24px", textAlign:"center" }}>
                   <svg width="72" height="72" viewBox="0 0 24 24" fill="none" stroke={T.t4} strokeWidth="1.5" strokeLinecap="round" style={{ marginBottom:20, opacity:.4 }}><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-                  <p style={{ fontSize:17, fontWeight:700, color:T.t2, margin:"0 0 6px" }}>Ingen billeder endnu</p>
+                  <p style={{ fontSize:17, fontWeight:700, color:T.t2, margin:"0 0 6px" }}>Ingen egne billeder endnu</p>
                   <p style={{ fontSize:13, color:T.t3, margin:"0 0 20px" }}>Upload dit første billede ovenfor</p>
                   <button onClick={() => fileRef.current?.click()}
                     style={{ padding:"10px 20px", background:T.accentDim, border:`1px solid ${T.accentBorder}`, borderRadius:8, color:T.accent, fontSize:13, fontWeight:600, cursor:"pointer", fontFamily:FF }}>
@@ -1107,6 +1108,42 @@ export default function AdminPanel() {
                 <Feedback m={msg} />
               </div>
 
+              {/* Default / Standard before-after items */}
+              <div style={{ marginBottom:28 }}>
+                <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:12 }}>
+                  <span style={{ fontSize:10, letterSpacing:2, fontWeight:700, color:T.t3, textTransform:"uppercase" }}>Standardbilleder ({DEFAULT_BEFORE_AFTER.length})</span>
+                </div>
+                <div style={{ display:"grid", gridTemplateColumns:`repeat(auto-fill, minmax(${narrow?"260px":"300px"},1fr))`, gap:14 }}>
+                  {DEFAULT_BEFORE_AFTER.map(item => (
+                    <div key={item.id} style={{ borderRadius:12, overflow:"hidden", background:T.bg1, border:`1px solid ${T.border}`, boxShadow:T.shadow, display:"flex", flexDirection:"column" }}>
+                      <div style={{ display:"flex", gap:2, padding:8 }}>
+                        <div style={{ flex:1, position:"relative" }}>
+                          <span style={{ position:"absolute", top:6, left:6, fontSize:10, fontWeight:700, color:T.bg0, background:T.gold, borderRadius:4, padding:"2px 7px" }}>Før</span>
+                          <img src={item.before} alt="" style={{ width:"100%", height:104, objectFit:"cover", borderRadius:8, display:"block" }} />
+                        </div>
+                        <div style={{ flex:1, position:"relative" }}>
+                          <span style={{ position:"absolute", top:6, left:6, fontSize:10, fontWeight:700, color:T.bg0, background:T.accent, borderRadius:4, padding:"2px 7px" }}>Efter</span>
+                          <img src={item.after} alt="" style={{ width:"100%", height:104, objectFit:"cover", borderRadius:8, display:"block" }} />
+                        </div>
+                      </div>
+                      <div style={{ padding:"8px 10px", borderTop:`1px solid ${T.border}`, display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+                        {item.caption
+                          ? <span style={{ fontSize:11, color:T.t3, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap", flex:1, minWidth:0 }}>{item.caption}</span>
+                          : <span style={{ flex:1 }}/>}
+                        <span style={{ background:"rgba(212,175,55,.15)", color:"#d4af37", border:"1px solid rgba(212,175,55,.3)", borderRadius:20, padding:"2px 10px", fontSize:11, fontWeight:700, flexShrink:0, marginLeft:8 }}>Standard</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* KV / uploaded before-after items */}
+              {beforeAfter.length > 0 && (
+                <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:12 }}>
+                  <span style={{ fontSize:10, letterSpacing:2, fontWeight:700, color:T.t3, textTransform:"uppercase" }}>Egne par ({beforeAfter.length})</span>
+                </div>
+              )}
+
               {beforeAfter.length > 0 ? (
                 <div style={{ display:"grid", gridTemplateColumns:`repeat(auto-fill, minmax(${narrow?"260px":"300px"},1fr))`, gap:14 }}>
                   {beforeAfter.map(item => {
@@ -1117,15 +1154,27 @@ export default function AdminPanel() {
                         onMouseEnter={() => setHoveredId(item.id)}
                         onMouseLeave={() => setHoveredId(null)}
                       >
-                        <div style={{ display:"flex", gap:2, padding:8 }}>
+                        <div style={{ display:"flex", gap:2, padding:8, position:"relative" }}>
                           <div style={{ flex:1, position:"relative" }}>
-                            <span style={{ position:"absolute", top:6, left:6, fontSize:10, fontWeight:700, color:T.bg0, background:T.gold, borderRadius:4, padding:"2px 7px" }}>Før</span>
+                            <span style={{ position:"absolute", top:6, left:6, fontSize:10, fontWeight:700, color:T.bg0, background:T.gold, borderRadius:4, padding:"2px 7px", zIndex:1 }}>Før</span>
                             <img src={item.before} alt="" style={{ width:"100%", height:104, objectFit:"cover", borderRadius:8, display:"block" }} />
                           </div>
                           <div style={{ flex:1, position:"relative" }}>
-                            <span style={{ position:"absolute", top:6, left:6, fontSize:10, fontWeight:700, color:T.bg0, background:T.accent, borderRadius:4, padding:"2px 7px" }}>Efter</span>
+                            <span style={{ position:"absolute", top:6, left:6, fontSize:10, fontWeight:700, color:T.bg0, background:T.accent, borderRadius:4, padding:"2px 7px", zIndex:1 }}>Efter</span>
                             <img src={item.after} alt="" style={{ width:"100%", height:104, objectFit:"cover", borderRadius:8, display:"block" }} />
                           </div>
+                          {!isEditingThis && (
+                            <div style={{ position:"absolute", inset:8, background:"rgba(0,0,0,.55)", display:"flex", alignItems:"center", justifyContent:"center", gap:8, opacity:hoveredId===item.id?1:0, transition:".2s", borderRadius:8 }}>
+                              <button onClick={() => setEditingBA({ id:item.id, caption:item.caption||"" })}
+                                style={{ width:36, height:36, borderRadius:"50%", background:"rgba(255,255,255,.12)", border:"1px solid rgba(255,255,255,.25)", color:"#fff", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center" }}>
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                              </button>
+                              <button onClick={() => deleteBeforeAfter(item)}
+                                style={{ width:36, height:36, borderRadius:"50%", background:"rgba(255,255,255,.12)", border:"1px solid rgba(255,255,255,.25)", color:"#fff", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center" }}>
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+                              </button>
+                            </div>
+                          )}
                         </div>
 
                         {isEditingThis ? (
@@ -1144,24 +1193,20 @@ export default function AdminPanel() {
                             </div>
                           </div>
                         ) : (
-                          <div style={{ padding:"8px 10px", display:"flex", gap:5, alignItems:"center", borderTop:`1px solid ${T.border}` }}>
-                            {item.caption
-                              ? <span style={{ flex:1, fontSize:11, color:T.t3, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap", minWidth:0 }}>{item.caption}</span>
-                              : <span style={{ flex:1 }}/>}
-                            <button onClick={() => setEditingBA({ id:item.id, caption:item.caption||"" })}
-                              style={{ padding:"5px 11px", background:"rgba(255,255,255,.06)", border:`1px solid ${T.border}`, borderRadius:6, color:T.t2, fontSize:11, fontWeight:600, cursor:"pointer", fontFamily:FF, whiteSpace:"nowrap" }}>Rediger</button>
-                            <button onClick={() => deleteBeforeAfter(item)}
-                              style={{ padding:"5px 11px", background:T.dangerDim, border:`1px solid ${T.dangerBorder}`, borderRadius:6, color:T.danger, fontSize:11, fontWeight:600, cursor:"pointer", fontFamily:FF, whiteSpace:"nowrap" }}>Slet</button>
-                          </div>
+                          item.caption && (
+                            <div style={{ padding:"8px 10px", borderTop:`1px solid ${T.border}` }}>
+                              <span style={{ fontSize:11, color:T.t3, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap", display:"block" }}>{item.caption}</span>
+                            </div>
+                          )
                         )}
                       </div>
                     );
                   })}
                 </div>
               ) : (
-                <div style={{ padding:"72px 24px", textAlign:"center" }}>
+                <div style={{ padding:"48px 24px", textAlign:"center" }}>
                   <svg width="72" height="72" viewBox="0 0 24 24" fill="none" stroke={T.t4} strokeWidth="1.5" strokeLinecap="round" style={{ marginBottom:20, opacity:.4 }}><rect x="2" y="5" width="11" height="14" rx="2"/><rect x="11" y="5" width="11" height="14" rx="2"/><line x1="12" y1="3" x2="12" y2="21"/></svg>
-                  <p style={{ fontSize:17, fontWeight:700, color:T.t2, margin:"0 0 6px" }}>Ingen før/efter endnu</p>
+                  <p style={{ fontSize:17, fontWeight:700, color:T.t2, margin:"0 0 6px" }}>Ingen egne par endnu</p>
                   <p style={{ fontSize:13, color:T.t3, margin:0 }}>Tilføj dit første par ovenfor</p>
                 </div>
               )}
