@@ -1184,14 +1184,14 @@ function submitBooking(cb){
     var prev=document.getElementById('galPrev');
     var next=document.getElementById('galNext');
     if(!grid||!prev||!next)return;
+    if(wrap.__galInit)return; // only init once
+    wrap.__galInit=true;
 
     function updateBtns(){
       var atStart=grid.scrollLeft<=4;
       var atEnd=grid.scrollLeft+grid.clientWidth>=grid.scrollWidth-4;
       prev.disabled=atStart;
       next.disabled=atEnd;
-      prev.style.display='';
-      next.style.display='';
     }
 
     prev.addEventListener('click',function(){grid.scrollBy({left:-SCROLL_AMT,behavior:'smooth'});});
@@ -1204,10 +1204,14 @@ function submitBooking(cb){
   function loadDynamicGallery(){
     var grid=document.getElementById('gallery');
     if(!grid)return;
+    if(grid.__kvLoaded)return; // prevent duplicate runs
+    grid.__kvLoaded=true;
     fetch('/api/content/gallery')
       .then(function(r){return r.json();})
       .then(function(data){
         var kvItems=data.items||[];
+        // remove any previously injected dynamic items (safety)
+        grid.querySelectorAll('.gitem-dynamic').forEach(function(el){el.remove();});
         kvItems.forEach(function(item){
           var fig=document.createElement('figure');
           fig.className='gitem gitem-dynamic';
@@ -1217,14 +1221,24 @@ function submitBooking(cb){
           fig.appendChild(img);
           if(item.caption){var cap=document.createElement('figcaption');cap.textContent=item.caption;fig.appendChild(cap);}
           grid.appendChild(fig);
-          var idx=(window.__lbItems||[]).length;
-          if(window.__lbItems)window.__lbItems.push(item.url);
-          fig.addEventListener('click',function(){if(window.__lbOpen)window.__lbOpen(idx);});
+          // register in lightbox
+          if(window.__lbItems){
+            var idx=window.__lbItems.length;
+            window.__lbItems.push(item.url);
+            fig.addEventListener('click',function(){if(window.__lbOpen)window.__lbOpen(idx);});
+          } else {
+            fig.addEventListener('click',function(){
+              if(window.__lbOpen&&window.__lbItems){
+                var i=window.__lbItems.indexOf(item.url);
+                if(i>=0)window.__lbOpen(i);
+              }
+            });
+          }
         });
         var wrap=document.getElementById('galleryNavWrap');
         if(wrap&&wrap.__galUpdate)wrap.__galUpdate();
       })
-      .catch(function(){});
+      .catch(function(){grid.__kvLoaded=false;}); // allow retry on error
   }
 
   function init(){
@@ -1233,7 +1247,7 @@ function submitBooking(cb){
   }
 
   if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',init);}
-  else{setTimeout(init,100);}
+  else{init();}
 })();
 
 /* ====== HAMBURGER DRAWER ====== */
