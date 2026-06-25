@@ -881,6 +881,18 @@ function submitBooking(cb){
       {keys:['sæde','stof','indvendig','interiør','lugt'],
        ans:['Vi tilbyder <strong>indvendig rens</strong> med damp – sæder, gulvtæpper, instrumentpanel og alle overflader. Til stof-sæder tilbyder vi også dybderens. <a href="#vaelg">Se pakker →</a>'],
        follow:['Hvad koster det?','Book nu']},
+      {keys:['betal','betaling','forudbetaling','hvornår betaler','faktura','mobilepay','kontant','penge'],
+       ans:['Du betaler <strong>først efter</strong> vasken er færdig – og kun når du er <strong>100% tilfreds</strong> 💳 Ingen forudbetaling. Vi modtager MobilePay, bankoverførsel og kontant.'],
+       follow:['Tilfredshedsgaranti?','Book nu']},
+      {keys:['gebyr','kørselsgebyr','tillæg','ekstra kørsel','by','byområde','langt','gratis kørsel'],
+       ans:['<strong>Kørsel er helt gratis</strong> på hele Sjælland – også inde i byområderne 🚗💨 Ingen kørselsgebyrer eller skjulte tillæg, uanset din adresse.'],
+       follow:['Dækker I mit område?','Book nu']},
+      {keys:['aflys','afbestil','ændre','flytte tid','aflysning','ombook'],
+       ans:['Du kan <strong>frit ændre eller aflyse</strong> din tid – giv os blot besked i god tid, så finder vi en ny tid der passer dig 🗓️ <a href="tel:+4524440321">Ring +45 24 44 03 21</a>'],
+       follow:['Åbningstider','Book nu']},
+      {keys:['regn','vejr','sne','blæser','udendørs','koldt'],
+       ans:['Vi arbejder i <strong>næsten alt vejr</strong> 🌦️ Vores damp fungerer fint i køligt vejr. Ved kraftig regn finder vi sammen en overdækket plads eller en ny tid.'],
+       follow:['Book nu','Dækker I mit område?']},
     ],
     en:[
       {keys:['price','cost','how much','prices','cheap','expensive'],
@@ -925,11 +937,23 @@ function submitBooking(cb){
       {keys:['seat','fabric','interior','smell'],
        ans:['We offer <strong>interior steam cleaning</strong> – seats, floor mats, dashboard and all surfaces. We also offer deep fabric seat cleaning. <a href="#vaelg">See packages →</a>'],
        follow:['What does it cost?','Book now']},
+      {keys:['pay','payment','prepay','when do i pay','invoice','mobilepay','cash','money'],
+       ans:['You pay <strong>only after</strong> the wash is finished – and only when you are <strong>100% satisfied</strong> 💳 No prepayment. We accept MobilePay, bank transfer and cash.'],
+       follow:['Satisfaction guarantee?','Book now']},
+      {keys:['fee','travel fee','surcharge','extra travel','city','far','free travel'],
+       ans:['<strong>Travel is completely free</strong> across all of Zealand – including inside the city areas 🚗💨 No travel fees or hidden surcharges, wherever you live.'],
+       follow:['Do you cover my area?','Book now']},
+      {keys:['cancel','reschedule','change time','rebook'],
+       ans:['You can <strong>freely change or cancel</strong> your booking – just let us know in good time and we\'ll find a new slot that suits you 🗓️ <a href="tel:+4524440321">Call +45 24 44 03 21</a>'],
+       follow:['Opening hours','Book now']},
+      {keys:['rain','weather','snow','wind','outdoor','cold'],
+       ans:['We work in <strong>almost any weather</strong> 🌦️ Our steam works fine in cold conditions. In heavy rain we\'ll find a covered spot together or reschedule.'],
+       follow:['Book now','Do you cover my area?']},
     ]
   };
   var QUICK={
-    da:[{l:'💰 Hvad koster det?',q:'Hvad koster det?'},{l:'⏱ Hvor lang tid?',q:'Hvor lang tid?'},{l:'📍 Dækker I mit område?',q:'Dækker I mit område?'},{l:'🚗 Leasingbil?',q:'Kan I vaske leasingbil?'}],
-    en:[{l:'💰 What does it cost?',q:'What does it cost?'},{l:'⏱ How long does it take?',q:'How long does it take?'},{l:'📍 Do you cover my area?',q:'Do you cover my area?'},{l:'🚗 Lease car?',q:'Can you clean lease cars?'}]
+    da:[{l:'💰 Hvad koster det?',q:'Hvad koster det?'},{l:'💳 Betal efter vask?',q:'Hvornår betaler jeg?'},{l:'⏱ Hvor lang tid?',q:'Hvor lang tid?'},{l:'📍 Dækker I mit område?',q:'Dækker I mit område?'},{l:'🛡️ Tilfredshedsgaranti?',q:'Har I tilfredshedsgaranti?'},{l:'🚗 Leasingbil?',q:'Kan I vaske leasingbil?'}],
+    en:[{l:'💰 What does it cost?',q:'What does it cost?'},{l:'💳 Pay after wash?',q:'When do I pay?'},{l:'⏱ How long does it take?',q:'How long does it take?'},{l:'📍 Do you cover my area?',q:'Do you cover my area?'},{l:'🛡️ Satisfaction guarantee?',q:'Do you have a satisfaction guarantee?'},{l:'🚗 Lease car?',q:'Can you clean lease cars?'}]
   };
   function showTyping(){
     if(typingEl)return;
