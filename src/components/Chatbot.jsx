@@ -20,100 +20,65 @@ const HTML = `<!-- CHATBOT -->
     </div>
 
     <div id="chatIntro" class="chat-intro" style="display:none">
-      <svg class="intro-svg" viewBox="0 0 220 160" xmlns="http://www.w3.org/2000/svg">
+      <svg class="intro-svg" viewBox="0 0 220 120" xmlns="http://www.w3.org/2000/svg">
         <defs>
-          <clipPath id="aboveRoof">
-            <rect x="0" y="0" width="220" height="56"/>
-          </clipPath>
-          <filter id="botGlow" x="-50%" y="-50%" width="200%" height="200%">
+          <radialGradient id="iglow" cx="50%" cy="85%" r="55%">
+            <stop offset="0%" stop-color="#d4af37" stop-opacity=".18"/>
+            <stop offset="100%" stop-color="#d4af37" stop-opacity="0"/>
+          </radialGradient>
+          <filter id="gf" x="-40%" y="-40%" width="180%" height="180%">
             <feGaussianBlur stdDeviation="2.5" result="b"/>
             <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
           </filter>
+          <filter id="gf2" x="-80%" y="-80%" width="260%" height="260%">
+            <feGaussianBlur stdDeviation="4" result="b"/>
+            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
         </defs>
-
-        <!-- ground shadow -->
-        <ellipse cx="110" cy="155" rx="100" ry="5" fill="#000" opacity="0.25"/>
-
-        <!-- CAR GROUP -->
+        <!-- ambient gold ground glow -->
+        <ellipse cx="110" cy="115" rx="88" ry="8" fill="url(#iglow)"/>
+        <!-- CAR — luxury sedan outline -->
         <g class="intro-car-g">
           <!-- body -->
-          <rect x="5" y="92" width="210" height="50" rx="16" fill="#0a2a18"/>
-          <!-- cabin -->
-          <rect x="50" y="54" width="124" height="42" rx="13" fill="#0c3018"/>
-          <!-- windshield -->
-          <rect x="54" y="58" width="46" height="34" rx="7" fill="#1a6040" opacity="0.9"/>
-          <!-- mid window -->
-          <rect x="104" y="58" width="38" height="34" rx="6" fill="#1a6040" opacity="0.9"/>
+          <path d="M14 76 L14 74 Q14 70 18 70 L24 70 L34 55 Q44 42 68 38 L130 38 Q156 42 168 56 L178 70 L202 70 Q206 70 206 74 L206 98 Q206 102 202 102 L18 102 Q14 102 14 98 Z" fill="#071a0f" stroke="#d4af37" stroke-width="1.4" stroke-opacity=".75"/>
+          <!-- roof line -->
+          <path d="M68 38 Q78 24 100 20 L130 20 Q148 22 152 38 Z" fill="#081606" stroke="#d4af37" stroke-width="1" stroke-opacity=".5"/>
+          <!-- front window -->
+          <path d="M70 38 L80 24 L98 20 L98 38 Z" fill="#1c5535" opacity=".85"/>
           <!-- rear window -->
-          <rect x="146" y="58" width="24" height="34" rx="5" fill="#1a6040" opacity="0.9"/>
-          <!-- sunroof hole -->
-          <rect x="104" y="54" width="38" height="10" rx="3" fill="#020a05"/>
-          <!-- body shine stripe -->
-          <rect x="11" y="92" width="198" height="5" rx="4" fill="#fff" opacity="0.04"/>
+          <path d="M132 20 L150 24 L150 38 L132 38 Z" fill="#1c5535" opacity=".85"/>
+          <!-- mid window -->
+          <rect x="100" y="20" width="30" height="18" rx="1.5" fill="#1c5535" opacity=".9"/>
           <!-- headlight -->
-          <rect x="6" y="101" width="22" height="13" rx="5" fill="#e8ffee" opacity="0.95"/>
-          <rect x="6" y="101" width="22" height="13" rx="5" fill="#9afabd" opacity="0.35" filter="url(#botGlow)"/>
+          <rect x="16" y="78" width="20" height="10" rx="4" fill="#eafff2" opacity=".95"/>
+          <rect x="16" y="78" width="20" height="10" rx="4" fill="#9afabd" opacity=".5" filter="url(#gf)"/>
           <!-- tail light -->
-          <rect x="192" y="101" width="22" height="13" rx="5" fill="#ff5555" opacity="0.8"/>
-          <!-- door line -->
-          <line x1="128" y1="96" x2="128" y2="138" stroke="#051510" stroke-width="1.5" opacity="0.5"/>
-          <!-- door handle -->
-          <rect x="102" y="116" width="14" height="4" rx="2" fill="#9afabd" opacity="0.2"/>
-          <!-- front bumper -->
-          <rect x="5" y="128" width="28" height="12" rx="7" fill="#072010"/>
-          <!-- rear bumper -->
-          <rect x="187" y="128" width="28" height="12" rx="7" fill="#072010"/>
-          <!-- wheel wells -->
-          <circle cx="62" cy="144" r="26" fill="#040d08"/>
-          <circle cx="158" cy="144" r="26" fill="#040d08"/>
-          <!-- tires -->
-          <circle cx="62" cy="144" r="22" fill="#111"/>
-          <circle cx="158" cy="144" r="22" fill="#111"/>
-          <!-- rim -->
-          <circle cx="62" cy="144" r="11" fill="#1e1e1e"/>
-          <circle cx="158" cy="144" r="11" fill="#1e1e1e"/>
-          <!-- spoke lines -->
-          <line x1="62" y1="133" x2="62" y2="155" stroke="#2a2a2a" stroke-width="2"/>
-          <line x1="51" y1="144" x2="73" y2="144" stroke="#2a2a2a" stroke-width="2"/>
-          <line x1="158" y1="133" x2="158" y2="155" stroke="#2a2a2a" stroke-width="2"/>
-          <line x1="147" y1="144" x2="169" y2="144" stroke="#2a2a2a" stroke-width="2"/>
-          <!-- hub caps -->
-          <circle cx="62" cy="144" r="5" fill="#9afabd" opacity="0.45"/>
-          <circle cx="158" cy="144" r="5" fill="#9afabd" opacity="0.45"/>
+          <rect x="184" y="78" width="20" height="10" rx="4" fill="#ff4444" opacity=".75"/>
+          <!-- door divider -->
+          <line x1="120" y1="44" x2="120" y2="100" stroke="#d4af37" stroke-width=".8" opacity=".2"/>
+          <!-- body crease line -->
+          <line x1="20" y1="82" x2="200" y2="82" stroke="#d4af37" stroke-width=".6" opacity=".15"/>
+          <!-- door handle front -->
+          <rect x="88" y="80" width="16" height="3.5" rx="1.8" fill="#d4af37" opacity=".25"/>
+          <!-- door handle rear -->
+          <rect x="135" y="80" width="16" height="3.5" rx="1.8" fill="#d4af37" opacity=".25"/>
+          <!-- front wheel -->
+          <circle cx="54" cy="104" r="19" fill="#040c07"/>
+          <circle cx="54" cy="104" r="15" fill="#0b1a0e" stroke="#d4af37" stroke-width="1.2" stroke-opacity=".45"/>
+          <circle cx="54" cy="104" r="7" fill="#d4af37" opacity=".12"/>
+          <circle cx="54" cy="104" r="3" fill="#d4af37" opacity=".4"/>
+          <!-- rear wheel -->
+          <circle cx="166" cy="104" r="19" fill="#040c07"/>
+          <circle cx="166" cy="104" r="15" fill="#0b1a0e" stroke="#d4af37" stroke-width="1.2" stroke-opacity=".45"/>
+          <circle cx="166" cy="104" r="7" fill="#d4af37" opacity=".12"/>
+          <circle cx="166" cy="104" r="3" fill="#d4af37" opacity=".4"/>
         </g>
-
-        <!-- ROBOT GROUP (clipped above car roof) -->
-        <g class="intro-robot-g" clip-path="url(#aboveRoof)">
-          <!-- left arm (waves) -->
-          <rect class="intro-arm-wave" x="95" y="35" width="9" height="20" rx="4" fill="#0e3d20"/>
-          <!-- right arm -->
-          <rect x="116" y="35" width="9" height="20" rx="4" fill="#0e3d20"/>
-          <!-- torso -->
-          <rect x="99" y="33" width="22" height="24" rx="6" fill="#0e3d20"/>
-          <!-- chest panel glow -->
-          <rect x="103" y="38" width="14" height="8" rx="3" fill="#9afabd" opacity="0.12"/>
-          <!-- neck -->
-          <rect x="107" y="26" width="6" height="9" rx="3" fill="#0b3018"/>
-          <!-- head -->
-          <rect x="97" y="4" width="26" height="24" rx="8" fill="#103d22"/>
-          <!-- head top highlight -->
-          <rect x="99" y="5" width="22" height="5" rx="4" fill="#fff" opacity="0.04"/>
-          <!-- antenna -->
-          <line x1="110" y1="4" x2="110" y2="-2" stroke="#9afabd" stroke-width="2" stroke-linecap="round"/>
-          <!-- antenna ball -->
-          <circle class="intro-ant-ball" cx="110" cy="-5" r="4" fill="#9afabd" filter="url(#botGlow)"/>
-          <!-- eyes -->
-          <rect x="100" y="10" width="8" height="7" rx="2.5" fill="#9afabd"/>
-          <rect x="112" y="10" width="8" height="7" rx="2.5" fill="#9afabd"/>
-          <!-- pupils -->
-          <circle cx="104" cy="13.5" r="2.2" fill="#062313"/>
-          <circle cx="116" cy="13.5" r="2.2" fill="#062313"/>
-          <!-- eye shine -->
-          <circle cx="105" cy="12" r="0.9" fill="#fff" opacity="0.9"/>
-          <circle cx="117" cy="12" r="0.9" fill="#fff" opacity="0.9"/>
-          <!-- mouth -->
-          <rect x="103" y="22" width="14" height="3" rx="1.5" fill="#9afabd" opacity="0.45"/>
-        </g>
+        <!-- steam sparkles -->
+        <circle class="isp1" cx="85" cy="14" r="3.5" fill="#d4af37" filter="url(#gf2)"/>
+        <circle class="isp2" cx="110" cy="8"  r="2.8" fill="#d4af37" filter="url(#gf2)"/>
+        <circle class="isp3" cx="136" cy="12" r="3"   fill="#d4af37" filter="url(#gf2)"/>
+        <circle class="isp4" cx="98"  cy="3"  r="1.8" fill="#d4af37" opacity=".7"/>
+        <circle class="isp5" cx="122" cy="2"  r="1.5" fill="#d4af37" opacity=".6"/>
       </svg>
       <p class="intro-label" data-i18n="chat_intro_label">Elite Bot er klar!</p>
     </div>
