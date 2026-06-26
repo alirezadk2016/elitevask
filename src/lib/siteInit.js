@@ -1116,6 +1116,24 @@ function submitBooking(cb){
   send.addEventListener('click',sendMsg);
   input.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey)sendMsg();});
 
+  /* Mobile keyboard fix: reposition chat window when virtual keyboard opens */
+  (function(){
+    var vv=window.visualViewport;
+    if(!vv)return;
+    function onVVResize(){
+      if(!opened)return;
+      var keyH=Math.max(0,window.innerHeight-vv.height-vv.offsetTop);
+      if(keyH>50){
+        win.style.bottom=(keyH+8)+'px';
+        win.style.maxHeight=(vv.height-90)+'px';
+      }else{
+        win.style.bottom='';win.style.maxHeight='';
+      }
+    }
+    vv.addEventListener('resize',onVVResize);
+    input.addEventListener('blur',function(){win.style.bottom='';win.style.maxHeight='';});
+  })();
+
   // Swipe-to-dismiss chatbot
   var chatbot=document.querySelector('.chatbot');
   if(chatbot){
@@ -1311,8 +1329,10 @@ function submitBooking(cb){
     cur=Math.max(0,Math.min(cur,pages-1));
 
     var showNav=(pages>1);
-    prev.style.visibility=showNav?'':'hidden';
-    next.style.visibility=showNav?'':'hidden';
+    prev.style.opacity=showNav?(cur<=0?'0.18':'1'):'0';
+    prev.style.pointerEvents=showNav&&cur>0?'auto':'none';
+    next.style.opacity=showNav?(cur>=pages-1?'0.18':'1'):'0';
+    next.style.pointerEvents=showNav&&cur<pages-1?'auto':'none';
     if(dotsEl)dotsEl.style.visibility=showNav?'':'hidden';
 
     var offset=cur*perPage*(itemW+gap);

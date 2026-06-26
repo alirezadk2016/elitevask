@@ -388,7 +388,8 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 .gcar-track .gitem{flex-shrink:0;min-width:0} /* width set by JS */
 .gcar-btn{flex-shrink:0;width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,.06);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.14);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10;transition:background .2s,border-color .25s,transform .25s,box-shadow .2s,opacity .2s;box-shadow:0 8px 32px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.1);margin:0 10px}
 .gcar-btn:hover{background:rgba(212,175,55,.16);border-color:rgba(212,175,55,.55);transform:scale(1.1);box-shadow:0 10px 36px rgba(0,0,0,.45),0 0 0 1px rgba(212,175,55,.2),inset 0 1px 0 rgba(255,255,255,.15)}
-.gcar-btn:disabled{opacity:.2;cursor:default;pointer-events:none}
+.gcar-btn:disabled{cursor:default}
+.gcar-btn{transition:background .2s,border-color .25s,transform .25s,box-shadow .2s,opacity .3s ease}
 .gcar-dots{display:flex;justify-content:center;gap:7px;margin-top:20px}
 .gcar-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.2);border:none;cursor:pointer;transition:background .25s,transform .25s;padding:0}
 .gcar-dot.active{background:#d4af37;transform:scale(1.35)}
