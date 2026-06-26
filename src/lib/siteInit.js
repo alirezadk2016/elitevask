@@ -453,7 +453,7 @@ function drawWiz(){
   }else if(step===6){
     h+='<div class="wiz-q">'+W('s6')+'</div>';
     h+='<div class="field"><label>'+W('name')+'</label><input id="f_name" value="'+wiz.name+'" placeholder="Dit navn"></div>';
-    h+='<div class="field"><label>'+W('phone')+'</label><input id="f_phone" inputmode="tel" value="'+wiz.phone+'" placeholder="12 34 56 78"></div>';
+    h+='<div class="field"><label>'+W('phone')+'</label><input id="f_phone" inputmode="tel" value="'+wiz.phone+'" placeholder="+45 12 34 56 78"></div>';
     h+='<div class="field"><label>'+W('email')+'</label><input id="f_email" value="'+wiz.email+'" placeholder="dig@mail.dk"></div>';
     h+='<div class="field"><label>'+W('msg')+'</label><textarea id="f_msg" rows="2">'+wiz.msg+'</textarea></div>';
   }else if(step===7){
@@ -543,7 +543,7 @@ function drawWiz(){
       if(!wiz.time){showWizErr(LANG==='da'?'Vælg venligst et tidspunkt.':'Please select a time slot.');return;}
     }
     if(step===6&&!wiz.name.trim()){showWizErr(LANG==='da'?'Indtast venligst dit navn.':'Please enter your name.');return;}
-    if(step===6&&!isValidPhone(wiz.phone)){showWizErr(LANG==='da'?'Indtast venligst et gyldigt telefonnummer (mindst 8 cifre).':'Please enter a valid phone number (at least 8 digits).');return;}
+    if(step===6&&!isValidPhone(wiz.phone)){showWizErr(LANG==='da'?'Indtast venligst et dansk telefonnummer med landekode (+45 XX XX XX XX).':'Please enter a valid Danish phone number with country code (+45 XX XX XX XX).');return;}
     if(step===6&&wiz.email.trim()&&!isValidEmail(wiz.email)){showWizErr(LANG==='da'?'Indtast venligst en gyldig e-mailadresse.':'Please enter a valid email address.');return;}
     if(step===6&&!wiz.email.trim()){showWizErr(LANG==='da'?'Indtast venligst din e-mailadresse.':'Please enter your email address.');return;}
     if(step<TOTAL){step++;drawWiz();}
@@ -744,7 +744,7 @@ function fmtDate(d,lang){
   return dn[dt.getDay()]+' '+dt.getDate()+'. '+mn[dt.getMonth()]+' '+p[0];
 }
 function isServiceZip(z){var n=parseInt(z);if(isNaN(n)||String(z).replace(/\D/g,'').length<4)return false;if(n>=3700&&n<=3790)return false;return n>=1000&&n<=4799;}
-function isValidPhone(p){return p.replace(/\D/g,'').length>=8;}
+function isValidPhone(p){var d=p.replace(/\D/g,'');return(d.startsWith('45')&&d.length>=10)||(!d.startsWith('45')&&false);}
 function isValidEmail(e){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);}
 function showWizErr(msg){
   var el=document.getElementById('wiz-err');
@@ -1101,16 +1101,18 @@ function submitBooking(cb){
   toggle.addEventListener('click',function(){
     if(!opened){
       win.style.display='flex';win.style.flexDirection='column';
-      win.classList.add('opening');setTimeout(function(){win.classList.remove('opening');},350);
+      win.classList.remove('closing');win.classList.add('opening');
+      setTimeout(function(){win.classList.remove('opening');},520);
       badge.style.display='none';opened=true;
       var intro=document.getElementById('chatIntro');
       if(intro&&!introPlayed){
         introPlayed=true;intro.style.display='flex';
         setTimeout(function(){intro.classList.add('hiding');setTimeout(function(){intro.style.display='none';showGreeting();},450);},3200);
       }else{showGreeting();}
-    }else{win.style.display='none';opened=false;}
+    }else{closeWin();}
   });
-  document.getElementById('chatClose').addEventListener('click',function(){win.style.display='none';opened=false;});
+  function closeWin(){win.classList.add('closing');setTimeout(function(){win.style.display='none';win.classList.remove('closing');opened=false;},280);}
+  document.getElementById('chatClose').addEventListener('click',closeWin);
   send.addEventListener('click',sendMsg);
   input.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey)sendMsg();});
 
@@ -1132,7 +1134,7 @@ function submitBooking(cb){
       dismissed=true;
       chatbot.classList.add('chat-dismissed');
       mini.classList.add('vis');
-      if(opened){win.style.display='none';opened=false;}
+      if(opened){closeWin();}
     }
     function restoreChat(){
       dismissed=false;
