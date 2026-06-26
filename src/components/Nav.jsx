@@ -6,10 +6,10 @@ const HTML = `<!-- NAV -->
   </a>
   <div class="nav-links">
     <a href="#vaelg" data-i18n="nav_choose">Se priser</a>
-    <a href="#arbejde" data-i18n="nav_work">Vores arbejde</a>
+    <a href="/galleri" data-i18n="nav_work">Galleri</a>
     <a href="/faq">FAQ</a>
     <a href="#kontakt" data-i18n="nav_contact">Kontakt</a>
-    <button type="button" class="guide-nav-btn" id="guideNavBtn" aria-expanded="false">Bilpleje Guide <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></button>
+    <a href="/guide" class="guide-nav-link" data-i18n="nav_guide">Guide</a>
   </div>
   <div class="nav-right">
     <div class="lang">
@@ -23,7 +23,8 @@ const HTML = `<!-- NAV -->
 </div>
 <div class="nav-drawer" id="navDrawer">
   <a href="#vaelg" class="drawer-link" data-i18n="nav_choose">Se priser</a>
-  <a href="#arbejde" class="drawer-link" data-i18n="nav_work">Vores arbejde</a>
+  <a href="/galleri" class="drawer-link" data-i18n="nav_work">Galleri</a>
+  <a href="/guide" class="drawer-link" data-i18n="nav_guide">Guide</a>
   <a href="/faq" class="drawer-link">FAQ</a>
   <a href="#kontakt" class="drawer-link" data-i18n="nav_contact">Kontakt</a>
   <div class="drawer-sep"></div>
