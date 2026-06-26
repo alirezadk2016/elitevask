@@ -241,28 +241,13 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 .ba-lab{position:absolute;top:14px;font-size:11px;font-weight:700;letter-spacing:1px;padding:5px 11px;border-radius:6px;text-transform:uppercase;background:rgba(8,12,10,.78);color:#fff;backdrop-filter:blur(3px)}
 .ba-lab.l{left:14px}.ba-lab.r{right:14px}
 .ba-cap{text-align:center;font-size:13.5px;color:var(--muted);margin-top:16px}
-/* BEFORE/AFTER PAGER */
-.ba-pager-nav{display:flex;align-items:center;justify-content:center;gap:20px;margin-top:36px}
-.ba-pager-counter{font-size:13px;font-weight:600;color:rgba(233,241,236,.45);letter-spacing:2px;min-width:44px;text-align:center;font-variant-numeric:tabular-nums}
-.ba-fade{transition:opacity .35s ease,transform .35s ease}
-.ba-fade.hiding{opacity:0;transform:translateY(6px);pointer-events:none}
-/* BEFORE/AFTER GALLERY — featured first, 3-col grid below */
-.ba-gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:44px}
-@media(max-width:640px){.ba-gallery{grid-template-columns:1fr;gap:14px}}
-.ba-card{position:relative}
-/* First card: featured — contained & centered, never full-bleed */
-.ba-card--featured{grid-column:1/-1;max-width:880px;width:100%;margin:0 auto}
-.ba-card--featured .ba-slider{aspect-ratio:16/10;border-radius:18px}
-.ba-card--featured .ba-knob{width:46px;height:46px}
-.ba-card--featured .ba-knob svg{width:22px;height:22px}
-.ba-card--featured .ba-lab{font-size:11px;padding:5px 13px;top:14px;letter-spacing:1px}
-.ba-card--featured .ba-lab.l{left:14px}.ba-card--featured .ba-lab.r{right:14px}
-.ba-card--featured .ba-handle{width:3px}
-.ba-card--featured figcaption{font-size:14px;margin-top:16px}
-/* all ba-cards */
-.ba-card .ba-slider{aspect-ratio:4/3;border-radius:14px;border:1px solid var(--line-2);box-shadow:0 14px 38px rgba(0,0,0,.38);transition:border-color .3s ease,box-shadow .4s ease,transform .4s cubic-bezier(.22,1,.36,1)}
-.ba-card:hover .ba-slider{border-color:rgba(212,175,55,.4);box-shadow:0 22px 56px rgba(0,0,0,.5),0 0 0 1px rgba(212,175,55,.14);transform:translateY(-4px)}
-.ba-card figcaption{text-align:center;font-size:12.5px;color:var(--muted);margin-top:13px;letter-spacing:.4px;font-weight:600}
+/* BEFORE/AFTER CARDS — carousel items matching gitem dimensions */
+.gcar-track .ba-card{flex-shrink:0;min-width:0}
+.ba-card{position:relative;border-radius:14px;overflow:hidden;cursor:default;border:1px solid var(--line);background:#0a0f0c;transition:border-color .3s ease,box-shadow .4s ease,transform .4s cubic-bezier(.22,1,.36,1)}
+.ba-card:hover{border-color:rgba(212,175,55,.5);box-shadow:0 20px 52px rgba(0,0,0,.55),0 0 0 1px rgba(212,175,55,.18);transform:translateY(-5px)}
+.ba-card .ba-slider{aspect-ratio:4/3;border-radius:0}
+.ba-card figcaption{position:absolute;left:0;right:0;bottom:0;padding:28px 14px 12px;font-size:12px;font-weight:600;letter-spacing:.3px;color:#fff;background:linear-gradient(to top,rgba(4,10,6,.95) 0%,rgba(4,10,6,.5) 55%,transparent 100%);transform:translateY(4px);opacity:.9;transition:opacity .3s ease,transform .3s ease}
+.ba-card:hover figcaption{opacity:1;transform:translateY(0)}
 .ba-card .ba-knob{width:34px;height:34px;transition:transform .25s cubic-bezier(.34,1.56,.64,1)}
 .ba-card .ba-knob svg{width:17px;height:17px}
 .ba-card .ba-slider:active .ba-knob{transform:translate(-50%,-50%) scale(1.12)}
@@ -395,7 +380,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 .gcar-dot.active{background:#d4af37;transform:scale(1.35)}
 /* legacy .gallery on /galleri page — keep grid */
 .gal-page .gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-top:34px}
-.gitem{position:relative;border-radius:14px;overflow:hidden;cursor:pointer;border:1px solid var(--line);background:#0a0f0c;aspect-ratio:1/1;transition:border-color .3s ease,box-shadow .4s ease,transform .4s cubic-bezier(.22,1,.36,1)}
+.gitem{position:relative;border-radius:14px;overflow:hidden;cursor:pointer;border:1px solid var(--line);background:#0a0f0c;aspect-ratio:4/3;transition:border-color .3s ease,box-shadow .4s ease,transform .4s cubic-bezier(.22,1,.36,1)}
 .gitem:hover{border-color:rgba(212,175,55,.5);box-shadow:0 20px 52px rgba(0,0,0,.55),0 0 0 1px rgba(212,175,55,.18);transform:translateY(-5px)}
 .gitem img{width:100%;height:100%;object-fit:cover;transition:transform .55s cubic-bezier(.22,1,.36,1)}
 .gitem:hover img{transform:scale(1.08)}
@@ -684,18 +669,25 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 .chat-window.opening::after{content:'';position:absolute;inset:0;border-radius:22px;background:radial-gradient(ellipse 70% 40% at 50% 0%,rgba(212,175,55,.13) 0%,transparent 70%);pointer-events:none;animation:chatShimmer .6s ease forwards;z-index:10}
 @keyframes chatShimmer{0%{opacity:0}40%{opacity:1}100%{opacity:0}}
 /* intro animation */
-.chat-intro{position:absolute;inset:0;z-index:6;background:#020b05;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;border-radius:22px}
-.intro-svg{width:88%;max-width:240px;overflow:visible}
-.intro-label{font-size:13px;font-weight:700;color:var(--green);letter-spacing:.5px;opacity:0;animation:introLabelIn .4s ease 1.1s forwards}
-.chat-intro.hiding{animation:chatIntroOut .45s ease forwards}
-.intro-car-g{animation:introCarIn .55s cubic-bezier(.22,1,.36,1) forwards;transform:translateX(260px)}
-.intro-robot-g{animation:introRobotUp .45s cubic-bezier(.34,1.56,.64,1) .65s both;transform:translateY(60px)}
-.intro-arm-wave{transform-box:fill-box;transform-origin:center top;animation:introArmWave .38s ease 1.3s 5 alternate}
-.intro-ant-ball{transform-box:fill-box;transform-origin:center center;animation:introAntPulse .7s ease-in-out .8s infinite alternate}
-@keyframes introCarIn{to{transform:translateX(0)}}
-@keyframes introRobotUp{to{transform:translateY(0)}}
-@keyframes introArmWave{to{transform:rotate(-38deg)}}
-@keyframes introAntPulse{to{transform:scale(1.4);opacity:.7}}
+.chat-intro{position:absolute;inset:0;z-index:6;background:linear-gradient(180deg,#020b05 0%,#030f07 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;border-radius:22px}
+.intro-svg{width:90%;max-width:260px;overflow:visible}
+.intro-label{font-size:12px;font-weight:700;color:#d4af37;letter-spacing:2px;text-transform:uppercase;opacity:0;animation:introLabelIn .5s ease 1.3s forwards}
+.chat-intro.hiding{animation:chatIntroOut .4s ease forwards}
+/* car drives in from left */
+.intro-car-g{animation:introCarLux .7s cubic-bezier(.22,1,.36,1) .05s both;transform:translateX(-240px)}
+@keyframes introCarLux{to{transform:translateX(0)}}
+/* sparkles rise and fade */
+.isp1,.isp2,.isp3,.isp4,.isp5{opacity:0}
+.isp1{animation:introSpark .7s ease .8s forwards}
+.isp2{animation:introSpark .7s ease .95s forwards}
+.isp3{animation:introSpark .7s ease 1.1s forwards}
+.isp4{animation:introSpark .55s ease 1.25s forwards}
+.isp5{animation:introSpark .55s ease 1.4s forwards}
+@keyframes introSpark{
+  0%{opacity:0;transform:translateY(14px) scale(.3)}
+  35%{opacity:1;transform:translateY(-10px) scale(1)}
+  100%{opacity:0;transform:translateY(-28px) scale(.5)}
+}
 @keyframes introLabelIn{to{opacity:1}}
 @keyframes chatIntroOut{to{opacity:0;pointer-events:none}}
 /* header */
@@ -767,7 +759,6 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
   .stats .wrap{grid-template-columns:repeat(2,1fr);gap:32px 24px}
   .steps{grid-template-columns:1fr;gap:32px}
   .work-grid{grid-template-columns:repeat(2,1fr)}
-  .ba-gallery{grid-template-columns:repeat(2,1fr);gap:16px}
   .why-grid,.info-grid,.reviews-grid{grid-template-columns:1fr}
   .ex-grid{grid-template-columns:1fr}
   .gal-page .gallery{grid-template-columns:repeat(2,1fr)}
@@ -792,7 +783,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
   .btn-lg{padding:13px 24px;font-size:15px}
   .tb-hide-mobile{display:none}
   .chatbot{bottom:calc(76px + env(safe-area-inset-bottom));right:16px}
-  .chat-window{position:fixed;bottom:calc(148px + env(safe-area-inset-bottom));right:16px;left:16px;width:auto;max-height:65vh;min-width:0}
+  .chat-window{position:fixed;bottom:calc(148px + env(safe-area-inset-bottom));right:16px;left:16px;width:auto;max-height:55dvh;min-width:0}
   .steam-science{padding:40px 24px}
   .ev-video-text{padding:20px 20px}
   .ev-video-text h3{font-size:18px}

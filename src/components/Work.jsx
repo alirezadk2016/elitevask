@@ -1,5 +1,5 @@
-function baCard(before, after, capKey, capText, altBefore, altAfter, featured) {
-  return `<figure class="ba-card${featured ? ' ba-card--featured' : ''}">
+function baCard(before, after, capKey, capText, altBefore, altAfter) {
+  return `<figure class="ba-card">
     <div class="ba-slider">
       <img class="ba-before" src="${before}" alt="${altBefore}" loading="lazy">
       <img class="ba-after" src="${after}" alt="${altAfter}" loading="lazy">
@@ -23,24 +23,24 @@ const HTML = `<!-- BEFORE/AFTER + GALLERY -->
     <p class="sec-sub" data-i18n="ba_sub">Træk i slideren og se forskellen – ægte resultater fra professionel mobil bilvask hos vores kunder.</p>
   </div>
 
-  <div class="ba-pager" id="baPager">
-    <div class="ba-gallery" id="baGallery">
-      ${baCard('/gallery/img01.jpg', '/gallery/img02.jpg', 'ba_c1', 'Motorrens · Peugeot', 'Motorrum før dampvask', 'Motorrum efter dampvask', true)}
-      ${baCard('/gallery/seat-before.jpg', '/gallery/seat-after.jpg', 'ba_c3', 'Sæderens · stofsæder', 'Sæderens før', 'Sæderens efter')}
-      ${baCard('/gallery/interior-before.jpg', '/gallery/interior-after.jpg', 'ba_c4', 'Interiør · kabine', 'Interiør før', 'Interiør efter')}
-      ${baCard('/gallery/floor-before.jpg', '/gallery/floor-after.jpg', 'ba_c5', 'Fodrum · måtter', 'Fodrum før', 'Fodrum efter')}
-      ${baCard('/gallery/roof-before.jpg', '/gallery/roof-after.jpg', 'ba_c6', 'Tagkant · algerens', 'Tagkant alger før', 'Tagkant alger efter')}
+  <div class="gcar-wrap" id="baNavWrap">
+    <button type="button" class="gcar-btn gcar-prev" id="baPrev" aria-label="Forrige">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <div class="gcar-viewport" id="baViewport">
+      <div class="gcar-track" id="baGallery">
+        ${baCard('/gallery/img01.jpg', '/gallery/img02.jpg', 'ba_c1', 'Motorrens · Peugeot', 'Motorrum før dampvask', 'Motorrum efter dampvask')}
+        ${baCard('/gallery/seat-before.jpg', '/gallery/seat-after.jpg', 'ba_c3', 'Sæderens · stofsæder', 'Sæderens før', 'Sæderens efter')}
+        ${baCard('/gallery/interior-before.jpg', '/gallery/interior-after.jpg', 'ba_c4', 'Interiør · kabine', 'Interiør før', 'Interiør efter')}
+        ${baCard('/gallery/floor-before.jpg', '/gallery/floor-after.jpg', 'ba_c5', 'Fodrum · måtter', 'Fodrum før', 'Fodrum efter')}
+        ${baCard('/gallery/roof-before.jpg', '/gallery/roof-after.jpg', 'ba_c6', 'Tagkant · algerens', 'Tagkant alger før', 'Tagkant alger efter')}
+      </div>
     </div>
-    <div class="ba-pager-nav">
-      <button type="button" class="gcar-btn" id="baPrev" aria-label="Forrige" disabled>
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-      </button>
-      <span class="ba-pager-counter" id="baCounter">01 / 02</span>
-      <button type="button" class="gcar-btn" id="baNext" aria-label="Næste">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
-      </button>
-    </div>
+    <button type="button" class="gcar-btn gcar-next" id="baNext" aria-label="Næste">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+    </button>
   </div>
+  <div class="gcar-dots" id="baDots"></div>
   <div class="gallery-cta-row">
     <a href="/galleri#foer-efter" class="gallery-cta" data-i18n="see_all_ba">Se alle før &amp; efter</a>
   </div>

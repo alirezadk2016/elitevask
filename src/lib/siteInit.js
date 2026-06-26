@@ -1193,87 +1193,89 @@ function submitBooking(cb){
   if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',initSteamAcc);}else{setTimeout(initSteamAcc,0);}
 })();
 
-/* ====== BEFORE/AFTER PAGER ====== */
+/* ====== BEFORE/AFTER CAROUSEL ====== */
 (function(){
-  var BA_PER=4,baCur=0,baTransitioning=false;
+  var cur=0;
 
-  function pad(n){return n<10?'0'+n:''+n;}
+  function getPerPage(){
+    var vp=document.getElementById('baViewport');
+    if(!vp)return 4;
+    var w=vp.offsetWidth;
+    if(w<540)return 1;
+    if(w<900)return 2;
+    return 4;
+  }
 
-  function applyPage(cards,pages){
-    var gallery=document.getElementById('baGallery');
+  function buildDots(total,perPage,dotsEl){
+    if(!dotsEl)return;
+    dotsEl.innerHTML='';
+    var pages=Math.ceil(total/perPage);
+    if(pages<=1){dotsEl.style.display='none';return;}
+    dotsEl.style.display='';
+    for(var i=0;i<pages;i++){
+      var btn=document.createElement('button');
+      btn.className='gcar-dot'+(i===cur?' active':'');
+      btn.setAttribute('aria-label','Side '+(i+1));
+      (function(idx){btn.addEventListener('click',function(){cur=idx;render();});})(i);
+      dotsEl.appendChild(btn);
+    }
+  }
+
+  function render(){
+    var track=document.getElementById('baGallery');
+    var viewport=document.getElementById('baViewport');
     var prev=document.getElementById('baPrev');
     var next=document.getElementById('baNext');
-    var counter=document.getElementById('baCounter');
-    if(!gallery||!prev||!next)return;
+    var dotsEl=document.getElementById('baDots');
+    if(!track||!viewport||!prev||!next)return;
 
-    var isLastPage=(baCur===pages-1);
-    var pageCards=[];
-    cards.forEach(function(c,i){
-      var show=(i>=baCur*BA_PER&&i<(baCur+1)*BA_PER);
-      c.style.display=show?'':'none';
-      c.classList.remove('ba-card--featured');
-      if(show)pageCards.push({card:c,idx:i});
+    var vw=viewport.offsetWidth;
+    var perPage=getPerPage();
+    var gap=16;
+    var itemW=Math.floor((vw-(gap*(perPage-1)))/perPage);
+
+    Array.from(track.children).forEach(function(item){
+      item.style.width=itemW+'px';
+      item.style.flexShrink='0';
     });
 
-    // if last page has only 1 card, make it featured
-    if(isLastPage&&pageCards.length===1){
-      pageCards[0].card.classList.add('ba-card--featured');
-    } else if(pageCards.length>0&&baCur===0){
-      // first card on page 0 always featured
-      pageCards[0].card.classList.add('ba-card--featured');
-    }
+    var items=Array.from(track.children);
+    var pages=Math.ceil(items.length/perPage);
+    cur=Math.max(0,Math.min(cur,pages-1));
 
-    prev.disabled=(baCur<=0);
-    next.disabled=(baCur>=pages-1);
-    if(counter)counter.textContent=pad(baCur+1)+' / '+pad(pages);
+    var showNav=(pages>1);
+    prev.style.opacity=showNav?(cur<=0?'0.18':'1'):'0';
+    prev.style.pointerEvents=showNav&&cur>0?'auto':'none';
+    next.style.opacity=showNav?(cur>=pages-1?'0.18':'1'):'0';
+    next.style.pointerEvents=showNav&&cur<pages-1?'auto':'none';
+    if(dotsEl)dotsEl.style.visibility=showNav?'':'hidden';
+
+    var offset=cur*perPage*(itemW+gap);
+    track.style.transform='translateX(-'+offset+'px)';
+
+    prev.disabled=(cur<=0);
+    next.disabled=(cur>=pages-1);
+
+    buildDots(items.length,perPage,dotsEl);
+    var dots=dotsEl?dotsEl.querySelectorAll('.gcar-dot'):[];
+    dots.forEach(function(d,i){d.classList.toggle('active',i===cur);});
   }
 
-  function renderBa(animate){
-    var gallery=document.getElementById('baGallery');
-    var nav=document.querySelector('.ba-pager-nav');
-    if(!gallery)return;
-
-    var cards=Array.from(gallery.querySelectorAll('.ba-card'));
-    var total=cards.length;
-
-    if(total<=BA_PER){
-      cards.forEach(function(c){c.style.display='';});
-      // ensure first card is featured, rest not
-      cards.forEach(function(c,i){c.classList.toggle('ba-card--featured',i===0);});
-      if(nav)nav.style.display='none';
-      return;
-    }
-
-    var pages=Math.ceil(total/BA_PER);
-    baCur=Math.max(0,Math.min(baCur,pages-1));
-
-    if(animate&&!baTransitioning){
-      baTransitioning=true;
-      gallery.classList.add('ba-fade','hiding');
-      setTimeout(function(){
-        applyPage(cards,pages);
-        gallery.classList.remove('hiding');
-        setTimeout(function(){baTransitioning=false;},380);
-      },200);
-    } else {
-      applyPage(cards,pages);
-    }
-  }
-
-  function initBaPager(){
-    var pager=document.getElementById('baPager');
-    if(!pager||pager.__baInit)return;
-    pager.__baInit=true;
+  function initCarousel(){
+    var wrap=document.getElementById('baNavWrap');
+    if(!wrap||wrap.__baInit)return;
+    wrap.__baInit=true;
     var prev=document.getElementById('baPrev');
     var next=document.getElementById('baNext');
     if(!prev||!next)return;
-    prev.addEventListener('click',function(){baCur--;renderBa(true);});
-    next.addEventListener('click',function(){baCur++;renderBa(true);});
-    renderBa(false);
+    prev.addEventListener('click',function(){cur--;render();});
+    next.addEventListener('click',function(){cur++;render();});
+    window.addEventListener('resize',function(){cur=0;render();});
+    render();
   }
 
-  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',initBaPager);}
-  else{initBaPager();}
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',initCarousel);}
+  else{initCarousel();}
 })();
 
 /* ====== GALLERY CAROUSEL ====== */
@@ -1282,11 +1284,11 @@ function submitBooking(cb){
 
   function getPerPage(){
     var vp=document.getElementById('galViewport');
-    if(!vp)return 3;
+    if(!vp)return 4;
     var w=vp.offsetWidth;
     if(w<540)return 1;
     if(w<900)return 2;
-    return 3;
+    return 4;
   }
 
   function buildDots(total,perPage,dotsEl){
