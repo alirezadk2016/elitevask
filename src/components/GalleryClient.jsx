@@ -21,28 +21,31 @@ function BaSlider({ item }) {
     setPos(Math.max(0, Math.min(100, ((clientX - r.left) / r.width) * 100)));
   }, []);
 
-  useEffect(() => {
-    const up = () => { dragging.current = false; };
-    const mm = (e) => { if (dragging.current) move(e.clientX); };
-    const tm = (e) => { if (dragging.current) { move(e.touches[0].clientX); e.preventDefault(); } };
-    window.addEventListener("mousemove", mm);
-    window.addEventListener("mouseup", up);
-    window.addEventListener("touchmove", tm, { passive: false });
-    window.addEventListener("touchend", up);
-    return () => {
-      window.removeEventListener("mousemove", mm);
-      window.removeEventListener("mouseup", up);
-      window.removeEventListener("touchmove", tm);
-      window.removeEventListener("touchend", up);
-    };
+  /* Pointer Events + capture: a single unified model for mouse/touch/pen.
+     setPointerCapture routes every subsequent pointermove to this element,
+     so dragging works on the very FIRST interaction after the modal opens —
+     no initial click, no window-listener race. */
+  const onPointerDown = useCallback((e) => {
+    dragging.current = true;
+    try { e.currentTarget.setPointerCapture(e.pointerId); } catch {}
+    move(e.clientX);
   }, [move]);
+
+  const onPointerMove = useCallback((e) => {
+    if (dragging.current) move(e.clientX);
+  }, [move]);
+
+  const endDrag = useCallback(() => { dragging.current = false; }, []);
 
   return (
     <div
       className="ba-slider"
       ref={ref}
-      onMouseDown={(e) => { dragging.current = true; move(e.clientX); e.preventDefault(); }}
-      onTouchStart={(e) => { dragging.current = true; move(e.touches[0].clientX); }}
+      style={{ touchAction: "none" }}
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={endDrag}
+      onPointerCancel={endDrag}
     >
       <img className="ba-before" src={item.before} alt={`${item.caption} – før`} />
       <img className="ba-after"  src={item.after}  alt={`${item.caption} – efter`}

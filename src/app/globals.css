@@ -242,7 +242,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 .ba-lab.l{left:14px}.ba-lab.r{right:14px}
 .ba-cap{text-align:center;font-size:13.5px;color:var(--muted);margin-top:16px}
 /* BEFORE/AFTER CARDS — carousel items matching gitem dimensions */
-.gcar-track .ba-card{flex-shrink:0;min-width:0}
+.gcar-track .ba-card{flex-shrink:0;min-width:0;aspect-ratio:4/3}
 .ba-card{position:relative;border-radius:14px;overflow:hidden;cursor:default;border:1px solid var(--line);background:#0a0f0c;transition:border-color .3s ease,box-shadow .4s ease,transform .4s cubic-bezier(.22,1,.36,1)}
 .ba-card:hover{border-color:rgba(212,175,55,.5);box-shadow:0 20px 52px rgba(0,0,0,.55),0 0 0 1px rgba(212,175,55,.18);transform:translateY(-5px)}
 .ba-card .ba-slider{aspect-ratio:4/3;border-radius:0}
@@ -370,7 +370,13 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 .gcar-wrap{position:relative;display:flex;align-items:center;gap:0;margin-top:34px}
 .gcar-viewport{flex:1;overflow:hidden;border-radius:18px;min-width:0;-webkit-transform:translateZ(0);transform:translateZ(0)}
 .gcar-track{display:flex;gap:16px;transition:transform .5s cubic-bezier(.22,1,.36,1);will-change:transform}
-.gcar-track .gitem{flex-shrink:0;min-width:0;width:25%;height:auto} /* fallback width; overridden by JS */
+.gcar-track .gitem{flex-shrink:0;min-width:0} /* width set by JS */
+/* Responsive fallback widths so the static markup already matches the JS
+   layout (perPage 4/2/1, gap 16px) — no oversized flash, no layout shift
+   before initCarousel() runs. JS overrides with exact px after rAF. */
+.gcar-track .gitem,.gcar-track .ba-card{width:calc((100% - 48px) / 4)}
+@media(max-width:900px){.gcar-track .gitem,.gcar-track .ba-card{width:calc((100% - 16px) / 2)}}
+@media(max-width:540px){.gcar-track .gitem,.gcar-track .ba-card{width:100%}}
 .gcar-btn{flex-shrink:0;width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,.06);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.14);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10;transition:background .2s,border-color .25s,transform .25s,box-shadow .2s,opacity .2s;box-shadow:0 8px 32px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.1);margin:0 10px}
 .gcar-btn:hover{background:rgba(212,175,55,.16);border-color:rgba(212,175,55,.55);transform:scale(1.1);box-shadow:0 10px 36px rgba(0,0,0,.45),0 0 0 1px rgba(212,175,55,.2),inset 0 1px 0 rgba(255,255,255,.15)}
 .gcar-btn:disabled{cursor:default}
