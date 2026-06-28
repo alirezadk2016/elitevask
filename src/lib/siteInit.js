@@ -1243,9 +1243,9 @@ function submitBooking(cb){
     cur=Math.max(0,Math.min(cur,pages-1));
 
     var showNav=(pages>1);
-    prev.style.opacity=showNav?(cur<=0?'0.18':'1'):'0';
+    prev.style.opacity=showNav?(cur<=0?'0.3':'1'):'0';
     prev.style.pointerEvents=showNav&&cur>0?'auto':'none';
-    next.style.opacity=showNav?(cur>=pages-1?'0.18':'1'):'0';
+    next.style.opacity=showNav?(cur>=pages-1?'0.3':'1'):'0';
     next.style.pointerEvents=showNav&&cur<pages-1?'auto':'none';
     if(dotsEl)dotsEl.style.visibility=showNav?'':'hidden';
 
@@ -1347,9 +1347,9 @@ function submitBooking(cb){
     cur=Math.max(0,Math.min(cur,pages-1));
 
     var showNav=(pages>1);
-    prev.style.opacity=showNav?(cur<=0?'0.18':'1'):'0';
+    prev.style.opacity=showNav?(cur<=0?'0.3':'1'):'0';
     prev.style.pointerEvents=showNav&&cur>0?'auto':'none';
-    next.style.opacity=showNav?(cur>=pages-1?'0.18':'1'):'0';
+    next.style.opacity=showNav?(cur>=pages-1?'0.3':'1'):'0';
     next.style.pointerEvents=showNav&&cur<pages-1?'auto':'none';
     if(dotsEl)dotsEl.style.visibility=showNav?'':'hidden';
 
