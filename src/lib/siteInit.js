@@ -1283,11 +1283,14 @@ function submitBooking(cb){
         tx=null;
       },{passive:true});
     }
-    render();
+    /* ensure layout is complete before render */
+    requestAnimationFrame(function(){
+      requestAnimationFrame(function(){ render(); });
+    });
   }
 
   if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',initCarousel);}
-  else{initCarousel();}
+  else{requestAnimationFrame(initCarousel);}
 })();
 
 /* ====== GALLERY CAROUSEL ====== */
@@ -1385,7 +1388,10 @@ function submitBooking(cb){
       },{passive:true});
     }
 
-    render();
+    /* ensure layout is complete before render */
+    requestAnimationFrame(function(){
+      requestAnimationFrame(function(){ render(); });
+    });
     wrap.__carRender=render;
   }
 

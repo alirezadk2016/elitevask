@@ -8,6 +8,12 @@ function BaSlider({ item }) {
   const dragging = useRef(false);
   const [pos, setPos] = useState(50);
 
+  /* reset position when item changes */
+  useEffect(() => {
+    setPos(50);
+    dragging.current = false;
+  }, [item.id]);
+
   const move = useCallback((clientX) => {
     const el = ref.current;
     if (!el) return;
@@ -142,8 +148,8 @@ function BaLightbox({ items, index, onClose, onPrev, onNext }) {
       </button>
 
       {/* slider + caption */}
-      <div className="ba-lb-content" key={index}>
-        <BaSlider item={item} />
+      <div className="ba-lb-content" key={`ba-${index}`}>
+        <BaSlider key={`ba-slider-${item.id}`} item={item} />
         {item.caption && <p className="ba-lb-cap">{item.caption}</p>}
       </div>
 

@@ -370,7 +370,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 .gcar-wrap{position:relative;display:flex;align-items:center;gap:0;margin-top:34px}
 .gcar-viewport{flex:1;overflow:hidden;border-radius:18px;min-width:0;-webkit-transform:translateZ(0);transform:translateZ(0)}
 .gcar-track{display:flex;gap:16px;transition:transform .5s cubic-bezier(.22,1,.36,1);will-change:transform}
-.gcar-track .gitem{flex-shrink:0;min-width:0} /* width set by JS */
+.gcar-track .gitem{flex-shrink:0;min-width:0;width:25%;height:auto} /* fallback width; overridden by JS */
 .gcar-btn{flex-shrink:0;width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,.06);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.14);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10;transition:background .2s,border-color .25s,transform .25s,box-shadow .2s,opacity .2s;box-shadow:0 8px 32px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.1);margin:0 10px}
 .gcar-btn:hover{background:rgba(212,175,55,.16);border-color:rgba(212,175,55,.55);transform:scale(1.1);box-shadow:0 10px 36px rgba(0,0,0,.45),0 0 0 1px rgba(212,175,55,.2),inset 0 1px 0 rgba(255,255,255,.15)}
 .gcar-btn:disabled{cursor:default}
@@ -738,6 +738,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
   .trustbar{display:none}
   .nav-links{display:none}.nav-phone{display:none}.nav-book-btn{display:none}.lang{display:none}.lang-mobile{display:none}.menu-toggle{display:block}
   .car-grid{grid-template-columns:repeat(2,1fr)}
+  .pkg-tabs-wrap::after{width:32px}
   .calc-head{flex-direction:column;align-items:flex-start;gap:16px;padding:18px 20px}
   .calc-head-chips{gap:8px}
   .ch-chip{font-size:11.5px;padding:4px 10px}
@@ -806,6 +807,9 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
      max-width:100% clamps flex scroll children (e.g. the package tabs) and
      forces a full-DOM style recalc. overflow-x:clip on body handles the rest. */
   img,svg,video,table,pre,iframe{max-width:100%}
+  .pkg-tabs-wrap{padding:12px 12px 2px}
+  .pkg-tabs-wrap::after{display:none}
+  .pkg-tabs{padding-right:8px}
   .wrap{padding:0 16px}
   .car-grid{grid-template-columns:1fr 1fr;gap:11px}.car svg.cs{width:84px;height:46px}
   .work-grid{grid-template-columns:1fr 1fr}
