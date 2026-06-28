@@ -1249,7 +1249,10 @@ function submitBooking(cb){
     next.style.pointerEvents=showNav&&cur<pages-1?'auto':'none';
     if(dotsEl)dotsEl.style.visibility=showNav?'':'hidden';
 
-    var offset=cur*perPage*(itemW+gap);
+    // right-align the last page so a partial page never leaves an empty gap
+    var trackW=items.length*itemW+(items.length-1)*gap;
+    var maxOffset=Math.max(0,trackW-vw);
+    var offset=Math.min(cur*perPage*(itemW+gap),maxOffset);
     track.style.transform='translateX(-'+offset+'px)';
 
     prev.disabled=(cur<=0);
@@ -1350,7 +1353,10 @@ function submitBooking(cb){
     next.style.pointerEvents=showNav&&cur<pages-1?'auto':'none';
     if(dotsEl)dotsEl.style.visibility=showNav?'':'hidden';
 
-    var offset=cur*perPage*(itemW+gap);
+    // right-align the last page so a partial page never leaves an empty gap
+    var trackW=items.length*itemW+(items.length-1)*gap;
+    var maxOffset=Math.max(0,trackW-vw);
+    var offset=Math.min(cur*perPage*(itemW+gap),maxOffset);
     track.style.transform='translateX(-'+offset+'px)';
 
     prev.disabled=(cur<=0);
