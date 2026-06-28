@@ -1201,7 +1201,6 @@ function submitBooking(cb){
     var vp=document.getElementById('baViewport');
     if(!vp)return 4;
     var w=vp.offsetWidth;
-    if(w<540)return 1;
     if(w<900)return 2;
     return 4;
   }
@@ -1301,7 +1300,6 @@ function submitBooking(cb){
     var vp=document.getElementById('galViewport');
     if(!vp)return 4;
     var w=vp.offsetWidth;
-    if(w<540)return 1;
     if(w<900)return 2;
     return 4;
   }

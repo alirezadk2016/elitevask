@@ -376,7 +376,6 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
    before initCarousel() runs. JS overrides with exact px after rAF. */
 .gcar-track .gitem,.gcar-track .ba-card{width:calc((100% - 48px) / 4)}
 @media(max-width:900px){.gcar-track .gitem,.gcar-track .ba-card{width:calc((100% - 16px) / 2)}}
-@media(max-width:540px){.gcar-track .gitem,.gcar-track .ba-card{width:100%}}
 .gcar-btn{flex-shrink:0;width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,.06);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.14);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10;transition:background .2s,border-color .25s,transform .25s,box-shadow .2s,opacity .2s;box-shadow:0 8px 32px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.1);margin:0 10px}
 .gcar-btn:hover{background:rgba(212,175,55,.16);border-color:rgba(212,175,55,.55);transform:scale(1.1);box-shadow:0 10px 36px rgba(0,0,0,.45),0 0 0 1px rgba(212,175,55,.2),inset 0 1px 0 rgba(255,255,255,.15)}
 .gcar-btn:disabled{cursor:default}
