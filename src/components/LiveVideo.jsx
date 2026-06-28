@@ -8,7 +8,7 @@ const HTML = `<!-- LIVE VIDEO -->
   <div class="lv-stage">
     <div class="lv-frame">
       <div class="ev-video-badge"><span class="ev-pulse"></span><span data-i18n="vid_badge">Se os i aktion</span></div>
-      <video class="ev-video" autoplay muted loop playsinline preload="metadata" poster="/gallery/steam-bmw.jpg">
+      <video class="ev-video" autoplay muted loop playsinline preload="metadata">
         <source src="/gallery/elite-vask-demo.mp4" type="video/mp4">
       </video>
       <div class="ev-video-overlay">
