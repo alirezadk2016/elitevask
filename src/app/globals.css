@@ -1095,25 +1095,17 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 .ba-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:8px}
 @media(max-width:900px){.ba-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:540px){.ba-grid{grid-template-columns:1fr}}
-/* thumbnail card */
-.ba-thumb{position:relative;aspect-ratio:4/3;border-radius:14px;overflow:hidden;cursor:pointer;border:1px solid var(--line);background:#080f0b;width:100%;padding:0;display:block;transition:border-color .3s ease,box-shadow .4s ease,transform .4s cubic-bezier(.22,1,.36,1)}
-.ba-thumb:hover{border-color:rgba(212,175,55,.5);box-shadow:0 20px 52px rgba(0,0,0,.55),0 0 0 1px rgba(212,175,55,.18);transform:translateY(-5px)}
-/* split image preview */
-.ba-thumb-split{position:absolute;inset:0;display:grid;grid-template-columns:1fr 1fr;overflow:hidden}
-.ba-thumb-split img{width:100%;height:100%;object-fit:cover;pointer-events:none;transition:transform .55s cubic-bezier(.22,1,.36,1)}
-.ba-thumb:hover .ba-thumb-split img{transform:scale(1.06)}
-/* gold center divider */
-.ba-thumb-rule{position:absolute;left:50%;top:0;bottom:0;width:2px;background:linear-gradient(to bottom,transparent 0%,rgba(212,175,55,.9) 25%,rgba(212,175,55,.9) 75%,transparent 100%);transform:translateX(-50%);z-index:2}
-/* Før / Efter tags */
-.ba-thumb-tag{position:absolute;top:9px;z-index:3;font-size:8.5px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:#fff;background:rgba(0,0,0,.52);padding:3px 7px;border-radius:4px;backdrop-filter:blur(4px)}
-.ba-thumb-tag.l{left:8px}.ba-thumb-tag.r{right:8px}
-/* hover overlay */
-.ba-thumb-hover{position:absolute;inset:0;background:rgba(3,9,5,.58);backdrop-filter:blur(3px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;z-index:4;opacity:0;transition:opacity .22s ease;color:#fff;font-size:12px;font-weight:600;letter-spacing:.3px}
-.ba-thumb:hover .ba-thumb-hover{opacity:1}
-.ba-thumb-hover svg{color:#d4af37;flex-shrink:0}
-/* caption */
-.ba-thumb-cap{position:absolute;bottom:0;left:0;right:0;padding:26px 11px 9px;font-size:10.5px;font-weight:600;letter-spacing:.3px;color:#fff;background:linear-gradient(to top,rgba(4,10,6,.95) 0%,rgba(4,10,6,.45) 60%,transparent 100%);z-index:1;margin:0;transition:opacity .22s}
-.ba-thumb:hover .ba-thumb-cap{opacity:0}
+/* in-place draggable card — slider works directly, no click required */
+.ba-thumb-live{position:relative;margin:0;border-radius:14px;overflow:hidden;border:1px solid var(--line);background:#080f0b;transition:border-color .3s ease,box-shadow .4s ease,transform .4s cubic-bezier(.22,1,.36,1)}
+.ba-thumb-live:hover{border-color:rgba(212,175,55,.5);box-shadow:0 20px 52px rgba(0,0,0,.55),0 0 0 1px rgba(212,175,55,.18);transform:translateY(-5px)}
+.ba-thumb-live .ba-slider{border:none;border-radius:0;aspect-ratio:4/3}
+/* caption overlay (doesn't block dragging) */
+.ba-thumb-livecap{position:absolute;left:0;right:0;bottom:0;padding:26px 11px 9px;font-size:10.5px;font-weight:600;letter-spacing:.3px;color:#fff;background:linear-gradient(to top,rgba(4,10,6,.95) 0%,rgba(4,10,6,.45) 60%,transparent 100%);z-index:2;margin:0;pointer-events:none}
+/* small expand-to-fullscreen button */
+.ba-thumb-expand{position:absolute;bottom:8px;right:8px;z-index:5;width:30px;height:30px;border-radius:8px;background:rgba(3,9,5,.5);border:1px solid rgba(255,255,255,.16);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(4px);transition:background .2s,border-color .2s,transform .2s;opacity:0}
+.ba-thumb-live:hover .ba-thumb-expand{opacity:1}
+.ba-thumb-expand:hover{background:rgba(212,175,55,.22);border-color:rgba(212,175,55,.5);transform:scale(1.08)}
+@media(hover:none){.ba-thumb-expand{opacity:1}}
 /* ── BA lightbox ── */
 .ba-lb{position:fixed;inset:0;z-index:200;background:rgba(2,5,3,.96);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);display:flex;align-items:center;justify-content:center;padding:76px 80px;animation:fade .2s ease}
 .ba-lb-content{width:min(82vw,880px);animation:lbIn .32s cubic-bezier(.22,1,.36,1)}
