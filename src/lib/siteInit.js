@@ -1271,6 +1271,18 @@ function submitBooking(cb){
     prev.addEventListener('click',function(){cur--;render();});
     next.addEventListener('click',function(){cur++;render();});
     window.addEventListener('resize',function(){cur=0;render();});
+    /* touch swipe */
+    var tx=null;
+    var vp=document.getElementById('baViewport');
+    if(vp){
+      vp.addEventListener('touchstart',function(e){tx=e.touches[0].clientX;},{passive:true});
+      vp.addEventListener('touchend',function(e){
+        if(tx===null)return;
+        var dx=tx-e.changedTouches[0].clientX;
+        if(Math.abs(dx)>40){if(dx>0){cur++;render();}else{cur--;render();}}
+        tx=null;
+      },{passive:true});
+    }
     render();
   }
 
@@ -1359,6 +1371,19 @@ function submitBooking(cb){
     prev.addEventListener('click',function(){cur--;render();});
     next.addEventListener('click',function(){cur++;render();});
     window.addEventListener('resize',function(){cur=0;render();});
+
+    /* touch swipe */
+    var tx=null;
+    var viewport=document.getElementById('galViewport');
+    if(viewport){
+      viewport.addEventListener('touchstart',function(e){tx=e.touches[0].clientX;},{passive:true});
+      viewport.addEventListener('touchend',function(e){
+        if(tx===null)return;
+        var dx=tx-e.changedTouches[0].clientX;
+        if(Math.abs(dx)>40){if(dx>0){cur++;render();}else{cur--;render();}}
+        tx=null;
+      },{passive:true});
+    }
 
     render();
     wrap.__carRender=render;

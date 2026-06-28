@@ -368,7 +368,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 .empty-state p{font-size:14px;color:var(--muted);max-width:440px;margin:0 auto 22px}
 /* GALLERY CAROUSEL */
 .gcar-wrap{position:relative;display:flex;align-items:center;gap:0;margin-top:34px}
-.gcar-viewport{flex:1;overflow:hidden;border-radius:18px}
+.gcar-viewport{flex:1;overflow:hidden;border-radius:18px;min-width:0;-webkit-transform:translateZ(0);transform:translateZ(0)}
 .gcar-track{display:flex;gap:16px;transition:transform .5s cubic-bezier(.22,1,.36,1);will-change:transform}
 .gcar-track .gitem{flex-shrink:0;min-width:0} /* width set by JS */
 .gcar-btn{flex-shrink:0;width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,.06);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.14);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10;transition:background .2s,border-color .25s,transform .25s,box-shadow .2s,opacity .2s;box-shadow:0 8px 32px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.1);margin:0 10px}
@@ -791,6 +791,14 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
   .extras-grid{grid-template-columns:1fr}
   .wiz-plate-row{flex-direction:column}
   .wiz-plate-lookup{width:100%}
+  /* carousel: shrink buttons so images get more room */
+  .gcar-btn{width:36px;height:36px;margin:0 5px}
+  .gcar-btn svg{width:16px;height:16px}
+}
+@media(max-width:560px){
+  /* hide arrows entirely — swipe to navigate */
+  .gcar-btn{display:none}
+  .gcar-dots{margin-top:14px}
 }
 @media(max-width:520px){
   html,body{overflow-x:clip}
