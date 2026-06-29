@@ -1114,13 +1114,13 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 /* ── BA thumbnail grid (/galleri) ── */
 .ba-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:8px}
 @media(max-width:900px){.ba-grid{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:540px){.ba-grid{grid-template-columns:repeat(2,1fr);gap:10px}}
+@media(max-width:540px){.ba-grid{grid-template-columns:repeat(2,1fr);gap:8px}}
 /* in-place draggable card — slider works directly, no click required */
 .ba-thumb-live{position:relative;margin:0;border-radius:14px;overflow:hidden;border:1px solid var(--line);background:#080f0b;transition:border-color .3s ease,box-shadow .4s ease,transform .4s cubic-bezier(.22,1,.36,1)}
 .ba-thumb-live:hover{border-color:rgba(212,175,55,.5);box-shadow:0 20px 52px rgba(0,0,0,.55),0 0 0 1px rgba(212,175,55,.18);transform:translateY(-5px)}
 .ba-thumb-live .ba-slider{border:none;border-radius:0;aspect-ratio:4/3}
 /* caption overlay (doesn't block dragging) */
-.ba-thumb-livecap{position:absolute;left:0;right:0;bottom:0;padding:26px 11px 9px;font-size:10.5px;font-weight:600;letter-spacing:.3px;color:#fff;background:linear-gradient(to top,rgba(4,10,6,.95) 0%,rgba(4,10,6,.45) 60%,transparent 100%);z-index:2;margin:0;pointer-events:none}
+.ba-thumb-livecap{position:absolute;left:0;right:0;bottom:0;padding:24px 12px 9px;font-size:10.5px;font-weight:500;letter-spacing:.4px;color:rgba(255,255,255,.62);background:linear-gradient(to top,rgba(4,10,6,.72) 0%,rgba(4,10,6,.28) 55%,transparent 100%);z-index:2;margin:0;pointer-events:none}
 /* small expand-to-fullscreen button */
 .ba-thumb-expand{position:absolute;bottom:8px;right:8px;z-index:5;width:30px;height:30px;border-radius:8px;background:rgba(3,9,5,.5);border:1px solid rgba(255,255,255,.16);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(4px);transition:background .2s,border-color .2s,transform .2s;opacity:0}
 .ba-thumb-live:hover .ba-thumb-expand{opacity:1}
@@ -1165,6 +1165,6 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
   .gal-lb-nav{width:42px;height:42px}.gal-lb-nav.l{left:10px}.gal-lb-nav.r{right:10px}
   .gal-hero{padding:40px 16px 28px}
   .gal-hero-sub{font-size:14px}
-  .gal-section{padding:20px 16px 8px}
+  .gal-section{padding:20px 12px 8px}
   .gal-section-head{gap:10px;margin-bottom:18px}
 }
