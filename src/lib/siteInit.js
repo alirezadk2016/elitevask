@@ -1107,7 +1107,7 @@ function submitBooking(cb){
       var intro=document.getElementById('chatIntro');
       if(intro&&!introPlayed){
         introPlayed=true;intro.style.display='flex';
-        setTimeout(function(){intro.classList.add('hiding');setTimeout(function(){intro.style.display='none';showGreeting();},450);},3200);
+        setTimeout(function(){intro.classList.add('hiding');setTimeout(function(){intro.style.display='none';showGreeting();},260);},1300);
       }else{showGreeting();}
     }else{closeWin();}
   });

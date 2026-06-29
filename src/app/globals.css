@@ -719,9 +719,9 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 .intro-spark.s5{left:96px;top:138px;animation:introSpark 3s ease .7s infinite}
 @keyframes introSpark{0%{opacity:0;transform:translateY(8px) scale(.4)}25%{opacity:1;transform:translateY(-4px) scale(1)}70%{opacity:.5}100%{opacity:0;transform:translateY(-26px) scale(.3)}}
 /* label + load line */
-.intro-label{font-size:12.5px;font-weight:800;letter-spacing:3px;text-transform:uppercase;background:linear-gradient(90deg,#f5e07a,#d4af37,#f5e07a);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;opacity:0;transform:translateY(8px);animation:introLabelIn .6s ease 1.05s forwards}
+.intro-label{font-size:12.5px;font-weight:800;letter-spacing:3px;text-transform:uppercase;background:linear-gradient(90deg,#f5e07a,#d4af37,#f5e07a);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;opacity:0;transform:translateY(8px);animation:introLabelIn .45s ease .4s forwards}
 @keyframes introLabelIn{to{opacity:1;transform:translateY(0)}}
-.intro-loadbar{width:64px;height:2px;border-radius:2px;background:linear-gradient(90deg,transparent,#d4af37,transparent);transform:scaleX(0);opacity:0;animation:introLoad 1s ease 1.25s forwards}
+.intro-loadbar{width:64px;height:2px;border-radius:2px;background:linear-gradient(90deg,transparent,#d4af37,transparent);transform:scaleX(0);opacity:0;animation:introLoad .7s ease .55s forwards}
 @keyframes introLoad{0%{transform:scaleX(0);opacity:0}30%{opacity:1}100%{transform:scaleX(1);opacity:.7}}
 .chat-intro.hiding{animation:chatIntroOut .4s ease forwards}
 @keyframes chatIntroOut{to{opacity:0;pointer-events:none}}
