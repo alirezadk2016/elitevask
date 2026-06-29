@@ -1160,16 +1160,66 @@ function submitBooking(cb){
       mini.classList.remove('vis');
     }
     mini.addEventListener('click',restoreChat);
-    // Touch swipe on chatbot toggle
-    var t0x=0,t0y=0;
-    toggle.addEventListener('touchstart',function(e){t0x=e.touches[0].clientX;t0y=e.touches[0].clientY;},{passive:true});
-    toggle.addEventListener('touchend',function(e){
-      var dx=e.changedTouches[0].clientX-t0x;
-      var dy=e.changedTouches[0].clientY-t0y;
-      var dist=Math.sqrt(dx*dx+dy*dy);
-      if(dist>40&&(dx<-20||dy>20)){e.preventDefault();dismissChat();}
-    });
+    // (swipe-to-dismiss removed — replaced by drag-to-reposition below)
   }
+})();
+
+/* ====== DRAGGABLE CHAT BUTTON (move it out of the way, snaps to edge) ====== */
+(function(){
+  var cb=document.getElementById('chatbot');
+  var toggle=document.getElementById('chatToggle');
+  if(!cb||!toggle||cb.__dragBound)return;
+  cb.__dragBound=true;
+
+  function clampApply(left,top){
+    var r=toggle.getBoundingClientRect();
+    var w=r.width||56,h=r.height||56,pad=8;
+    left=Math.max(pad,Math.min(left,window.innerWidth-w-pad));
+    top=Math.max(pad,Math.min(top,window.innerHeight-h-pad));
+    cb.style.left=left+'px';cb.style.top=top+'px';cb.style.right='auto';cb.style.bottom='auto';
+    return {left:left,top:top};
+  }
+
+  // restore saved position
+  try{
+    var s=JSON.parse(localStorage.getItem('ev_chat_pos')||'null');
+    if(s&&typeof s.left==='number')clampApply(s.left,s.top);
+  }catch(e){}
+
+  var dragging=false,moved=false,suppress=false,sx=0,sy=0,bl=0,bt=0,pid=null;
+
+  toggle.addEventListener('pointerdown',function(e){
+    dragging=true;moved=false;pid=e.pointerId;
+    var r=cb.getBoundingClientRect();bl=r.left;bt=r.top;sx=e.clientX;sy=e.clientY;
+    try{toggle.setPointerCapture(pid);}catch(_){}
+  });
+  toggle.addEventListener('pointermove',function(e){
+    if(!dragging)return;
+    var dx=e.clientX-sx,dy=e.clientY-sy;
+    if(!moved&&(Math.abs(dx)>6||Math.abs(dy)>6)){moved=true;cb.classList.add('chat-dragging');}
+    if(moved)clampApply(bl+dx,bt+dy);
+  });
+  function end(){
+    if(!dragging)return;dragging=false;
+    try{toggle.releasePointerCapture(pid);}catch(_){}
+    if(moved){
+      cb.classList.remove('chat-dragging');
+      var r=toggle.getBoundingClientRect();
+      var toLeft=(r.left+r.width/2)<window.innerWidth/2;
+      var pos=clampApply(toLeft?12:(window.innerWidth-r.width-12),r.top);
+      try{localStorage.setItem('ev_chat_pos',JSON.stringify(pos));}catch(_){}
+      suppress=true;setTimeout(function(){suppress=false;},60);
+    }
+  }
+  toggle.addEventListener('pointerup',end);
+  toggle.addEventListener('pointercancel',end);
+  // capture-phase: cancel the click that follows a drag so chat doesn't open
+  toggle.addEventListener('click',function(e){
+    if(suppress||moved){e.stopImmediatePropagation();e.preventDefault();moved=false;}
+  },true);
+  window.addEventListener('resize',function(){
+    if(cb.style.left)clampApply(parseFloat(cb.style.left),parseFloat(cb.style.top));
+  });
 })();
 
 /* ====== STEAM FACTS ACCORDION (mobile) ====== */
