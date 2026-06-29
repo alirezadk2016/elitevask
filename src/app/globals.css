@@ -105,6 +105,8 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 .hero-trust{display:flex;gap:28px;justify-content:center;flex-wrap:wrap;margin-top:46px}
 .hero-trust .t{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
 .hero-trust .t svg{width:17px;height:17px;color:var(--green)}
+/* mobile-only trust strip under the hero CTA (desktop unchanged) */
+.hero-trust-mini{display:none}
 
 /* SECTIONS */
 .sec{padding:80px 0}
@@ -797,6 +799,15 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
   .hero p{margin-top:12px;font-size:13.5px;padding:0 6px;line-height:1.55;max-width:420px;margin-left:auto;margin-right:auto}
   .hero-cta{flex-direction:column;align-items:stretch;gap:10px;padding:0 2px;margin-top:20px}
   .hero-cta .btn{width:100%;justify-content:center}
+  /* trust strip under CTA — reinforces trust at the decision point */
+  .hero-trust-mini{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:8px 10px;margin-top:16px}
+  .hero-trust-mini>span{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;color:rgba(233,241,236,.82);white-space:nowrap}
+  .hero-trust-mini svg{width:13px;height:13px;color:var(--green);flex-shrink:0}
+  .hero-trust-mini .htm-stars{color:#FBBC05;font-size:11px;letter-spacing:.5px}
+  .hero-trust-mini .htm-dot{width:3px;height:3px;border-radius:50%;background:rgba(255,255,255,.32);padding:0}
+  /* clean single-line announcement on mobile */
+  .ann-text{font-size:12.5px;flex-wrap:nowrap}
+  .ann-text .ann-sep,.ann-text .ann-sub{display:none}
   .btn-lg{padding:13px 24px;font-size:15px}
   .tb-hide-mobile{display:none}
   .chatbot{bottom:calc(76px + env(safe-area-inset-bottom));right:16px}

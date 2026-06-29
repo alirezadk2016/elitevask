@@ -17,6 +17,13 @@ const HTML = `<!-- HERO -->
       <a href="#vaelg" class="btn btn-green btn-lg"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg><span data-i18n="hero_cta1">Se priser</span></a>
       <button type="button" class="btn btn-ghost btn-lg" data-book data-i18n="hero_cta2">Book med det samme</button>
     </div>
+    <div class="hero-trust-mini">
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg><span data-i18n="htm_guarantee">100% tilfredshedsgaranti</span></span>
+      <span class="htm-dot"></span>
+      <span><span class="htm-stars">★★★★★</span><span data-i18n="htm_rating">5.0 på Google</span></span>
+      <span class="htm-dot"></span>
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2v-4c0-1-.7-1.8-1.5-2L16 10l-2.2-2.3c-.4-.4-1-.7-1.7-.7H5c-.6 0-1.1.4-1.4 1L2 11v6h2"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg><span data-i18n="htm_free">Gratis kørsel</span></span>
+    </div>
   </div>
 </section>`;
 export default function Hero() {
