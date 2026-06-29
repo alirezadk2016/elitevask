@@ -22,8 +22,18 @@ const HTML = `<!-- CHATBOT -->
     </div>
 
     <div id="chatIntro" class="chat-intro" style="display:none">
-      ${botAvatarSvg(128)}
+      <div class="intro-stage">
+        <span class="intro-halo"></span>
+        <span class="intro-ring"></span>
+        <div class="intro-bot">${botAvatarSvg(132)}<span class="intro-sweep"></span></div>
+        <span class="intro-spark s1"></span>
+        <span class="intro-spark s2"></span>
+        <span class="intro-spark s3"></span>
+        <span class="intro-spark s4"></span>
+        <span class="intro-spark s5"></span>
+      </div>
       <p class="intro-label" data-i18n="chat_intro_label">Elite Bot er klar!</p>
+      <span class="intro-loadbar"></span>
     </div>
 
     <div id="chatMessages" class="chat-messages"></div>

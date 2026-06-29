@@ -673,13 +673,37 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 }
 .chat-window.opening::after{content:'';position:absolute;inset:0;border-radius:22px;background:radial-gradient(ellipse 70% 40% at 50% 0%,rgba(212,175,55,.13) 0%,transparent 70%);pointer-events:none;animation:chatShimmer .6s ease forwards;z-index:10}
 @keyframes chatShimmer{0%{opacity:0}40%{opacity:1}100%{opacity:0}}
-/* intro animation */
-.chat-intro{position:absolute;inset:0;z-index:6;background:linear-gradient(180deg,#020b05 0%,#030f07 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;border-radius:22px}
-.chat-intro svg{border-radius:20px;box-shadow:0 0 40px rgba(212,175,55,.12),0 0 0 1px rgba(212,175,55,.18);animation:botAvatarIn .6s cubic-bezier(.22,1,.36,1) .05s both;opacity:0;transform:scale(.82) translateY(10px)}
-@keyframes botAvatarIn{to{opacity:1;transform:scale(1) translateY(0)}}
-.intro-label{font-size:12px;font-weight:700;color:#d4af37;letter-spacing:2px;text-transform:uppercase;opacity:0;animation:introLabelIn .5s ease .75s forwards}
+/* ===== cinematic intro ===== */
+.chat-intro{position:absolute;inset:0;z-index:6;background:radial-gradient(circle at 50% 38%,#06180e 0%,#020b05 72%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;border-radius:22px;overflow:hidden}
+.chat-intro::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 36%,transparent 55%,rgba(0,0,0,.45) 100%);pointer-events:none}
+.intro-stage{position:relative;width:190px;height:168px;display:flex;align-items:center;justify-content:center}
+/* soft gold halo behind the bot */
+.intro-halo{position:absolute;width:172px;height:172px;border-radius:50%;background:radial-gradient(circle,rgba(212,175,55,.34) 0%,rgba(212,175,55,.09) 42%,transparent 70%);filter:blur(3px);opacity:0;animation:introHaloIn .8s ease .05s both,introBreathe 3.6s ease-in-out 1s infinite}
+@keyframes introHaloIn{from{opacity:0;transform:scale(.5)}to{opacity:1;transform:scale(1)}}
+@keyframes introBreathe{0%,100%{opacity:.82;transform:scale(1)}50%{opacity:1;transform:scale(1.07)}}
+/* one expanding ring pulse on entrance */
+.intro-ring{position:absolute;width:130px;height:130px;border-radius:33px;border:1.5px solid rgba(212,175,55,.55);opacity:0;animation:introRing 1.15s cubic-bezier(.22,1,.36,1) .35s forwards}
+@keyframes introRing{0%{opacity:.7;transform:scale(.72)}100%{opacity:0;transform:scale(1.5)}}
+/* the avatar — spring entrance + shine sweep */
+.intro-bot{position:relative;width:132px;height:132px;border-radius:30px;overflow:hidden;box-shadow:0 22px 52px rgba(0,0,0,.62),0 0 0 1px rgba(212,175,55,.28),0 0 42px rgba(212,175,55,.15);opacity:0;animation:introBotIn .78s cubic-bezier(.34,1.56,.64,1) .12s both}
+.intro-bot svg{display:block;border-radius:30px}
+@keyframes introBotIn{0%{opacity:0;transform:scale(.55) rotate(-9deg);filter:blur(7px)}60%{opacity:1;filter:blur(0)}100%{opacity:1;transform:scale(1) rotate(0)}}
+.intro-sweep{position:absolute;inset:0;background:linear-gradient(115deg,transparent 36%,rgba(255,255,255,.30) 50%,transparent 64%);transform:translateX(-120%);animation:introSweep 3.4s ease .65s infinite}
+@keyframes introSweep{0%{transform:translateX(-120%)}28%,100%{transform:translateX(120%)}}
+/* rising gold sparks */
+.intro-spark{position:absolute;width:5px;height:5px;border-radius:50%;background:radial-gradient(circle,#ffe9a0,#d4af37);box-shadow:0 0 8px rgba(212,175,55,.85);opacity:0}
+.intro-spark.s1{left:32px;top:118px;animation:introSpark 2.6s ease 1s infinite}
+.intro-spark.s2{left:150px;top:106px;animation:introSpark 2.9s ease 1.6s infinite}
+.intro-spark.s3{left:26px;top:54px;animation:introSpark 3.1s ease 2.1s infinite}
+.intro-spark.s4{left:158px;top:50px;animation:introSpark 2.7s ease 2.7s infinite}
+.intro-spark.s5{left:96px;top:138px;animation:introSpark 3s ease .7s infinite}
+@keyframes introSpark{0%{opacity:0;transform:translateY(8px) scale(.4)}25%{opacity:1;transform:translateY(-4px) scale(1)}70%{opacity:.5}100%{opacity:0;transform:translateY(-26px) scale(.3)}}
+/* label + load line */
+.intro-label{font-size:12.5px;font-weight:800;letter-spacing:3px;text-transform:uppercase;background:linear-gradient(90deg,#f5e07a,#d4af37,#f5e07a);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;opacity:0;transform:translateY(8px);animation:introLabelIn .6s ease 1.05s forwards}
+@keyframes introLabelIn{to{opacity:1;transform:translateY(0)}}
+.intro-loadbar{width:64px;height:2px;border-radius:2px;background:linear-gradient(90deg,transparent,#d4af37,transparent);transform:scaleX(0);opacity:0;animation:introLoad 1s ease 1.25s forwards}
+@keyframes introLoad{0%{transform:scaleX(0);opacity:0}30%{opacity:1}100%{transform:scaleX(1);opacity:.7}}
 .chat-intro.hiding{animation:chatIntroOut .4s ease forwards}
-@keyframes introLabelIn{to{opacity:1}}
 @keyframes chatIntroOut{to{opacity:0;pointer-events:none}}
 /* header */
 .chat-header{background:linear-gradient(135deg,#061a0e 0%,#0e3820 50%,#071f0f 100%);padding:16px 18px;display:flex;align-items:center;justify-content:space-between;position:relative;border-bottom:1px solid rgba(212,175,55,.18)}
