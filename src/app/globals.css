@@ -819,6 +819,9 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
   .hero-trust-mini>span{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;color:rgba(233,241,236,.82);white-space:nowrap}
   .hero-trust-mini svg{width:13px;height:13px;color:var(--green);flex-shrink:0}
   .hero-trust-mini .htm-stars{color:#FBBC05;font-size:11px;letter-spacing:.5px}
+  .hero-trust-mini .htm-google{gap:5px}
+  .hero-trust-mini .htm-google svg{width:14px;height:14px}
+  .hero-trust-mini .htm-google>span:last-child{color:#fff;font-weight:700}
   .hero-trust-mini .htm-dot{width:3px;height:3px;border-radius:50%;background:rgba(255,255,255,.32);padding:0}
   /* clean single-line announcement on mobile */
   .ann-text{font-size:12.5px;flex-wrap:nowrap}
@@ -1080,14 +1083,9 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 
 /* ====== MOBILE GOOGLE BADGE STRIP ====== */
 .mob-google-strip{display:none}
-@media(max-width:880px){
-  .mob-google-strip{display:flex;align-items:center;justify-content:center;gap:8px;background:#081009;border-bottom:1px solid var(--line);padding:7px 16px;text-decoration:none}
-  .mob-google-strip .mgs-logo{display:flex;align-items:center;gap:5px;font-size:12px;font-weight:700;color:rgba(255,255,255,.8)}
-  .mob-google-strip .mgs-divider{width:1px;height:14px;background:var(--line-2)}
-  .mob-google-strip .mgs-stars{color:#FBBC05;font-size:12px;letter-spacing:1px}
-  .mob-google-strip .mgs-score{font-size:12px;font-weight:700;color:#fff}
-  .mob-google-strip .mgs-label{font-size:11px;color:var(--muted)}
-}
+/* top Google strip removed on mobile — declutters the header; the colourful
+   Google rating now lives in the hero trust strip (lower, at the decision point) */
+.mob-google-strip{display:none!important}
 
 @keyframes calPulse{0%{transform:scale(1);opacity:.7}70%{transform:scale(2.2);opacity:0}100%{transform:scale(2.2);opacity:0}}
 
