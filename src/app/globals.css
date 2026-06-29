@@ -816,11 +816,11 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
   .ev-video-text{padding:20px 20px}
   .ev-video-text h3{font-size:18px}
   .ev-video-text p{font-size:13px}
-  .pkg-tabs-wrap{position:relative;padding:12px 16px 2px}
-  .pkg-tabs-wrap::after{content:"";position:absolute;right:0;top:12px;bottom:2px;width:48px;background:linear-gradient(to right,transparent,#15211b);pointer-events:none;z-index:2}
-  .pkg-tabs{display:flex;gap:6px;overflow-x:auto;padding:0 0 12px;scrollbar-width:none;-ms-overflow-style:none}
-  .pkg-tabs::-webkit-scrollbar{display:none}
-  .pkg-tab{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:99px;padding:8px 16px;font-size:12.5px;font-weight:700;color:rgba(255,255,255,.45);cursor:pointer;white-space:nowrap;font-family:inherit;transition:all .18s;flex-shrink:0;max-width:none}
+  /* package tabs: clean 2×2 grid on mobile — all 4 packages visible, no cut-off Guld */
+  .pkg-tabs-wrap{position:relative;padding:12px 16px 6px}
+  .pkg-tabs-wrap::after{display:none}
+  .pkg-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0;overflow:visible}
+  .pkg-tab{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:99px;padding:11px 10px;font-size:12.5px;font-weight:700;color:rgba(255,255,255,.5);cursor:pointer;white-space:nowrap;text-align:center;font-family:inherit;transition:all .18s;min-width:0}
   .pkg-tab.on{background:var(--green);color:#052010;border-color:var(--green);box-shadow:0 3px 12px rgba(55,210,120,.28)}
   /* Chips: compact single row on mobile */
   .calc-head-chips{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
@@ -844,9 +844,9 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
      max-width:100% clamps flex scroll children (e.g. the package tabs) and
      forces a full-DOM style recalc. overflow-x:clip on body handles the rest. */
   img,svg,video,table,pre,iframe{max-width:100%}
-  .pkg-tabs-wrap{padding:12px 12px 2px}
+  .pkg-tabs-wrap{padding:12px 12px 6px}
   .pkg-tabs-wrap::after{display:none}
-  .pkg-tabs{padding-right:8px}
+  .pkg-tabs{padding:0}
   .wrap{padding:0 16px}
   .car-grid{grid-template-columns:1fr 1fr;gap:11px}.car svg.cs{width:84px;height:46px}
   .work-grid{grid-template-columns:1fr 1fr}
