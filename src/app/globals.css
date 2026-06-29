@@ -95,13 +95,13 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 .badge{display:inline-flex;align-items:center;gap:8px;background:var(--green-soft);border:1px solid rgba(55,210,120,.28);color:var(--green);border-radius:99px;padding:7px 16px;font-size:12.5px;font-weight:600;margin-bottom:24px}
 .badge svg{width:15px;height:15px}
 /* hero Google rating badge — premium dark glass + gold accent */
-.badge-google{background:rgba(6,12,9,.82);border:1px solid rgba(212,175,55,.45);color:#fff;backdrop-filter:blur(14px) saturate(1.1);-webkit-backdrop-filter:blur(14px) saturate(1.1);gap:7px;padding:7px 16px;text-decoration:none;box-shadow:0 6px 22px rgba(0,0,0,.5),0 0 0 1px rgba(212,175,55,.12),inset 0 1px 0 rgba(255,255,255,.07);transition:border-color .25s ease,background .25s ease,transform .25s ease,box-shadow .3s ease}
-.badge-google:hover{border-color:rgba(212,175,55,.75);background:rgba(8,15,11,.88);transform:translateY(-1px);box-shadow:0 10px 28px rgba(0,0,0,.55),0 0 22px rgba(212,175,55,.18)}
-.badge-google svg{width:15px;height:15px;flex-shrink:0}
-.badge-google .htm-stars{color:#FBBC05;font-size:12.5px;letter-spacing:.5px}
-.badge-google .badge-g-score{font-weight:800;color:#fff}
-.badge-google .badge-g-sep{opacity:.4}
-.badge-google [data-i18n]{color:rgba(255,255,255,.72);font-weight:600}
+.badge-google{background:rgba(6,12,9,.78);border:1px solid rgba(212,175,55,.38);color:#fff;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);gap:6px;padding:6px 13px;font-size:11.5px;text-decoration:none;box-shadow:0 5px 16px rgba(0,0,0,.42),inset 0 1px 0 rgba(255,255,255,.05);transition:border-color .25s ease,background .25s ease,transform .25s ease,box-shadow .3s ease}
+.badge-google:hover{border-color:rgba(212,175,55,.65);background:rgba(8,15,11,.86);transform:translateY(-1px);box-shadow:0 9px 22px rgba(0,0,0,.48),0 0 16px rgba(212,175,55,.15)}
+.badge-google svg{width:13px;height:13px;flex-shrink:0;opacity:.9}
+.badge-google .htm-stars{color:#e8c873;font-size:11px;letter-spacing:1px}
+.badge-google .badge-g-score{font-weight:800;color:#f3e2ad;font-size:12px}
+.badge-google .badge-g-sep{opacity:.32}
+.badge-google [data-i18n]{color:rgba(255,255,255,.6);font-weight:600;font-size:11px}
 .hero h1{font-size:clamp(33px,5.4vw,56px);font-weight:800;line-height:1.08;letter-spacing:-1.5px;color:#fff}
 .hero h1 em{font-style:normal;color:var(--green)}
 .hero p{font-size:clamp(15px,2vw,18px);color:var(--muted);max-width:560px;margin:20px auto 0}
@@ -786,9 +786,6 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 @media(max-width:880px){
   .trustbar{display:none}
   .nav-links{display:none}.nav-phone{display:none}.nav-book-btn{display:none}.lang{display:none}.lang-mobile{display:none}.menu-toggle{display:block}
-  /* tighter header (~12% shorter) so the hero gets more room */
-  .nav-inner{padding:10px 18px}
-  .ann-bar{padding:8px 16px}
   .car-grid{grid-template-columns:repeat(2,1fr)}
   .pkg-tabs-wrap::after{width:32px}
   .calc-head{flex-direction:column;align-items:flex-start;gap:16px;padding:18px 20px}
@@ -826,17 +823,16 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
   .plate-btn{width:100%}
   .plate-dk input{font-size:22px;letter-spacing:3px}
   /* premium mobile hero — content sits low over a clean dark band, image breathes up top */
-  .hero.hero-img{padding:0;min-height:calc(100svh - 78px);display:flex;align-items:flex-end;overflow:hidden}
+  .hero.hero-img{padding:0;min-height:calc(100svh - 96px);display:flex;align-items:flex-end;overflow:hidden}
   .hero-bg-img{position:absolute;top:0;left:0;right:0;bottom:0;width:100%;height:100%;object-fit:cover;object-position:center 32%}
   .hero-overlay{background:radial-gradient(125% 72% at 50% 28%,transparent 48%,rgba(2,6,4,.58) 100%),linear-gradient(to bottom,rgba(8,16,12,.5) 0%,rgba(8,16,12,.26) 34%,rgba(8,16,12,.82) 75%,rgba(5,11,8,.97) 100%)}
   .hero-inner{padding:0 0 30px;width:100%}
   .hero h1{font-size:clamp(34px,8.8vw,46px);letter-spacing:-1.2px;line-height:1.06}
   .badge{margin-bottom:14px;padding:6px 13px;font-size:12px}
   .hero p{margin-top:12px;font-size:13.5px;padding:0 6px;line-height:1.55;max-width:420px;margin-left:auto;margin-right:auto}
-  /* single refined hero CTA on mobile; Book is the committing action in the sticky bar */
-  .hero-cta{flex-direction:column;align-items:center;gap:10px;padding:0;margin-top:18px}
-  .hero-cta .btn{width:auto;justify-content:center}
-  .hero-cta .btn-green{min-width:210px;padding:12px 30px;font-size:14.5px}
+  /* full-width primary CTA; only the redundant ghost 'Book' button is removed (Book lives in the sticky bar) */
+  .hero-cta{flex-direction:column;align-items:stretch;gap:10px;padding:0 2px;margin-top:20px}
+  .hero-cta .btn{width:100%;justify-content:center}
   .hero-cta .btn-ghost{display:none}
   /* trust strip under CTA — reinforces trust at the decision point */
   .hero-trust-mini{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:8px 10px;margin-top:16px}
@@ -896,7 +892,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
   .footer-bottom{padding-bottom:4px}
   .mak-credit{padding:8px 0 calc(76px + env(safe-area-inset-bottom))}
   .opt-grid{grid-template-columns:1fr}
-  .hero.hero-img{padding:0;min-height:calc(100svh - 78px);align-items:flex-end}
+  .hero.hero-img{padding:0;min-height:calc(100svh - 96px);align-items:flex-end}
   .hero-inner{padding:0 0 28px}
   .hero h1{font-size:clamp(30px,9vw,40px);letter-spacing:-1px;line-height:1.06}
   .hero p{font-size:13px;margin-top:11px;padding:0 6px}
