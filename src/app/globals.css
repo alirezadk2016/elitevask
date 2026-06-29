@@ -94,8 +94,8 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 .badge{display:inline-flex;align-items:center;gap:8px;background:var(--green-soft);border:1px solid rgba(55,210,120,.28);color:var(--green);border-radius:99px;padding:7px 16px;font-size:12.5px;font-weight:600;margin-bottom:24px}
 .badge svg{width:15px;height:15px}
 /* hero Google rating badge — premium dark glass + gold accent */
-.badge-google{background:rgba(8,15,11,.6);border:1px solid rgba(212,175,55,.4);color:#fff;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);gap:7px;padding:7px 15px;text-decoration:none;box-shadow:0 4px 18px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.06);transition:border-color .25s ease,background .25s ease,transform .25s ease}
-.badge-google:hover{border-color:rgba(212,175,55,.7);background:rgba(10,18,13,.72);transform:translateY(-1px)}
+.badge-google{background:rgba(6,12,9,.82);border:1px solid rgba(212,175,55,.45);color:#fff;backdrop-filter:blur(14px) saturate(1.1);-webkit-backdrop-filter:blur(14px) saturate(1.1);gap:7px;padding:7px 16px;text-decoration:none;box-shadow:0 6px 22px rgba(0,0,0,.5),0 0 0 1px rgba(212,175,55,.12),inset 0 1px 0 rgba(255,255,255,.07);transition:border-color .25s ease,background .25s ease,transform .25s ease,box-shadow .3s ease}
+.badge-google:hover{border-color:rgba(212,175,55,.75);background:rgba(8,15,11,.88);transform:translateY(-1px);box-shadow:0 10px 28px rgba(0,0,0,.55),0 0 22px rgba(212,175,55,.18)}
 .badge-google svg{width:15px;height:15px;flex-shrink:0}
 .badge-google .htm-stars{color:#FBBC05;font-size:12.5px;letter-spacing:.5px}
 .badge-google .badge-g-score{font-weight:800;color:#fff}
@@ -115,6 +115,15 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 .hero-trust .t svg{width:17px;height:17px;color:var(--green)}
 /* mobile-only trust strip under the hero CTA (desktop unchanged) */
 .hero-trust-mini{display:none}
+/* cinematic staggered hero reveal (premium entrance; auto-off for reduced-motion) */
+.hero.hero-img .hero-inner>*{animation:heroReveal .75s cubic-bezier(.22,1,.36,1) both}
+.hero.hero-img .badge{animation-delay:.06s}
+.hero.hero-img h1{animation-delay:.16s}
+.hero.hero-img p{animation-delay:.3s}
+.hero.hero-img .hero-flow{animation-delay:.42s}
+.hero.hero-img .hero-cta{animation-delay:.5s}
+.hero.hero-img .hero-trust-mini{animation-delay:.62s}
+@keyframes heroReveal{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
 
 /* SECTIONS */
 .sec{padding:80px 0}
