@@ -1193,6 +1193,29 @@ function submitBooking(cb){
   if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',initSteamAcc);}else{setTimeout(initSteamAcc,0);}
 })();
 
+/* ====== LAZY VIDEO — only load & play when on screen (saves mobile data) ====== */
+(function(){
+  function initLazyVideo(){
+    var v=document.querySelector('.ev-video');
+    if(!v||v.__lazyBound)return;
+    v.__lazyBound=true;
+    if(!('IntersectionObserver' in window)){v.setAttribute('preload','metadata');v.play&&v.play().catch(function(){});return;}
+    var io=new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if(e.isIntersecting){
+          if(v.preload!=='metadata')v.preload='metadata';
+          var p=v.play();if(p&&p.catch)p.catch(function(){});
+        } else if(!v.paused){
+          v.pause();
+        }
+      });
+    },{threshold:0.25});
+    io.observe(v);
+  }
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',initLazyVideo);}
+  else{initLazyVideo();}
+})();
+
 /* ====== BEFORE/AFTER CAROUSEL ====== */
 (function(){
   var cur=0;
