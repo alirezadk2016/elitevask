@@ -786,6 +786,9 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 @media(max-width:880px){
   .trustbar{display:none}
   .nav-links{display:none}.nav-phone{display:none}.nav-book-btn{display:none}.lang{display:none}.lang-mobile{display:none}.menu-toggle{display:block}
+  /* tighter header (~12% shorter) so the hero gets more room */
+  .nav-inner{padding:10px 18px}
+  .ann-bar{padding:8px 16px}
   .car-grid{grid-template-columns:repeat(2,1fr)}
   .pkg-tabs-wrap::after{width:32px}
   .calc-head{flex-direction:column;align-items:flex-start;gap:16px;padding:18px 20px}
@@ -823,15 +826,18 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
   .plate-btn{width:100%}
   .plate-dk input{font-size:22px;letter-spacing:3px}
   /* premium mobile hero — content sits low over a clean dark band, image breathes up top */
-  .hero.hero-img{padding:0;min-height:calc(100svh - 96px);display:flex;align-items:flex-end;overflow:hidden}
+  .hero.hero-img{padding:0;min-height:calc(100svh - 78px);display:flex;align-items:flex-end;overflow:hidden}
   .hero-bg-img{position:absolute;top:0;left:0;right:0;bottom:0;width:100%;height:100%;object-fit:cover;object-position:center 32%}
   .hero-overlay{background:radial-gradient(125% 72% at 50% 28%,transparent 48%,rgba(2,6,4,.58) 100%),linear-gradient(to bottom,rgba(8,16,12,.5) 0%,rgba(8,16,12,.26) 34%,rgba(8,16,12,.82) 75%,rgba(5,11,8,.97) 100%)}
   .hero-inner{padding:0 0 30px;width:100%}
   .hero h1{font-size:clamp(34px,8.8vw,46px);letter-spacing:-1.2px;line-height:1.06}
   .badge{margin-bottom:14px;padding:6px 13px;font-size:12px}
   .hero p{margin-top:12px;font-size:13.5px;padding:0 6px;line-height:1.55;max-width:420px;margin-left:auto;margin-right:auto}
-  .hero-cta{flex-direction:column;align-items:stretch;gap:10px;padding:0 2px;margin-top:20px}
-  .hero-cta .btn{width:100%;justify-content:center}
+  /* single refined hero CTA on mobile; Book is the committing action in the sticky bar */
+  .hero-cta{flex-direction:column;align-items:center;gap:10px;padding:0;margin-top:18px}
+  .hero-cta .btn{width:auto;justify-content:center}
+  .hero-cta .btn-green{min-width:210px;padding:12px 30px;font-size:14.5px}
+  .hero-cta .btn-ghost{display:none}
   /* trust strip under CTA — reinforces trust at the decision point */
   .hero-trust-mini{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:8px 10px;margin-top:16px}
   .hero-trust-mini>span{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;color:rgba(233,241,236,.82);white-space:nowrap}
@@ -890,7 +896,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
   .footer-bottom{padding-bottom:4px}
   .mak-credit{padding:8px 0 calc(76px + env(safe-area-inset-bottom))}
   .opt-grid{grid-template-columns:1fr}
-  .hero.hero-img{padding:0;min-height:calc(100svh - 96px);align-items:flex-end}
+  .hero.hero-img{padding:0;min-height:calc(100svh - 78px);align-items:flex-end}
   .hero-inner{padding:0 0 28px}
   .hero h1{font-size:clamp(30px,9vw,40px);letter-spacing:-1px;line-height:1.06}
   .hero p{font-size:13px;margin-top:11px;padding:0 6px}
@@ -912,7 +918,10 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 
 /* CHATBOT DISMISS */
 .chat-dismissed{transform:translateX(120%) scale(.8)!important;opacity:0!important;pointer-events:none!important;transition:transform .35s cubic-bezier(.4,0,1,1),opacity .25s!important}
-.chatbot{transition:transform .35s cubic-bezier(.34,1.2,.64,1),opacity .3s}
+.chatbot{transition:transform .4s cubic-bezier(.34,1.56,.64,1),opacity .35s ease}
+/* reveal the chat only after the visitor scrolls — less intrusive first impression */
+.chatbot{opacity:0;pointer-events:none;transform:translateY(14px) scale(.92)}
+.chatbot.chat-revealed{opacity:1;pointer-events:auto;transform:none}
 .chat-mini-btn{position:fixed;bottom:32px;right:32px;z-index:150;width:38px;height:38px;border-radius:50%;background:rgba(15,30,20,.7);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(55,210,120,.25);box-shadow:0 6px 24px rgba(0,0,0,.35),inset 0 1px 0 rgba(55,210,120,.1);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--green);opacity:0;pointer-events:none;transform:scale(.6);transition:opacity .28s,transform .28s cubic-bezier(.34,1.4,.64,1);outline:none}
 .chat-mini-btn.vis{opacity:1;pointer-events:auto;transform:scale(1)}
 .chat-mini-btn:hover{background:rgba(20,45,28,.85);border-color:rgba(55,210,120,.5);transform:scale(1.1)}

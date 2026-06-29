@@ -1193,6 +1193,24 @@ function submitBooking(cb){
   if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',initSteamAcc);}else{setTimeout(initSteamAcc,0);}
 })();
 
+/* ====== REVEAL CHATBOT AFTER SCROLL (less intrusive first impression) ====== */
+(function(){
+  function initChatReveal(){
+    var cb=document.getElementById('chatbot');
+    if(!cb||cb.__revealBound)return;
+    cb.__revealBound=true;
+    var shown=false;
+    function check(){
+      if(shown)return;
+      if(window.scrollY>320){cb.classList.add('chat-revealed');shown=true;window.removeEventListener('scroll',check);}
+    }
+    window.addEventListener('scroll',check,{passive:true});
+    check();
+  }
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',initChatReveal);}
+  else{initChatReveal();}
+})();
+
 /* ====== LAZY VIDEO — only load & play when on screen (saves mobile data) ====== */
 (function(){
   function initLazyVideo(){
