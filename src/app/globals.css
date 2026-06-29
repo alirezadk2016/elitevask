@@ -1114,7 +1114,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 /* ── BA thumbnail grid (/galleri) ── */
 .ba-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:8px}
 @media(max-width:900px){.ba-grid{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:540px){.ba-grid{grid-template-columns:1fr}}
+@media(max-width:540px){.ba-grid{grid-template-columns:repeat(2,1fr);gap:10px}}
 /* in-place draggable card — slider works directly, no click required */
 .ba-thumb-live{position:relative;margin:0;border-radius:14px;overflow:hidden;border:1px solid var(--line);background:#080f0b;transition:border-color .3s ease,box-shadow .4s ease,transform .4s cubic-bezier(.22,1,.36,1)}
 .ba-thumb-live:hover{border-color:rgba(212,175,55,.5);box-shadow:0 20px 52px rgba(0,0,0,.55),0 0 0 1px rgba(212,175,55,.18);transform:translateY(-5px)}
