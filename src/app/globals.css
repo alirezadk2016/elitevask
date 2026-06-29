@@ -677,7 +677,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 @keyframes chatRingRotate{to{transform:rotate(360deg)}}
 .chat-badge{position:absolute;top:-3px;right:-3px;width:20px;height:20px;border-radius:50%;background:linear-gradient(135deg,#ff6b35,#e53);color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;border:2px solid #071910;box-shadow:0 2px 8px rgba(229,51,51,.5)}
 /* window */
-.chat-window{position:absolute;bottom:80px;right:0;width:350px;max-height:82vh;background:linear-gradient(180deg,rgba(12,30,19,.8) 0%,rgba(6,13,9,.85) 100%);backdrop-filter:blur(26px) saturate(1.15);-webkit-backdrop-filter:blur(26px) saturate(1.15);border:1px solid rgba(212,175,55,.28);border-radius:22px;box-shadow:0 0 0 1px rgba(212,175,55,.08),0 32px 90px rgba(0,0,0,.7),0 0 60px rgba(212,175,55,.05);overflow:hidden;display:flex;flex-direction:column}
+.chat-window{position:absolute;bottom:80px;right:0;width:350px;max-height:82vh;background:linear-gradient(180deg,rgba(12,28,18,.93) 0%,rgba(6,13,9,.96) 100%);backdrop-filter:blur(18px) saturate(1.1);-webkit-backdrop-filter:blur(18px) saturate(1.1);border:1px solid rgba(212,175,55,.28);border-radius:22px;box-shadow:0 0 0 1px rgba(212,175,55,.08),0 32px 90px rgba(0,0,0,.7),0 0 60px rgba(212,175,55,.05);overflow:hidden;display:flex;flex-direction:column}
 .chat-window::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(212,175,55,.55) 40%,rgba(212,175,55,.55) 60%,transparent);pointer-events:none;z-index:5}
 .chat-window.opening{animation:chatWinIn .5s cubic-bezier(.22,1.2,.36,1) both}
 .chat-window.closing{animation:chatWinOut .28s cubic-bezier(.4,0,1,1) both;pointer-events:none}
@@ -855,7 +855,13 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
   .chatbot{bottom:calc(70px + env(safe-area-inset-bottom));right:12px}
   .chat-toggle{width:52px;height:52px}
   .chat-toggle svg{width:23px;height:23px}
-  .chat-window{position:fixed;bottom:calc(146px + env(safe-area-inset-bottom));right:18px;left:18px;width:auto;max-height:52dvh;min-width:0}
+  /* mobile chat = clean bottom sheet that always fits header+messages+chips+input */
+  .chat-window{position:fixed;left:10px;right:10px;bottom:calc(12px + env(safe-area-inset-bottom));top:auto;width:auto;max-height:80dvh;min-width:0;border-radius:20px}
+  .chat-messages{min-height:0;max-height:none}
+  /* while typing, hide the quick chips so the input stays visible above the keyboard */
+  .chat-window.kb-typing .chat-quick{display:none}
+  /* hide the sticky call/book bar while the chat is open so they don't clash */
+  body.chat-open .mobile-cta{display:none}
   .steam-science{padding:40px 24px}
   .ev-video-text{padding:20px 20px}
   .ev-video-text h3{font-size:18px}
@@ -911,7 +917,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
   .contact-list{gap:14px}
   .cl-item{gap:10px}
   .chatbot{bottom:calc(82px + env(safe-area-inset-bottom));right:12px}
-  .chat-window{left:16px;right:16px;width:auto;max-height:56dvh}
+  .chat-window{left:10px;right:10px;width:auto;max-height:82dvh}
   .stat .n{font-size:clamp(16px,5.5vw,26px);letter-spacing:-.5px}
   .stat .l{font-size:11.5px}
   .steam-science{padding:24px 16px}

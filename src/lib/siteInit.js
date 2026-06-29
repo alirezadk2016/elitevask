@@ -1103,7 +1103,7 @@ function submitBooking(cb){
       win.style.display='flex';win.style.flexDirection='column';
       win.classList.remove('closing');win.classList.add('opening');
       setTimeout(function(){win.classList.remove('opening');},520);
-      badge.style.display='none';opened=true;
+      badge.style.display='none';opened=true;document.body.classList.add('chat-open');
       var intro=document.getElementById('chatIntro');
       if(intro&&!introPlayed){
         introPlayed=true;intro.style.display='flex';
@@ -1111,27 +1111,28 @@ function submitBooking(cb){
       }else{showGreeting();}
     }else{closeWin();}
   });
-  function closeWin(){win.classList.add('closing');setTimeout(function(){win.style.display='none';win.classList.remove('closing');opened=false;},280);}
+  function closeWin(){win.classList.add('closing');document.body.classList.remove('chat-open');win.classList.remove('kb-typing');win.style.bottom='';win.style.maxHeight='';setTimeout(function(){win.style.display='none';win.classList.remove('closing');opened=false;},280);}
   document.getElementById('chatClose').addEventListener('click',closeWin);
   send.addEventListener('click',sendMsg);
   input.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey)sendMsg();});
 
-  /* Mobile keyboard fix: reposition chat window when virtual keyboard opens */
+  /* Mobile keyboard fix: lift the chat above the keyboard and hide the quick
+     chips while typing so the input + messages always stay visible */
   (function(){
     var vv=window.visualViewport;
-    if(!vv)return;
-    function onVVResize(){
-      if(!opened)return;
+    function adjust(){
+      if(!opened||!vv||window.innerWidth>880){return;}
       var keyH=Math.max(0,window.innerHeight-vv.height-vv.offsetTop);
-      if(keyH>50){
-        win.style.bottom=(keyH+8)+'px';
-        win.style.maxHeight=(vv.height-90)+'px';
+      if(keyH>80){
+        win.style.bottom=(keyH+10)+'px';
+        win.style.maxHeight=(vv.height-20)+'px';
       }else{
         win.style.bottom='';win.style.maxHeight='';
       }
     }
-    vv.addEventListener('resize',onVVResize);
-    input.addEventListener('blur',function(){win.style.bottom='';win.style.maxHeight='';});
+    if(vv){vv.addEventListener('resize',adjust);vv.addEventListener('scroll',adjust);}
+    input.addEventListener('focus',function(){win.classList.add('kb-typing');setTimeout(adjust,250);});
+    input.addEventListener('blur',function(){win.classList.remove('kb-typing');win.style.bottom='';win.style.maxHeight='';});
   })();
 
   // Swipe-to-dismiss chatbot
