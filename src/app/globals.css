@@ -677,7 +677,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 @keyframes chatRingRotate{to{transform:rotate(360deg)}}
 .chat-badge{position:absolute;top:-3px;right:-3px;width:20px;height:20px;border-radius:50%;background:linear-gradient(135deg,#ff6b35,#e53);color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;border:2px solid #071910;box-shadow:0 2px 8px rgba(229,51,51,.5)}
 /* window */
-.chat-window{position:absolute;bottom:80px;right:0;width:370px;max-height:85vh;background:linear-gradient(180deg,#0b1e12 0%,#070f0a 100%);border:1px solid rgba(212,175,55,.22);border-radius:22px;box-shadow:0 0 0 1px rgba(212,175,55,.06),0 32px 90px rgba(0,0,0,.75),0 0 60px rgba(212,175,55,.04);overflow:hidden;display:flex;flex-direction:column}
+.chat-window{position:absolute;bottom:80px;right:0;width:350px;max-height:82vh;background:linear-gradient(180deg,rgba(12,30,19,.8) 0%,rgba(6,13,9,.85) 100%);backdrop-filter:blur(26px) saturate(1.15);-webkit-backdrop-filter:blur(26px) saturate(1.15);border:1px solid rgba(212,175,55,.28);border-radius:22px;box-shadow:0 0 0 1px rgba(212,175,55,.08),0 32px 90px rgba(0,0,0,.7),0 0 60px rgba(212,175,55,.05);overflow:hidden;display:flex;flex-direction:column}
 .chat-window::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(212,175,55,.55) 40%,rgba(212,175,55,.55) 60%,transparent);pointer-events:none;z-index:5}
 .chat-window.opening{animation:chatWinIn .5s cubic-bezier(.22,1.2,.36,1) both}
 .chat-window.closing{animation:chatWinOut .28s cubic-bezier(.4,0,1,1) both;pointer-events:none}
@@ -768,7 +768,8 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 .chat-chip:hover{border-color:rgba(212,175,55,.55);color:#f0d060;background:rgba(212,175,55,.12)}
 /* input row */
 .chat-input-row{display:flex;gap:9px;padding:11px 13px 13px;border-top:1px solid rgba(212,175,55,.1);background:rgba(0,0,0,.25)}
-.chat-input-row input{flex:1;background:rgba(255,255,255,.05);border:1px solid rgba(212,175,55,.18);border-radius:26px;color:#fff;font-family:inherit;font-size:13px;padding:10px 17px;transition:.2s}
+/* font-size:16px is required so iOS Safari does NOT auto-zoom the page on focus */
+.chat-input-row input{flex:1;background:rgba(255,255,255,.05);border:1px solid rgba(212,175,55,.18);border-radius:26px;color:#fff;font-family:inherit;font-size:16px;padding:10px 16px;transition:.2s;min-width:0}
 .chat-input-row input::placeholder{color:var(--muted)}
 .chat-input-row input:focus{outline:none;border-color:rgba(212,175,55,.5);background:rgba(255,255,255,.07);box-shadow:0 0 0 3px rgba(212,175,55,.08)}
 .chat-send-btn{border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#c9a227,#a07c10)!important;border:none;color:#04120a;box-shadow:0 4px 14px rgba(160,124,16,.4);transition:transform .2s cubic-bezier(.34,1.5,.64,1),box-shadow .2s}
@@ -854,7 +855,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
   .chatbot{bottom:calc(70px + env(safe-area-inset-bottom));right:12px}
   .chat-toggle{width:52px;height:52px}
   .chat-toggle svg{width:23px;height:23px}
-  .chat-window{position:fixed;bottom:calc(148px + env(safe-area-inset-bottom));right:16px;left:16px;width:auto;max-height:55dvh;min-width:0}
+  .chat-window{position:fixed;bottom:calc(146px + env(safe-area-inset-bottom));right:18px;left:18px;width:auto;max-height:52dvh;min-width:0}
   .steam-science{padding:40px 24px}
   .ev-video-text{padding:20px 20px}
   .ev-video-text h3{font-size:18px}
@@ -910,7 +911,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
   .contact-list{gap:14px}
   .cl-item{gap:10px}
   .chatbot{bottom:calc(82px + env(safe-area-inset-bottom));right:12px}
-  .chat-window{left:12px;right:12px;width:auto;max-height:60vh}
+  .chat-window{left:16px;right:16px;width:auto;max-height:56dvh}
   .stat .n{font-size:clamp(16px,5.5vw,26px);letter-spacing:-.5px}
   .stat .l{font-size:11.5px}
   .steam-science{padding:24px 16px}
