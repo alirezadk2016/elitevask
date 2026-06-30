@@ -692,10 +692,8 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 /* ===== CHATBOT LUXURY ===== */
 .chatbot{position:fixed;bottom:28px;right:28px;z-index:150}
 /* toggle button */
-.chat-toggle{width:60px;height:60px;border-radius:50%;background:linear-gradient(145deg,#0f2d1a 0%,#071910 100%);border:1px solid rgba(212,175,55,.5);box-shadow:0 0 0 4px rgba(212,175,55,.08),0 12px 40px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,234,150,.22);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--green);transition:transform .3s cubic-bezier(.34,1.4,.64,1),box-shadow .3s ease;position:relative;overflow:visible}
-.chat-toggle::before{content:'';position:absolute;inset:-3px;border-radius:50%;background:conic-gradient(from 0deg,transparent 0%,rgba(212,175,55,.35) 30%,rgba(212,175,55,.6) 50%,rgba(212,175,55,.35) 70%,transparent 100%);animation:chatRingRotate 4s linear infinite;opacity:0;transition:opacity .3s}
-.chat-toggle:hover::before{opacity:1}
-.chat-toggle:hover{transform:scale(1.1);box-shadow:0 0 0 6px rgba(212,175,55,.14),0 18px 52px rgba(0,0,0,.6),0 0 28px rgba(212,175,55,.18),inset 0 1px 0 rgba(255,234,150,.3)}
+.chat-toggle{width:54px;height:54px;border-radius:50%;background:linear-gradient(145deg,#0f2d1a 0%,#071910 100%);border:1px solid rgba(255,255,255,.1);box-shadow:0 8px 26px rgba(0,0,0,.42);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--green);opacity:.78;transition:transform .3s cubic-bezier(.34,1.4,.64,1),box-shadow .3s ease,opacity .3s ease;position:relative;overflow:visible}
+.chat-toggle:hover{transform:scale(1.08);opacity:1;box-shadow:0 14px 40px rgba(0,0,0,.5)}
 @keyframes chatRingRotate{to{transform:rotate(360deg)}}
 .chat-badge{position:absolute;top:-3px;right:-3px;width:20px;height:20px;border-radius:50%;background:linear-gradient(135deg,#ff6b35,#e53);color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;border:2px solid #071910;box-shadow:0 2px 8px rgba(229,51,51,.5)}
 /* window */
@@ -881,8 +879,8 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
   .btn-lg{padding:13px 24px;font-size:15px}
   .tb-hide-mobile{display:none}
   .chatbot{bottom:calc(70px + env(safe-area-inset-bottom));right:12px}
-  .chat-toggle{width:52px;height:52px}
-  .chat-toggle svg{width:23px;height:23px}
+  .chat-toggle{width:48px;height:48px}
+  .chat-toggle svg{width:19px;height:19px}
   /* mobile chat = clean bottom sheet that always fits header+messages+chips+input */
   .chat-window{position:fixed;left:10px;right:10px;bottom:calc(12px + env(safe-area-inset-bottom));top:auto;width:auto;max-height:80dvh;min-width:0;border-radius:20px}
   .chat-messages{min-height:0;max-height:none}
@@ -961,7 +959,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 .chatbot.chat-revealed{opacity:1;pointer-events:auto;transform:none}
 /* draggable: while dragging, no transition + grabbing feedback */
 .chatbot.chat-dragging{transition:none!important}
-.chatbot.chat-dragging .chat-toggle{transform:scale(1.08);cursor:grabbing;box-shadow:0 18px 52px rgba(0,0,0,.6),0 0 30px rgba(212,175,55,.25)}
+.chatbot.chat-dragging .chat-toggle{transform:scale(1.08);cursor:grabbing;opacity:1;box-shadow:0 16px 44px rgba(0,0,0,.55)}
 .chat-toggle{touch-action:none}
 .chat-mini-btn{position:fixed;bottom:32px;right:32px;z-index:150;width:38px;height:38px;border-radius:50%;background:rgba(15,30,20,.7);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(55,210,120,.25);box-shadow:0 6px 24px rgba(0,0,0,.35),inset 0 1px 0 rgba(55,210,120,.1);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--green);opacity:0;pointer-events:none;transform:scale(.6);transition:opacity .28s,transform .28s cubic-bezier(.34,1.4,.64,1);outline:none}
 .chat-mini-btn.vis{opacity:1;pointer-events:auto;transform:scale(1)}

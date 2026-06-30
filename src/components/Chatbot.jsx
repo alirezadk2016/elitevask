@@ -3,7 +3,7 @@ import { botAvatarSvg } from './BotAvatar';
 const HTML = `<!-- CHATBOT -->
 <div id="chatbot" class="chatbot">
   <button id="chatToggle" class="chat-toggle" aria-label="Chat">
-    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
     <span class="chat-badge" id="chatBadge">1</span>
   </button>
   <div id="chatWindow" class="chat-window" style="display:none">
