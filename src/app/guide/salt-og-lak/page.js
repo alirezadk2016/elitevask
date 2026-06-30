@@ -1,3 +1,5 @@
+import JsonLd from "@/components/JsonLd";
+import { breadcrumbLd, articleLd } from "@/lib/seo";
 export const metadata = {
   title: "Beskyt bilens lak mod vejsalt i Danmark – Elite Vask Guide",
   description: "Vejsalt er den største trussel mod bilens lak og undervogn i den danske vinter. Læs hvad salt gør ved din bil, og hvordan du beskytter den effektivt.",
@@ -13,6 +15,7 @@ export const metadata = {
 export default function SaltOgLak() {
   return (
     <div className="legal-page">
+      <JsonLd items={[breadcrumbLd([{name:"Forside",path:"/"},{name:"Guide",path:"/guide"},{name:"Beskyt bilens lak mod vejsalt i Danmark",path:"/guide/salt-og-lak"}]),articleLd({title:"Beskyt bilens lak mod vejsalt i Danmark",description:"Vejsalt er den største trussel mod bilens lak og undervogn i den danske vinter. Læs hvad salt gør ved din bil, og hvordan du beskytter den effektivt.",path:"/guide/salt-og-lak",datePublished:"2026-06-01"})]} />
       <div className="legal-wrap">
         <a href="/" className="legal-back">← Tilbage til forsiden</a>
 

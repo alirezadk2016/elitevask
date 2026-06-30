@@ -1,3 +1,5 @@
+import JsonLd from "@/components/JsonLd";
+import { breadcrumbLd, articleLd } from "@/lib/seo";
 export const metadata = {
   title: "Hvor ofte bør man vaske sin bil? – Elite Vask Guide",
   description: "Hvor tit skal bilen vaskes? Svaret afhænger af årstid, brug og parkeringsforhold. Her er en konkret guide til, hvornår det er nødvendigt.",
@@ -13,6 +15,7 @@ export const metadata = {
 export default function HvorOfte() {
   return (
     <div className="legal-page">
+      <JsonLd items={[breadcrumbLd([{name:"Forside",path:"/"},{name:"Guide",path:"/guide"},{name:"Hvor ofte bør man vaske sin bil?",path:"/guide/hvor-ofte"}]),articleLd({title:"Hvor ofte bør man vaske sin bil?",description:"Hvor tit skal bilen vaskes? Svaret afhænger af årstid, brug og parkeringsforhold. Her er en konkret guide til, hvornår det er nødvendigt.",path:"/guide/hvor-ofte",datePublished:"2026-06-01"})]} />
       <div className="legal-wrap">
         <a href="/" className="legal-back">← Tilbage til forsiden</a>
 

@@ -1,3 +1,5 @@
+import JsonLd from "@/components/JsonLd";
+import { breadcrumbLd, articleLd } from "@/lib/seo";
 export const metadata = {
   title: "Dampvask vs. traditionel bilvask: Hvad er forskellen? – Elite Vask Guide",
   description: "Dampvask og traditionel bilvask har meget forskellige resultater. Se hvad forskningen viser om ridser, bakterier, vandforbrug og rengøringseffekt.",
@@ -13,6 +15,7 @@ export const metadata = {
 export default function DampvaskVsTraditionel() {
   return (
     <div className="legal-page">
+      <JsonLd items={[breadcrumbLd([{name:"Forside",path:"/"},{name:"Guide",path:"/guide"},{name:"Dampvask vs. traditionel bilvask: Hvad er forskellen?",path:"/guide/dampvask-vs-traditionel"}]),articleLd({title:"Dampvask vs. traditionel bilvask: Hvad er forskellen?",description:"Dampvask og traditionel bilvask har meget forskellige resultater. Se hvad forskningen viser om ridser, bakterier, vandforbrug og rengøringseffekt.",path:"/guide/dampvask-vs-traditionel",datePublished:"2026-06-19"})]} />
       <div className="legal-wrap">
         <a href="/" className="legal-back">← Tilbage til forsiden</a>
 

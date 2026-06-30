@@ -1,3 +1,5 @@
+import JsonLd from "@/components/JsonLd";
+import { breadcrumbLd, cityServiceLd } from "@/lib/seo";
 export const metadata = {
   title: "Mobil bilvask i Køge – Elite Vask dampvask til din dør",
   description: "Professionel mobil dampvask i Køge og omegn. Vi kører til dig – gratis kørsel, betal efter vask. Dampvask af bil uden ridser og med minimal miljøpåvirkning.",
@@ -13,6 +15,7 @@ export const metadata = {
 export default function BilvaskKoege() {
   return (
     <div className="legal-page">
+      <JsonLd items={[breadcrumbLd([{name:"Forside",path:"/"},{name:"Mobil bilvask i Køge",path:"/bilvask/koege"}]),cityServiceLd({city:"Køge",path:"/bilvask/koege"})]} />
       <div className="legal-wrap">
         <a href="/" className="legal-back">← Tilbage til forsiden</a>
 
