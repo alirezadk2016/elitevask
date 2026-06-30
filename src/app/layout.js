@@ -2,6 +2,7 @@ import { Manrope } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import CookieConsent from "./components/CookieConsent";
+import GoogleAnalytics from "@/components/GoogleAnalytics";
 
 const manrope = Manrope({
   subsets: ["latin"],
@@ -104,6 +105,15 @@ const JSONLD = [
     {"@type":"Question","name":"Kommer I hjem til mig?","acceptedAnswer":{"@type":"Answer","text":"Ja, vi er mobile og kører ud til din adresse – hjemme eller på arbejde."}},
     {"@type":"Question","name":"Hvad er forskellen på dampvask og almindelig bilvask?","acceptedAnswer":{"@type":"Answer","text":"Dampvask bruger varm damp med minimalt vandforbrug, renser mere skånsomt og desinficerer overflader uden aggressive kemikalier."}}
   ]
+},
+{
+  "@context":"https://schema.org",
+  "@type":"WebSite",
+  "@id":"https://www.elite-vask.dk/#website",
+  "url":"https://www.elite-vask.dk",
+  "name":"Elite Vask",
+  "inLanguage":"da-DK",
+  "publisher":{"@id":"https://www.elite-vask.dk/#business"}
 }
 ];
 
@@ -124,6 +134,7 @@ export default function RootLayout({ children }) {
         {children}
         <CookieConsent />
         <Analytics />
+        <GoogleAnalytics />
         <script
           dangerouslySetInnerHTML={{ __html: `(function(w,d,s,r,n){w.TrustpilotObject=n;w[n]=w[n]||function(){(w[n].q=w[n].q||[]).push(arguments)};a=d.createElement(s);a.async=1;a.src=r;a.type='text/java'+s;f=d.getElementsByTagName(s)[0];f.parentNode.insertBefore(a,f)})(window,document,'script','https://invitejs.trustpilot.com/tp.min.js','tp');tp('register','alMjUlvV9s57mEha');` }}
         />

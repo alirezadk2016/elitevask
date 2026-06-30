@@ -13,11 +13,11 @@ const securityHeaders = [
     key: 'Content-Security-Policy',
     value: [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' https://invitejs.trustpilot.com https://widget.trustpilot.com",
+      "script-src 'self' 'unsafe-inline' https://invitejs.trustpilot.com https://widget.trustpilot.com https://www.googletagmanager.com https://va.vercel-scripts.com",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' data: https://fonts.gstatic.com",
       "img-src 'self' data: blob: https:",
-      "connect-src 'self' https://api.dataforsyningen.dk https://*.upstash.io https://api.trustpilot.com",
+      "connect-src 'self' https://api.dataforsyningen.dk https://*.upstash.io https://api.trustpilot.com https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com https://va.vercel-scripts.com",
       "frame-src 'none'",
       "frame-ancestors 'none'",
       "object-src 'none'",
