@@ -19,11 +19,11 @@ export const viewport = {
 
 export const metadata = {
   metadataBase: new URL("https://www.elite-vask.dk"),
-  title: "Elite Vask – Mobil bil dampvask på Sjælland | Vi kører til dig",
+  title: "Elite Vask | Mobil Bil Dampvask på Sjælland",
   description: "Elite Vask – mobil bil dampvask på Sjælland. Rent, effektivt og miljøvenligt. Vælg biltype, se pris og book tid online. Vi kører til dig.",
   alternates: { canonical: "/" },
   openGraph: {
-    title: "Elite Vask – Mobil bil dampvask på Sjælland",
+    title: "Elite Vask | Mobil Bil Dampvask på Sjælland",
     description: "Vi kører til dig og vasker din bil. Rent, effektivt og miljøvenligt.",
     type: "website",
     locale: "da_DK",
@@ -33,7 +33,7 @@ export const metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Elite Vask – Mobil bil dampvask på Sjælland",
+    title: "Elite Vask | Mobil Bil Dampvask på Sjælland",
     description: "Vi kører til dig og vasker din bil. Rent, effektivt og miljøvenligt.",
     images: ["/hero.jpg.png"],
   },
