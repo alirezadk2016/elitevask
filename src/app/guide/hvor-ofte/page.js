@@ -1,3 +1,4 @@
+import RelatedLinks from "@/components/RelatedLinks";
 import JsonLd from "@/components/JsonLd";
 import { breadcrumbLd, articleLd } from "@/lib/seo";
 export const metadata = {
@@ -107,6 +108,7 @@ export default function HvorOfte() {
           <p><strong>Mobil dampvask på hele Sjælland</strong><br />Elite Vask kører ud til dig, uanset om du er hjemme eller på arbejdet. Book en tid direkte her på siden.</p>
           <a href="/#vaelg" className="btn btn-green guide-cta-btn">Se priser og book tid</a>
         </div>
+        <RelatedLinks />
       </div>
     </div>
   );

@@ -1,3 +1,4 @@
+import RelatedLinks from "@/components/RelatedLinks";
 import JsonLd from "@/components/JsonLd";
 import { breadcrumbLd, articleLd } from "@/lib/seo";
 export const metadata = {
@@ -95,6 +96,7 @@ export default function SaltOgLak() {
           <p><strong>Har du brug for en grundig vintervask?</strong><br />Elite Vask tilbyder mobil dampvask på hele Sjælland – vi kører til dig og renser bilen grundigt for vejsalt, også undervognen.</p>
           <a href="/#vaelg" className="btn btn-green guide-cta-btn">Se priser og book tid</a>
         </div>
+        <RelatedLinks />
       </div>
     </div>
   );

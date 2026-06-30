@@ -1,3 +1,4 @@
+import RelatedLinks from "@/components/RelatedLinks";
 import JsonLd from "@/components/JsonLd";
 import { breadcrumbLd, articleLd } from "@/lib/seo";
 export const metadata = {
@@ -162,6 +163,7 @@ export default function DampvaskVsTraditionel() {
           <p><strong>Prøv mobil dampvask på Sjælland</strong><br />Elite Vask kører til dig – ingen kø, ingen bilvask, ingen kompromis på kvalitet.</p>
           <a href="/#vaelg" className="btn btn-green guide-cta-btn">Se priser og book tid</a>
         </div>
+        <RelatedLinks />
       </div>
     </div>
   );

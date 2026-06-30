@@ -1,3 +1,4 @@
+import RelatedLinks from "@/components/RelatedLinks";
 import JsonLd from "@/components/JsonLd";
 import { breadcrumbLd, cityServiceLd } from "@/lib/seo";
 export const metadata = {
@@ -93,6 +94,7 @@ export default function BilvaskKoebenhavn() {
           <p style={{margin:'0 0 1rem',fontWeight:700,fontSize:'1.1rem'}}>Klar til en skinnende ren bil i København?</p>
           <a href="/#vaelg" className="btn btn-green" style={{display:'inline-block',padding:'0.75rem 2rem',borderRadius:'8px',background:'#22c55e',color:'#fff',textDecoration:'none',fontWeight:700}}>Se priser og book nu</a>
         </div>
+        <RelatedLinks />
       </div>
     </div>
   );

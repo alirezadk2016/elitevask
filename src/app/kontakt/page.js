@@ -1,3 +1,4 @@
+import RelatedLinks from "@/components/RelatedLinks";
 import JsonLd from "@/components/JsonLd";
 import { breadcrumbLd, SITE } from "@/lib/seo";
 
@@ -108,6 +109,7 @@ export default function Kontakt() {
             <span><span className="lab">CVR</span><br /><span className="val">46392264</span></span>
           </div>
         </div>
+        <RelatedLinks />
       </div>
     </div>
   );
