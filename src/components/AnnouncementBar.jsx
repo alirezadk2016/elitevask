@@ -9,7 +9,8 @@ const HTML = `<!-- ANNOUNCEMENT BAR -->
       <span class="ann-sub" data-i18n="ann_sub">Ingen forudbetaling – 100% tilfredshedsgaranti</span>
     </span>
     <a href="https://dk.trustpilot.com/review/elite-vask.dk" target="_blank" rel="noopener" class="ann-tp" aria-label="Se vores anmeldelser på Trustpilot" title="Trustpilot">
-      <span class="ann-tp-word"><svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true"><path fill="#00b67a" d="M12 2l2.9 6.95L22 9.6l-5.3 4.7 1.6 7.1L12 17.6 5.7 21.4l1.6-7.1L2 9.6l7.1-.65L12 2z"/></svg>Trustpilot</span>
+      <span class="ann-tp-cta" data-i18n="ann_tp_cta">Se vores anmeldelser</span>
+      <span class="ann-tp-word"><svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><path fill="#00b67a" d="M12 2l2.9 6.95L22 9.6l-5.3 4.7 1.6 7.1L12 17.6 5.7 21.4l1.6-7.1L2 9.6l7.1-.65L12 2z"/></svg>Trustpilot</span>
       <span class="ann-tp-stars" aria-hidden="true">
         <svg viewBox="0 0 127 24" height="13" aria-hidden="true">
           <g>
