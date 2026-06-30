@@ -11,10 +11,17 @@
 .ann-inner{display:inline-flex;align-items:center;gap:10px;justify-content:center;flex-wrap:wrap}
 .ann-pulse{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 0 rgba(55,210,120,.6);animation:annpulse 1.8s infinite;flex-shrink:0}
 @keyframes annpulse{0%{box-shadow:0 0 0 0 rgba(55,210,120,.6)}70%{box-shadow:0 0 0 8px rgba(55,210,120,0)}100%{box-shadow:0 0 0 0 rgba(55,210,120,0)}}
-.ann-text{display:inline-flex;align-items:center;gap:8px;font-size:13.5px;color:#c8f0d8;flex-wrap:wrap;justify-content:center}
-.ann-text svg{color:var(--green);flex-shrink:0}
-.ann-text strong{color:#fff;font-size:14px}
+.ann-text{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:#c8f0d8;flex-wrap:wrap;justify-content:center}
+.ann-text svg{color:var(--green);flex-shrink:0;width:14px;height:14px}
+.ann-text strong{color:#fff;font-size:12.5px;font-weight:700}
 .ann-sep{color:rgba(255,255,255,.3);font-size:12px}
+/* Trustpilot badge in the announcement bar, next to the text */
+.ann-tp{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:7px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);text-decoration:none;transition:border-color .2s ease,background .2s ease;flex-shrink:0}
+.ann-tp:hover{border-color:rgba(255,255,255,.35);background:rgba(255,255,255,.14)}
+.ann-tp>svg{flex-shrink:0}
+.ann-tp-word{color:#fff;font-weight:700;font-size:11.5px}
+.ann-tp-stars{display:inline-flex;gap:1.5px}
+.ann-tp-stars i{width:11px;height:11px;display:inline-block;background:#00b67a;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2l2.9 6.95L22 9.6l-5.3 4.7 1.6 7.1L12 17.6 5.7 21.4l1.6-7.1L2 9.6l7.1-.65z'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2l2.9 6.95L22 9.6l-5.3 4.7 1.6 7.1L12 17.6 5.7 21.4l1.6-7.1L2 9.6l7.1-.65z'/%3E%3C/svg%3E") center/contain no-repeat}
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth}
 body{font-family:'Manrope',system-ui,sans-serif;background:var(--bg);color:var(--txt);line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
@@ -102,14 +109,6 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 .badge-google .badge-g-score{font-weight:800;color:#f3e2ad;font-size:12px}
 .badge-google .badge-g-sep{opacity:.32}
 .badge-google [data-i18n]{color:rgba(255,255,255,.6);font-weight:600;font-size:11px}
-/* small Trustpilot badge in the nav, next to the green Book button */
-.nav-tp{display:inline-flex;align-items:center;gap:5px;padding:5px 9px;border-radius:8px;border:1px solid rgba(0,182,122,.32);background:rgba(0,182,122,.07);text-decoration:none;transition:border-color .2s ease,background .2s ease,transform .2s ease;flex-shrink:0}
-.nav-tp:hover{border-color:rgba(0,182,122,.6);background:rgba(0,182,122,.13);transform:translateY(-1px)}
-.nav-tp>svg{flex-shrink:0}
-.nav-tp-stars{display:inline-flex;gap:1.5px}
-.nav-tp-stars i{width:12px;height:12px;display:inline-block;background:#00b67a;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2l2.9 6.95L22 9.6l-5.3 4.7 1.6 7.1L12 17.6 5.7 21.4l1.6-7.1L2 9.6l7.1-.65z'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2l2.9 6.95L22 9.6l-5.3 4.7 1.6 7.1L12 17.6 5.7 21.4l1.6-7.1L2 9.6l7.1-.65z'/%3E%3C/svg%3E") center/contain no-repeat}
-/* hide the nav Trustpilot badge on small screens to avoid crowding */
-@media(max-width:900px){.nav-tp{display:none}}
 .hero h1{font-size:clamp(33px,5.4vw,56px);font-weight:800;line-height:1.08;letter-spacing:-1.5px;color:#fff}
 .hero h1 em{font-style:normal;color:var(--green)}
 .hero p{font-size:clamp(15px,2vw,18px);color:var(--muted);max-width:560px;margin:20px auto 0}
@@ -869,6 +868,8 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
   /* clean single-line announcement on mobile */
   .ann-text{font-size:12.5px;flex-wrap:nowrap}
   .ann-text .ann-sep,.ann-text .ann-sub{display:none}
+  .ann-tp-word{display:none}
+  .ann-tp{padding:2px 7px}
   .btn-lg{padding:13px 24px;font-size:15px}
   .tb-hide-mobile{display:none}
   .chatbot{bottom:calc(70px + env(safe-area-inset-bottom));right:12px}
