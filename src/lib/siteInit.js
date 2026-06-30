@@ -561,7 +561,8 @@ function drawWiz(){
     }
     if(step===6&&!wiz.name.trim()){showWizErr(LANG==='da'?'Indtast venligst dit navn.':'Please enter your name.');return;}
     if(step===6&&!isValidPhone(wiz.phone)){showWizErr(LANG==='da'?'Indtast venligst et dansk telefonnummer med landekode (+45 XX XX XX XX).':'Please enter a valid Danish phone number with country code (+45 XX XX XX XX).');return;}
-    if(step===6&&wiz.email.trim()&&!isValidEmail(wiz.email)){showWizErr(LANG==='da'?'Indtast venligst en gyldig e-mailadresse.':'Please enter a valid email address.');return;}
+    if(step===6&&wiz.email.trim()&&isDisposableEmail(wiz.email)){showWizErr(LANG==='da'?'⚠ Brug venligst en rigtig e-mailadresse – midlertidige e-mails accepteres ikke. Ring til os på +45 24 44 03 21, hvis du har brug for hjælp.':'⚠ Please use a real email address – temporary emails are not accepted. Call us on +45 24 44 03 21 if you need help.');return;}
+    if(step===6&&wiz.email.trim()&&!isValidEmail(wiz.email)){showWizErr(LANG==='da'?'Indtast venligst en gyldig e-mailadresse (f.eks. navn@gmail.com).':'Please enter a valid email address (e.g. name@gmail.com).');return;}
     if(step===6&&!wiz.email.trim()){showWizErr(LANG==='da'?'Indtast venligst din e-mailadresse.':'Please enter your email address.');return;}
     if(step<TOTAL){step++;drawWiz();}
     else{
@@ -791,7 +792,9 @@ function fmtDate(d,lang){
 }
 function isServiceZip(z){var n=parseInt(z);if(isNaN(n)||String(z).replace(/\D/g,'').length<4)return false;if(n>=3700&&n<=3790)return false;return n>=1000&&n<=4799;}
 function isValidPhone(p){var d=p.replace(/\D/g,'');return(d.startsWith('45')&&d.length>=10)||(!d.startsWith('45')&&false);}
-function isValidEmail(e){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);}
+var DISPOSABLE_EMAIL_DOMAINS=['mailinator.com','tempmail.com','temp-mail.org','10minutemail.com','guerrillamail.com','guerrillamail.net','sharklasers.com','yopmail.com','yopmail.fr','trashmail.com','getnada.com','nada.email','throwawaymail.com','fakeinbox.com','dispostable.com','maildrop.cc','mailnesia.com','tempinbox.com','mintemail.com','mohmal.com','emailondeck.com','spambog.com','mytemp.email','tempr.email','discard.email','mailcatch.com','inboxbear.com','tempmailo.com','luxusmail.org','mailto.plus','fakemail.net','burnermail.io','33mail.com','spam4.me','grr.la','guerrillamailblock.com','maileater.com','wegwerfmail.de','trashmail.de','byom.de','tmail.ws','minuteinbox.com'];
+function isValidEmail(e){e=(e||'').trim().toLowerCase();if(!/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/.test(e))return false;var d=e.split('@')[1];if(DISPOSABLE_EMAIL_DOMAINS.indexOf(d)!==-1)return false;return true;}
+function isDisposableEmail(e){e=(e||'').trim().toLowerCase();var d=e.split('@')[1];return DISPOSABLE_EMAIL_DOMAINS.indexOf(d)!==-1;}
 function showWizErr(msg){
   var el=document.getElementById('wiz-err');
   if(!el){
@@ -830,7 +833,7 @@ function submitBooking(cb){
   }).then(function(r){
     return r.json().then(function(d){return {status:r.status,data:d};});
   }).then(function(res){
-    if(res.status===409&&res.data&&res.data.message){cb(res.data.message);}
+    if((res.status===409||res.status===400)&&res.data&&res.data.message){cb(res.data.message);}
     else{cb(null);}
   }).catch(function(){cb(null);});
 }

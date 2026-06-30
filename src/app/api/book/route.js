@@ -1,5 +1,35 @@
 import { randomBytes, createHash } from 'crypto';
+import dns from 'node:dns/promises';
 import { buildTransport, emailShell, tr, BOOKING_EMAIL, INFO_EMAIL, CONTACT_EMAIL } from '@/lib/mailer';
+
+// Known disposable / throwaway email domains – block fake bookings
+const DISPOSABLE_DOMAINS = new Set([
+  'mailinator.com','tempmail.com','temp-mail.org','10minutemail.com','guerrillamail.com',
+  'guerrillamail.net','sharklasers.com','yopmail.com','yopmail.fr','trashmail.com',
+  'getnada.com','nada.email','throwawaymail.com','fakeinbox.com','dispostable.com',
+  'maildrop.cc','mailnesia.com','tempinbox.com','mintemail.com','mohmal.com',
+  'emailondeck.com','spambog.com','mytemp.email','tempr.email','discard.email',
+  'mailcatch.com','inboxbear.com','tempmailo.com','luxusmail.org','mailto.plus',
+  'fakemail.net','burnermail.io','33mail.com','spam4.me','grr.la','guerrillamailblock.com',
+  'maileater.com','wegwerfmail.de','trashmail.de','byom.de','tmail.ws','minuteinbox.com',
+]);
+
+// Verify the email domain can actually receive mail (MX, with A/AAAA fallback)
+async function emailDomainHasMail(domain) {
+  try {
+    const mx = await dns.resolveMx(domain);
+    if (mx && mx.length > 0) return true;
+  } catch {}
+  try {
+    const a = await dns.resolve(domain);
+    if (a && a.length > 0) return true;
+  } catch {}
+  try {
+    const aaaa = await dns.resolve6(domain);
+    if (aaaa && aaaa.length > 0) return true;
+  } catch {}
+  return false;
+}
 
 function hashEmail(email) {
   return createHash('sha256').update(email.toLowerCase().trim()).digest('hex');
@@ -139,8 +169,25 @@ export async function POST(request) {
   const { car, pkg, extras, addr, zip, city, date, time, name, phone, email, msg, price, lang, carId, slotsNeeded: rawSlots } = body;
 
   // Input validation
-  if (email && !/^[^\s@\r\n]+@[^\s@\r\n]+\.[^\s@\r\n]+$/.test(email)) {
-    return Response.json({ error: 'invalid_email' }, { status: 400 });
+  const L0 = lang !== 'en';
+  if (email) {
+    const em = email.trim().toLowerCase();
+    if (!/^[^\s@\r\n]+@[^\s@\r\n]+\.[a-z]{2,}$/.test(em)) {
+      return Response.json({ error: 'invalid_email', message: L0
+        ? 'Indtast venligst en gyldig e-mailadresse, så vi kan sende din bekræftelse. Ring til os på +45 24 44 03 21, hvis du har brug for hjælp.'
+        : 'Please enter a valid email address so we can send your confirmation. Call us on +45 24 44 03 21 if you need help.' }, { status: 400 });
+    }
+    const domain = em.split('@')[1];
+    if (DISPOSABLE_DOMAINS.has(domain)) {
+      return Response.json({ error: 'disposable_email', message: L0
+        ? 'Brug venligst en rigtig e-mailadresse – midlertidige e-mails accepteres ikke. Ring til os på +45 24 44 03 21, hvis du har brug for hjælp.'
+        : 'Please use a real email address – temporary emails are not accepted. Call us on +45 24 44 03 21 if you need help.' }, { status: 400 });
+    }
+    if (!(await emailDomainHasMail(domain))) {
+      return Response.json({ error: 'invalid_email', message: L0
+        ? 'Denne e-mailadresse ser ikke ud til at findes. Indtast venligst en rigtig e-mail, eller ring til os på +45 24 44 03 21.'
+        : 'This email address does not appear to exist. Please enter a real email, or call us on +45 24 44 03 21.' }, { status: 400 });
+    }
   }
   if (phone && !/^[\d\s\-\+\(\)]{6,25}$/.test(phone)) {
     return Response.json({ error: 'invalid_phone' }, { status: 400 });
