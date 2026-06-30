@@ -1660,12 +1660,48 @@ if(window.innerWidth>880){
     btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" aria-hidden="true"><path d="M18 15l-6-6-6 6"/></svg>';
     document.body.appendChild(btn);
   }
-  btn.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});},{signal:__sig});
+  var dismissed=sessionStorage.getItem('ev_sctop_hidden')==='1';
+  if(dismissed)btn.classList.add('sc-dismissed');
+  // Drag-to-dismiss: drag the button toward the right edge to hide it for this session.
+  // A plain click (no drag) still scrolls to top.
+  var down=false,dragging=false,sx=0,sy=0,curX=0,curY=0;
+  btn.addEventListener('pointerdown',function(e){
+    down=true;dragging=false;sx=e.clientX;sy=e.clientY;curX=0;curY=0;
+    try{btn.setPointerCapture(e.pointerId);}catch(_){}
+  },{signal:__sig});
+  btn.addEventListener('pointermove',function(e){
+    if(!down)return;
+    var dx=e.clientX-sx,dy=e.clientY-sy;
+    if(!dragging&&Math.abs(dx)+Math.abs(dy)>6){dragging=true;btn.classList.add('sc-dragging');}
+    if(dragging){curX=dx;curY=dy;btn.style.transform='translate('+dx+'px,'+dy+'px)';}
+  },{signal:__sig});
+  function endDrag(e){
+    if(!down)return;down=false;
+    btn.classList.remove('sc-dragging');
+    if(dragging){
+      // Released in the right ~40% of the viewport → dismiss for the session.
+      var released=(e&&typeof e.clientX==='number')?e.clientX:0;
+      if(released>window.innerWidth*0.6){
+        dismissed=true;
+        sessionStorage.setItem('ev_sctop_hidden','1');
+        btn.style.transform='translate('+curX+'px,'+curY+'px) scale(.4)';
+        btn.style.opacity='0';
+        setTimeout(function(){btn.classList.add('sc-dismissed');btn.style.transform='';btn.style.opacity='';},260);
+      }else{
+        btn.style.transform='';
+      }
+    }else{
+      window.scrollTo({top:0,behavior:'smooth'});
+    }
+    dragging=false;
+  }
+  btn.addEventListener('pointerup',endDrag,{signal:__sig});
+  btn.addEventListener('pointercancel',function(){down=false;dragging=false;btn.classList.remove('sc-dragging');btn.style.transform='';},{signal:__sig});
   var ticking=false;
   window.addEventListener('scroll',function(){
     if(!ticking){
       requestAnimationFrame(function(){
-        btn.classList.toggle('vis',window.scrollY>500);
+        if(!dismissed)btn.classList.toggle('vis',window.scrollY>500);
         ticking=false;
       });
       ticking=true;

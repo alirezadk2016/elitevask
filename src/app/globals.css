@@ -968,13 +968,15 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 @media(max-width:520px){.chat-mini-btn{bottom:calc(98px + env(safe-area-inset-bottom))}}
 
 /* SCROLL TO TOP */
-.scroll-top{position:fixed;bottom:32px;left:32px;z-index:140;width:48px;height:48px;border-radius:50%;background:rgba(15,30,20,.65);backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);border:1px solid rgba(55,210,120,.28);box-shadow:0 8px 32px rgba(0,0,0,.4),0 0 0 1px rgba(55,210,120,.08),inset 0 1px 0 rgba(55,210,120,.15);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--green);opacity:0;pointer-events:none;transform:translateY(12px) scale(.85);transition:opacity .3s,transform .3s cubic-bezier(.34,1.4,.64,1),background .18s,box-shadow .18s;outline:none}
+.scroll-top{position:fixed;bottom:32px;left:32px;z-index:140;width:40px;height:40px;touch-action:none;border-radius:50%;background:rgba(15,30,20,.65);backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);border:1px solid rgba(55,210,120,.28);box-shadow:0 8px 32px rgba(0,0,0,.4),0 0 0 1px rgba(55,210,120,.08),inset 0 1px 0 rgba(55,210,120,.15);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--green);opacity:0;pointer-events:none;transform:translateY(12px) scale(.85);transition:opacity .3s,transform .3s cubic-bezier(.34,1.4,.64,1),background .18s,box-shadow .18s;outline:none}
 .scroll-top.vis{opacity:1;pointer-events:auto;transform:none}
 .scroll-top:hover{background:rgba(20,45,28,.8);border-color:rgba(55,210,120,.55);color:#fff;transform:translateY(-3px);box-shadow:0 14px 44px rgba(0,0,0,.45),0 0 0 1px rgba(55,210,120,.2),0 0 20px rgba(55,210,120,.12),inset 0 1px 0 rgba(55,210,120,.2)}
 .scroll-top svg{display:block;transition:transform .2s}
 .scroll-top:hover svg{transform:translateY(-1px)}
-@media(max-width:880px){.scroll-top{bottom:calc(82px + env(safe-area-inset-bottom));left:16px;width:44px;height:44px}}
-@media(max-width:520px){.scroll-top{bottom:calc(98px + env(safe-area-inset-bottom));left:12px;width:40px;height:40px}}
+.scroll-top.sc-dragging{transition:none;opacity:1;cursor:grabbing}
+.scroll-top.sc-dismissed{display:none}
+@media(max-width:880px){.scroll-top{bottom:calc(82px + env(safe-area-inset-bottom));left:16px;width:38px;height:38px}}
+@media(max-width:520px){.scroll-top{bottom:calc(98px + env(safe-area-inset-bottom));left:12px;width:36px;height:36px}}
 
 /* LEGAL PAGES */
 .legal-page{min-height:100vh;background:var(--bg);padding:60px 0 100px}
