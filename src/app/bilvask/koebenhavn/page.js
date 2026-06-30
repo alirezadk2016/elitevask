@@ -1,7 +1,7 @@
 export const metadata = {
   title: "Mobil bilvask i København – Elite Vask dampvask til din dør",
   description: "Professionel mobil dampvask i København. Vi kører til din adresse i hele Storkøbenhavn – ingen ventetid, ingen kø. Book online i dag.",
-  alternates: { canonical: "https://elite-vask.dk/bilvask/koebenhavn" },
+  alternates: { canonical: "/bilvask/koebenhavn" },
   openGraph: {
     title: "Mobil bilvask i København – Elite Vask",
     description: "Professionel mobil dampvask i København. Vi kører direkte til dig.",

@@ -1,7 +1,7 @@
 export const metadata = {
   title: "Dampvask vs. traditionel bilvask: Hvad er forskellen? – Elite Vask Guide",
   description: "Dampvask og traditionel bilvask har meget forskellige resultater. Se hvad forskningen viser om ridser, bakterier, vandforbrug og rengøringseffekt.",
-  alternates: { canonical: "https://elite-vask.dk/guide/dampvask-vs-traditionel" },
+  alternates: { canonical: "/guide/dampvask-vs-traditionel" },
   openGraph: {
     title: "Dampvask vs. traditionel bilvask: Hvad er forskellen?",
     description: "Se hvad forskningen viser om ridser, bakterier, vandforbrug og rengøringseffekt.",

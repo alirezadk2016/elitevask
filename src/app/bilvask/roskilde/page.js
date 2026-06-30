@@ -1,7 +1,7 @@
 export const metadata = {
   title: "Mobil bilvask i Roskilde – Elite Vask dampvask til din dør",
   description: "Professionel mobil dampvask i Roskilde. Vi kører til din adresse – hjemme eller på arbejdet. Gratis kørsel, betal efter vask. Book online.",
-  alternates: { canonical: "https://elite-vask.dk/bilvask/roskilde" },
+  alternates: { canonical: "/bilvask/roskilde" },
   openGraph: {
     title: "Mobil bilvask i Roskilde – Elite Vask",
     description: "Professionel mobil dampvask i Roskilde. Vi kører direkte til dig.",

@@ -1,7 +1,7 @@
 export const metadata = {
   title: "Hvor ofte bør man vaske sin bil? – Elite Vask Guide",
   description: "Hvor tit skal bilen vaskes? Svaret afhænger af årstid, brug og parkeringsforhold. Her er en konkret guide til, hvornår det er nødvendigt.",
-  alternates: { canonical: "https://elite-vask.dk/guide/hvor-ofte" },
+  alternates: { canonical: "/guide/hvor-ofte" },
   openGraph: {
     title: "Hvor ofte bør man vaske sin bil?",
     description: "Svaret afhænger af årstid, brug og parkeringsforhold. Her er en konkret guide til, hvornår det er nødvendigt.",

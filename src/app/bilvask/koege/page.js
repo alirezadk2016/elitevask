@@ -1,7 +1,7 @@
 export const metadata = {
   title: "Mobil bilvask i Køge – Elite Vask dampvask til din dør",
   description: "Professionel mobil dampvask i Køge og omegn. Vi kører til dig – gratis kørsel, betal efter vask. Dampvask af bil uden ridser og med minimal miljøpåvirkning.",
-  alternates: { canonical: "https://elite-vask.dk/bilvask/koege" },
+  alternates: { canonical: "/bilvask/koege" },
   openGraph: {
     title: "Mobil bilvask i Køge – Elite Vask",
     description: "Professionel mobil dampvask i Køge. Vi kører direkte til dig.",

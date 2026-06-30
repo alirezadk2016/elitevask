@@ -1,7 +1,7 @@
 export const metadata = {
   title: "Mobil bilvask i Næstved – Elite Vask dampvask til din dør",
   description: "Professionel mobil dampvask i Næstved og omegn. Vi kører til din adresse – gratis kørsel, betal efter vask. Book online eller ring til os.",
-  alternates: { canonical: "https://elite-vask.dk/bilvask/naestved" },
+  alternates: { canonical: "/bilvask/naestved" },
   openGraph: {
     title: "Mobil bilvask i Næstved – Elite Vask",
     description: "Professionel mobil dampvask i Næstved. Vi kører direkte til dig.",

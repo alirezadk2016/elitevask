@@ -1,13 +1,13 @@
 export const metadata = {
   title: "FAQ – Elite Vask | Ofte stillede spørgsmål om mobil dampvask",
   description: "Svar på de mest stillede spørgsmål om Elite Vaskes mobile bil dampvask på Sjælland. Priser, behandlingstid, sikkerhed, elbiler, aftaler og meget mere.",
-  alternates: { canonical: "https://elite-vask.dk/faq" },
+  alternates: { canonical: "/faq" },
   openGraph: {
     title: "FAQ – Elite Vask | Ofte stillede spørgsmål",
     description: "Svar på de mest stillede spørgsmål om Elite Vaskes mobile bil dampvask på Sjælland.",
     type: "website",
     locale: "da_DK",
-    url: "https://elite-vask.dk/faq",
+    url: "/faq",
   },
 };
 

@@ -1,6 +1,7 @@
 export const metadata = {
   title: "Handelsbetingelser – Elite Vask",
   description: "Læs Elite Vaskes handelsbetingelser for mobil bil dampvask på Sjælland.",
+  alternates: { canonical: "/handelsbetingelser" },
 };
 
 export default function Handelsbetingelser() {

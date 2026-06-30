@@ -1,6 +1,7 @@
 export const metadata = {
   title: "Privatlivspolitik – Elite Vask",
   description: "Læs Elite Vaskes privatlivspolitik og se, hvordan vi behandler dine personoplysninger.",
+  alternates: { canonical: "/privatpolitik" },
 };
 
 export default function Privatpolitik() {

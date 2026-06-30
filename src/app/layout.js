@@ -29,7 +29,7 @@ export const metadata = {
     locale: "da_DK",
     url: "https://www.elite-vask.dk",
     siteName: "Elite Vask",
-    images: [{ url: "/hero.jpg.png", width: 1200, height: 630, alt: "Elite Vask – mobil bil dampvask" }],
+    images: [{ url: "/hero.jpg.png", width: 1672, height: 941, alt: "Elite Vask – mobil bil dampvask" }],
   },
   twitter: {
     card: "summary_large_image",

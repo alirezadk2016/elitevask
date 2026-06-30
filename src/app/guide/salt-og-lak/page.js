@@ -1,7 +1,7 @@
 export const metadata = {
   title: "Beskyt bilens lak mod vejsalt i Danmark – Elite Vask Guide",
   description: "Vejsalt er den største trussel mod bilens lak og undervogn i den danske vinter. Læs hvad salt gør ved din bil, og hvordan du beskytter den effektivt.",
-  alternates: { canonical: "https://elite-vask.dk/guide/salt-og-lak" },
+  alternates: { canonical: "/guide/salt-og-lak" },
   openGraph: {
     title: "Beskyt bilens lak mod vejsalt i Danmark",
     description: "Vejsalt er den største trussel mod bilens lak og undervogn i den danske vinter. Læs hvad salt gør ved din bil.",

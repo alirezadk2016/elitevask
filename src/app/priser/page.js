@@ -3,7 +3,7 @@ import Link from "next/link";
 export const metadata = {
   title: "Elite Vask – Priser | Mobil bil dampvask på Sjælland",
   description: "Se priser på mobil bil dampvask fra Elite Vask. Udvendig vask fra 500 kr, hel bil fra 800 kr, Guld pakke fra 2.000 kr. Gratis kørsel på Sjælland.",
-  alternates: { canonical: "https://elite-vask.dk/priser" },
+  alternates: { canonical: "/priser" },
   openGraph: {
     title: "Elite Vask – Priser | Mobil bil dampvask på Sjælland",
     description: "Se priser på mobil bil dampvask. Udvendig fra 500 kr, hel bil fra 800 kr, Guld pakke fra 2.000 kr. Gratis kørsel på Sjælland.",

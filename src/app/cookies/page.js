@@ -1,6 +1,7 @@
 export const metadata = {
   title: "Cookiepolitik – Elite Vask",
   description: "Læs Elite Vaskes cookiepolitik og se, hvilke cookies vi bruger på vores hjemmeside.",
+  alternates: { canonical: "/cookies" },
 };
 
 export default function Cookies() {

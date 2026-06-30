@@ -1,7 +1,7 @@
 export const metadata = {
   title: "Mobil bilvask i Ringsted – Elite Vask dampvask til din dør",
   description: "Professionel mobil dampvask i Ringsted. Vi kører til din adresse – gratis kørsel, betal efter vask. Skånsom dampvask uden ridser. Book online.",
-  alternates: { canonical: "https://elite-vask.dk/bilvask/ringsted" },
+  alternates: { canonical: "/bilvask/ringsted" },
   openGraph: {
     title: "Mobil bilvask i Ringsted – Elite Vask",
     description: "Professionel mobil dampvask i Ringsted. Vi kører direkte til dig.",
