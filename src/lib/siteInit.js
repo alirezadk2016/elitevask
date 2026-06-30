@@ -331,11 +331,11 @@ if(flowBook3){flowBook3.addEventListener('click',function(e){e.preventDefault();
 
 /* ====== BOOKING WIZARD ====== */
 var modal=document.getElementById('modal'),wizBody=document.getElementById('wizBody'),wizProg=document.getElementById('wizProg');
-var wiz={car:null,pkg:null,extras:[],addr:"",zip:"",city:"",date:"",time:"",name:"",phone:"",email:"",msg:""};
+var wiz={car:null,pkg:null,extras:[],addr:"",zip:"",city:"",addrVerified:false,date:"",time:"",name:"",phone:"",email:"",msg:""};
 var step=1, TOTAL=7;
 function W(k){return WIZ[LANG][k]||k;}
 function openWiz(car,pkg){
-  wiz.car=car||null;wiz.pkg=pkg||null;wiz.zip="";wiz.extras=[];
+  wiz.car=car||null;wiz.pkg=pkg||null;wiz.zip="";wiz.extras=[];wiz.addrVerified=false;
   if(car&&pkg){step=3;}
   else if(car){step=2;}
   else{wiz.car=selCar||CARS[0];step=1;}
@@ -538,6 +538,23 @@ function drawWiz(){
     if(step===4&&!wiz.addr.trim()){showWizErr(LANG==='da'?'Indtast venligst din adresse.':'Please enter your address.');return;}
     if(step===4&&!wiz.zip.trim()){showWizErr(LANG==='da'?'Indtast venligst dit postnummer.':'Please enter your postcode.');return;}
     if(step===4&&!isServiceZip(wiz.zip)){showWizErr(LANG==='da'?'Vi dækker desværre ikke dette postnummer. Vi betjener hele Sjælland (1000–4799). Kontakt os gerne på +45 24 44 03 21, så finder vi en løsning.':'We do not currently cover this postcode. We serve all of Zealand (1000–4799). Please contact us on +45 24 44 03 21 and we will do our best to help.');return;}
+    // Verify the address is a REAL Danish address (DAWA datavask) before continuing
+    if(step===4&&!wiz.addrVerified){
+      var vbtn=document.getElementById('wizNext');
+      var vtxt=vbtn?vbtn.textContent:'';
+      if(vbtn){vbtn.disabled=true;vbtn.textContent=(LANG==='da'?'Tjekker adresse...':'Checking address...');}
+      verifyDanishAddress(function(ok,clean){
+        if(vbtn){vbtn.disabled=false;vbtn.textContent=vtxt;}
+        if(ok){
+          wiz.addrVerified=true;
+          if(clean){ if(clean.addr){wiz.addr=clean.addr;} if(clean.zip){wiz.zip=clean.zip;} if(clean.city){wiz.city=clean.city;} }
+          step++;drawWiz();
+        }else{
+          showWizErr(LANG==='da'?'Vi kunne ikke finde denne adresse. Vælg venligst en rigtig adresse fra listen, mens du skriver (vejnavn + husnummer).':'We could not find this address. Please choose a real address from the suggestions as you type (street + house number).');
+        }
+      });
+      return;
+    }
     if(step===5){
       if(!wiz.date){showWizErr(LANG==='da'?'Vælg venligst en dato.':'Please select a date.');return;}
       if(!wiz.time){showWizErr(LANG==='da'?'Vælg venligst et tidspunkt.':'Please select a time slot.');return;}
@@ -561,6 +578,32 @@ function drawWiz(){
     }
   });
 }
+/* Validate a typed address against DAWA's official address-cleaning service.
+   kategori A = exact unique match, B = plausible candidates, C = no match (fake). */
+function verifyDanishAddress(cb){
+  var betegnelse=((wiz.addr||'')+', '+(wiz.zip||'')+' '+(wiz.city||'')).trim();
+  if(betegnelse.replace(/\D/g,'').length<4){cb(false);return;}
+  var url='https://api.dataforsyningen.dk/datavask/adgangsadresser?betegnelse='+encodeURIComponent(betegnelse);
+  fetch(url)
+    .then(function(r){return r.ok?r.json():null;})
+    .then(function(d){
+      if(!d){cb(true);return;} // unexpected response → don't block a real customer
+      var kat=d.kategori, res=(d.resultater||[]);
+      if((kat==='A'||kat==='B')&&res.length){
+        var a=(res[0].adresse)||(res[0].adgangsadresse)||res[0]||{};
+        var clean={
+          addr:((a.vejnavn||'')+' '+(a.husnr||'')).trim()||null,
+          zip:a.postnr||null,
+          city:a.postnrnavn||null
+        };
+        cb(true, clean.addr?clean:null);
+      }else{
+        cb(false); // kategori C → no real match
+      }
+    })
+    .catch(function(){cb(true);}); // network/API outage → fail open, don't block bookings
+}
+
 function bindAddressAutocomplete(){
   var fz=document.getElementById('f_zip');
   var fc=document.getElementById('f_city');
@@ -570,6 +613,7 @@ function bindAddressAutocomplete(){
   // zip → city
   fz.addEventListener('input',function(){
     var z=fz.value.replace(/\D/g,'');fz.value=z;
+    wiz.addrVerified=false; // postcode change invalidates verification
     if(z.length===4){
       fetch('https://api.dataforsyningen.dk/postnumre/'+z)
         .then(function(r){return r.ok?r.json():null;})
@@ -601,6 +645,7 @@ function bindAddressAutocomplete(){
     var addrTimer=null;
     fa.addEventListener('input',function(){
       clearTimeout(addrTimer);
+      wiz.addrVerified=false; // typing invalidates a previous verification
       var q=fa.value.trim();
       removeDropdown('addr-drop');
       if(q.length<2) return;
@@ -655,6 +700,7 @@ function showAddrSuggestions(list,fa,fz,fc){
       var street=((a.vejnavn||'')+' '+(a.husnr||'')).trim();
       fa.value=street;
       wiz.addr=street;
+      wiz.addrVerified=true; // chosen from official DAWA list = real address
       // always update zip + city from selected suggestion
       if(a.postnr){fz.value=a.postnr;wiz.zip=a.postnr;}
       if(a.postnrnavn){fc.value=a.postnrnavn;wiz.city=a.postnrnavn;}
