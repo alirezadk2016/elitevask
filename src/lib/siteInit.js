@@ -537,7 +537,7 @@ function drawWiz(){
     if(step===2&&!wiz.pkg){showWizErr(LANG==='da'?'Vælg venligst en pakke.':'Please select a package.');return;}
     if(step===4&&!wiz.addr.trim()){showWizErr(LANG==='da'?'Indtast venligst din adresse.':'Please enter your address.');return;}
     if(step===4&&!wiz.zip.trim()){showWizErr(LANG==='da'?'Indtast venligst dit postnummer.':'Please enter your postcode.');return;}
-    if(step===4&&!isServiceZip(wiz.zip)){showWizErr(LANG==='da'?'Vi dækker desværre ikke dette postnummer. Vi betjener hele Sjælland (1000–4799). Kontakt os gerne på +45 24 44 03 21, så finder vi en løsning.':'We do not currently cover this postcode. We serve all of Zealand (1000–4799). Please contact us on +45 24 44 03 21 and we will do our best to help.');return;}
+    if(step===4&&!isServiceZip(wiz.zip)){showWizErr(LANG==='da'?'⚠ Vi dækker kun Sjælland (postnr. 1000–4799). Din adresse ligger uden for vores område – ring til os på +45 24 44 03 21, så finder vi en løsning.':'⚠ We only cover Zealand (postcodes 1000–4799). Your address is outside our area – call us on +45 24 44 03 21 and we will find a solution.');return;}
     // Verify the address is a REAL Danish address (DAWA datavask) before continuing
     if(step===4&&!wiz.addrVerified){
       var vbtn=document.getElementById('wizNext');
@@ -550,7 +550,7 @@ function drawWiz(){
           if(clean){ if(clean.addr){wiz.addr=clean.addr;} if(clean.zip){wiz.zip=clean.zip;} if(clean.city){wiz.city=clean.city;} }
           step++;drawWiz();
         }else{
-          showWizErr(LANG==='da'?'Vi kunne ikke finde denne adresse. Vælg venligst en rigtig adresse fra listen, mens du skriver (vejnavn + husnummer).':'We could not find this address. Please choose a real address from the suggestions as you type (street + house number).');
+          showWizErr(LANG==='da'?'⚠ Vi kunne ikke finde denne adresse. Vælg en rigtig adresse fra listen – eller ring til os på +45 24 44 03 21, så hjælper vi dig.':'⚠ We could not find this address. Please choose a real address from the list – or call us on +45 24 44 03 21 and we will help you.');
         }
       });
       return;
