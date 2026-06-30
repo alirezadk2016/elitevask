@@ -8,7 +8,7 @@ const HTML = `<!-- NAV -->
     <a href="#vaelg" data-i18n="nav_choose">Se priser</a>
     <a href="/galleri" data-i18n="nav_work">Galleri</a>
     <a href="/faq">FAQ</a>
-    <a href="#kontakt" data-i18n="nav_contact">Kontakt</a>
+    <a href="/kontakt" data-i18n="nav_contact">Kontakt</a>
     <a href="/guide" class="guide-nav-link" data-i18n="nav_guide">Guide</a>
   </div>
   <div class="nav-right">
@@ -26,7 +26,7 @@ const HTML = `<!-- NAV -->
   <a href="/galleri" class="drawer-link" data-i18n="nav_work">Galleri</a>
   <a href="/guide" class="drawer-link" data-i18n="nav_guide">Guide</a>
   <a href="/faq" class="drawer-link">FAQ</a>
-  <a href="#kontakt" class="drawer-link" data-i18n="nav_contact">Kontakt</a>
+  <a href="/kontakt" class="drawer-link" data-i18n="nav_contact">Kontakt</a>
   <div class="drawer-sep"></div>
   <div class="drawer-lang">
     <button type="button" aria-label="Skift til dansk" aria-pressed="true" data-lang="da" class="drawer-lang-btn on" title="Dansk"><svg viewBox="0 0 20 14" width="20" height="14" aria-hidden="true"><rect width="20" height="14" fill="#C60C30"/><rect x="6" y="0" width="3" height="14" fill="white"/><rect x="0" y="5.5" width="20" height="3" fill="white"/></svg>DK</button>
