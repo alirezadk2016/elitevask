@@ -17,6 +17,9 @@ const SUSPICIOUS_PATH_PATTERNS = [
   /phpmyadmin|adminer|webshell|c99|r57/i,
 ];
 
+// Public files that must always be served (never treated as scanner probes)
+const ALLOWED_PATHS = new Set(['/sitemap.xml', '/robots.txt', '/manifest.webmanifest']);
+
 const ipHits = new Map();
 const WINDOW_MS = 60_000;
 const MAX_HITS = 120;
@@ -51,10 +54,13 @@ export function proxy(request) {
     }
   }
 
-  // Block suspicious paths (vulnerability scanners)
-  for (const pattern of SUSPICIOUS_PATH_PATTERNS) {
-    if (pattern.test(pathname)) {
-      return new NextResponse(null, { status: 404 });
+  // Block suspicious paths (vulnerability scanners) — but never block known
+  // public metadata files (the .xml rule otherwise 404s the real /sitemap.xml).
+  if (!ALLOWED_PATHS.has(pathname)) {
+    for (const pattern of SUSPICIOUS_PATH_PATTERNS) {
+      if (pattern.test(pathname)) {
+        return new NextResponse(null, { status: 404 });
+      }
     }
   }
 
@@ -89,6 +95,6 @@ export function proxy(request) {
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|logo.jpg|hero.jpg.png|.*\\.(?:png|jpg|jpeg|gif|svg|webp|ico|woff|woff2)).*)',
+    '/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|manifest.webmanifest|logo.jpg|hero.jpg.png|.*\\.(?:png|jpg|jpeg|gif|svg|webp|ico|woff|woff2)).*)',
   ],
 };
