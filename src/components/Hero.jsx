@@ -1,6 +1,6 @@
 const HTML = `<!-- HERO -->
 <section class="hero hero-img">
-  <img src="/hero.jpg.png" alt="Elite Vask dampvask" class="hero-bg-img" fetchpriority="high" decoding="async" />
+  <img src="/hero.jpg.png" alt="Elite Vask medarbejder der dampvasker en sort bil – mobil bilvask på Sjælland" class="hero-bg-img" fetchpriority="high" decoding="async" />
   <div class="hero-overlay"></div>
   <div class="wrap hero-inner">
     <a href="https://www.google.com/maps?cid=14890071893602568107" target="_blank" rel="noopener" class="badge badge-google">
