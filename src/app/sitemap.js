@@ -1,4 +1,6 @@
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.elite-vask.dk';
+// Always the production canonical domain — never VERCEL_URL / the preview
+// (*.vercel.app) domain, regardless of NEXT_PUBLIC_SITE_URL.
+const SITE_URL = 'https://www.elite-vask.dk';
 
 export default function sitemap() {
   return [

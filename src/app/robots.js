@@ -1,4 +1,5 @@
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.elite-vask.dk';
+// Always the production canonical domain — never the preview (*.vercel.app) domain.
+const SITE_URL = 'https://www.elite-vask.dk';
 
 export default function robots() {
   return {

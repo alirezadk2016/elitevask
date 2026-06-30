@@ -38,7 +38,7 @@ const DEFAULT_FAQ = [
 
 async function getFaqItems() {
   try {
-    const base = process.env.NEXT_PUBLIC_BASE_URL || "https://elite-vask.dk";
+    const base = "https://www.elite-vask.dk";
     const res = await fetch(`${base}/api/site-content`, { next: { revalidate: 60 } });
     if (!res.ok) return DEFAULT_FAQ;
     const data = await res.json();
