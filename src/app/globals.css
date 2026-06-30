@@ -8,7 +8,7 @@
 }
 /* ANNOUNCEMENT BAR */
 .ann-bar{background:linear-gradient(90deg,#0d4a27 0%,#116635 40%,#0d4a27 100%);border-bottom:1px solid rgba(55,210,120,.25);padding:9px 16px;text-align:center}
-.ann-inner{display:flex;align-items:center;gap:14px;justify-content:space-between;flex-wrap:wrap;width:100%;max-width:1200px;margin:0 auto}
+.ann-inner{display:inline-flex;align-items:center;gap:12px;justify-content:center;flex-wrap:nowrap}
 .ann-pulse{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 0 rgba(55,210,120,.6);animation:annpulse 1.8s infinite;flex-shrink:0}
 @keyframes annpulse{0%{box-shadow:0 0 0 0 rgba(55,210,120,.6)}70%{box-shadow:0 0 0 8px rgba(55,210,120,0)}100%{box-shadow:0 0 0 0 rgba(55,210,120,0)}}
 .ann-text{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:#c8f0d8;flex-wrap:wrap;justify-content:center}
@@ -875,8 +875,9 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
   /* clean single-line announcement on mobile */
   .ann-text{font-size:12.5px;flex-wrap:nowrap}
   .ann-text .ann-sep,.ann-text .ann-sub{display:none}
-  .ann-tp-cta{display:none}
-  .ann-tp{padding:3px 8px}
+  .ann-tp-cta,.ann-tp-word{display:none}
+  .ann-tp{padding:2px 6px}
+  .ann-inner{gap:8px}
   .btn-lg{padding:13px 24px;font-size:15px}
   .tb-hide-mobile{display:none}
   .chatbot{bottom:calc(70px + env(safe-area-inset-bottom));right:12px}
