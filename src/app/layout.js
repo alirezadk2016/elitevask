@@ -55,7 +55,7 @@ const JSONLD = [
   "paymentAccepted":"MobilePay, Bankoverførsel, Kontant",
   "areaServed":["Næstved","Roskilde","Køge","Ringsted","København","Stevns Kommune","Faxe Kommune","Helsingør","Hillerød","Frederikssund","Sjælland"],
   "priceRange":"500–2350 kr","vatID":"DK46392264",
-  "address":{"@type":"PostalAddress","streetAddress":"Vangeledet 21","postalCode":"2830","addressLocality":"Virum","addressRegion":"Sjælland","addressCountry":"DK"},
+  "address":{"@type":"PostalAddress","addressLocality":"København","addressRegion":"Sjælland","addressCountry":"DK"},
   "openingHoursSpecification":[
     {"@type":"OpeningHoursSpecification","dayOfWeek":["Monday","Tuesday","Wednesday","Thursday","Friday"],"opens":"08:00","closes":"20:00"},
     {"@type":"OpeningHoursSpecification","dayOfWeek":["Saturday","Sunday"],"opens":"10:00","closes":"20:00"}

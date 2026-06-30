@@ -31,9 +31,8 @@ const contactPageLd = {
     url: SITE,
     address: {
       "@type": "PostalAddress",
-      streetAddress: "Vangeledet 21",
-      postalCode: "2830",
-      addressLocality: "Virum",
+      addressLocality: "København",
+      addressRegion: "Sjælland",
       addressCountry: "DK",
     },
     contactPoint: {
@@ -94,7 +93,7 @@ export default function Kontakt() {
           </div>
           <div className="cl-item">
             <span className="cl-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" /><circle cx="12" cy="10" r="3" /></svg></span>
-            <span><span className="lab">Adresse</span><br /><span className="val">Vangeledet 21, 2830 Virum</span></span>
+            <span><span className="lab">Adresse</span><br /><span className="val">København · Sjælland · Danmark</span></span>
           </div>
           <a href="https://www.facebook.com/share/14ciFraNT4M/" target="_blank" rel="noopener noreferrer" className="cl-item">
             <span className="cl-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" /></svg></span>
