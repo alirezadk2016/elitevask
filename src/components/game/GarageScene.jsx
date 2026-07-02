@@ -1,19 +1,23 @@
 "use client";
-/* Elite Vask – Car Wash Game, PHASE 1: environment + car only.
-   Ultra-modern detailing garage (matte black concrete, wet reflective floor,
-   blue LED strips, illuminated Elite Vask logo, garage props, volumetric
-   light, HDRI reflections, bloom/AO) around a realistic Ferrari glTF.
-   No gameplay in this phase.
+/* Elite Vask – Car Wash Game.
+   Phase 1: cinematic detailing garage + realistic Ferrari glTF.
+   Phase 2: pressure washer with REAL per-pixel cleaning – every cleanable
+   mesh carries a runtime-painted dirt mask (see lib/game/dirtCar.js); the
+   jet erases dirt exactly where the water hits, with splash/mist/foam
+   particles, procedural audio, a water tank and a minimal HUD.
 
    Car model: "Ferrari 458 Italia" by vicent091036 (from the official
    three.js examples). Draco decoders served locally from /draco/gltf/. */
 
-import { Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, useGLTF, useTexture, useProgress, MeshReflectorMaterial } from "@react-three/drei";
 import { EffectComposer, Bloom, N8AO, Vignette, SMAA } from "@react-three/postprocessing";
 import * as THREE from "three";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
+import Washer from "./Washer";
+import { CarDirt } from "@/lib/game/dirtCar";
+import { initAudio, sndClick, sndComplete } from "@/lib/game/audio";
 
 const CAR_URL = "/game/ferrari.glb";
 const DRACO = "/draco/gltf/";
@@ -21,12 +25,12 @@ const CAM_HOME = new THREE.Vector3(5.4, 1.7, 5.8);
 const CAM_INTRO = new THREE.Vector3(9.5, 2.9, 10.5);
 const TARGET = new THREE.Vector3(0, 0.65, 0);
 
-/* ---------- the car ---------- */
-function Car() {
+/* ---------- the car (+ per-mesh dirt registration) ---------- */
+function Car({ G, isMobile }) {
   const { scene } = useGLTF(CAR_URL, DRACO);
   const ao = useTexture("/game/ferrari_ao.png");
 
-  const car = useMemo(() => {
+  const built = useMemo(() => {
     const root = scene;
     const body = new THREE.MeshPhysicalMaterial({
       color: new THREE.Color("#0e4d2c"), // Elite emerald
@@ -55,12 +59,43 @@ function Car() {
         o.material.envMapIntensity = 0.6;
       }
     });
-    return root;
-  }, [scene]);
+
+    /* real cleaning: register washable meshes with their own dirt masks.
+       (dirtCar clones+patches the material, so do this AFTER assignment) */
+    const dirt = new CarDirt();
+    const mr = (n) => (isMobile ? Math.max(192, Math.round(n * 0.6)) : n);
+    const cleanables = [];
+    const SPEC = [
+      { match: (o) => o.name === "body", opt: { maskRes: mr(1024), repeat: 2.2, weight: 1.6 } },
+      { match: (o) => o.name === "glass", opt: { maskRes: mr(512), repeat: 1.6, amount: 0.85 } },
+      { match: (o) => o.name === "trim", opt: { maskRes: mr(384), repeat: 1.6 } },
+      { match: (o) => o.name === "chrome", opt: { maskRes: mr(256), repeat: 1.4 } },
+      { match: (o) => o.name.startsWith("rim_"), opt: { maskRes: mr(256), repeat: 1.3 } },
+      { match: (o) => o.name.startsWith("tire"), opt: { maskRes: mr(384), repeat: 1.7, weight: 0.7 } },
+      { match: (o) => o.name.startsWith("wheel"), opt: { maskRes: mr(256), repeat: 1.3, weight: 0.5 } },
+      { match: (o) => o.name === "grills", opt: { maskRes: mr(256), repeat: 1.5, weight: 0.5 } },
+    ];
+    root.updateMatrixWorld(true);
+    root.traverse((o) => {
+      if (!o.isMesh) return;
+      const spec = SPEC.find((s) => s.match(o));
+      if (spec && dirt.add(o, spec.opt)) cleanables.push(o);
+    });
+    return { root, dirt, cleanables };
+  }, [scene, isMobile]);
+
+  useEffect(() => {
+    G.dirt = built.dirt;
+    G.carMeshes = built.cleanables;
+    return () => {
+      if (G.dirt === built.dirt) { G.dirt = null; G.carMeshes = []; }
+      built.dirt.dispose();
+    };
+  }, [built, G]);
 
   return (
     <group rotation-y={Math.PI * 0.62}>
-      <primitive object={car} />
+      <primitive object={built.root} />
       {/* baked soft shadow under the chassis (from the official demo) */}
       <mesh rotation-x={-Math.PI / 2} position={[0, 0.003, 0]} renderOrder={2}>
         <planeGeometry args={[4.6, 4.6]} />
@@ -316,10 +351,14 @@ function EnvTune() {
   return null;
 }
 
-/* ---------- cinematic camera rig ---------- */
-function Rig({ resetSignal }) {
+/* ---------- cinematic camera rig ----------
+   OrbitControls listens on the R3F wrapper div (canvas parent), so the spray
+   handler on the canvas itself can stopPropagation() when the press lands on
+   the car – washing wins, dragging the background orbits. */
+function Rig({ G, resetSignal }) {
   const controls = useRef();
-  const { camera } = useThree();
+  const { camera, gl } = useThree();
+  const wrapper = gl.domElement.parentNode || gl.domElement;
   const S = useRef({ intro: true, t: 0, lastTouch: 0, resetting: false, lastReset: 0 });
 
   useEffect(() => {
@@ -357,16 +396,18 @@ function Rig({ resetSignal }) {
       c.target.lerp(TARGET, k);
       if (camera.position.distanceTo(CAM_HOME) < 0.05) s.resetting = false;
     }
-    // slow cinematic orbit, pausing while the user drives the camera
+    // slow cinematic orbit: only before play starts (or on the shine lap
+    // after completion), pausing while the user drives the camera
     const idle = performance.now() - s.lastTouch > 4200;
-    c.autoRotate = !s.resetting && (s.intro || idle);
+    const cinematic = !G.hasSprayed || G.done;
+    c.autoRotate = !s.resetting && !G.spraying && cinematic && (s.intro || idle);
     c.autoRotateSpeed = s.intro ? 0.9 : 0.55;
     c.update();
   });
 
   return (
     <OrbitControls
-      ref={controls} makeDefault enableDamping dampingFactor={0.06} enablePan={false}
+      ref={controls} makeDefault domElement={wrapper} enableDamping dampingFactor={0.06} enablePan={false}
       minDistance={3.4} maxDistance={9.5} maxPolarAngle={1.5} minPolarAngle={0.25}
       target={[TARGET.x, TARGET.y, TARGET.z]}
     />
@@ -397,6 +438,36 @@ export default function GarageScene() {
     []
   );
   const [resetSignal, setResetSignal] = useState(0);
+  const [done, setDone] = useState(false);
+  const [hud, setHud] = useState({ progress: 0, water: 100, tankLock: false, hasSprayed: false });
+
+  const G = useRef(null);
+  if (!G.current) {
+    G.current = {
+      pointer: new THREE.Vector2(), spraying: false, hasSprayed: false,
+      water: 100, tankLock: false, progress: 0, done: false,
+      dirt: null, carMeshes: [], onDone: null,
+    };
+  }
+  const g = G.current;
+  g.onDone = () => { setDone(true); sndComplete(); };
+  if (typeof window !== "undefined") window.__evg = g;
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setHud({ progress: g.progress, water: g.water, tankLock: g.tankLock, hasSprayed: g.hasSprayed });
+    }, 170);
+    return () => clearInterval(id);
+  }, [g]);
+
+  const washAgain = useCallback(() => {
+    sndClick(); initAudio();
+    if (g.dirt) g.dirt.reset();
+    g.progress = 0; g.water = 100; g.tankLock = false; g.done = false; g.hasSprayed = false;
+    setDone(false);
+  }, [g]);
+
+  const pct = Math.min(100, Math.round(hud.progress * 100 + 0.2));
 
   return (
     <div className="gp-wrap">
@@ -413,7 +484,8 @@ export default function GarageScene() {
           <EnvTune />
           <Garage isMobile={isMobile} />
           <VolumetricCones />
-          <Car />
+          <Car G={g} isMobile={isMobile} />
+          <Washer G={g} isMobile={isMobile} />
           {!isMobile && (
             <EffectComposer multisampling={0}>
               <N8AO intensity={3.4} aoRadius={0.5} distanceFalloff={0.7} quality="performance" />
@@ -423,10 +495,53 @@ export default function GarageScene() {
             </EffectComposer>
           )}
         </Suspense>
-        <Rig resetSignal={resetSignal} />
+        <Rig G={g} resetSignal={resetSignal} />
       </Canvas>
 
       <Loader />
+
+      {/* minimal wash HUD */}
+      <div className="gp-hud gp-topleft">
+        <div className="gp-label">REN</div>
+        <div className="gp-progress-row">
+          <span className="gp-pct">{pct}%</span>
+        </div>
+        <div className="gp-pbar"><i style={{ width: `${pct}%` }} /></div>
+        <div className="gp-stat" style={{ marginTop: 9 }}>
+          <span className="gp-k">VAND</span>
+          <span className="gp-water"><i style={{ width: `${Math.round(hud.water)}%` }} /></span>
+        </div>
+      </div>
+
+      {hud.tankLock && <div className="gp-toast">Vandtank genoplader…</div>}
+
+      {!hud.hasSprayed && !done && (
+        <div className="gp-hint">
+          {isMobile
+            ? "Hold fingeren på bilen og bevæg den for at vaske · Træk i baggrunden for at dreje"
+            : "Hold musen nede på bilen og bevæg den for at vaske · Træk i baggrunden for at dreje"}
+        </div>
+      )}
+
+      {done && (
+        <div className="gp-overlay gp-complete">
+          <div className="gp-panel">
+            <div className="gp-big-stars">
+              {[0, 1, 2].map((i) => (
+                <svg key={i} viewBox="0 0 24 24" className="on" style={{ animationDelay: `${0.3 + i * 0.35}s` }} width="46" height="46"><path d="M12 2 15 9l7 .5-5.5 4.5L18 21l-6-3.8L6 21l1.5-7L2 9.5 9 9Z" fill="currentColor" /></svg>
+              ))}
+            </div>
+            <h2 className="gp-title">Skinnende ren!</h2>
+            <p className="gp-sub">Din rigtige bil fortjener samme behandling.</p>
+            <div className="gp-actions">
+              <a href="/#vaelg" className="btn btn-green btn-lg gp-book">Book din bilvask</a>
+              <div className="gp-actions-row">
+                <button className="btn gp-ghost" onClick={washAgain}>Vask igen</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <button className="gp-tool gp-camreset" aria-label="Nulstil kamera" title="Nulstil kamera"
         onClick={() => setResetSignal((n) => n + 1)}>
