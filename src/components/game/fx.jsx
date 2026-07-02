@@ -69,6 +69,13 @@ export const FX = forwardRef(function FX(
       S.life[i] = life; S.maxLife[i] = life;
       S.size0[i] = size; S.alpha0[i] = alpha;
     },
+    clear() {
+      S.life.fill(0);
+      S.alpha.fill(0);
+      for (let i = 0; i < count; i++) S.pos[i * 3 + 1] = -999;
+      S.geo.attributes.position.needsUpdate = true;
+      S.geo.attributes.aAlpha.needsUpdate = true;
+    },
   }), [S, count]);
 
   useFrame((_, dt) => {

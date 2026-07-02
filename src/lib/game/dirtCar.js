@@ -176,6 +176,28 @@ export class CarDirt {
     this._smp.width = this._smp.height = 48;
     this._smpCtx = this._smp.getContext("2d", { willReadFrequently: true });
     this.progress = 0;
+    this.whiteTex = new THREE.DataTexture(new Uint8Array([255, 255, 255, 255]), 1, 1);
+    this.whiteTex.needsUpdate = true;
+  }
+
+  /* hold-to-compare: temporarily show the fully dirty car */
+  setBefore(on) {
+    for (const it of this.items.values()) {
+      const sh = it.mesh.material.userData.shader;
+      if (sh) sh.uniforms.uDirtMask.value = on ? this.whiteTex : it.maskTex;
+    }
+  }
+
+  /* how cleaned is the mask at this uv? 0 = dirty, 1 = cleaned */
+  cleanedAt(key, uv) {
+    const it = this.items.get(key);
+    if (!it) return 0;
+    const x = Math.max(0, Math.min(it.maskCv.width - 1, Math.round(uv.x * it.maskCv.width)));
+    const y = Math.max(0, Math.min(it.maskCv.height - 1, Math.round((1 - uv.y) * it.maskCv.height)));
+    try {
+      const px = it.ctx.getImageData(x, y, 1, 1).data;
+      return 1 - px[1] / 255;
+    } catch { return 0; }
   }
 
   add(mesh, { maskRes = 512, repeat = 2, amount = 1, weight = 1 } = {}) {
@@ -252,6 +274,7 @@ export class CarDirt {
 
   dispose() {
     for (const it of this.items.values()) it.maskTex.dispose();
+    this.whiteTex.dispose();
     this.items.clear();
   }
 }

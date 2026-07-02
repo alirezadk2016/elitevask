@@ -17,7 +17,8 @@ import * as THREE from "three";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
 import Washer from "./Washer";
 import { CarDirt } from "@/lib/game/dirtCar";
-import { initAudio, sndClick, sndComplete } from "@/lib/game/audio";
+import { initAudio, setMuted, sndClick, sndComplete, sndStar } from "@/lib/game/audio";
+import { MISSIONS, T3, loadSave, storeSave, starsFor } from "@/lib/game/campaign";
 
 const CAR_URL = "/game/ferrari.glb";
 const DRACO = "/draco/gltf/";
@@ -87,8 +88,10 @@ function Car({ G, isMobile }) {
   useEffect(() => {
     G.dirt = built.dirt;
     G.carMeshes = built.cleanables;
+    const bodyMesh = built.cleanables.find((m) => m.name === "body");
+    G.bodyMat = bodyMesh ? bodyMesh.material : null;
     return () => {
-      if (G.dirt === built.dirt) { G.dirt = null; G.carMeshes = []; }
+      if (G.dirt === built.dirt) { G.dirt = null; G.carMeshes = []; G.bodyMat = null; }
       built.dirt.dispose();
     };
   }, [built, G]);
@@ -219,9 +222,9 @@ function Bucket({ position, color = "#123322" }) {
 }
 
 /* ---------- LED strip helper ---------- */
-function Led({ position, size, color = "#3da8ff", intensity = 4, rotation = [0, 0, 0] }) {
+function Led({ position, size, color = "#3da8ff", intensity = 4, rotation = [0, 0, 0], innerRef }) {
   return (
-    <mesh position={position} rotation={rotation}>
+    <mesh ref={innerRef} position={position} rotation={rotation}>
       <boxGeometry args={size} />
       <meshStandardMaterial color={color} emissive={color} emissiveIntensity={intensity} toneMapped={false} />
     </mesh>
@@ -229,7 +232,7 @@ function Led({ position, size, color = "#3da8ff", intensity = 4, rotation = [0, 
 }
 
 /* ---------- garage ---------- */
-function Garage({ isMobile }) {
+function Garage({ G, isMobile }) {
   const logo = useMemo(() => logoTexture(), []);
   useEffect(() => () => logo.dispose(), [logo]);
   const wallMat = <meshStandardMaterial color="#0b0c0e" roughness={0.94} metalness={0.05} />;
@@ -273,9 +276,10 @@ function Garage({ isMobile }) {
       </mesh>
       <pointLight position={[0, 3.6, -7.6]} color="#57e69b" intensity={9} distance={9} decay={2} />
 
-      {/* blue LED strips – back wall verticals */}
-      {[-5.6, -4.9, 4.9, 5.6].map((x) => (
-        <Led key={"v" + x} position={[x, 2.9, -8.76]} size={[0.06, 4.6, 0.06]} intensity={5} />
+      {/* blue LED strips – back wall verticals (pulse on celebration) */}
+      {[-5.6, -4.9, 4.9, 5.6].map((x, i) => (
+        <Led key={"v" + x} position={[x, 2.9, -8.76]} size={[0.06, 4.6, 0.06]} intensity={5}
+          innerRef={(el) => { if (G) G.leds[i] = el; }} />
       ))}
       {/* side wall horizontal twin lines */}
       {[1.0, 3.3].map((y) => (
@@ -319,6 +323,76 @@ function Garage({ isMobile }) {
       <spotLight position={[-4.6, 5.4, -1.8]} angle={0.8} penumbra={0.7} intensity={120} decay={1.8} color="#cfe0f4" />
       {/* blue rim light from behind the car */}
       <spotLight position={[0, 2.4, -6.4]} angle={0.9} penumbra={0.9} intensity={90} decay={1.8} color="#3da8ff" />
+    </group>
+  );
+}
+
+/* ---------- hidden golden dirt: 3 sprites raycast onto the body ---------- */
+let _goldTex = null;
+function goldTex() {
+  if (_goldTex) return _goldTex;
+  const c = document.createElement("canvas");
+  c.width = c.height = 64;
+  const g = c.getContext("2d");
+  const gr = g.createRadialGradient(32, 32, 0, 32, 32, 30);
+  gr.addColorStop(0, "rgba(255,236,170,1)");
+  gr.addColorStop(0.45, "rgba(236,196,92,.95)");
+  gr.addColorStop(1, "rgba(212,175,55,0)");
+  g.fillStyle = gr;
+  g.beginPath(); g.arc(32, 32, 30, 0, Math.PI * 2); g.fill();
+  _goldTex = new THREE.CanvasTexture(c);
+  return _goldTex;
+}
+
+function GoldSpots({ G, attempt }) {
+  const group = useRef();
+  const tex = useMemo(() => goldTex(), []);
+  const [spots, setSpots] = useState([]);
+
+  useEffect(() => {
+    const body = G.carMeshes.find((m) => m.name === "body");
+    if (!body) { G.gold = []; setSpots([]); return; }
+    body.updateWorldMatrix(true, false);
+    const rayc = new THREE.Raycaster();
+    const out = [];
+    let guard = 0;
+    while (out.length < 3 && guard++ < 60) {
+      const az = Math.random() * Math.PI * 2;
+      const o = new THREE.Vector3(Math.cos(az) * 4.5, 0.45 + Math.random() * 0.8, Math.sin(az) * 4.5);
+      rayc.set(o, new THREE.Vector3(0, 0.6, 0).sub(o).normalize());
+      const h = rayc.intersectObject(body, false)[0];
+      if (h && h.uv && h.face) {
+        const n = h.face.normal.clone().transformDirection(body.matrixWorld);
+        // keep spots apart
+        const pos = h.point.clone().addScaledVector(n, 0.035);
+        if (out.every((s) => s.pos.distanceTo(pos) > 0.9)) {
+          out.push({ key: body.uuid, uv: h.uv.clone(), pos, found: false });
+        }
+      }
+    }
+    G.gold = out;
+    setSpots(out);
+  }, [G, attempt]);
+
+  useFrame((st) => {
+    const g = group.current;
+    if (!g) return;
+    g.children.forEach((s, i) => {
+      const d = G.gold && G.gold[i];
+      if (!d) { s.visible = false; return; }
+      s.visible = !d.found && G.phase === "playing";
+      const k = 1 + Math.sin(st.clock.elapsedTime * 4 + i * 2) * 0.18;
+      s.scale.setScalar(0.09 * k);
+    });
+  });
+
+  return (
+    <group ref={group}>
+      {spots.map((s, i) => (
+        <sprite key={attempt + "-" + i} position={[s.pos.x, s.pos.y, s.pos.z]}>
+          <spriteMaterial map={tex} color="#ffd766" transparent depthWrite={false} toneMapped={false} />
+        </sprite>
+      ))}
     </group>
   );
 }
@@ -396,10 +470,9 @@ function Rig({ G, resetSignal }) {
       c.target.lerp(TARGET, k);
       if (camera.position.distanceTo(CAM_HOME) < 0.05) s.resetting = false;
     }
-    // slow cinematic orbit: only before play starts (or on the shine lap
-    // after completion), pausing while the user drives the camera
+    // slow cinematic orbit in the menu and on the post-completion shine lap
     const idle = performance.now() - s.lastTouch > 4200;
-    const cinematic = !G.hasSprayed || G.done;
+    const cinematic = G.phase !== "playing";
     c.autoRotate = !s.resetting && !G.spraying && cinematic && (s.intro || idle);
     c.autoRotateSpeed = s.intro ? 0.9 : 0.55;
     c.update();
@@ -437,37 +510,101 @@ export default function GarageScene() {
     () => typeof window !== "undefined" && (window.matchMedia("(pointer: coarse)").matches || window.innerWidth < 820),
     []
   );
+  const lang = useMemo(() => {
+    try { return localStorage.getItem("lang") === "en" ? "en" : "da"; } catch { return "da"; }
+  }, []);
+  const tr = T3[lang];
+
+  const [phase, setPhase] = useState("menu"); // menu | playing | done
+  const [missionIdx, setMissionIdx] = useState(0);
+  const [attempt, setAttempt] = useState(0);
+  const [save, setSave] = useState(() => (typeof window !== "undefined" ? loadSave() : { unlocked: 1, best: {} }));
+  const [muted, setMutedState] = useState(() => { try { return localStorage.getItem("ev_game_mute") === "1"; } catch { return false; } });
+  const [result, setResult] = useState(null);
   const [resetSignal, setResetSignal] = useState(0);
-  const [done, setDone] = useState(false);
-  const [hud, setHud] = useState({ progress: 0, water: 100, tankLock: false, hasSprayed: false });
+  const [hud, setHud] = useState({ progress: 0, water: 100, tankLock: false, hasSprayed: false, time: 0, score: 0, combo: 1, toast: null });
 
   const G = useRef(null);
   if (!G.current) {
     G.current = {
       pointer: new THREE.Vector2(), spraying: false, hasSprayed: false,
-      water: 100, tankLock: false, progress: 0, done: false,
-      dirt: null, carMeshes: [], onDone: null,
+      water: 100, tankLock: false, progress: 0, done: false, phase: "menu",
+      time: 0, score: 0, combo: 1, scrub: 1, toast: null, celebrateT: 0, ledsHot: false,
+      dirt: null, carMeshes: [], bodyMat: null, gold: [], leds: [], tr: T3.da, finish: null,
     };
   }
   const g = G.current;
-  g.onDone = () => { setDone(true); sndComplete(); };
+  g.phase = phase;
+  g.tr = tr;
   if (typeof window !== "undefined") window.__evg = g;
 
+  useEffect(() => { setMuted(muted); }, [muted]);
+
+  /* finish → score breakdown, save, celebration */
+  useEffect(() => {
+    g.finish = () => {
+      if (g.phase !== "playing" || g.done) return;
+      g.done = true;
+      g.spraying = false;
+      const mission = MISSIONS[missionIdx];
+      const secs = Math.round(g.time);
+      const stars = starsFor(mission, secs);
+      const bonus = Math.max(0, Math.round((mission.time2 * 1.2 - secs) * 9));
+      g.score += bonus + 1500;
+      g.celebrateT = 3.2;
+      const sc = Math.round(g.score);
+      const prevBest = save.best[mission.id];
+      const newBest = !prevBest || sc > prevBest.score;
+      const nextSave = {
+        unlocked: Math.max(save.unlocked, Math.min(MISSIONS.length, mission.id + 1)),
+        best: {
+          ...save.best,
+          [mission.id]: newBest
+            ? { score: sc, stars: Math.max(stars, prevBest?.stars || 0), time: secs }
+            : prevBest,
+        },
+      };
+      setSave(nextSave); storeSave(nextSave);
+      setResult({ stars, score: sc, time: secs, bonus, newBest, hasNext: mission.id < MISSIONS.length });
+      setPhase("done");
+      sndComplete();
+      let i = 0;
+      const int = setInterval(() => { sndStar(i); if (++i >= stars) clearInterval(int); }, 420);
+    };
+  }, [missionIdx, save, g]);
+
+  /* HUD sync */
   useEffect(() => {
     const id = setInterval(() => {
-      setHud({ progress: g.progress, water: g.water, tankLock: g.tankLock, hasSprayed: g.hasSprayed });
+      setHud({
+        progress: g.progress, water: g.water, tankLock: g.tankLock, hasSprayed: g.hasSprayed,
+        time: g.time, score: Math.round(g.score), combo: g.combo, toast: g.toast ? g.toast.msg : null,
+      });
     }, 170);
     return () => clearInterval(id);
   }, [g]);
 
-  const washAgain = useCallback(() => {
+  const startMission = useCallback((i) => {
     sndClick(); initAudio();
+    const m = MISSIONS[i];
     if (g.dirt) g.dirt.reset();
+    if (g.bodyMat) { g.bodyMat.color.set(m.paint); g.bodyMat.metalness = m.metal; }
+    g.scrub = m.scrub;
     g.progress = 0; g.water = 100; g.tankLock = false; g.done = false; g.hasSprayed = false;
-    setDone(false);
+    g.time = 0; g.score = 0; g.combo = 1; g.toast = null; g.celebrateT = 0; g.clearFx = true;
+    setMissionIdx(i); setAttempt((a) => a + 1); setResult(null);
+    setResetSignal((n) => n + 1);
+    setPhase("playing");
   }, [g]);
 
+  const toMenu = useCallback(() => { sndClick(); g.spraying = false; setPhase("menu"); setResult(null); }, [g]);
+
+  const mission = MISSIONS[missionIdx];
   const pct = Math.min(100, Math.round(hud.progress * 100 + 0.2));
+  const canFinish = phase === "playing" && hud.progress >= 0.97;
+  const paceStars = phase === "playing" ? (hud.time <= mission.time3 ? 3 : hud.time <= mission.time2 ? 2 : 1) : 0;
+  const mm = Math.floor(hud.time / 60);
+  const ss = String(Math.floor(hud.time % 60)).padStart(2, "0");
 
   return (
     <div className="gp-wrap">
@@ -482,9 +619,10 @@ export default function GarageScene() {
         <fogExp2 attach="fog" args={["#05070a", 0.02]} />
         <Suspense fallback={null}>
           <EnvTune />
-          <Garage isMobile={isMobile} />
+          <Garage G={g} isMobile={isMobile} />
           <VolumetricCones />
           <Car G={g} isMobile={isMobile} />
+          <GoldSpots G={g} attempt={attempt} />
           <Washer G={g} isMobile={isMobile} />
           {!isMobile && (
             <EffectComposer multisampling={0}>
@@ -500,53 +638,140 @@ export default function GarageScene() {
 
       <Loader />
 
-      {/* minimal wash HUD */}
-      <div className="gp-hud gp-topleft">
-        <div className="gp-label">REN</div>
-        <div className="gp-progress-row">
-          <span className="gp-pct">{pct}%</span>
-        </div>
-        <div className="gp-pbar"><i style={{ width: `${pct}%` }} /></div>
-        <div className="gp-stat" style={{ marginTop: 9 }}>
-          <span className="gp-k">VAND</span>
-          <span className="gp-water"><i style={{ width: `${Math.round(hud.water)}%` }} /></span>
-        </div>
-      </div>
+      {/* ---------- in-game HUD ---------- */}
+      {phase === "playing" && (
+        <>
+          <div className="gp-hud gp-topleft">
+            <div className="gp-label">{tr.clean} · {mission.name[lang].toUpperCase()}</div>
+            <div className="gp-progress-row">
+              <span className="gp-pct">{pct}%</span>
+              <span className="gp-stars">{[1, 2, 3].map((i) => (
+                <svg key={i} viewBox="0 0 24 24" className={i <= paceStars ? "on" : ""} width="17" height="17"><path d="M12 2 15 9l7 .5-5.5 4.5L18 21l-6-3.8L6 21l1.5-7L2 9.5 9 9Z" fill="currentColor" /></svg>
+              ))}</span>
+            </div>
+            <div className="gp-pbar"><i style={{ width: `${pct}%` }} /></div>
+          </div>
 
-      {hud.tankLock && <div className="gp-toast">Vandtank genoplader…</div>}
+          <div className="gp-hud gp-topright">
+            <div className="gp-stat"><span className="gp-k">{tr.water}</span>
+              <span className="gp-water"><i style={{ width: `${Math.round(hud.water)}%` }} /></span>
+            </div>
+            <div className="gp-stat"><span className="gp-k">{tr.time}</span><span className="gp-v">{mm}:{ss}</span></div>
+            <div className="gp-stat"><span className="gp-k">{tr.score}</span><span className="gp-v gp-score">{hud.score.toLocaleString("da-DK")}</span></div>
+            <div className="gp-stat"><span className="gp-k">{tr.combo}</span><span className="gp-v gp-combo">×{hud.combo.toFixed(1)}</span></div>
+          </div>
 
-      {!hud.hasSprayed && !done && (
-        <div className="gp-hint">
-          {isMobile
-            ? "Hold fingeren på bilen og bevæg den for at vaske · Træk i baggrunden for at dreje"
-            : "Hold musen nede på bilen og bevæg den for at vaske · Træk i baggrunden for at dreje"}
+          {(hud.toast || hud.tankLock) && <div className="gp-toast">{hud.toast || tr.waterLow}</div>}
+
+          {!hud.hasSprayed && (
+            <div className="gp-hint">{isMobile ? tr.hintMobile : tr.hintDesktop}</div>
+          )}
+
+          {canFinish && (
+            <button className="gp-finish" onClick={() => { sndClick(); g.finish && g.finish(); }}>
+              ✦ {tr.finish}
+            </button>
+          )}
+
+          <div className="gp-tools">
+            <button className="gp-tool" aria-label={tr.menu} title={tr.menu} onClick={toMenu}>
+              <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" rx="1.5" /><rect x="14" y="3" width="7" height="7" rx="1.5" /><rect x="3" y="14" width="7" height="7" rx="1.5" /><rect x="14" y="14" width="7" height="7" rx="1.5" /></svg>
+            </button>
+            <button className="gp-tool" aria-label={tr.resetCam} title={tr.resetCam} onClick={() => { sndClick(); setResetSignal((n) => n + 1); }}>
+              <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M3 12a9 9 0 1 0 3-6.7" /><path d="M3 4v5h5" /></svg>
+            </button>
+            <button className="gp-tool" aria-label={tr.beforeAfter} title={tr.beforeAfter}
+              onPointerDown={() => g.dirt && g.dirt.setBefore(true)}
+              onPointerUp={() => g.dirt && g.dirt.setBefore(false)}
+              onPointerLeave={() => g.dirt && g.dirt.setBefore(false)}>
+              <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 3v18" /><path d="M5 8c3 0 4 2 7 2M5 16c3 0 4-2 7-2" opacity=".6" /><circle cx="18" cy="12" r="3" /></svg>
+            </button>
+            <button className="gp-tool" aria-label={tr.sound} title={tr.sound}
+              onClick={() => { const m = !muted; setMutedState(m); try { localStorage.setItem("ev_game_mute", m ? "1" : "0"); } catch {} sndClick(); }}>
+              {muted ? (
+                <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M11 5 6 9H2v6h4l5 4V5Z" /><line x1="23" y1="9" x2="17" y2="15" /><line x1="17" y1="9" x2="23" y2="15" /></svg>
+              ) : (
+                <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M11 5 6 9H2v6h4l5 4V5Z" /><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a9 9 0 0 1 0 14" /></svg>
+              )}
+            </button>
+          </div>
+        </>
+      )}
+
+      {/* ---------- mission select ---------- */}
+      {phase === "menu" && (
+        <div className="gp-overlay">
+          <div className="gp-panel">
+            <div className="gp-eyebrow">Elite Vask</div>
+            <h1 className="gp-title">{tr.title}</h1>
+            <p className="gp-sub">{tr.tagline}</p>
+            <div className="gp-levels">
+              {MISSIONS.map((m, i) => {
+                const locked = m.id > save.unlocked;
+                const best = save.best[m.id];
+                return (
+                  <button key={m.id} className={`gp-level${locked ? " locked" : ""}`} disabled={locked}
+                    onClick={() => startMission(i)}>
+                    <span className="gp-lv-num" style={{ background: locked ? undefined : m.paint }}>{m.id}</span>
+                    <span className="gp-lv-name">{m.name[lang]}</span>
+                    <span className="gp-lv-meta">
+                      {locked ? (
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2"><rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></svg>
+                      ) : best ? (
+                        <>
+                          <span className="gp-lv-stars">{"★".repeat(best.stars)}{"☆".repeat(3 - best.stars)}</span>
+                          <span className="gp-lv-best">{best.score.toLocaleString("da-DK")}</span>
+                        </>
+                      ) : (
+                        <span className="gp-lv-new">{tr.newTag}</span>
+                      )}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+            <p className="gp-note">{isMobile ? tr.hintMobile : tr.hintDesktop}</p>
+          </div>
         </div>
       )}
 
-      {done && (
+      {/* ---------- success ---------- */}
+      {phase === "done" && result && (
         <div className="gp-overlay gp-complete">
           <div className="gp-panel">
             <div className="gp-big-stars">
-              {[0, 1, 2].map((i) => (
-                <svg key={i} viewBox="0 0 24 24" className="on" style={{ animationDelay: `${0.3 + i * 0.35}s` }} width="46" height="46"><path d="M12 2 15 9l7 .5-5.5 4.5L18 21l-6-3.8L6 21l1.5-7L2 9.5 9 9Z" fill="currentColor" /></svg>
+              {[1, 2, 3].map((i) => (
+                <svg key={i} viewBox="0 0 24 24" className={i <= result.stars ? "on" : ""} style={{ animationDelay: `${0.35 + i * 0.42}s` }} width="52" height="52"><path d="M12 2 15 9l7 .5-5.5 4.5L18 21l-6-3.8L6 21l1.5-7L2 9.5 9 9Z" fill="currentColor" /></svg>
               ))}
             </div>
-            <h2 className="gp-title">Skinnende ren!</h2>
-            <p className="gp-sub">Din rigtige bil fortjener samme behandling.</p>
+            <h2 className="gp-title">{tr.done}</h2>
+            <p className="gp-sub">{tr.doneSub}</p>
+            <div className="gp-result">
+              <div><span>{tr.score}</span><strong>{result.score.toLocaleString("da-DK")}</strong></div>
+              <div><span>{tr.time}</span><strong>{Math.floor(result.time / 60)}:{String(result.time % 60).padStart(2, "0")}</strong></div>
+              <div><span>{tr.timeBonus}</span><strong>+{result.bonus.toLocaleString("da-DK")}</strong></div>
+              {result.newBest && <div className="gp-newbest">{tr.newBest}</div>}
+            </div>
             <div className="gp-actions">
-              <a href="/#vaelg" className="btn btn-green btn-lg gp-book">Book din bilvask</a>
+              <a href="/#vaelg" className="btn btn-green btn-lg gp-book">{tr.book}</a>
               <div className="gp-actions-row">
-                <button className="btn gp-ghost" onClick={washAgain}>Vask igen</button>
+                <button className="btn gp-ghost" onClick={() => startMission(missionIdx)}>{tr.again}</button>
+                {result.hasNext && MISSIONS[missionIdx + 1].id <= save.unlocked && (
+                  <button className="btn gp-ghost" onClick={() => startMission(missionIdx + 1)}>{tr.next}</button>
+                )}
+                <button className="btn gp-ghost" onClick={toMenu}>{tr.menu}</button>
               </div>
             </div>
           </div>
         </div>
       )}
 
-      <button className="gp-tool gp-camreset" aria-label="Nulstil kamera" title="Nulstil kamera"
-        onClick={() => setResetSignal((n) => n + 1)}>
-        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M3 12a9 9 0 1 0 3-6.7" /><path d="M3 4v5h5" /></svg>
-      </button>
+      {phase !== "playing" && (
+        <button className="gp-tool gp-camreset" aria-label={tr.resetCam} title={tr.resetCam}
+          onClick={() => { sndClick(); setResetSignal((n) => n + 1); }}>
+          <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M3 12a9 9 0 1 0 3-6.7" /><path d="M3 4v5h5" /></svg>
+        </button>
+      )}
       <div className="gp-credit">3D-model: Ferrari 458 Italia · vicent091036</div>
     </div>
   );
