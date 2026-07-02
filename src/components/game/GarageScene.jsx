@@ -16,8 +16,8 @@ import { EffectComposer, Bloom, N8AO, Vignette, SMAA } from "@react-three/postpr
 import * as THREE from "three";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
 import Washer from "./Washer";
-import { CarDirt } from "@/lib/game/dirtCar";
-import { initAudio, setMuted, sndClick, sndComplete, sndStar } from "@/lib/game/audio";
+import { CarDirt, bodyAtlasTexture } from "@/lib/game/dirtCar";
+import { initAudio, setMuted, sndClick, sndComplete, sndStar, sndCombo } from "@/lib/game/audio";
 import { MISSIONS, T3, ACH, loadSave, storeSave, starsFor, dailyMission, todayStr } from "@/lib/game/campaign";
 
 /* ---------- photo mode helpers ---------- */
@@ -107,10 +107,11 @@ function Car({ G, isMobile }) {
     /* real cleaning: register washable meshes with their own dirt masks.
        (dirtCar clones+patches the material, so do this AFTER assignment) */
     const dirt = new CarDirt();
+    const bodyTex = bodyAtlasTexture();
     const mr = (n) => (isMobile ? Math.max(192, Math.round(n * 0.6)) : n);
     const cleanables = [];
     const SPEC = [
-      { match: (o) => o.name === "body", opt: { maskRes: mr(1024), repeat: 2.2, weight: 1.6 } },
+      { match: (o) => o.name === "body", opt: { maskRes: mr(1024), texture: bodyTex, weight: 1.6 } },
       { match: (o) => o.name === "glass", opt: { maskRes: mr(512), repeat: 1.6, amount: 0.85 } },
       { match: (o) => o.name === "trim", opt: { maskRes: mr(384), repeat: 1.6 } },
       { match: (o) => o.name === "chrome", opt: { maskRes: mr(256), repeat: 1.4 } },
@@ -125,7 +126,7 @@ function Car({ G, isMobile }) {
       const spec = SPEC.find((s) => s.match(o));
       if (spec && dirt.add(o, spec.opt)) cleanables.push(o);
     });
-    return { root, dirt, cleanables };
+    return { root, dirt, cleanables, bodyTex };
   }, [scene, isMobile]);
 
   useEffect(() => {
@@ -136,6 +137,7 @@ function Car({ G, isMobile }) {
     return () => {
       if (G.dirt === built.dirt) { G.dirt = null; G.carMeshes = []; G.bodyMat = null; }
       built.dirt.dispose();
+      built.bodyTex.dispose();
     };
   }, [built, G]);
 
@@ -568,7 +570,9 @@ export default function GarageScene() {
   const [result, setResult] = useState(null);
   const [resetSignal, setResetSignal] = useState(0);
   const [photo, setPhoto] = useState(null);
-  const [hud, setHud] = useState({ progress: 0, water: 100, tankLock: false, hasSprayed: false, time: 0, score: 0, combo: 1, toast: null });
+  const [banner, setBanner] = useState(null);
+  const bannerTimer = useRef(null);
+  const [hud, setHud] = useState({ progress: 0, water: 100, tankLock: false, hasSprayed: false, time: 0, score: 0, combo: 1, toast: null, gain: 0, gainSeq: 0 });
 
   const daily = useMemo(() => (typeof window !== "undefined" ? dailyMission(todayStr()) : null), []);
   const canShare = useMemo(() => typeof navigator !== "undefined" && !!navigator.share, []);
@@ -658,6 +662,7 @@ export default function GarageScene() {
       setHud({
         progress: g.progress, water: g.water, tankLock: g.tankLock, hasSprayed: g.hasSprayed,
         time: g.time, score: Math.round(g.score), combo: g.combo, toast: g.toast ? g.toast.msg : null,
+        gain: g.lastGain || 0, gainSeq: g.gainSeq || 0,
       });
     }, 170);
     return () => clearInterval(id);
@@ -671,11 +676,21 @@ export default function GarageScene() {
     g.goldCount = m.golds || 3;
     g.progress = 0; g.water = 100; g.tankLock = false; g.done = false; g.hasSprayed = false;
     g.time = 0; g.score = 0; g.combo = 1; g.comboMax = 1; g.toast = null; g.celebrateT = 0; g.clearFx = true;
+    g.nextMile = 0; g.lastGain = 0; g.gainSeq = 0;
     setMissionIdx(idx >= 0 ? idx : 0);
     setDailyActive(isDaily);
     setAttempt((a) => a + 1); setResult(null); setPhoto(null);
     setResetSignal((n) => n + 1);
     setPhase("playing");
+    /* mission intro banner: name + objectives, input unlocks on GO */
+    g.introLock = true;
+    setBanner(m);
+    if (bannerTimer.current) clearTimeout(bannerTimer.current);
+    bannerTimer.current = setTimeout(() => {
+      setBanner(null);
+      g.introLock = false;
+      sndCombo(3);
+    }, 2200);
   }, [g]);
 
   const startMission = useCallback((i) => launch(MISSIONS[i], i, false), [launch]);
@@ -769,14 +784,33 @@ export default function GarageScene() {
             <div className="gp-stat"><span className="gp-k">{tr.water}</span>
               <span className="gp-water"><i style={{ width: `${Math.round(hud.water)}%` }} /></span>
             </div>
-            <div className="gp-stat"><span className="gp-k">{tr.time}</span><span className="gp-v">{mm}:{ss}</span></div>
-            <div className="gp-stat"><span className="gp-k">{tr.score}</span><span className="gp-v gp-score">{hud.score.toLocaleString("da-DK")}</span></div>
-            <div className="gp-stat"><span className="gp-k">{tr.combo}</span><span className="gp-v gp-combo">×{hud.combo.toFixed(1)}</span></div>
+            <div className="gp-stat"><span className="gp-k">{tr.time}</span>
+              <span className={`gp-v${paceStars === 1 ? " gp-late" : (mission && (paceStars === 3 ? mission.time3 : mission.time2) - hud.time < 12 ? " gp-urgent" : "")}`}>{mm}:{ss}</span>
+            </div>
+            <div className="gp-stat"><span className="gp-k">{tr.score}</span>
+              <span className="gp-v gp-score" style={{ position: "relative" }}>
+                {hud.score.toLocaleString("da-DK")}
+                {hud.gain > 0 && <em key={hud.gainSeq} className="gp-gain">+{hud.gain}</em>}
+              </span>
+            </div>
+            <div className="gp-stat"><span className="gp-k">{tr.combo}</span>
+              <span className={`gp-v gp-combo gp-ct${Math.min(5, Math.floor(hud.combo))}`}>
+                {hud.combo >= 5 ? "MAX ×5" : `×${hud.combo.toFixed(1)}`}
+              </span>
+            </div>
           </div>
 
           {(hud.toast || hud.tankLock) && <div className="gp-toast">{hud.toast || tr.waterLow}</div>}
 
-          {!hud.hasSprayed && (
+          {banner && (
+            <div className="gp-mbanner" aria-hidden="true">
+              <div className="gp-mb-name">{banner.name[lang]}</div>
+              <div className="gp-mb-obj">★★★ ≤ {Math.floor(banner.time3 / 60)}:{String(banner.time3 % 60).padStart(2, "0")} · 100% ren</div>
+              <div className="gp-mb-go">GO!</div>
+            </div>
+          )}
+
+          {!hud.hasSprayed && !banner && (
             <div className="gp-hint">{isMobile ? tr.hintMobile : tr.hintDesktop}</div>
           )}
 
@@ -882,7 +916,8 @@ export default function GarageScene() {
       {/* ---------- success ---------- */}
       {phase === "done" && result && (
         <div className="gp-overlay gp-complete">
-          <div className="gp-panel">
+          <div className="gp-stamp" aria-hidden="true">100%</div>
+          <div className="gp-panel gp-panel-delay">
             <div className="gp-big-stars">
               {[1, 2, 3].map((i) => (
                 <svg key={i} viewBox="0 0 24 24" className={i <= result.stars ? "on" : ""} style={{ animationDelay: `${0.35 + i * 0.42}s` }} width="52" height="52"><path d="M12 2 15 9l7 .5-5.5 4.5L18 21l-6-3.8L6 21l1.5-7L2 9.5 9 9Z" fill="currentColor" /></svg>

@@ -1387,3 +1387,25 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 .gp-ach.locked{background:rgba(255,255,255,.03);border-color:var(--line);opacity:.4;filter:grayscale(1)}
 .gp-photo-panel{width:min(720px,94vw);padding:18px}
 .gp-photo-img{width:100%;border-radius:12px;border:1px solid var(--line);display:block}
+
+/* game pro-polish: intro banner, score gain, combo tiers, urgency, 100% stamp */
+.gp-mbanner{position:absolute;inset:0;z-index:7;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;pointer-events:none;background:radial-gradient(ellipse at center,rgba(4,7,5,.55),rgba(4,7,5,.15) 70%)}
+.gp-mb-name{font-size:clamp(30px,6vw,52px);font-weight:800;letter-spacing:-1px;color:#fff;text-shadow:0 4px 30px rgba(0,0,0,.6);animation:gpMbIn .5s cubic-bezier(.22,1,.36,1) both}
+.gp-mb-obj{font-size:14px;font-weight:700;letter-spacing:1.5px;color:#f3e2ad;animation:gpMbIn .5s .12s cubic-bezier(.22,1,.36,1) both}
+.gp-mb-go{font-size:clamp(40px,8vw,72px);font-weight:800;color:var(--green);text-shadow:0 0 40px rgba(55,210,120,.6);animation:gpGo .55s 1.55s cubic-bezier(.34,1.56,.64,1) both}
+@keyframes gpMbIn{from{opacity:0;transform:translateY(26px) scale(.95)}to{opacity:1;transform:none}}
+@keyframes gpGo{from{opacity:0;transform:scale(2.4)}to{opacity:1;transform:scale(1)}}
+.gp-gain{position:absolute;right:0;top:-4px;font-style:normal;font-size:12px;font-weight:800;color:#7be3a8;animation:gpGain .8s ease both;pointer-events:none}
+@keyframes gpGain{0%{opacity:0;transform:translateY(4px)}25%{opacity:1}100%{opacity:0;transform:translateY(-16px)}}
+.gp-ct1{color:#9fb4a8}
+.gp-ct2{color:#7be3a8}
+.gp-ct3{color:#63c1ff}
+.gp-ct4{color:#c09df3;text-shadow:0 0 10px rgba(192,157,243,.5)}
+.gp-ct5{color:#f6c343;text-shadow:0 0 12px rgba(246,195,67,.7);animation:gpMax .8s ease infinite alternate}
+@keyframes gpMax{from{transform:scale(1)}to{transform:scale(1.12)}}
+.gp-urgent{color:#f6c343!important;animation:gpBlink 1s step-end infinite}
+.gp-late{color:#e74c3c!important}
+@keyframes gpBlink{50%{opacity:.45}}
+.gp-stamp{position:absolute;top:14%;left:50%;transform:translateX(-50%);z-index:9;font-size:clamp(54px,11vw,110px);font-weight:800;letter-spacing:-3px;color:var(--green);text-shadow:0 0 50px rgba(55,210,120,.65);animation:gpStamp .7s cubic-bezier(.34,1.56,.64,1) both;pointer-events:none}
+@keyframes gpStamp{0%{opacity:0;transform:translateX(-50%) scale(2.6) rotate(-6deg)}60%{opacity:1;transform:translateX(-50%) scale(.96) rotate(1deg)}100%{opacity:1;transform:translateX(-50%) scale(1) rotate(0)}}
+.gp-panel-delay{animation-delay:.55s}

@@ -19,6 +19,7 @@ export default function Washer({ G, isMobile }) {
   const beamCore = useRef();
   const beamCone = useRef();
   const glow = useRef();
+  const ring = useRef();
   const fxSplash = useRef();
   const fxMist = useRef();
   const fxFoam = useRef();
@@ -39,11 +40,12 @@ export default function Washer({ G, isMobile }) {
       if (e.button !== undefined && e.button !== 0) return;
       ndc(e);
       initAudio();
-      if (G.phase !== "playing" || G.done || !G.carMeshes.length) return;
+      if (G.phase !== "playing" || G.done || G.introLock || !G.carMeshes.length) return;
       ray.setFromCamera(G.pointer, camera);
       if (ray.intersectObjects(G.carMeshes, false).length) {
         G.spraying = true;
         G.hasSprayed = true;
+        G.fovKick = 1;
         buzz(12);
         e.stopPropagation(); // OrbitControls (on the wrapper) never sees it
       }
@@ -100,11 +102,23 @@ export default function Washer({ G, isMobile }) {
       noz.updateMatrixWorld();
     }
 
+    /* spray-start FOV punch */
+    if (G.fovKick > 0.002) {
+      camera.fov = 40 + G.fovKick * 1.6;
+      camera.updateProjectionMatrix();
+      G.fovKick *= Math.pow(0.0001, dt);
+    } else if (camera.fov !== 40) {
+      camera.fov = 40;
+      camera.updateProjectionMatrix();
+      G.fovKick = 0;
+    }
+
     const tip = tmp.v1;
-    if (noz) noz.localToWorld(tip.set(0, 0, 0.3));
+    if (noz) noz.localToWorld(tip.set(0, 0, 0.44));
     if (beamCore.current) beamCore.current.visible = spraying;
     if (beamCone.current) beamCone.current.visible = spraying;
     if (glow.current) glow.current.visible = !!(spraying && hit);
+    if (ring.current) ring.current.visible = !!(spraying && hit);
 
     if (spraying) {
       const target = hit ? hit.point : ray.ray.at(9, tmp.v2);
@@ -118,6 +132,9 @@ export default function Washer({ G, isMobile }) {
         b.quaternion.copy(tmp.q);
         b.scale.set(1, dist, 1);
       }
+      // high-pressure flicker
+      if (beamCore.current) beamCore.current.children[0].material.opacity = 0.72 + Math.random() * 0.24;
+      if (beamCone.current) beamCone.current.children[0].material.opacity = 0.22 + Math.random() * 0.12;
       setSpray(true, dist);
 
       if (hit) {
@@ -136,6 +153,14 @@ export default function Washer({ G, isMobile }) {
           ? tmp.v2.copy(hit.face.normal).transformDirection(hit.object.matrixWorld)
           : tmp.v2.set(0, 1, 0);
         const p = hit.point;
+        /* pulsing impact ring aligned to the surface */
+        if (ring.current) {
+          ring.current.position.copy(p).addScaledVector(n, 0.025);
+          ring.current.quaternion.setFromUnitVectors(tmp.v3.set(0, 0, 1), n);
+          const rs = 0.07 + Math.random() * 0.05 + dist * 0.008;
+          ring.current.scale.set(rs, rs, rs);
+          ring.current.material.opacity = 0.24 + Math.random() * 0.2;
+        }
         const sp = fxSplash.current, mi = fxMist.current, fo = fxFoam.current, stm = fxSteam.current;
         for (let i = 0, N = isMobile ? 3 : 5; i < N && sp; i++) {
           sp.spawn(
@@ -179,12 +204,23 @@ export default function Washer({ G, isMobile }) {
       const comboWas = Math.floor(G.combo);
       if (delta > 0.0004) {
         G.combo = Math.min(5, G.combo + delta * 26);
-        G.score += Math.round(delta * 9000 * G.combo);
+        const gained = Math.round(delta * 9000 * G.combo);
+        G.score += gained;
+        G.lastGain = gained;
+        G.gainSeq = (G.gainSeq || 0) + 1;
       } else {
         G.combo = Math.max(1, G.combo - 0.22);
       }
       G.comboMax = Math.max(G.comboMax || 1, G.combo);
       if (Math.floor(G.combo) > comboWas) { sndCombo(Math.floor(G.combo)); buzz(8); }
+      /* milestone dings at 25 / 50 / 75 % */
+      const MILES = [0.25, 0.5, 0.75];
+      G.nextMile = G.nextMile || 0;
+      while (G.nextMile < MILES.length && p >= MILES[G.nextMile]) {
+        G.toast = { msg: `${Math.round(MILES[G.nextMile] * 100)}% ✓`, t: 1.3 };
+        sndCombo(4);
+        G.nextMile++;
+      }
       if (G.gold) {
         for (const s of G.gold) {
           if (!s.found && G.dirt.cleanedAt(s.key, s.uv) > 0.55) {
@@ -223,18 +259,39 @@ export default function Washer({ G, isMobile }) {
 
   return (
     <group>
+      {/* professional washer gun: lance + gold accents + grip + trigger + hose */}
       <group ref={nozzle} visible={false}>
-        <mesh position={[0, 0, 0.12]} rotation-x={Math.PI / 2}>
-          <cylinderGeometry args={[0.02, 0.026, 0.3, 12]} />
-          <meshStandardMaterial color="#15181b" metalness={0.8} roughness={0.35} />
+        <mesh position={[0, 0, 0.18]} rotation-x={Math.PI / 2}>
+          <cylinderGeometry args={[0.011, 0.014, 0.5, 12]} />
+          <meshStandardMaterial color="#23282d" metalness={0.9} roughness={0.28} />
         </mesh>
-        <mesh position={[0, 0, 0.29]} rotation-x={Math.PI / 2}>
-          <coneGeometry args={[0.013, 0.06, 10]} />
-          <meshStandardMaterial color="#cfd6dc" metalness={1} roughness={0.25} />
+        <mesh position={[0, 0, 0.41]} rotation-x={Math.PI / 2}>
+          <coneGeometry args={[0.017, 0.07, 12]} />
+          <meshStandardMaterial color="#d5dbe0" metalness={1} roughness={0.2} />
         </mesh>
-        <mesh position={[0, -0.07, -0.05]} rotation-x={0.5}>
-          <boxGeometry args={[0.034, 0.12, 0.045]} />
-          <meshStandardMaterial color="#0f1113" metalness={0.6} roughness={0.5} />
+        <mesh position={[0, 0, 0.36]} rotation-x={Math.PI / 2}>
+          <torusGeometry args={[0.018, 0.005, 8, 18]} />
+          <meshStandardMaterial color="#d4af37" metalness={0.9} roughness={0.3} />
+        </mesh>
+        <mesh position={[0, -0.012, -0.1]} rotation-x={Math.PI / 2}>
+          <capsuleGeometry args={[0.03, 0.14, 6, 12]} />
+          <meshStandardMaterial color="#111418" metalness={0.6} roughness={0.4} />
+        </mesh>
+        <mesh position={[0, -0.012, -0.02]} rotation-x={Math.PI / 2}>
+          <torusGeometry args={[0.033, 0.006, 8, 18]} />
+          <meshStandardMaterial color="#d4af37" metalness={0.85} roughness={0.35} />
+        </mesh>
+        <mesh position={[0, -0.1, -0.15]} rotation-x={0.42}>
+          <boxGeometry args={[0.042, 0.15, 0.05]} />
+          <meshStandardMaterial color="#0c0e10" metalness={0.5} roughness={0.5} />
+        </mesh>
+        <mesh position={[0, -0.065, -0.085]} rotation-x={0.3}>
+          <boxGeometry args={[0.022, 0.06, 0.015]} />
+          <meshStandardMaterial color="#cfd6dc" metalness={0.9} roughness={0.3} />
+        </mesh>
+        <mesh position={[0, -0.2, -0.22]} rotation-x={1.15}>
+          <cylinderGeometry args={[0.014, 0.014, 0.18, 8]} />
+          <meshStandardMaterial color="#0a0c0e" roughness={0.85} />
         </mesh>
       </group>
 
@@ -253,6 +310,10 @@ export default function Washer({ G, isMobile }) {
       <mesh ref={glow} visible={false} frustumCulled={false} renderOrder={5}>
         <sphereGeometry args={[1, 12, 12]} />
         <meshBasicMaterial color="#cfeaff" transparent opacity={0.26} blending={THREE.AdditiveBlending} depthWrite={false} />
+      </mesh>
+      <mesh ref={ring} visible={false} frustumCulled={false} renderOrder={5}>
+        <ringGeometry args={[0.72, 1, 26]} />
+        <meshBasicMaterial color="#bfe4ff" transparent opacity={0.3} blending={THREE.AdditiveBlending} depthWrite={false} side={THREE.DoubleSide} />
       </mesh>
 
       <FX ref={fxSplash} count={isMobile ? 200 : 400} color="#bfe2f8" gravity={-8.5} drag={0.985} opacity={0.9} />

@@ -56,6 +56,104 @@ export function grungeTexture() {
   return _grunge;
 }
 
+/* Realistic body dirt drawn straight into the box-unwrap ATLAS (repeat=1):
+   the atlas v-axis maps to local height on the side cells, so mud can pool
+   on the lower panels, salt streaks run downward, splatter sits low, and
+   the top surfaces only get light dust + water spots – like a real car. */
+export function bodyAtlasTexture() {
+  const W = 1024;
+  const c = document.createElement("canvas");
+  c.width = c.height = W;
+  const g = c.getContext("2d");
+  g.clearRect(0, 0, W, W);
+  const X = (u) => u * W, Y = (v) => (1 - v) * W;
+  const MUD = ["#4a3b2a", "#5d4b35", "#6b5a44"];
+  const rnd = Math.random;
+
+  const cells = [];
+  for (let axis = 0; axis < 3; axis++) for (let sign = 0; sign < 2; sign++) {
+    cells.push({ axis, sign, u0: axis / 3, u1: (axis + 1) / 3, v0: sign * 0.5, v1: sign * 0.5 + 0.5 });
+  }
+
+  for (const cell of cells) {
+    const x0 = X(cell.u0), x1 = X(cell.u1);
+    const yTop = Y(cell.v1), yBot = Y(cell.v0);
+    const h = yBot - yTop, w = x1 - x0;
+    const isTop = cell.axis === 1 && cell.sign === 0;
+    const isUnder = cell.axis === 1 && cell.sign === 1;
+
+    if (isUnder) {
+      g.fillStyle = "rgba(52,42,30,0.85)";
+      g.fillRect(x0, yTop, w, h);
+      continue;
+    }
+    if (isTop) {
+      // light dust film + water spots
+      g.fillStyle = "rgba(122,116,104,0.16)";
+      g.fillRect(x0, yTop, w, h);
+      for (let i = 0; i < 26; i++) {
+        const cx = x0 + rnd() * w, cy = yTop + rnd() * h, r = 4 + rnd() * 13;
+        g.strokeStyle = `rgba(196,198,190,${0.1 + rnd() * 0.14})`;
+        g.lineWidth = 1.5 + rnd() * 2;
+        g.beginPath(); g.arc(cx, cy, r, 0, Math.PI * 2); g.stroke();
+      }
+      for (let i = 0; i < 420; i++) {
+        g.fillStyle = `rgba(120,112,98,${0.08 + rnd() * 0.2})`;
+        const s = 1 + rnd() * 2;
+        g.fillRect(x0 + rnd() * w, yTop + rnd() * h, s, s);
+      }
+      continue;
+    }
+
+    // vertical panels: mud pools low, fades up
+    const grad = g.createLinearGradient(0, yBot, 0, yTop);
+    grad.addColorStop(0, "rgba(66,52,36,0.82)");
+    grad.addColorStop(0.32, "rgba(84,68,48,0.42)");
+    grad.addColorStop(0.62, "rgba(104,90,70,0.18)");
+    grad.addColorStop(1, "rgba(116,104,86,0.1)");
+    g.fillStyle = grad;
+    g.fillRect(x0, yTop, w, h);
+
+    // blotches biased to the bottom
+    for (let i = 0; i < 46; i++) {
+      const bx = x0 + rnd() * w;
+      const by = yBot - Math.pow(rnd(), 2.1) * h * 0.75;
+      const r = 8 + rnd() * 34;
+      const col = MUD[(rnd() * MUD.length) | 0];
+      const rg = g.createRadialGradient(bx, by, 0, bx, by, r);
+      rg.addColorStop(0, col + "b8");
+      rg.addColorStop(1, col + "00");
+      g.fillStyle = rg;
+      g.beginPath();
+      g.ellipse(bx, by, r, r * (0.4 + rnd() * 0.6), rnd() * Math.PI, 0, Math.PI * 2);
+      g.fill();
+    }
+    // splatter specks, heavy at the very bottom (wheel spray)
+    for (let i = 0; i < 900; i++) {
+      const sy = yBot - Math.pow(rnd(), 2.6) * h * 0.6;
+      g.fillStyle = `rgba(${64 + rnd() * 40 | 0},${52 + rnd() * 34 | 0},${36 + rnd() * 26 | 0},${0.3 + rnd() * 0.5})`;
+      const s = 1 + rnd() * 2.6;
+      g.fillRect(x0 + rnd() * w, sy, s, s);
+    }
+    // salt streaks running down
+    for (let i = 0; i < 16; i++) {
+      const sx = x0 + rnd() * w;
+      const sy = yTop + h * (0.18 + rnd() * 0.3);
+      const len = h * (0.2 + rnd() * 0.4), lw = 2 + rnd() * 4;
+      const lg = g.createLinearGradient(0, sy, 0, sy + len);
+      lg.addColorStop(0, "rgba(214,216,210,0.34)");
+      lg.addColorStop(1, "rgba(214,216,210,0)");
+      g.fillStyle = lg;
+      g.fillRect(sx, sy, lw, len);
+    }
+  }
+
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.anisotropy = 4;
+  return tex;
+}
+
 const FRAG_COMMON = `
 uniform sampler2D uDirtMap;
 uniform sampler2D uDirtMask;
@@ -200,7 +298,7 @@ export class CarDirt {
     } catch { return 0; }
   }
 
-  add(mesh, { maskRes = 512, repeat = 2, amount = 1, weight = 1 } = {}) {
+  add(mesh, { maskRes = 512, repeat = 2, amount = 1, weight = 1, texture = null } = {}) {
     if (!mesh.geometry?.attributes?.position) return false;
     mesh.geometry = boxUnwrap(mesh.geometry); // own uv atlas, no mirroring
     const tpm = texelsPerMeter(mesh, maskRes);
@@ -213,14 +311,29 @@ export class CarDirt {
     const maskTex = new THREE.CanvasTexture(maskCv);
     maskTex.generateMipmaps = false;
     maskTex.minFilter = THREE.LinearFilter;
+    const dirtTex = texture || grungeTexture();
+    const rep = texture ? 1 : repeat;
     mesh.material = mesh.material.clone();
-    patchMaterial(mesh.material, grungeTexture(), maskTex, repeat, amount);
+    patchMaterial(mesh.material, dirtTex, maskTex, rep, amount);
     mesh.userData.dirtKey = mesh.uuid;
+
+    /* per-texel dirt weights (atlas textures aren't uniform, so progress
+       must count dirt where it actually is – no hunting invisible spots) */
+    let weights = null, wSum = 0;
+    if (texture && texture.image) {
+      this._smpCtx.clearRect(0, 0, 48, 48);
+      this._smpCtx.drawImage(texture.image, 0, 0, 48, 48);
+      const img = this._smpCtx.getImageData(0, 0, 48, 48).data;
+      weights = new Float32Array(48 * 48);
+      for (let i = 0; i < 48 * 48; i++) { weights[i] = img[i * 4 + 3] / 255; wSum += weights[i]; }
+      if (wSum < 1) { weights = null; wSum = 0; }
+    }
+
     // world-area weight for fair progress
     const box = new THREE.Box3().setFromObject(mesh);
     const size = box.getSize(new THREE.Vector3());
     const area = Math.max(0.05, (size.x * size.y + size.y * size.z + size.x * size.z) * 0.5) * weight;
-    this.items.set(mesh.uuid, { mesh, maskCv, ctx, maskTex, tpm, area, clean: 0, changed: true });
+    this.items.set(mesh.uuid, { mesh, maskCv, ctx, maskTex, tpm, area, clean: 0, changed: true, weights, wSum });
     return true;
   }
 
@@ -251,8 +364,13 @@ export class CarDirt {
       this._smpCtx.drawImage(it.maskCv, 0, 0, 48, 48);
       const img = this._smpCtx.getImageData(0, 0, 48, 48).data;
       let acc = 0;
-      for (let i = 0; i < 48 * 48; i++) acc += 1 - img[i * 4 + 1] / 255;
-      it.clean = acc / (48 * 48);
+      if (it.weights) {
+        for (let i = 0; i < 48 * 48; i++) acc += (1 - img[i * 4 + 1] / 255) * it.weights[i];
+        it.clean = acc / it.wSum;
+      } else {
+        for (let i = 0; i < 48 * 48; i++) acc += 1 - img[i * 4 + 1] / 255;
+        it.clean = acc / (48 * 48);
+      }
     }
     let sum = 0, w = 0;
     for (const it of this.items.values()) { sum += it.clean * it.area; w += it.area; }
