@@ -12,7 +12,7 @@ import { LEVELS, T, loadSave, storeSave, starsFor } from "@/lib/game/levels";
 import { buildCar, applyShine, disposeCar } from "@/lib/game/car";
 import { initAudio, setMuted, setSpray, sndClick, sndGold, sndComplete, sndStar } from "@/lib/game/audio";
 
-const PLAY_POS = new THREE.Vector3(4.9, 2.35, 5.4);
+const PLAY_POS = new THREE.Vector3(4.35, 2.05, 4.8);
 const CAM_TARGET = new THREE.Vector3(0, 0.82, 0);
 
 /* ---------- soft round sprite ---------- */
@@ -379,7 +379,7 @@ function Washer({ G, isMobile }) {
         }
         if (glow.current) {
           glow.current.position.copy(hit.point).addScaledVector(hit.face ? hit.face.normal : tmp.down, 0.03);
-          const s = 0.16 + Math.random() * 0.05;
+          const s = 0.09 + Math.random() * 0.03;
           glow.current.scale.set(s, s, s);
         }
         /* splash + mist + foam */
@@ -395,17 +395,17 @@ function Washer({ G, isMobile }) {
             n.z * (1 + Math.random() * 1.6) + (Math.random() - 0.5) * 1.8,
             0.3 + Math.random() * 0.15, 6 + Math.random() * 6, 0.55);
         }
-        for (let i = 0; i < 2 && mi; i++) {
+        if (mi && Math.random() < 0.55) {
           mi.spawn(p.x, p.y + 0.04, p.z,
-            (Math.random() - 0.5) * 0.5, 0.3 + Math.random() * 0.4, (Math.random() - 0.5) * 0.5,
-            0.7 + Math.random() * 0.4, 26 + Math.random() * 22, 0.13);
+            (Math.random() - 0.5) * 0.4, 0.25 + Math.random() * 0.3, (Math.random() - 0.5) * 0.4,
+            0.45 + Math.random() * 0.25, 13 + Math.random() * 9, 0.05);
         }
-        for (let i = 0; i < (isMobile ? 2 : 3) && fo; i++) {
+        for (let i = 0; i < (isMobile ? 1 : 2) && fo; i++) {
           fo.spawn(
             p.x + (Math.random() - 0.5) * 0.16 + n.x * 0.02,
             p.y + (Math.random() - 0.5) * 0.16 + n.y * 0.02,
             p.z + (Math.random() - 0.5) * 0.16 + n.z * 0.02,
-            0, -0.05, 0, 1.3 + Math.random() * 0.7, 10 + Math.random() * 12, 0.8);
+            0, -0.05, 0, 1.1 + Math.random() * 0.6, 7 + Math.random() * 8, 0.5);
         }
       }
     } else {
@@ -482,12 +482,12 @@ function Washer({ G, isMobile }) {
       </group>
       <mesh ref={glow} visible={false} frustumCulled={false} renderOrder={5}>
         <sphereGeometry args={[1, 12, 12]} />
-        <meshBasicMaterial color="#cfeaff" transparent opacity={0.5} blending={THREE.AdditiveBlending} depthWrite={false} />
+        <meshBasicMaterial color="#cfeaff" transparent opacity={0.28} blending={THREE.AdditiveBlending} depthWrite={false} />
       </mesh>
 
-      <FX ref={fxSplash} count={isMobile ? 220 : 420} color="#bfe2f8" gravity={-8.5} drag={0.985} opacity={0.95} />
-      <FX ref={fxMist} count={isMobile ? 90 : 160} color="#a8d8f5" blending="add" gravity={0.35} drag={0.96} grow={2.4} opacity={0.8} />
-      <FX ref={fxFoam} count={isMobile ? 200 : 380} color="#f6fbff" gravity={-0.22} drag={0.9} grow={0.7} opacity={0.95} />
+      <FX ref={fxSplash} count={isMobile ? 220 : 420} color="#bfe2f8" gravity={-8.5} drag={0.985} opacity={0.9} />
+      <FX ref={fxMist} count={isMobile ? 48 : 80} color="#9fcdea" blending="add" gravity={0.3} drag={0.96} grow={1.3} opacity={0.35} />
+      <FX ref={fxFoam} count={isMobile ? 160 : 300} color="#f6fbff" gravity={-0.22} drag={0.9} grow={0.6} opacity={0.85} />
     </group>
   );
 }
