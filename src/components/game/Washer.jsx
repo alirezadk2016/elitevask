@@ -1,9 +1,11 @@
 "use client";
 /* Pressure washer + game loop.
-   Press & hold ON THE CAR to spray (the press never reaches OrbitControls,
-   which listens on the canvas wrapper). The jet paints the dirt masks at the
-   raycast UV and drives particles, audio, the water tank, the mission timer,
-   score/combo, golden-dirt pickup and the completion celebration. */
+   The jet is built from stretched water-filament particles (no glowing
+   beams): droplets leave the nozzle at ~15 m/s in a narrow cone, arc
+   slightly under gravity and die at the impact point, where fine mist,
+   bouncing droplets, quick suds and water running down the panel take
+   over. Press & hold ON THE CAR to spray; painting happens at the raycast
+   UV so cleaning stays perfectly accurate. */
 
 import { useEffect, useMemo, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
@@ -12,14 +14,14 @@ import { FX } from "./fx";
 import { initAudio, setSpray, sndGold, sndCombo } from "@/lib/game/audio";
 
 const buzz = (p) => { try { navigator.vibrate && navigator.vibrate(p); } catch {} };
+const WORLD_UP = new THREE.Vector3(0, 1, 0);
+const JET_SPEED = 15;
 
 export default function Washer({ G, isMobile }) {
   const { gl, camera } = useThree();
   const nozzle = useRef();
-  const beamCore = useRef();
-  const beamCone = useRef();
-  const glow = useRef();
-  const ring = useRef();
+  const fxJet = useRef();
+  const fxRun = useRef();
   const fxSplash = useRef();
   const fxMist = useRef();
   const fxFoam = useRef();
@@ -27,7 +29,7 @@ export default function Washer({ G, isMobile }) {
   const ray = useMemo(() => new THREE.Raycaster(), []);
   const tmp = useMemo(() => ({
     v1: new THREE.Vector3(), v2: new THREE.Vector3(), v3: new THREE.Vector3(),
-    q: new THREE.Quaternion(), down: new THREE.Vector3(0, -1, 0), acc: 0,
+    side: new THREE.Vector3(), up2: new THREE.Vector3(), acc: 0,
   }), []);
 
   useEffect(() => {
@@ -71,7 +73,7 @@ export default function Washer({ G, isMobile }) {
     /* wipe leftover particles when a new mission starts */
     if (G.clearFx) {
       G.clearFx = false;
-      for (const f of [fxSplash, fxMist, fxFoam, fxSteam]) f.current && f.current.clear();
+      for (const f of [fxJet, fxRun, fxSplash, fxMist, fxFoam, fxSteam]) f.current && f.current.clear();
     }
 
     /* mission timer runs from the first spray */
@@ -115,27 +117,42 @@ export default function Washer({ G, isMobile }) {
 
     const tip = tmp.v1;
     if (noz) noz.localToWorld(tip.set(0, 0, 0.44));
-    if (beamCore.current) beamCore.current.visible = spraying;
-    if (beamCone.current) beamCone.current.visible = spraying;
-    if (glow.current) glow.current.visible = !!(spraying && hit);
-    if (ring.current) ring.current.visible = !!(spraying && hit);
 
     if (spraying) {
       const target = hit ? hit.point : ray.ray.at(9, tmp.v2);
       const dir = tmp.v3.copy(target).sub(tip);
       const dist = Math.max(0.3, dir.length());
       dir.normalize();
-      tmp.q.setFromUnitVectors(tmp.down, dir);
-      for (const b of [beamCore.current, beamCone.current]) {
-        if (!b) continue;
-        b.position.copy(tip);
-        b.quaternion.copy(tmp.q);
-        b.scale.set(1, dist, 1);
-      }
-      // high-pressure flicker
-      if (beamCore.current) beamCore.current.children[0].material.opacity = 0.72 + Math.random() * 0.24;
-      if (beamCone.current) beamCone.current.children[0].material.opacity = 0.22 + Math.random() * 0.12;
       setSpray(true, dist);
+
+      /* the jet: filaments seeded along the WHOLE stream every frame, so it
+         reads as one continuous water line at any frame rate; the spread
+         cone widens with distance like a real high-pressure jet */
+      const jt = fxJet.current;
+      if (jt) {
+        tmp.side.crossVectors(dir, WORLD_UP);
+        if (tmp.side.lengthSq() < 1e-4) tmp.side.set(1, 0, 0); else tmp.side.normalize();
+        tmp.up2.crossVectors(tmp.side, dir);
+        const n = isMobile ? 16 : 30;
+        const flight = dist / JET_SPEED;
+        for (let i = 0; i < n; i++) {
+          const t = Math.random(); // position along the beam
+          const w = 0.15 + t * 0.85; // cone widens downstream
+          const s1 = (Math.random() - 0.5) * 0.7 * w;
+          const s2 = (Math.random() - 0.5) * 0.7 * w;
+          const ox = tmp.side.x * s1 * 0.04 + tmp.up2.x * s2 * 0.04;
+          const oy = tmp.side.y * s1 * 0.04 + tmp.up2.y * s2 * 0.04;
+          const oz = tmp.side.z * s1 * 0.04 + tmp.up2.z * s2 * 0.04;
+          jt.spawn(
+            tip.x + dir.x * dist * t + ox, tip.y + dir.y * dist * t + oy, tip.z + dir.z * dist * t + oz,
+            dir.x * JET_SPEED + tmp.side.x * s1 + tmp.up2.x * s2,
+            dir.y * JET_SPEED + tmp.side.y * s1 + tmp.up2.y * s2,
+            dir.z * JET_SPEED + tmp.side.z * s1 + tmp.up2.z * s2,
+            Math.max(0.03, (1 - t) * flight * (0.85 + Math.random() * 0.25)),
+            0.04 + Math.random() * 0.04,
+            0.14 + Math.random() * 0.16);
+        }
+      }
 
       if (hit) {
         const key = hit.object.userData.dirtKey;
@@ -144,49 +161,51 @@ export default function Washer({ G, isMobile }) {
           const strength = Math.max(0.28, Math.min(1, 1.15 - dist * 0.09)) * (G.scrub || 1);
           G.dirt.paint(key, hit.uv, brush, strength);
         }
-        if (glow.current) {
-          glow.current.position.copy(hit.point).addScaledVector(hit.face ? hit.face.normal : tmp.down, 0.03);
-          const s = 0.08 + Math.random() * 0.03;
-          glow.current.scale.set(s, s, s);
-        }
         const n = hit.face
           ? tmp.v2.copy(hit.face.normal).transformDirection(hit.object.matrixWorld)
           : tmp.v2.set(0, 1, 0);
         const p = hit.point;
-        /* pulsing impact ring aligned to the surface */
-        if (ring.current) {
-          ring.current.position.copy(p).addScaledVector(n, 0.025);
-          ring.current.quaternion.setFromUnitVectors(tmp.v3.set(0, 0, 1), n);
-          const rs = 0.07 + Math.random() * 0.05 + dist * 0.008;
-          ring.current.scale.set(rs, rs, rs);
-          ring.current.material.opacity = 0.24 + Math.random() * 0.2;
-        }
-        const sp = fxSplash.current, mi = fxMist.current, fo = fxFoam.current, stm = fxSteam.current;
+        const sp = fxSplash.current, mi = fxMist.current, fo = fxFoam.current, stm = fxSteam.current, rd = fxRun.current;
+
+        /* bouncing spray droplets */
         for (let i = 0, N = isMobile ? 3 : 5; i < N && sp; i++) {
           sp.spawn(
             p.x + n.x * 0.02, p.y + n.y * 0.02, p.z + n.z * 0.02,
-            n.x * (1 + Math.random() * 1.6) + (Math.random() - 0.5) * 1.8,
-            n.y * (1 + Math.random() * 1.4) + Math.random() * 1.2,
-            n.z * (1 + Math.random() * 1.6) + (Math.random() - 0.5) * 1.8,
-            0.3 + Math.random() * 0.15, 6 + Math.random() * 6, 0.55);
+            n.x * (0.8 + Math.random() * 1.4) + (Math.random() - 0.5) * 1.6,
+            n.y * (0.8 + Math.random() * 1.2) + Math.random() * 1.1,
+            n.z * (0.8 + Math.random() * 1.4) + (Math.random() - 0.5) * 1.6,
+            0.28 + Math.random() * 0.14, 0.02 + Math.random() * 0.02, 0.5);
         }
-        if (mi && Math.random() < 0.5) {
-          mi.spawn(p.x, p.y + 0.04, p.z,
-            (Math.random() - 0.5) * 0.4, 0.25 + Math.random() * 0.3, (Math.random() - 0.5) * 0.4,
-            0.45 + Math.random() * 0.25, 13 + Math.random() * 9, 0.05);
+        /* fine mist puff */
+        if (mi && Math.random() < 0.6) {
+          mi.spawn(p.x, p.y + 0.03, p.z,
+            (Math.random() - 0.5) * 0.35, 0.2 + Math.random() * 0.25, (Math.random() - 0.5) * 0.35,
+            0.4 + Math.random() * 0.25, 0.14 + Math.random() * 0.1, 0.05);
         }
+        /* water running down the panel */
+        if (rd) {
+          for (let i = 0, N = isMobile ? 1 : 2; i < N; i++) {
+            rd.spawn(
+              p.x + (Math.random() - 0.5) * 0.14 + n.x * 0.012,
+              p.y + (Math.random() - 0.5) * 0.08,
+              p.z + (Math.random() - 0.5) * 0.14 + n.z * 0.012,
+              (Math.random() - 0.5) * 0.05, -0.3 - Math.random() * 0.25, (Math.random() - 0.5) * 0.05,
+              0.7 + Math.random() * 0.5, 0.035 + Math.random() * 0.03, 0.42);
+          }
+        }
+        /* quick suds */
         for (let i = 0, N = isMobile ? 1 : 2; i < N && fo; i++) {
           fo.spawn(
-            p.x + (Math.random() - 0.5) * 0.15 + n.x * 0.02,
-            p.y + (Math.random() - 0.5) * 0.15 + n.y * 0.02,
-            p.z + (Math.random() - 0.5) * 0.15 + n.z * 0.02,
-            0, -0.05, 0, 1.0 + Math.random() * 0.5, 5 + Math.random() * 6, 0.42);
+            p.x + (Math.random() - 0.5) * 0.13 + n.x * 0.02,
+            p.y + (Math.random() - 0.5) * 0.13 + n.y * 0.02,
+            p.z + (Math.random() - 0.5) * 0.13 + n.z * 0.02,
+            0, -0.05, 0, 0.7 + Math.random() * 0.4, 0.03 + Math.random() * 0.03, 0.32);
         }
-        // steam wisps off freshly washed panels
-        if (stm && Math.random() < 0.22) {
+        /* steam wisps off freshly washed panels */
+        if (stm && Math.random() < 0.18) {
           stm.spawn(p.x + (Math.random() - 0.5) * 0.1, p.y + 0.05, p.z + (Math.random() - 0.5) * 0.1,
             (Math.random() - 0.5) * 0.15, 0.5 + Math.random() * 0.35, (Math.random() - 0.5) * 0.15,
-            1.0 + Math.random() * 0.5, 16 + Math.random() * 10, 0.07);
+            1.0 + Math.random() * 0.5, 0.16 + Math.random() * 0.12, 0.06);
         }
       }
     } else {
@@ -243,7 +262,7 @@ export default function Washer({ G, isMobile }) {
       for (let i = 0; i < (isMobile ? 4 : 7) && sp; i++) {
         sp.spawn((Math.random() - 0.5) * 3.6, 1.6 + Math.random() * 0.4, (Math.random() - 0.5) * 1.8,
           (Math.random() - 0.5) * 2.6, 2.6 + Math.random() * 2.6, (Math.random() - 0.5) * 2.6,
-          0.8 + Math.random() * 0.5, 5 + Math.random() * 5, 0.55);
+          0.8 + Math.random() * 0.5, 0.025 + Math.random() * 0.02, 0.55);
       }
       if (G.leds) G.leds.forEach((l, i) => {
         if (l) l.material.emissiveIntensity = 5 + Math.sin(performance.now() / 90 + i * 1.7) * 3.4;
@@ -295,31 +314,13 @@ export default function Washer({ G, isMobile }) {
         </mesh>
       </group>
 
-      <group ref={beamCore} visible={false}>
-        <mesh position={[0, -0.5, 0]} frustumCulled={false} renderOrder={4}>
-          <cylinderGeometry args={[0.009, 0.022, 1, 8, 1, true]} />
-          <meshBasicMaterial color="#eaf7ff" transparent opacity={0.85} blending={THREE.AdditiveBlending} depthWrite={false} />
-        </mesh>
-      </group>
-      <group ref={beamCone} visible={false}>
-        <mesh position={[0, -0.5, 0]} frustumCulled={false} renderOrder={4}>
-          <cylinderGeometry args={[0.014, 0.06, 1, 10, 1, true]} />
-          <meshBasicMaterial color="#8fd0ff" transparent opacity={0.28} blending={THREE.AdditiveBlending} depthWrite={false} />
-        </mesh>
-      </group>
-      <mesh ref={glow} visible={false} frustumCulled={false} renderOrder={5}>
-        <sphereGeometry args={[1, 12, 12]} />
-        <meshBasicMaterial color="#cfeaff" transparent opacity={0.26} blending={THREE.AdditiveBlending} depthWrite={false} />
-      </mesh>
-      <mesh ref={ring} visible={false} frustumCulled={false} renderOrder={5}>
-        <ringGeometry args={[0.72, 1, 26]} />
-        <meshBasicMaterial color="#bfe4ff" transparent opacity={0.3} blending={THREE.AdditiveBlending} depthWrite={false} side={THREE.DoubleSide} />
-      </mesh>
-
-      <FX ref={fxSplash} count={isMobile ? 200 : 400} color="#bfe2f8" gravity={-8.5} drag={0.985} opacity={0.9} />
-      <FX ref={fxMist} count={isMobile ? 44 : 80} color="#9fcdea" blending="add" gravity={0.3} drag={0.96} grow={1.3} opacity={0.35} />
-      <FX ref={fxFoam} count={isMobile ? 150 : 280} color="#f6fbff" gravity={-0.22} drag={0.9} grow={0.6} opacity={0.85} />
-      <FX ref={fxSteam} count={isMobile ? 30 : 54} color="#dfe9f2" blending="add" gravity={0.22} drag={0.97} grow={2.2} opacity={0.4} />
+      {/* water: jet filaments, run-down, droplets, mist, suds, steam */}
+      <FX ref={fxJet} streak count={isMobile ? 280 : 640} color="#e6f1f8" gravity={-4.5} drag={0.999} opacity={0.85} />
+      <FX ref={fxRun} streak count={isMobile ? 110 : 200} color="#dfe9ee" gravity={-1.5} drag={0.965} opacity={0.6} />
+      <FX ref={fxSplash} count={isMobile ? 180 : 340} color="#d5e6f2" gravity={-8.5} drag={0.985} opacity={0.8} />
+      <FX ref={fxMist} count={isMobile ? 44 : 80} color="#c9d4da" blending="add" gravity={0.25} drag={0.96} grow={1.4} opacity={0.3} />
+      <FX ref={fxFoam} count={isMobile ? 120 : 220} color="#f4f9fd" gravity={-0.2} drag={0.9} grow={0.7} opacity={0.7} />
+      <FX ref={fxSteam} count={isMobile ? 30 : 54} color="#dfe9f2" blending="add" gravity={0.22} drag={0.97} grow={2.2} opacity={0.35} />
     </group>
   );
 }
