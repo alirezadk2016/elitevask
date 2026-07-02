@@ -2,12 +2,15 @@
    finishes and increasingly stubborn dirt (lower brush efficiency + tighter
    star times). Local best scores + unlock chain in localStorage. */
 
+/* Hard limit: the wash must be done in 3 minutes or it's game over. */
+export const TIME_LIMIT = 180;
+
 export const MISSIONS = [
-  { id: 1, name: { da: "Hverdagssnavs",    en: "Daily dirt" },    paint: "#0e4d2c", metal: 0.9,  scrub: 1.0,  time3: 75,  time2: 125 },
-  { id: 2, name: { da: "Efter regnvejr",   en: "After the rain" }, paint: "#15171c", metal: 0.9,  scrub: 0.78, time3: 90,  time2: 145 },
-  { id: 3, name: { da: "Grusvej",          en: "Gravel road" },    paint: "#8b95a0", metal: 0.95, scrub: 0.62, time3: 105, time2: 165 },
-  { id: 4, name: { da: "Vinter & vejsalt", en: "Winter salt" },    paint: "#7d1620", metal: 0.9,  scrub: 0.52, time3: 120, time2: 185 },
-  { id: 5, name: { da: "Elite Special",    en: "Elite Special" },  paint: "#b8912f", metal: 1.0,  scrub: 0.45, time3: 135, time2: 210 },
+  { id: 1, name: { da: "Hverdagssnavs",    en: "Daily dirt" },    paint: "#0e4d2c", metal: 0.9,  scrub: 1.0,  time3: 70,  time2: 115 },
+  { id: 2, name: { da: "Efter regnvejr",   en: "After the rain" }, paint: "#15171c", metal: 0.9,  scrub: 0.8,  time3: 80,  time2: 125 },
+  { id: 3, name: { da: "Grusvej",          en: "Gravel road" },    paint: "#8b95a0", metal: 0.95, scrub: 0.66, time3: 90,  time2: 135 },
+  { id: 4, name: { da: "Vinter & vejsalt", en: "Winter salt" },    paint: "#7d1620", metal: 0.9,  scrub: 0.56, time3: 100, time2: 148 },
+  { id: 5, name: { da: "Elite Special",    en: "Elite Special" },  paint: "#b8912f", metal: 1.0,  scrub: 0.5,  time3: 110, time2: 160 },
 ];
 
 export const SAVE_KEY = "ev_game_v2";
@@ -54,14 +57,14 @@ export function dailyMission(dateStr) {
     t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
-  const time3 = Math.round(85 + rnd() * 40);
+  const time3 = Math.round(75 + rnd() * 30);
   return {
     id: "daily", daily: true, date: dateStr,
     name: { da: "Dagens udfordring", en: "Daily challenge" },
     paint: DAILY_PAINTS[(rnd() * DAILY_PAINTS.length) | 0],
     metal: 0.92,
-    scrub: 0.5 + rnd() * 0.3,
-    time3, time2: time3 + 55,
+    scrub: 0.55 + rnd() * 0.3,
+    time3, time2: time3 + 45,
     golds: 4,
   };
 }
@@ -90,6 +93,8 @@ export const T3 = {
     hintMobile: "Hold fingeren på bilen og bevæg den for at vaske · Træk i baggrunden for at dreje",
     daily: "Dagens udfordring", dailyNew: "Ny udfordring om", achievements: "Præstationer",
     photo: "Foto", download: "Gem billede", share: "Del", close: "Luk", achPrefix: "Præstation",
+    timeUp: "Tiden er udløbet!", timeUpSub: "Bilen nåede ikke at blive helt ren – prøv igen!",
+    wax: "Voks fælgene", waxHint: "Sigt på fælgene og hold for at vokse", waxDone: "Fælg vokset! +250 ✨",
   },
   en: {
     title: "Car Wash Game", tagline: "Pick a mission – and make the car shine!",
@@ -104,5 +109,7 @@ export const T3 = {
     hintMobile: "Hold your finger on the car and move to wash · Drag the background to rotate",
     daily: "Daily challenge", dailyNew: "New challenge in", achievements: "Achievements",
     photo: "Photo", download: "Save image", share: "Share", close: "Close", achPrefix: "Achievement",
+    timeUp: "Time's up!", timeUpSub: "The car didn't get fully clean – try again!",
+    wax: "Wax the rims", waxHint: "Aim at the rims and hold to wax", waxDone: "Rim waxed! +250 ✨",
   },
 };

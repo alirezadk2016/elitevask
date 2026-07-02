@@ -96,6 +96,14 @@ export function sndCombo(level) {
   tone(660 + level * 110, t + 0.06, 0.12, "square", 0.06);
 }
 
+export function sndFail() {
+  ensureCtx(); if (!ctx) return;
+  const t = ctx.currentTime;
+  tone(392, t, 0.35, "triangle", 0.2);
+  tone(311, t + 0.28, 0.5, "triangle", 0.2);
+  tone(233, t + 0.6, 0.8, "triangle", 0.18);
+}
+
 export function sndComplete() {
   ensureCtx(); if (!ctx) return;
   const t = ctx.currentTime;

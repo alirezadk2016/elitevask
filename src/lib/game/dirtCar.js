@@ -67,7 +67,8 @@ export function bodyAtlasTexture() {
   const g = c.getContext("2d");
   g.clearRect(0, 0, W, W);
   const X = (u) => u * W, Y = (v) => (1 - v) * W;
-  const MUD = ["#4a3b2a", "#5d4b35", "#6b5a44"];
+  const MUD = ["#3a2d1f", "#4a3a28", "#5b4936"];
+  const CRUST = "#7d6e55";
   const rnd = Math.random;
 
   const cells = [];
@@ -114,25 +115,53 @@ export function bodyAtlasTexture() {
     g.fillStyle = grad;
     g.fillRect(x0, yTop, w, h);
 
-    // blotches biased to the bottom
-    for (let i = 0; i < 46; i++) {
+    // dried mud blotches: dark wet core + lighter dried crust ring + drips
+    for (let i = 0; i < 44; i++) {
       const bx = x0 + rnd() * w;
       const by = yBot - Math.pow(rnd(), 2.1) * h * 0.75;
-      const r = 8 + rnd() * 34;
+      const r = 8 + rnd() * 30;
       const col = MUD[(rnd() * MUD.length) | 0];
+      const rot = rnd() * Math.PI, squash = 0.4 + rnd() * 0.6;
+      if (rnd() < 0.55) { // dried crust halo
+        const cg = g.createRadialGradient(bx, by, r * 0.55, bx, by, r * 1.25);
+        cg.addColorStop(0, CRUST + "00");
+        cg.addColorStop(0.55, CRUST + "66");
+        cg.addColorStop(1, CRUST + "00");
+        g.fillStyle = cg;
+        g.beginPath(); g.ellipse(bx, by, r * 1.25, r * 1.25 * squash, rot, 0, Math.PI * 2); g.fill();
+      }
       const rg = g.createRadialGradient(bx, by, 0, bx, by, r);
-      rg.addColorStop(0, col + "b8");
+      rg.addColorStop(0, col + "cc");
+      rg.addColorStop(0.7, col + "88");
       rg.addColorStop(1, col + "00");
       g.fillStyle = rg;
-      g.beginPath();
-      g.ellipse(bx, by, r, r * (0.4 + rnd() * 0.6), rnd() * Math.PI, 0, Math.PI * 2);
-      g.fill();
+      g.beginPath(); g.ellipse(bx, by, r, r * squash, rot, 0, Math.PI * 2); g.fill();
+      if (rnd() < 0.4) { // drip trail below the blotch
+        const dl = 12 + rnd() * 34, dw = 2 + rnd() * 3.4;
+        const lg = g.createLinearGradient(0, by, 0, by + dl);
+        lg.addColorStop(0, col + "99");
+        lg.addColorStop(1, col + "00");
+        g.fillStyle = lg;
+        g.fillRect(bx - dw / 2 + (rnd() - 0.5) * 4, by, dw, dl);
+      }
     }
-    // splatter specks, heavy at the very bottom (wheel spray)
-    for (let i = 0; i < 900; i++) {
-      const sy = yBot - Math.pow(rnd(), 2.6) * h * 0.6;
-      g.fillStyle = `rgba(${64 + rnd() * 40 | 0},${52 + rnd() * 34 | 0},${36 + rnd() * 26 | 0},${0.3 + rnd() * 0.5})`;
-      const s = 1 + rnd() * 2.6;
+    // wheel-arch splatter clusters (wheels sit around 20% / 80% of length)
+    const clusters = cell.axis === 2 ? [0.2, 0.8] : [0.5];
+    for (const cu of clusters) {
+      const cxp = x0 + cu * w;
+      for (let i = 0; i < 340; i++) {
+        const sx = cxp + (rnd() - 0.5) * w * 0.24;
+        const sy = yBot - Math.pow(rnd(), 2.4) * h * 0.55;
+        g.fillStyle = `rgba(${52 + rnd() * 36 | 0},${42 + rnd() * 28 | 0},${28 + rnd() * 22 | 0},${0.35 + rnd() * 0.5})`;
+        const s = 1 + rnd() * 3;
+        g.fillRect(sx, sy, s, s * (1 + rnd()));
+      }
+    }
+    // general specks
+    for (let i = 0; i < 420; i++) {
+      const sy = yBot - Math.pow(rnd(), 2) * h * 0.8;
+      g.fillStyle = `rgba(${64 + rnd() * 40 | 0},${52 + rnd() * 34 | 0},${36 + rnd() * 26 | 0},${0.25 + rnd() * 0.4})`;
+      const s = 1 + rnd() * 2.4;
       g.fillRect(x0 + rnd() * w, sy, s, s);
     }
     // salt streaks running down
@@ -184,7 +213,8 @@ function patchMaterial(mat, dirtTex, maskTex, repeat, amount) {
       .replace("#include <roughnessmap_fragment>", `#include <roughnessmap_fragment>
 {
   float dF = dirtFactor(vUv);
-  roughnessFactor = mix(roughnessFactor, 0.93, dF);
+  /* washed areas get a WET sheen – glossier than the paint ever was dry */
+  roughnessFactor = mix(roughnessFactor * 0.42, 0.95, dF);
 }`)
       .replace("#include <metalnessmap_fragment>", `#include <metalnessmap_fragment>
 {

@@ -12,6 +12,7 @@ import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { FX } from "./fx";
 import { initAudio, setSpray, sndGold, sndCombo } from "@/lib/game/audio";
+import { TIME_LIMIT } from "@/lib/game/campaign";
 
 const buzz = (p) => { try { navigator.vibrate && navigator.vibrate(p); } catch {} };
 const WORLD_UP = new THREE.Vector3(0, 1, 0);
@@ -26,6 +27,7 @@ export default function Washer({ G, isMobile }) {
   const fxMist = useRef();
   const fxFoam = useRef();
   const fxSteam = useRef();
+  const fxSpark = useRef();
   const ray = useMemo(() => new THREE.Raycaster(), []);
   const tmp = useMemo(() => ({
     v1: new THREE.Vector3(), v2: new THREE.Vector3(), v3: new THREE.Vector3(),
@@ -73,18 +75,29 @@ export default function Washer({ G, isMobile }) {
     /* wipe leftover particles when a new mission starts */
     if (G.clearFx) {
       G.clearFx = false;
-      for (const f of [fxJet, fxRun, fxSplash, fxMist, fxFoam, fxSteam]) f.current && f.current.clear();
+      for (const f of [fxJet, fxRun, fxSplash, fxMist, fxFoam, fxSteam, fxSpark]) f.current && f.current.clear();
     }
 
-    /* mission timer runs from the first spray */
-    if (playing && G.hasSprayed) G.time += Math.min(rawDt, 0.25);
+    /* mission timer runs from the first spray – 3 minutes, then game over */
+    if (playing && G.hasSprayed) {
+      G.time += Math.min(rawDt, 0.25);
+      if (G.time >= TIME_LIMIT && !G.done) {
+        G.done = true;
+        G.spraying = false;
+        G.fail && G.fail();
+        return;
+      }
+    }
 
-    /* water tank */
+    /* water tank (waxing uses no water) */
+    const waxMode = G.tool === "wax";
     const wantsSpray = G.spraying && playing;
-    let spraying = wantsSpray && G.water > 0.5 && !G.tankLock;
-    if (wantsSpray && G.water <= 0.5) G.tankLock = true;
-    if (G.tankLock && G.water > 18) G.tankLock = false;
-    G.water = Math.max(0, Math.min(100, G.water + (spraying ? -11 : 22) * dt));
+    let spraying = wantsSpray && (waxMode || (G.water > 0.5 && !G.tankLock));
+    if (!waxMode) {
+      if (wantsSpray && G.water <= 0.5) G.tankLock = true;
+      if (G.tankLock && G.water > 18) G.tankLock = false;
+    }
+    G.water = Math.max(0, Math.min(100, G.water + (spraying && !waxMode ? -11 : 22) * dt));
 
     /* aim */
     ray.setFromCamera(G.pointer, camera);
@@ -129,7 +142,7 @@ export default function Washer({ G, isMobile }) {
          reads as one continuous water line at any frame rate; the spread
          cone widens with distance like a real high-pressure jet */
       const jt = fxJet.current;
-      if (jt) {
+      if (jt && !waxMode) {
         tmp.side.crossVectors(dir, WORLD_UP);
         if (tmp.side.lengthSq() < 1e-4) tmp.side.set(1, 0, 0); else tmp.side.normalize();
         tmp.up2.crossVectors(tmp.side, dir);
@@ -154,12 +167,50 @@ export default function Washer({ G, isMobile }) {
         }
       }
 
-      if (hit) {
+      if (hit && waxMode) {
+        /* wax the rims: hold on a rim to polish it to a mirror shine */
+        const nm = hit.object.name;
+        if (/^rim_/.test(nm)) {
+          G.waxLevels = G.waxLevels || {};
+          const before = G.waxLevels[nm] || 0;
+          const v = Math.min(1, before + dt * 0.55);
+          G.waxLevels[nm] = v;
+          const m = hit.object.material;
+          m.roughness = 0.28 - 0.24 * v;
+          m.envMapIntensity = 1.4 + 1.6 * v;
+          if (before < 1 && v >= 1) {
+            G.score += 250;
+            G.lastGain = 250;
+            G.gainSeq = (G.gainSeq || 0) + 1;
+            G.toast = { msg: G.tr.waxDone, t: 2.2 };
+            sndGold();
+            buzz(25);
+          }
+          const sk = fxSpark.current;
+          for (let i = 0; i < 3 && sk; i++) {
+            sk.spawn(
+              hit.point.x + (Math.random() - 0.5) * 0.12,
+              hit.point.y + (Math.random() - 0.5) * 0.12,
+              hit.point.z + (Math.random() - 0.5) * 0.12,
+              (Math.random() - 0.5) * 0.2, 0.15 + Math.random() * 0.2, (Math.random() - 0.5) * 0.2,
+              0.35 + Math.random() * 0.2, 0.014 + Math.random() * 0.016, 0.7);
+          }
+        }
+      } else if (hit) {
         const key = hit.object.userData.dirtKey;
         if (key && hit.uv && G.dirt) {
           const brush = 0.09 + dist * 0.014;
           const strength = Math.max(0.28, Math.min(1, 1.15 - dist * 0.09)) * (G.scrub || 1);
           G.dirt.paint(key, hit.uv, brush, strength);
+          /* clean-reveal glints */
+          const sk = fxSpark.current;
+          if (sk && Math.random() < 0.3) {
+            const gn = hit.face ? tmp.v2.copy(hit.face.normal).transformDirection(hit.object.matrixWorld) : tmp.v2.set(0, 1, 0);
+            sk.spawn(
+              hit.point.x + gn.x * 0.04, hit.point.y + gn.y * 0.04, hit.point.z + gn.z * 0.04,
+              gn.x * 0.1, 0.12 + Math.random() * 0.15, gn.z * 0.1,
+              0.3 + Math.random() * 0.15, 0.012 + Math.random() * 0.014, 0.6);
+          }
         }
         const n = hit.face
           ? tmp.v2.copy(hit.face.normal).transformDirection(hit.object.matrixWorld)
@@ -321,6 +372,7 @@ export default function Washer({ G, isMobile }) {
       <FX ref={fxMist} count={isMobile ? 44 : 80} color="#c9d4da" blending="add" gravity={0.25} drag={0.96} grow={1.4} opacity={0.3} />
       <FX ref={fxFoam} count={isMobile ? 120 : 220} color="#f4f9fd" gravity={-0.2} drag={0.9} grow={0.7} opacity={0.7} />
       <FX ref={fxSteam} count={isMobile ? 30 : 54} color="#dfe9f2" blending="add" gravity={0.22} drag={0.97} grow={2.2} opacity={0.35} />
+      <FX ref={fxSpark} count={isMobile ? 50 : 90} color="#ffe9b0" blending="add" gravity={0.1} drag={0.95} opacity={0.9} />
     </group>
   );
 }

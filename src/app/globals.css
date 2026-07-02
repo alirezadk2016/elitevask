@@ -1409,3 +1409,10 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 .gp-stamp{position:absolute;top:14%;left:50%;transform:translateX(-50%);z-index:9;font-size:clamp(54px,11vw,110px);font-weight:800;letter-spacing:-3px;color:var(--green);text-shadow:0 0 50px rgba(55,210,120,.65);animation:gpStamp .7s cubic-bezier(.34,1.56,.64,1) both;pointer-events:none}
 @keyframes gpStamp{0%{opacity:0;transform:translateX(-50%) scale(2.6) rotate(-6deg)}60%{opacity:1;transform:translateX(-50%) scale(.96) rotate(1deg)}100%{opacity:1;transform:translateX(-50%) scale(1) rotate(0)}}
 .gp-panel-delay{animation-delay:.55s}
+
+/* trophy, wax tool, game over */
+.gp-trophy{display:flex;justify-content:center;margin-bottom:6px;animation:gpTrophy .7s .25s cubic-bezier(.34,1.56,.64,1) both;filter:drop-shadow(0 8px 26px rgba(212,175,55,.45))}
+@keyframes gpTrophy{from{opacity:0;transform:translateY(-18px) scale(.5)}to{opacity:1;transform:none}}
+.gp-tool-on{border-color:rgba(212,175,55,.75);color:#f3e2ad;background:rgba(212,175,55,.14);box-shadow:0 0 14px rgba(212,175,55,.3)}
+.gp-hint-wax{color:#f3e2ad;border-color:rgba(212,175,55,.4)}
+.gp-failicon{font-size:52px;margin-bottom:8px;animation:gpTrophy .6s both}

@@ -17,8 +17,39 @@ import * as THREE from "three";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
 import Washer from "./Washer";
 import { CarDirt, bodyAtlasTexture } from "@/lib/game/dirtCar";
-import { initAudio, setMuted, sndClick, sndComplete, sndStar, sndCombo } from "@/lib/game/audio";
-import { MISSIONS, T3, ACH, loadSave, storeSave, starsFor, dailyMission, todayStr } from "@/lib/game/campaign";
+import { initAudio, setMuted, sndClick, sndComplete, sndStar, sndCombo, sndFail } from "@/lib/game/audio";
+import { MISSIONS, T3, ACH, TIME_LIMIT, loadSave, storeSave, starsFor, dailyMission, todayStr } from "@/lib/game/campaign";
+
+/* gold trophy with the Elite Vask logo on the cup */
+function Trophy() {
+  return (
+    <div className="gp-trophy" aria-hidden="true">
+      <svg viewBox="0 0 120 110" width="118" height="108">
+        <defs>
+          <linearGradient id="tgold" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor="#f6dd8e" />
+            <stop offset=".45" stopColor="#d4af37" />
+            <stop offset="1" stopColor="#9c7a1c" />
+          </linearGradient>
+          <clipPath id="tlogo"><circle cx="60" cy="38" r="14" /></clipPath>
+        </defs>
+        {/* handles */}
+        <path d="M28 22h-12a4 4 0 0 0-4 4c0 14 8 22 20 24" fill="none" stroke="url(#tgold)" strokeWidth="7" strokeLinecap="round" />
+        <path d="M92 22h12a4 4 0 0 1 4 4c0 14-8 22-20 24" fill="none" stroke="url(#tgold)" strokeWidth="7" strokeLinecap="round" />
+        {/* cup */}
+        <path d="M28 14h64v22a32 32 0 0 1-64 0z" fill="url(#tgold)" stroke="#7d6215" strokeWidth="1.5" />
+        {/* logo plate */}
+        <circle cx="60" cy="38" r="15.5" fill="#fff" stroke="#9c7a1c" strokeWidth="2" />
+        <image href="/logo.jpg" x="46" y="24" width="28" height="28" clipPath="url(#tlogo)" preserveAspectRatio="xMidYMid slice" />
+        {/* stem + base */}
+        <path d="M53 66h14l4 12H49z" fill="url(#tgold)" stroke="#7d6215" strokeWidth="1" />
+        <rect x="40" y="78" width="40" height="9" rx="3" fill="url(#tgold)" stroke="#7d6215" strokeWidth="1" />
+        <rect x="32" y="88" width="56" height="11" rx="4" fill="#8a6d18" stroke="#6d5511" strokeWidth="1" />
+        <text x="60" y="97" textAnchor="middle" fontSize="7.5" fontWeight="800" fill="#f6dd8e" fontFamily="Manrope, Arial">ELITE VASK</text>
+      </svg>
+    </div>
+  );
+}
 
 /* ---------- photo mode helpers ---------- */
 function SnapshotBridge({ G }) {
@@ -78,9 +109,9 @@ function Car({ G, isMobile }) {
     const root = scene;
     const body = new THREE.MeshPhysicalMaterial({
       color: new THREE.Color("#0e4d2c"), // Elite emerald
-      metalness: 0.9, roughness: 0.28,
-      clearcoat: 1.0, clearcoatRoughness: 0.04,
-      envMapIntensity: 1.6,
+      metalness: 0.92, roughness: 0.19,
+      clearcoat: 1.0, clearcoatRoughness: 0.026,
+      envMapIntensity: 2.0,
     });
     const details = new THREE.MeshStandardMaterial({
       color: "#e8ecef", metalness: 1.0, roughness: 0.28, envMapIntensity: 1.4,
@@ -570,6 +601,7 @@ export default function GarageScene() {
   const [result, setResult] = useState(null);
   const [resetSignal, setResetSignal] = useState(0);
   const [photo, setPhoto] = useState(null);
+  const [tool, setTool] = useState("wash");
   const [banner, setBanner] = useState(null);
   const bannerTimer = useRef(null);
   const [hud, setHud] = useState({ progress: 0, water: 100, tankLock: false, hasSprayed: false, time: 0, score: 0, combo: 1, toast: null, gain: 0, gainSeq: 0 });
@@ -654,6 +686,13 @@ export default function GarageScene() {
         setTimeout(() => { g.toast = { msg: `${a.icon} ${g.tr.achPrefix}: ${a.name[lang]}`, t: 2.6 }; }, 900 + k * 1600);
       });
     };
+    /* out of time → game over */
+    g.fail = () => {
+      setResult({ score: Math.round(g.score), progressPct: Math.round(g.progress * 100) });
+      setPhase("failed");
+      try { sndFail(); } catch {}
+      try { navigator.vibrate && navigator.vibrate([60, 80, 60]); } catch {}
+    };
   }, [missionIdx, dailyActive, daily, save, g, lang]);
 
   /* HUD sync */
@@ -677,8 +716,16 @@ export default function GarageScene() {
     g.progress = 0; g.water = 100; g.tankLock = false; g.done = false; g.hasSprayed = false;
     g.time = 0; g.score = 0; g.combo = 1; g.comboMax = 1; g.toast = null; g.celebrateT = 0; g.clearFx = true;
     g.nextMile = 0; g.lastGain = 0; g.gainSeq = 0;
+    g.tool = "wash"; g.waxLevels = {};
+    for (const mesh of g.carMeshes) {
+      if (/^rim_/.test(mesh.name) && mesh.material) {
+        mesh.material.roughness = 0.28;
+        mesh.material.envMapIntensity = 1.4;
+      }
+    }
     setMissionIdx(idx >= 0 ? idx : 0);
     setDailyActive(isDaily);
+    setTool("wash");
     setAttempt((a) => a + 1); setResult(null); setPhoto(null);
     setResetSignal((n) => n + 1);
     setPhase("playing");
@@ -730,8 +777,9 @@ export default function GarageScene() {
   const pct = Math.min(100, Math.round(hud.progress * 100 + 0.2));
   const canFinish = phase === "playing" && hud.progress >= 0.97;
   const paceStars = phase === "playing" ? (hud.time <= mission.time3 ? 3 : hud.time <= mission.time2 ? 2 : 1) : 0;
-  const mm = Math.floor(hud.time / 60);
-  const ss = String(Math.floor(hud.time % 60)).padStart(2, "0");
+  const remain = Math.ceil(Math.max(0, TIME_LIMIT - hud.time));
+  const mm = Math.floor(remain / 60);
+  const ss = String(remain % 60).padStart(2, "0");
 
   return (
     <div className="gp-wrap">
@@ -785,7 +833,7 @@ export default function GarageScene() {
               <span className="gp-water"><i style={{ width: `${Math.round(hud.water)}%` }} /></span>
             </div>
             <div className="gp-stat"><span className="gp-k">{tr.time}</span>
-              <span className={`gp-v${paceStars === 1 ? " gp-late" : (mission && (paceStars === 3 ? mission.time3 : mission.time2) - hud.time < 12 ? " gp-urgent" : "")}`}>{mm}:{ss}</span>
+              <span className={`gp-v${remain <= 12 ? " gp-late" : remain <= 30 ? " gp-urgent" : ""}`}>{mm}:{ss}</span>
             </div>
             <div className="gp-stat"><span className="gp-k">{tr.score}</span>
               <span className="gp-v gp-score" style={{ position: "relative" }}>
@@ -810,9 +858,10 @@ export default function GarageScene() {
             </div>
           )}
 
-          {!hud.hasSprayed && !banner && (
+          {!hud.hasSprayed && !banner && tool === "wash" && (
             <div className="gp-hint">{isMobile ? tr.hintMobile : tr.hintDesktop}</div>
           )}
+          {tool === "wax" && !banner && <div className="gp-hint gp-hint-wax">✨ {tr.waxHint}</div>}
 
           {canFinish && (
             <button className="gp-finish" onClick={() => { sndClick(); g.finish && g.finish(); }}>
@@ -823,6 +872,10 @@ export default function GarageScene() {
           <div className="gp-tools">
             <button className="gp-tool" aria-label={tr.menu} title={tr.menu} onClick={toMenu}>
               <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" rx="1.5" /><rect x="14" y="3" width="7" height="7" rx="1.5" /><rect x="3" y="14" width="7" height="7" rx="1.5" /><rect x="14" y="14" width="7" height="7" rx="1.5" /></svg>
+            </button>
+            <button className={`gp-tool${tool === "wax" ? " gp-tool-on" : ""}`} aria-label={tr.wax} title={tr.wax}
+              onClick={() => { sndClick(); const t = tool === "wax" ? "wash" : "wax"; setTool(t); g.tool = t; }}>
+              <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3l1.7 4.3L18 9l-4.3 1.7L12 15l-1.7-4.3L6 9l4.3-1.7z" /><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z" /><path d="M5 16l.6 1.6L7.2 18l-1.6.6L5 20.2 4.4 18.6 2.8 18l1.6-.4z" /></svg>
             </button>
             <button className="gp-tool" aria-label={tr.photo} title={tr.photo} onClick={takePhoto}>
               <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" /><circle cx="12" cy="13" r="4" /></svg>
@@ -918,6 +971,7 @@ export default function GarageScene() {
         <div className="gp-overlay gp-complete">
           <div className="gp-stamp" aria-hidden="true">100%</div>
           <div className="gp-panel gp-panel-delay">
+            <Trophy />
             <div className="gp-big-stars">
               {[1, 2, 3].map((i) => (
                 <svg key={i} viewBox="0 0 24 24" className={i <= result.stars ? "on" : ""} style={{ animationDelay: `${0.35 + i * 0.42}s` }} width="52" height="52"><path d="M12 2 15 9l7 .5-5.5 4.5L18 21l-6-3.8L6 21l1.5-7L2 9.5 9 9Z" fill="currentColor" /></svg>
@@ -939,6 +993,27 @@ export default function GarageScene() {
                   <button className="btn gp-ghost" onClick={() => startMission(missionIdx + 1)}>{tr.next}</button>
                 )}
                 <button className="btn gp-ghost" onClick={takePhoto}>📸 {tr.photo}</button>
+                <button className="btn gp-ghost" onClick={toMenu}>{tr.menu}</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ---------- game over (out of time) ---------- */}
+      {phase === "failed" && result && (
+        <div className="gp-overlay gp-complete">
+          <div className="gp-panel">
+            <div className="gp-failicon" aria-hidden="true">⏱</div>
+            <h2 className="gp-title">{tr.timeUp}</h2>
+            <p className="gp-sub">{tr.timeUpSub}</p>
+            <div className="gp-result">
+              <div><span>{tr.clean}</span><strong>{result.progressPct}%</strong></div>
+              <div><span>{tr.score}</span><strong>{result.score.toLocaleString("da-DK")}</strong></div>
+            </div>
+            <div className="gp-actions">
+              <div className="gp-actions-row">
+                <button className="btn btn-green" onClick={() => (dailyActive ? startDaily() : startMission(missionIdx))}>{tr.again}</button>
                 <button className="btn gp-ghost" onClick={toMenu}>{tr.menu}</button>
               </div>
             </div>
