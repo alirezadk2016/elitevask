@@ -18,7 +18,50 @@ import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment
 import Washer from "./Washer";
 import { CarDirt } from "@/lib/game/dirtCar";
 import { initAudio, setMuted, sndClick, sndComplete, sndStar } from "@/lib/game/audio";
-import { MISSIONS, T3, loadSave, storeSave, starsFor } from "@/lib/game/campaign";
+import { MISSIONS, T3, ACH, loadSave, storeSave, starsFor, dailyMission, todayStr } from "@/lib/game/campaign";
+
+/* ---------- photo mode helpers ---------- */
+function SnapshotBridge({ G }) {
+  const { gl } = useThree();
+  useEffect(() => {
+    // copy the (preserved) GL buffer into a capped-size 2d canvas – much
+    // cheaper to encode than a full-res toDataURL on the GL canvas
+    G.snap = () => {
+      const src = gl.domElement;
+      const scale = Math.min(1, 1600 / src.width);
+      const c = document.createElement("canvas");
+      c.width = Math.max(2, Math.round(src.width * scale));
+      c.height = Math.max(2, Math.round(src.height * scale));
+      c.getContext("2d").drawImage(src, 0, 0, c.width, c.height);
+      return c;
+    };
+    return () => { G.snap = null; };
+  }, [gl, G]);
+  return null;
+}
+
+function addWatermark(c) {
+  const g = c.getContext("2d");
+  const h = Math.max(70, Math.round(c.height * 0.16));
+  const grad = g.createLinearGradient(0, c.height - h, 0, c.height);
+  grad.addColorStop(0, "rgba(4,6,5,0)");
+  grad.addColorStop(1, "rgba(4,6,5,.78)");
+  g.fillStyle = grad;
+  g.fillRect(0, c.height - h, c.width, h);
+  const pad = Math.round(c.width * 0.03);
+  g.textAlign = "left";
+  g.font = `800 ${Math.round(c.width * 0.03)}px Manrope, Arial, sans-serif`;
+  g.fillStyle = "#ffffff";
+  g.fillText("ELITE ", pad, c.height - pad);
+  const w1 = g.measureText("ELITE ").width;
+  g.fillStyle = "#37d278";
+  g.fillText("VASK", pad + w1, c.height - pad);
+  g.font = `600 ${Math.round(c.width * 0.017)}px Manrope, Arial, sans-serif`;
+  g.fillStyle = "rgba(255,255,255,.78)";
+  g.textAlign = "right";
+  g.fillText("elite-vask.dk · Car Wash Game", c.width - pad, c.height - pad);
+  return c.toDataURL("image/jpeg", 0.9);
+}
 
 const CAR_URL = "/game/ferrari.glb";
 const DRACO = "/draco/gltf/";
@@ -355,8 +398,9 @@ function GoldSpots({ G, attempt }) {
     body.updateWorldMatrix(true, false);
     const rayc = new THREE.Raycaster();
     const out = [];
+    const N = G.goldCount || 3;
     let guard = 0;
-    while (out.length < 3 && guard++ < 60) {
+    while (out.length < N && guard++ < 90) {
       const az = Math.random() * Math.PI * 2;
       const o = new THREE.Vector3(Math.cos(az) * 4.5, 0.45 + Math.random() * 0.8, Math.sin(az) * 4.5);
       rayc.set(o, new THREE.Vector3(0, 0.6, 0).sub(o).normalize());
@@ -365,7 +409,7 @@ function GoldSpots({ G, attempt }) {
         const n = h.face.normal.clone().transformDirection(body.matrixWorld);
         // keep spots apart
         const pos = h.point.clone().addScaledVector(n, 0.035);
-        if (out.every((s) => s.pos.distanceTo(pos) > 0.9)) {
+        if (out.every((s) => s.pos.distanceTo(pos) > 0.75)) {
           out.push({ key: body.uuid, uv: h.uv.clone(), pos, found: false });
         }
       }
@@ -517,12 +561,17 @@ export default function GarageScene() {
 
   const [phase, setPhase] = useState("menu"); // menu | playing | done
   const [missionIdx, setMissionIdx] = useState(0);
+  const [dailyActive, setDailyActive] = useState(false);
   const [attempt, setAttempt] = useState(0);
-  const [save, setSave] = useState(() => (typeof window !== "undefined" ? loadSave() : { unlocked: 1, best: {} }));
+  const [save, setSave] = useState(() => (typeof window !== "undefined" ? loadSave() : { unlocked: 1, best: {}, ach: [], daily: null }));
   const [muted, setMutedState] = useState(() => { try { return localStorage.getItem("ev_game_mute") === "1"; } catch { return false; } });
   const [result, setResult] = useState(null);
   const [resetSignal, setResetSignal] = useState(0);
+  const [photo, setPhoto] = useState(null);
   const [hud, setHud] = useState({ progress: 0, water: 100, tankLock: false, hasSprayed: false, time: 0, score: 0, combo: 1, toast: null });
+
+  const daily = useMemo(() => (typeof window !== "undefined" ? dailyMission(todayStr()) : null), []);
+  const canShare = useMemo(() => typeof navigator !== "undefined" && !!navigator.share, []);
 
   const G = useRef(null);
   if (!G.current) {
@@ -540,38 +589,68 @@ export default function GarageScene() {
 
   useEffect(() => { setMuted(muted); }, [muted]);
 
-  /* finish → score breakdown, save, celebration */
+  /* finish → score breakdown, achievements, save, celebration */
   useEffect(() => {
     g.finish = () => {
       if (g.phase !== "playing" || g.done) return;
       g.done = true;
       g.spraying = false;
-      const mission = MISSIONS[missionIdx];
+      const mission = dailyActive ? daily : MISSIONS[missionIdx];
       const secs = Math.round(g.time);
       const stars = starsFor(mission, secs);
       const bonus = Math.max(0, Math.round((mission.time2 * 1.2 - secs) * 9));
       g.score += bonus + 1500;
       g.celebrateT = 3.2;
       const sc = Math.round(g.score);
-      const prevBest = save.best[mission.id];
-      const newBest = !prevBest || sc > prevBest.score;
-      const nextSave = {
-        unlocked: Math.max(save.unlocked, Math.min(MISSIONS.length, mission.id + 1)),
-        best: {
-          ...save.best,
-          [mission.id]: newBest
-            ? { score: sc, stars: Math.max(stars, prevBest?.stars || 0), time: secs }
-            : prevBest,
-        },
-      };
+
+      /* achievements */
+      const newAch = [];
+      const has = (id) => save.ach.includes(id) || newAch.includes(id);
+      if (!has("first")) newAch.push("first");
+      if (g.progress >= 0.999 && !has("perfect")) newAch.push("perfect");
+      if (g.gold && g.gold.length > 0 && g.gold.every((s) => s.found) && !has("gold")) newAch.push("gold");
+      if ((g.comboMax || 1) >= 5 && !has("combo")) newAch.push("combo");
+      if (stars === 3 && !has("fast")) newAch.push("fast");
+      if (!dailyActive && mission.id === 5 && !has("elite")) newAch.push("elite");
+
+      let nextSave;
+      let newBest;
+      if (dailyActive) {
+        const prev = save.daily && save.daily.date === mission.date ? save.daily : null;
+        newBest = !prev || sc > prev.score;
+        nextSave = {
+          ...save,
+          ach: [...save.ach, ...newAch],
+          daily: newBest ? { date: mission.date, score: sc, stars: Math.max(stars, prev?.stars || 0) } : save.daily,
+        };
+      } else {
+        const prevBest = save.best[mission.id];
+        newBest = !prevBest || sc > prevBest.score;
+        nextSave = {
+          ...save,
+          unlocked: Math.max(save.unlocked, Math.min(MISSIONS.length, mission.id + 1)),
+          ach: [...save.ach, ...newAch],
+          best: {
+            ...save.best,
+            [mission.id]: newBest
+              ? { score: sc, stars: Math.max(stars, prevBest?.stars || 0), time: secs }
+              : prevBest,
+          },
+        };
+      }
       setSave(nextSave); storeSave(nextSave);
-      setResult({ stars, score: sc, time: secs, bonus, newBest, hasNext: mission.id < MISSIONS.length });
+      setResult({ stars, score: sc, time: secs, bonus, newBest, hasNext: !dailyActive && mission.id < MISSIONS.length });
       setPhase("done");
       sndComplete();
+      try { navigator.vibrate && navigator.vibrate([40, 60, 40]); } catch {}
       let i = 0;
       const int = setInterval(() => { sndStar(i); if (++i >= stars) clearInterval(int); }, 420);
+      newAch.forEach((id, k) => {
+        const a = ACH.find((x) => x.id === id);
+        setTimeout(() => { g.toast = { msg: `${a.icon} ${g.tr.achPrefix}: ${a.name[lang]}`, t: 2.6 }; }, 900 + k * 1600);
+      });
     };
-  }, [missionIdx, save, g]);
+  }, [missionIdx, dailyActive, daily, save, g, lang]);
 
   /* HUD sync */
   useEffect(() => {
@@ -584,22 +663,55 @@ export default function GarageScene() {
     return () => clearInterval(id);
   }, [g]);
 
-  const startMission = useCallback((i) => {
+  const launch = useCallback((m, idx, isDaily) => {
     sndClick(); initAudio();
-    const m = MISSIONS[i];
     if (g.dirt) g.dirt.reset();
     if (g.bodyMat) { g.bodyMat.color.set(m.paint); g.bodyMat.metalness = m.metal; }
     g.scrub = m.scrub;
+    g.goldCount = m.golds || 3;
     g.progress = 0; g.water = 100; g.tankLock = false; g.done = false; g.hasSprayed = false;
-    g.time = 0; g.score = 0; g.combo = 1; g.toast = null; g.celebrateT = 0; g.clearFx = true;
-    setMissionIdx(i); setAttempt((a) => a + 1); setResult(null);
+    g.time = 0; g.score = 0; g.combo = 1; g.comboMax = 1; g.toast = null; g.celebrateT = 0; g.clearFx = true;
+    setMissionIdx(idx >= 0 ? idx : 0);
+    setDailyActive(isDaily);
+    setAttempt((a) => a + 1); setResult(null); setPhoto(null);
     setResetSignal((n) => n + 1);
     setPhase("playing");
   }, [g]);
 
-  const toMenu = useCallback(() => { sndClick(); g.spraying = false; setPhase("menu"); setResult(null); }, [g]);
+  const startMission = useCallback((i) => launch(MISSIONS[i], i, false), [launch]);
+  const startDaily = useCallback(() => daily && launch(daily, -1, true), [launch, daily]);
 
-  const mission = MISSIONS[missionIdx];
+  const toMenu = useCallback(() => { sndClick(); g.spraying = false; setPhase("menu"); setResult(null); setPhoto(null); }, [g]);
+
+  const takePhoto = useCallback(() => {
+    sndClick();
+    // defer so the click finishes before the (potentially slow) GL readback
+    setTimeout(() => {
+      if (!g.snap) return;
+      try { setPhoto(addWatermark(g.snap())); } catch {}
+    }, 30);
+  }, [g]);
+
+  const sharePhoto = useCallback(async () => {
+    if (!photo) return;
+    try {
+      const blob = await (await fetch(photo)).blob();
+      const file = new File([blob], "elite-vask-carwash.jpg", { type: "image/jpeg" });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title: "Elite Vask Car Wash Game" });
+      } else if (navigator.share) {
+        await navigator.share({ title: "Elite Vask Car Wash Game", url: "https://www.elite-vask.dk/game" });
+      }
+    } catch {}
+  }, [photo]);
+
+  const mission = dailyActive && daily ? daily : MISSIONS[missionIdx];
+  const dailyBest = daily && save.daily && save.daily.date === daily.date ? save.daily : null;
+  const hoursToNext = useMemo(() => {
+    const now = new Date();
+    const end = new Date(now); end.setHours(24, 0, 0, 0);
+    return Math.max(1, Math.ceil((end - now) / 3600000));
+  }, [phase]);
   const pct = Math.min(100, Math.round(hud.progress * 100 + 0.2));
   const canFinish = phase === "playing" && hud.progress >= 0.97;
   const paceStars = phase === "playing" ? (hud.time <= mission.time3 ? 3 : hud.time <= mission.time2 ? 2 : 1) : 0;
@@ -612,7 +724,7 @@ export default function GarageScene() {
         dpr={[1, isMobile ? 1.5 : 1.75]}
         shadows={!isMobile}
         camera={{ position: [CAM_INTRO.x, CAM_INTRO.y, CAM_INTRO.z], fov: 40 }}
-        gl={{ antialias: isMobile, powerPreference: "high-performance" }}
+        gl={{ antialias: isMobile, powerPreference: "high-performance", preserveDrawingBuffer: true }}
         onCreated={({ gl }) => { gl.toneMapping = THREE.ACESFilmicToneMapping; gl.toneMappingExposure = 1.12; }}
       >
         <color attach="background" args={["#040507"]} />
@@ -624,6 +736,7 @@ export default function GarageScene() {
           <Car G={g} isMobile={isMobile} />
           <GoldSpots G={g} attempt={attempt} />
           <Washer G={g} isMobile={isMobile} />
+          <SnapshotBridge G={g} />
           {!isMobile && (
             <EffectComposer multisampling={0}>
               <N8AO intensity={3.4} aoRadius={0.5} distanceFalloff={0.7} quality="performance" />
@@ -677,6 +790,9 @@ export default function GarageScene() {
             <button className="gp-tool" aria-label={tr.menu} title={tr.menu} onClick={toMenu}>
               <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" rx="1.5" /><rect x="14" y="3" width="7" height="7" rx="1.5" /><rect x="3" y="14" width="7" height="7" rx="1.5" /><rect x="14" y="14" width="7" height="7" rx="1.5" /></svg>
             </button>
+            <button className="gp-tool" aria-label={tr.photo} title={tr.photo} onClick={takePhoto}>
+              <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" /><circle cx="12" cy="13" r="4" /></svg>
+            </button>
             <button className="gp-tool" aria-label={tr.resetCam} title={tr.resetCam} onClick={() => { sndClick(); setResetSignal((n) => n + 1); }}>
               <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M3 12a9 9 0 1 0 3-6.7" /><path d="M3 4v5h5" /></svg>
             </button>
@@ -705,6 +821,24 @@ export default function GarageScene() {
             <div className="gp-eyebrow">Elite Vask</div>
             <h1 className="gp-title">{tr.title}</h1>
             <p className="gp-sub">{tr.tagline}</p>
+            {daily && (
+              <button className="gp-level gp-daily" onClick={startDaily}>
+                <span className="gp-lv-num gp-daily-num">✦</span>
+                <span className="gp-lv-name">{tr.daily}
+                  <span className="gp-daily-sub">{tr.dailyNew} {hoursToNext}t</span>
+                </span>
+                <span className="gp-lv-meta">
+                  {dailyBest ? (
+                    <>
+                      <span className="gp-lv-stars">{"★".repeat(dailyBest.stars)}{"☆".repeat(3 - dailyBest.stars)}</span>
+                      <span className="gp-lv-best">{dailyBest.score.toLocaleString("da-DK")}</span>
+                    </>
+                  ) : (
+                    <span className="gp-lv-new">{tr.newTag}</span>
+                  )}
+                </span>
+              </button>
+            )}
             <div className="gp-levels">
               {MISSIONS.map((m, i) => {
                 const locked = m.id > save.unlocked;
@@ -727,6 +861,16 @@ export default function GarageScene() {
                       )}
                     </span>
                   </button>
+                );
+              })}
+            </div>
+            <div className="gp-achrow" aria-label={tr.achievements}>
+              {ACH.map((a) => {
+                const got = save.ach.includes(a.id);
+                return (
+                  <span key={a.id} className={`gp-ach${got ? "" : " locked"}`} title={`${a.name[lang]} – ${a.desc[lang]}`}>
+                    {a.icon}
+                  </span>
                 );
               })}
             </div>
@@ -755,12 +899,27 @@ export default function GarageScene() {
             <div className="gp-actions">
               <a href="/#vaelg" className="btn btn-green btn-lg gp-book">{tr.book}</a>
               <div className="gp-actions-row">
-                <button className="btn gp-ghost" onClick={() => startMission(missionIdx)}>{tr.again}</button>
+                <button className="btn gp-ghost" onClick={() => (dailyActive ? startDaily() : startMission(missionIdx))}>{tr.again}</button>
                 {result.hasNext && MISSIONS[missionIdx + 1].id <= save.unlocked && (
                   <button className="btn gp-ghost" onClick={() => startMission(missionIdx + 1)}>{tr.next}</button>
                 )}
+                <button className="btn gp-ghost" onClick={takePhoto}>📸 {tr.photo}</button>
                 <button className="btn gp-ghost" onClick={toMenu}>{tr.menu}</button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ---------- photo mode ---------- */}
+      {photo && (
+        <div className="gp-overlay gp-photo">
+          <div className="gp-panel gp-photo-panel">
+            <img src={photo} alt="Elite Vask Car Wash Game" className="gp-photo-img" />
+            <div className="gp-actions-row" style={{ marginTop: 14 }}>
+              <a href={photo} download="elite-vask-carwash.jpg" className="btn btn-green">{tr.download}</a>
+              {canShare && <button className="btn gp-ghost" onClick={sharePhoto}>{tr.share}</button>}
+              <button className="btn gp-ghost" onClick={() => { sndClick(); setPhoto(null); }}>{tr.close}</button>
             </div>
           </div>
         </div>

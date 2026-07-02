@@ -9,7 +9,9 @@ import { useEffect, useMemo, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { FX } from "./fx";
-import { initAudio, setSpray, sndGold } from "@/lib/game/audio";
+import { initAudio, setSpray, sndGold, sndCombo } from "@/lib/game/audio";
+
+const buzz = (p) => { try { navigator.vibrate && navigator.vibrate(p); } catch {} };
 
 export default function Washer({ G, isMobile }) {
   const { gl, camera } = useThree();
@@ -42,6 +44,7 @@ export default function Washer({ G, isMobile }) {
       if (ray.intersectObjects(G.carMeshes, false).length) {
         G.spraying = true;
         G.hasSprayed = true;
+        buzz(12);
         e.stopPropagation(); // OrbitControls (on the wrapper) never sees it
       }
     };
@@ -173,12 +176,15 @@ export default function Washer({ G, isMobile }) {
       const p = G.dirt.sample();
       G.progress = p;
       const delta = p - before;
+      const comboWas = Math.floor(G.combo);
       if (delta > 0.0004) {
         G.combo = Math.min(5, G.combo + delta * 26);
         G.score += Math.round(delta * 9000 * G.combo);
       } else {
         G.combo = Math.max(1, G.combo - 0.22);
       }
+      G.comboMax = Math.max(G.comboMax || 1, G.combo);
+      if (Math.floor(G.combo) > comboWas) { sndCombo(Math.floor(G.combo)); buzz(8); }
       if (G.gold) {
         for (const s of G.gold) {
           if (!s.found && G.dirt.cleanedAt(s.key, s.uv) > 0.55) {
@@ -186,6 +192,7 @@ export default function Washer({ G, isMobile }) {
             G.score += 500;
             G.toast = { msg: G.tr.gold, t: 2.4 };
             sndGold();
+            buzz(30);
           }
         }
       }

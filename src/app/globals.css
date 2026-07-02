@@ -1376,3 +1376,14 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 .gp-loadpct{font-size:12px;font-weight:700;letter-spacing:2px;color:rgba(233,241,236,.5);font-variant-numeric:tabular-nums}
 .gp-camreset{position:absolute;right:14px;top:14px;z-index:6}
 .gp-credit{position:absolute;left:14px;bottom:12px;z-index:5;font-size:10px;letter-spacing:.4px;color:rgba(233,241,236,.3);pointer-events:none}
+
+/* game phase 4: daily challenge, achievements, photo mode */
+.gp-daily{margin-bottom:10px;border-color:rgba(212,175,55,.45);background:linear-gradient(135deg,rgba(212,175,55,.09),rgba(212,175,55,.03))}
+.gp-daily:hover{border-color:rgba(212,175,55,.75);background:linear-gradient(135deg,rgba(212,175,55,.14),rgba(212,175,55,.05))}
+.gp-daily-num{background:rgba(212,175,55,.14)!important;border-color:rgba(212,175,55,.55)!important;color:#f3e2ad!important}
+.gp-daily-sub{display:block;font-size:11px;font-weight:600;color:rgba(233,241,236,.45);margin-top:2px}
+.gp-achrow{display:flex;justify-content:center;gap:9px;margin:16px 0 10px;flex-wrap:wrap}
+.gp-ach{width:38px;height:38px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:17px;background:rgba(212,175,55,.12);border:1px solid rgba(212,175,55,.5);box-shadow:0 0 14px rgba(212,175,55,.15);cursor:help}
+.gp-ach.locked{background:rgba(255,255,255,.03);border-color:var(--line);opacity:.4;filter:grayscale(1)}
+.gp-photo-panel{width:min(720px,94vw);padding:18px}
+.gp-photo-img{width:100%;border-radius:12px;border:1px solid var(--line);display:block}

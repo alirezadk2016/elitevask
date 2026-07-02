@@ -31,6 +31,20 @@ function ensureCtx() {
   sprayGain = ctx.createGain(); sprayGain.gain.value = 0;
   src.connect(sprayFilter); sprayFilter.connect(sprayLp); sprayLp.connect(sprayGain); sprayGain.connect(master);
   src.start();
+
+  // quiet garage ambience: low hum + air rumble
+  const hum = ctx.createOscillator();
+  hum.type = "sine"; hum.frequency.value = 55;
+  const humGain = ctx.createGain(); humGain.gain.value = 0.012;
+  hum.connect(humGain); humGain.connect(master);
+  hum.start();
+  const airSrc = ctx.createBufferSource();
+  airSrc.buffer = buf; airSrc.loop = true; airSrc.playbackRate.value = 0.5;
+  const airLp = ctx.createBiquadFilter();
+  airLp.type = "lowpass"; airLp.frequency.value = 220;
+  const airGain = ctx.createGain(); airGain.gain.value = 0.03;
+  airSrc.connect(airLp); airLp.connect(airGain); airGain.connect(master);
+  airSrc.start();
   return ctx;
 }
 
@@ -73,6 +87,13 @@ export function sndGold() {
 export function sndStar(i) {
   ensureCtx(); if (!ctx) return;
   tone(620 + i * 180, ctx.currentTime, 0.3, "triangle", 0.2);
+}
+
+export function sndCombo(level) {
+  ensureCtx(); if (!ctx) return;
+  const t = ctx.currentTime;
+  tone(440 + level * 110, t, 0.09, "square", 0.07);
+  tone(660 + level * 110, t + 0.06, 0.12, "square", 0.06);
 }
 
 export function sndComplete() {

@@ -15,9 +15,55 @@ export const SAVE_KEY = "ev_game_v2";
 export function loadSave() {
   try {
     const s = JSON.parse(localStorage.getItem(SAVE_KEY) || "null");
-    if (s && typeof s === "object") return { unlocked: s.unlocked || 1, best: s.best || {} };
+    if (s && typeof s === "object") {
+      return { unlocked: s.unlocked || 1, best: s.best || {}, ach: s.ach || [], daily: s.daily || null };
+    }
   } catch {}
-  return { unlocked: 1, best: {} };
+  return { unlocked: 1, best: {}, ach: [], daily: null };
+}
+
+/* ---- achievements ---- */
+export const ACH = [
+  { id: "first",   icon: "🫧", name: { da: "Første vask",   en: "First wash" },     desc: { da: "Gennemfør din første mission", en: "Complete your first mission" } },
+  { id: "perfect", icon: "✨", name: { da: "Perfektionist", en: "Perfectionist" },  desc: { da: "Afslut med 100% ren bil", en: "Finish with the car 100% clean" } },
+  { id: "gold",    icon: "🏅", name: { da: "Guldjæger",     en: "Gold hunter" },    desc: { da: "Find alt guld-snavs i én mission", en: "Find all golden dirt in one mission" } },
+  { id: "combo",   icon: "⚡", name: { da: "Kombo-konge",   en: "Combo king" },     desc: { da: "Nå ×5 combo", en: "Reach a ×5 combo" } },
+  { id: "fast",    icon: "⏱", name: { da: "Lynhurtig",     en: "Lightning fast" }, desc: { da: "Få 3 stjerner i en mission", en: "Earn 3 stars in a mission" } },
+  { id: "elite",   icon: "👑", name: { da: "Elite-mester",  en: "Elite master" },   desc: { da: "Gennemfør Elite Special", en: "Complete Elite Special" } },
+];
+
+/* ---- daily challenge (deterministic per local date) ---- */
+const DAILY_PAINTS = ["#4b2a78", "#0d5c66", "#7a2f5e", "#274e13", "#6e4a10", "#22303c", "#5c1f2f"];
+
+export function todayStr() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+function hash(str) {
+  let h = 2166136261;
+  for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return h >>> 0;
+}
+
+export function dailyMission(dateStr) {
+  let a = hash(dateStr);
+  const rnd = () => {
+    a |= 0; a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+  const time3 = Math.round(85 + rnd() * 40);
+  return {
+    id: "daily", daily: true, date: dateStr,
+    name: { da: "Dagens udfordring", en: "Daily challenge" },
+    paint: DAILY_PAINTS[(rnd() * DAILY_PAINTS.length) | 0],
+    metal: 0.92,
+    scrub: 0.5 + rnd() * 0.3,
+    time3, time2: time3 + 55,
+    golds: 4,
+  };
 }
 
 export function storeSave(save) {
@@ -42,6 +88,8 @@ export const T3 = {
     gold: "Guld-snavs fundet! +500", waterLow: "Vandtank genoplader…",
     hintDesktop: "Hold musen nede på bilen og bevæg den for at vaske · Træk i baggrunden for at dreje",
     hintMobile: "Hold fingeren på bilen og bevæg den for at vaske · Træk i baggrunden for at dreje",
+    daily: "Dagens udfordring", dailyNew: "Ny udfordring om", achievements: "Præstationer",
+    photo: "Foto", download: "Gem billede", share: "Del", close: "Luk", achPrefix: "Præstation",
   },
   en: {
     title: "Car Wash Game", tagline: "Pick a mission – and make the car shine!",
@@ -54,5 +102,7 @@ export const T3 = {
     gold: "Golden dirt found! +500", waterLow: "Water tank recharging…",
     hintDesktop: "Hold the mouse on the car and move it to wash · Drag the background to rotate",
     hintMobile: "Hold your finger on the car and move to wash · Drag the background to rotate",
+    daily: "Daily challenge", dailyNew: "New challenge in", achievements: "Achievements",
+    photo: "Photo", download: "Save image", share: "Share", close: "Close", achPrefix: "Achievement",
   },
 };
