@@ -1,7 +1,7 @@
 "use client";
 import dynamic from "next/dynamic";
 
-const CarWashGame = dynamic(() => import("@/components/game/CarWashGame"), {
+const GarageScene = dynamic(() => import("@/components/game/GarageScene"), {
   ssr: false,
   loading: () => (
     <div className="gp-loading">
@@ -23,7 +23,7 @@ export default function GameClient() {
         <a href="/#vaelg" className="btn btn-green gp-bar-book">Book nu</a>
       </header>
       <div className="gp-stage">
-        <CarWashGame />
+        <GarageScene />
       </div>
     </div>
   );

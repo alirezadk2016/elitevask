@@ -13,7 +13,10 @@ const securityHeaders = [
     key: 'Content-Security-Policy',
     value: [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' https://invitejs.trustpilot.com https://widget.trustpilot.com https://www.googletagmanager.com https://va.vercel-scripts.com",
+      // 'wasm-unsafe-eval' + blob: workers are required by the Draco mesh
+      // decoder used for the /game 3D car model (no JS eval is allowed).
+      "script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' blob: https://invitejs.trustpilot.com https://widget.trustpilot.com https://www.googletagmanager.com https://va.vercel-scripts.com",
+      "worker-src 'self' blob:",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' data: https://fonts.gstatic.com",
       "img-src 'self' data: blob: https:",
