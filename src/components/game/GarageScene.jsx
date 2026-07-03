@@ -107,11 +107,35 @@ function Car({ G, isMobile }) {
 
   const built = useMemo(() => {
     const root = scene;
+    /* metallic flake shimmer: tiny random-normal noise tiled across the
+       body – catches the lights like real metallic paint */
+    const flakeCv = document.createElement("canvas");
+    flakeCv.width = flakeCv.height = 128;
+    {
+      const fg = flakeCv.getContext("2d");
+      fg.fillStyle = "rgb(128,128,255)";
+      fg.fillRect(0, 0, 128, 128);
+      const img = fg.getImageData(0, 0, 128, 128);
+      for (let i = 0; i < img.data.length; i += 4) {
+        if (Math.random() < 0.32) {
+          img.data[i] = 128 + (Math.random() - 0.5) * 46;
+          img.data[i + 1] = 128 + (Math.random() - 0.5) * 46;
+        }
+      }
+      fg.putImageData(img, 0, 0);
+    }
+    const flakeTex = new THREE.CanvasTexture(flakeCv);
+    flakeTex.wrapS = flakeTex.wrapT = THREE.RepeatWrapping;
+    flakeTex.repeat.set(26, 26);
+
     const body = new THREE.MeshPhysicalMaterial({
       color: new THREE.Color("#0e4d2c"), // Elite emerald
-      metalness: 0.92, roughness: 0.19,
-      clearcoat: 1.0, clearcoatRoughness: 0.026,
-      envMapIntensity: 2.0,
+      metalness: 0.95, roughness: 0.16,
+      clearcoat: 1.0, clearcoatRoughness: 0.02,
+      envMapIntensity: 2.2,
+      specularIntensity: 1.0,
+      normalMap: flakeTex,
+      normalScale: new THREE.Vector2(0.09, 0.09),
     });
     const details = new THREE.MeshStandardMaterial({
       color: "#e8ecef", metalness: 1.0, roughness: 0.28, envMapIntensity: 1.4,
@@ -157,7 +181,7 @@ function Car({ G, isMobile }) {
       const spec = SPEC.find((s) => s.match(o));
       if (spec && dirt.add(o, spec.opt)) cleanables.push(o);
     });
-    return { root, dirt, cleanables, bodyTex };
+    return { root, dirt, cleanables, bodyTex, flakeTex };
   }, [scene, isMobile]);
 
   useEffect(() => {
@@ -169,6 +193,7 @@ function Car({ G, isMobile }) {
       if (G.dirt === built.dirt) { G.dirt = null; G.carMeshes = []; G.bodyMat = null; }
       built.dirt.dispose();
       built.bodyTex.dispose();
+      built.flakeTex.dispose();
     };
   }, [built, G]);
 

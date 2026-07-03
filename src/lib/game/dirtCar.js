@@ -115,46 +115,95 @@ export function bodyAtlasTexture() {
     g.fillStyle = grad;
     g.fillRect(x0, yTop, w, h);
 
-    // dried mud blotches: dark wet core + lighter dried crust ring + drips
-    for (let i = 0; i < 44; i++) {
+    // break the film's uniformity: soft cloudy variation + washed-thin gaps
+    for (let i = 0; i < 10; i++) {
+      const cx2 = x0 + rnd() * w, cy2 = yBot - rnd() * h * 0.8, cr = 30 + rnd() * 70;
+      const cgr = g.createRadialGradient(cx2, cy2, 0, cx2, cy2, cr);
+      cgr.addColorStop(0, `rgba(70,56,40,${0.12 + rnd() * 0.16})`);
+      cgr.addColorStop(1, "rgba(70,56,40,0)");
+      g.fillStyle = cgr;
+      g.beginPath(); g.arc(cx2, cy2, cr, 0, Math.PI * 2); g.fill();
+    }
+    g.save();
+    g.globalCompositeOperation = "destination-out";
+    for (let i = 0; i < 7; i++) {
+      const cx2 = x0 + rnd() * w, cy2 = yTop + rnd() * h * 0.7, cr = 24 + rnd() * 55;
+      const cgr = g.createRadialGradient(cx2, cy2, 0, cx2, cy2, cr);
+      cgr.addColorStop(0, `rgba(0,0,0,${0.14 + rnd() * 0.18})`);
+      cgr.addColorStop(1, "rgba(0,0,0,0)");
+      g.fillStyle = cgr;
+      g.beginPath(); g.arc(cx2, cy2, cr, 0, Math.PI * 2); g.fill();
+    }
+    g.restore();
+
+    // organic mud blobs: 3–5 overlapping lobes + crust halo + drips + spray halo
+    for (let i = 0; i < 34; i++) {
       const bx = x0 + rnd() * w;
-      const by = yBot - Math.pow(rnd(), 2.1) * h * 0.75;
-      const r = 8 + rnd() * 30;
-      const col = MUD[(rnd() * MUD.length) | 0];
-      const rot = rnd() * Math.PI, squash = 0.4 + rnd() * 0.6;
-      if (rnd() < 0.55) { // dried crust halo
-        const cg = g.createRadialGradient(bx, by, r * 0.55, bx, by, r * 1.25);
+      const by = yBot - Math.pow(rnd(), 2.1) * h * 0.72;
+      const r = 7 + rnd() * 24;
+      const col = rnd() < 0.12 ? "#241b12" /* oily spot */ : MUD[(rnd() * MUD.length) | 0];
+      if (rnd() < 0.5) { // dried crust halo behind the blob
+        const cg = g.createRadialGradient(bx, by, r * 0.5, bx, by, r * 1.45);
         cg.addColorStop(0, CRUST + "00");
-        cg.addColorStop(0.55, CRUST + "66");
+        cg.addColorStop(0.55, CRUST + "59");
         cg.addColorStop(1, CRUST + "00");
         g.fillStyle = cg;
-        g.beginPath(); g.ellipse(bx, by, r * 1.25, r * 1.25 * squash, rot, 0, Math.PI * 2); g.fill();
+        g.beginPath(); g.arc(bx, by, r * 1.45, 0, Math.PI * 2); g.fill();
       }
-      const rg = g.createRadialGradient(bx, by, 0, bx, by, r);
-      rg.addColorStop(0, col + "cc");
-      rg.addColorStop(0.7, col + "88");
-      rg.addColorStop(1, col + "00");
-      g.fillStyle = rg;
-      g.beginPath(); g.ellipse(bx, by, r, r * squash, rot, 0, Math.PI * 2); g.fill();
-      if (rnd() < 0.4) { // drip trail below the blotch
-        const dl = 12 + rnd() * 34, dw = 2 + rnd() * 3.4;
+      const lobes = 3 + (rnd() * 3 | 0);
+      for (let k = 0; k < lobes; k++) {
+        const lx = bx + (rnd() - 0.5) * r * 1.3;
+        const ly = by + (rnd() - 0.5) * r * 0.9;
+        const lr = r * (0.35 + rnd() * 0.55);
+        const rg = g.createRadialGradient(lx, ly, 0, lx, ly, lr);
+        rg.addColorStop(0, col + "c4");
+        rg.addColorStop(0.65, col + "7d");
+        rg.addColorStop(1, col + "00");
+        g.fillStyle = rg;
+        g.beginPath();
+        g.ellipse(lx, ly, lr, lr * (0.55 + rnd() * 0.5), rnd() * Math.PI, 0, Math.PI * 2);
+        g.fill();
+      }
+      // spray halo of fine specks around the blob
+      for (let k = 0; k < 14; k++) {
+        const a = rnd() * Math.PI * 2, rr = r * (1.1 + rnd() * 0.9);
+        g.fillStyle = col + Math.floor(40 + rnd() * 90).toString(16).padStart(2, "0");
+        const s = 0.8 + rnd() * 2;
+        g.fillRect(bx + Math.cos(a) * rr, by + Math.sin(a) * rr * 0.7, s, s);
+      }
+      if (rnd() < 0.42) { // drip trail below
+        const dl = 10 + rnd() * 36, dw = 1.6 + rnd() * 3;
         const lg = g.createLinearGradient(0, by, 0, by + dl);
-        lg.addColorStop(0, col + "99");
+        lg.addColorStop(0, col + "8c");
         lg.addColorStop(1, col + "00");
         g.fillStyle = lg;
-        g.fillRect(bx - dw / 2 + (rnd() - 0.5) * 4, by, dw, dl);
+        const wob = (rnd() - 0.5) * 3;
+        g.fillRect(bx - dw / 2 + wob, by, dw, dl * 0.6);
+        g.fillRect(bx - dw / 2 + wob * 1.6, by + dl * 0.5, dw * 0.7, dl * 0.5);
       }
     }
-    // wheel-arch splatter clusters (wheels sit around 20% / 80% of length)
+    // wheel-arch splatter (wheels sit around 20% / 80% of length):
+    // fine specks + horizontal wind-smeared streaks thrown backwards
     const clusters = cell.axis === 2 ? [0.2, 0.8] : [0.5];
     for (const cu of clusters) {
       const cxp = x0 + cu * w;
-      for (let i = 0; i < 340; i++) {
-        const sx = cxp + (rnd() - 0.5) * w * 0.24;
+      for (let i = 0; i < 300; i++) {
+        const sx = cxp + (rnd() - 0.5) * w * 0.26;
         const sy = yBot - Math.pow(rnd(), 2.4) * h * 0.55;
         g.fillStyle = `rgba(${52 + rnd() * 36 | 0},${42 + rnd() * 28 | 0},${28 + rnd() * 22 | 0},${0.35 + rnd() * 0.5})`;
         const s = 1 + rnd() * 3;
         g.fillRect(sx, sy, s, s * (1 + rnd()));
+      }
+      for (let i = 0; i < 26; i++) { // driving smears
+        const sx = cxp + (rnd() - 0.5) * w * 0.2;
+        const sy = yBot - Math.pow(rnd(), 1.9) * h * 0.45;
+        const len = 8 + rnd() * 30, sh = 1.2 + rnd() * 2.4;
+        const dirn = rnd() < 0.5 ? -1 : 1;
+        const lg = g.createLinearGradient(sx, 0, sx + len * dirn, 0);
+        lg.addColorStop(0, `rgba(58,45,31,${0.4 + rnd() * 0.3})`);
+        lg.addColorStop(1, "rgba(58,45,31,0)");
+        g.fillStyle = lg;
+        g.fillRect(dirn > 0 ? sx : sx - len, sy, len, sh);
       }
     }
     // general specks
