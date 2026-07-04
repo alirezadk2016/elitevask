@@ -322,6 +322,135 @@ function Bucket({ position, color = "#123322" }) {
   );
 }
 
+/* ---------- procedural environment textures ---------- */
+function wallTexture() {
+  const c = document.createElement("canvas");
+  c.width = c.height = 512;
+  const g = c.getContext("2d");
+  g.fillStyle = "#0d0f13";
+  g.fillRect(0, 0, 512, 512);
+  for (let i = 0; i < 2600; i++) { // concrete noise
+    g.fillStyle = `rgba(${16 + Math.random() * 22 | 0},${18 + Math.random() * 22 | 0},${22 + Math.random() * 24 | 0},${0.1 + Math.random() * 0.2})`;
+    g.fillRect(Math.random() * 512, Math.random() * 512, 1 + Math.random() * 3, 1 + Math.random() * 3);
+  }
+  g.strokeStyle = "#07080b"; // panel seams
+  g.lineWidth = 5;
+  for (let i = 0; i <= 4; i++) {
+    g.beginPath(); g.moveTo(i * 128, 0); g.lineTo(i * 128, 512); g.stroke();
+    g.beginPath(); g.moveTo(0, i * 128); g.lineTo(512, i * 128); g.stroke();
+  }
+  g.strokeStyle = "rgba(60,66,76,.5)"; // seam highlight
+  g.lineWidth = 1;
+  for (let i = 0; i <= 4; i++) {
+    g.beginPath(); g.moveTo(i * 128 + 3, 0); g.lineTo(i * 128 + 3, 512); g.stroke();
+    g.beginPath(); g.moveTo(0, i * 128 + 3); g.lineTo(512, i * 128 + 3); g.stroke();
+  }
+  const t = new THREE.CanvasTexture(c);
+  t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  t.colorSpace = THREE.SRGBColorSpace;
+  t.anisotropy = 4;
+  return t;
+}
+
+function shaftTexture() {
+  const c = document.createElement("canvas");
+  c.width = 64; c.height = 256;
+  const g = c.getContext("2d");
+  const gr = g.createLinearGradient(0, 0, 0, 256);
+  gr.addColorStop(0, "rgba(255,255,255,0)");    // cone base (floor)
+  gr.addColorStop(0.75, "rgba(255,255,255,.35)");
+  gr.addColorStop(1, "rgba(255,255,255,.8)");   // apex (at the lamp)
+  g.fillStyle = gr;
+  g.fillRect(0, 0, 64, 256);
+  return new THREE.CanvasTexture(c);
+}
+
+function floorDecalTexture() {
+  const c = document.createElement("canvas");
+  c.width = 1024; c.height = 640;
+  const g = c.getContext("2d");
+  g.clearRect(0, 0, 1024, 640);
+  g.strokeStyle = "rgba(212,175,55,.85)"; // gold lane corners
+  g.lineWidth = 10;
+  for (const [x, y, dx, dy] of [[60, 60, 1, 1], [964, 60, -1, 1], [60, 580, 1, -1], [964, 580, -1, -1]]) {
+    g.beginPath(); g.moveTo(x, y + dy * 90); g.lineTo(x, y); g.lineTo(x + dx * 90, y); g.stroke();
+  }
+  g.textAlign = "center";
+  g.fillStyle = "rgba(233,241,236,.5)";
+  g.font = "800 92px Manrope, Arial, sans-serif";
+  g.fillText("ELITE VASK", 512, 350);
+  g.font = "600 34px Manrope, Arial, sans-serif";
+  g.fillStyle = "rgba(212,175,55,.55)";
+  g.fillText("· PREMIUM DETAILING BAY ·", 512, 415);
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  t.anisotropy = 8;
+  return t;
+}
+
+/* showroom podium under the car: brushed disc + glowing gold ring */
+function Podium() {
+  return (
+    <group>
+      <mesh position={[0, 0.011, 0]} receiveShadow>
+        <cylinderGeometry args={[3.35, 3.4, 0.022, 64]} />
+        <meshStandardMaterial color="#14171b" metalness={0.85} roughness={0.32} envMapIntensity={0.8} />
+      </mesh>
+      <mesh position={[0, 0.024, 0]} rotation-x={-Math.PI / 2}>
+        <ringGeometry args={[3.22, 3.32, 64]} />
+        <meshStandardMaterial color="#d4af37" emissive="#d4af37" emissiveIntensity={1.8} toneMapped={false} />
+      </mesh>
+      <mesh position={[0, 0.005, 0]} rotation-x={-Math.PI / 2}>
+        <ringGeometry args={[3.4, 3.85, 64]} />
+        <meshBasicMaterial color="#d4af37" transparent opacity={0.08} blending={THREE.AdditiveBlending} depthWrite={false} />
+      </mesh>
+    </group>
+  );
+}
+
+function TireStack({ position }) {
+  return (
+    <group position={position}>
+      {[0, 1, 2, 3].map((i) => (
+        <mesh key={i} position={[(i % 2) * 0.05, 0.13 + i * 0.24, (i % 3) * 0.04]} rotation-x={Math.PI / 2} rotation-z={i * 0.4} castShadow>
+          <torusGeometry args={[0.31, 0.12, 12, 24]} />
+          <meshStandardMaterial color="#121212" roughness={0.92} />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
+function Toolbox({ position, rotation = 0 }) {
+  return (
+    <group position={position} rotation-y={rotation}>
+      <mesh position={[0, 0.5, 0]} castShadow>
+        <boxGeometry args={[0.85, 0.88, 0.48]} />
+        <meshStandardMaterial color="#5e1420" metalness={0.65} roughness={0.32} />
+      </mesh>
+      {[0.26, 0.44, 0.62, 0.8].map((y) => (
+        <mesh key={y} position={[0, y, 0.245]}>
+          <boxGeometry args={[0.78, 0.015, 0.01]} />
+          <meshStandardMaterial color="#2a0a10" roughness={0.6} />
+        </mesh>
+      ))}
+      {[0.35, 0.53, 0.71].map((y) => (
+        <mesh key={y} position={[0, y, 0.25]} rotation-z={Math.PI / 2}>
+          <cylinderGeometry args={[0.012, 0.012, 0.3, 8]} />
+          <meshStandardMaterial color="#cfd6dc" metalness={1} roughness={0.3} />
+        </mesh>
+      ))}
+      <mesh position={[0, 0.97, -0.05]} castShadow><boxGeometry args={[0.3, 0.1, 0.2]} /><meshStandardMaterial color="#171a1f" roughness={0.5} /></mesh>
+      {[[-0.32, -0.16], [0.32, -0.16], [-0.32, 0.16], [0.32, 0.16]].map(([x, z], i) => (
+        <mesh key={i} position={[x, 0.05, z]} rotation-z={Math.PI / 2}>
+          <cylinderGeometry args={[0.05, 0.05, 0.04, 10]} />
+          <meshStandardMaterial color="#0a0c0e" roughness={0.8} />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
 /* ---------- LED strip helper ---------- */
 function Led({ position, size, color = "#3da8ff", intensity = 4, rotation = [0, 0, 0], innerRef }) {
   return (
@@ -335,8 +464,10 @@ function Led({ position, size, color = "#3da8ff", intensity = 4, rotation = [0, 
 /* ---------- garage ---------- */
 function Garage({ G, isMobile }) {
   const logo = useMemo(() => logoTexture(), []);
-  useEffect(() => () => logo.dispose(), [logo]);
-  const wallMat = <meshStandardMaterial color="#0b0c0e" roughness={0.94} metalness={0.05} />;
+  const wallTex = useMemo(() => { const t = wallTexture(); t.repeat.set(5, 1.6); return t; }, []);
+  const wallTexSide = useMemo(() => { const t = wallTexture(); t.repeat.set(4.4, 1.6); return t; }, []);
+  const decalTex = useMemo(() => floorDecalTexture(), []);
+  useEffect(() => () => { logo.dispose(); wallTex.dispose(); wallTexSide.dispose(); decalTex.dispose(); }, [logo, wallTex, wallTexSide, decalTex]);
 
   return (
     <group>
@@ -354,11 +485,24 @@ function Garage({ G, isMobile }) {
         )}
       </mesh>
 
-      {/* walls + ceiling (matte black concrete) */}
-      <mesh position={[0, 3.2, -9]}><boxGeometry args={[30, 6.4, 0.4]} />{wallMat}</mesh>
-      <mesh position={[-11, 3.2, 0]}><boxGeometry args={[0.4, 6.4, 26]} />{wallMat}</mesh>
-      <mesh position={[11, 3.2, 0]}><boxGeometry args={[0.4, 6.4, 26]} />{wallMat}</mesh>
+      {/* showroom podium + floor decal */}
+      <Podium />
+      <mesh position={[0, 0.004, 4.6]} rotation-x={-Math.PI / 2}>
+        <planeGeometry args={[8.8, 5.5]} />
+        <meshBasicMaterial map={decalTex} transparent opacity={0.5} depthWrite={false} />
+      </mesh>
+
+      {/* panelled concrete walls + ceiling */}
+      <mesh position={[0, 3.2, -9]}><boxGeometry args={[30, 6.4, 0.4]} /><meshStandardMaterial map={wallTex} roughness={0.9} metalness={0.08} /></mesh>
+      <mesh position={[-11, 3.2, 0]}><boxGeometry args={[0.4, 6.4, 26]} /><meshStandardMaterial map={wallTexSide} roughness={0.9} metalness={0.08} /></mesh>
+      <mesh position={[11, 3.2, 0]}><boxGeometry args={[0.4, 6.4, 26]} /><meshStandardMaterial map={wallTexSide} roughness={0.9} metalness={0.08} /></mesh>
       <mesh position={[0, 6.4, 0]} rotation-x={Math.PI / 2}><planeGeometry args={[30, 26]} /><meshStandardMaterial color="#060708" roughness={1} /></mesh>
+      {/* dark ceiling beams */}
+      {[-5.5, 0, 5.5].map((x) => (
+        <mesh key={"b" + x} position={[x, 6.2, 0]}><boxGeometry args={[0.5, 0.4, 25]} /><meshStandardMaterial color="#0a0c0f" metalness={0.4} roughness={0.6} /></mesh>
+      ))}
+      {/* gold trim line along the back wall */}
+      <mesh position={[0, 4.9, -8.77]}><boxGeometry args={[29.4, 0.05, 0.04]} /><meshStandardMaterial color="#d4af37" emissive="#d4af37" emissiveIntensity={1.4} toneMapped={false} /></mesh>
       {/* concrete wall ribs */}
       {[-8, -4, 4, 8].map((x) => (
         <mesh key={"r" + x} position={[x, 3.2, -8.78]}><boxGeometry args={[0.18, 6.4, 0.06]} /><meshStandardMaterial color="#101216" roughness={0.85} /></mesh>
@@ -403,7 +547,20 @@ function Garage({ G, isMobile }) {
       <pointLight position={[10, 2.9, -4]} color="#2f7fd4" intensity={10} distance={11} decay={2} />
       <pointLight position={[0, 1.4, -8]} color="#2f7fd4" intensity={8} distance={9} decay={2} />
 
+      {/* round downlights over the bay – they mirror beautifully in the floor */}
+      {[0, 1, 2, 3, 4, 5].map((i) => {
+        const a = (i / 6) * Math.PI * 2;
+        return (
+          <mesh key={"dl" + i} position={[Math.cos(a) * 4.4, 6.17, Math.sin(a) * 3.6]} rotation-x={Math.PI / 2}>
+            <circleGeometry args={[0.21, 20]} />
+            <meshStandardMaterial color="#fff" emissive="#eef4ff" emissiveIntensity={2.6} toneMapped={false} side={THREE.DoubleSide} />
+          </mesh>
+        );
+      })}
+
       {/* props */}
+      <TireStack position={[9.3, 0, 2.4]} />
+      <Toolbox position={[-9.7, 0, 0.9]} rotation={Math.PI / 2} />
       <Shelf position={[-10.2, 0, -5.2]} rotation={Math.PI / 2} />
       <Shelf position={[10.2, 0, -3]} rotation={-Math.PI / 2} />
       <HoseReel position={[-10.74, 1.9, 1.6]} rotation={Math.PI / 2} />
@@ -499,14 +656,17 @@ function GoldSpots({ G, attempt }) {
   );
 }
 
-/* ---------- soft volumetric cones (fake, cheap, bloom-friendly) ---------- */
+/* ---------- soft light shafts (gradient-textured, bright at the lamp) ---------- */
 function VolumetricCones() {
+  const tex = useMemo(() => shaftTexture(), []);
+  useEffect(() => () => tex.dispose(), [tex]);
   return (
     <group>
       {[-2.4, 2.4].map((x) => (
         <mesh key={x} position={[x, 3.6, 0.6]}>
-          <coneGeometry args={[2.1, 5.6, 26, 1, true]} />
-          <meshBasicMaterial color="#9db9dd" transparent opacity={0.028} blending={THREE.AdditiveBlending} depthWrite={false} side={THREE.DoubleSide} />
+          <coneGeometry args={[2.0, 5.6, 26, 1, true]} />
+          <meshBasicMaterial map={tex} color="#bcd2ea" transparent opacity={0.16}
+            blending={THREE.AdditiveBlending} depthWrite={false} side={THREE.DoubleSide} />
         </mesh>
       ))}
     </group>
