@@ -2,15 +2,27 @@
    finishes and increasingly stubborn dirt (lower brush efficiency + tighter
    star times). Local best scores + unlock chain in localStorage. */
 
-/* Hard limit: the wash must be done in 3 minutes or it's game over. */
-export const TIME_LIMIT = 180;
+/* Hard limit for the FULL detailing pipeline (6 stages), then game over. */
+export const TIME_LIMIT = 300;
+
+/* The Elite Vask detailing pipeline – played in order, auto-advancing. */
+export const STAGES = [
+  { id: "forvask",  icon: "💦", type: "wash",   goal: 0.5,   name: { da: "Forvask",       en: "Pre-wash" }, hint: { da: "Spul det værste mudder af", en: "Blast off the heavy mud" } },
+  { id: "skum",     icon: "🫧", type: "foam",   goal: 0.86,  name: { da: "Skum",          en: "Foam" },     hint: { da: "Dæk hele bilen i skum", en: "Cover the whole car in foam" } },
+  { id: "skyl",     icon: "🚿", type: "rinse",  goal: 0.995, name: { da: "Højtryksskyl",  en: "Rinse" },    hint: { da: "Skyl skum og snavs helt af", en: "Rinse all foam and dirt off" } },
+  { id: "faelge",   icon: "🛞", type: "wheels", goal: 0.94,  name: { da: "Fælge",         en: "Rims" },     hint: { da: "Skrub fælge og dæk rene", en: "Scrub rims and tires clean" } },
+  { id: "polering", icon: "✨", type: "polish", goal: 0.84,  name: { da: "Polering",      en: "Polish" },   hint: { da: "Polér lakken – hold og bevæg", en: "Buff the paint – hold and move" } },
+  { id: "voks",     icon: "🌟", type: "wax",    goal: 0.84,  name: { da: "Voks",          en: "Wax" },      hint: { da: "Læg beskyttende voks på", en: "Apply protective wax" } },
+];
+
+export const DISCOUNT_CODE = "GAME10";
 
 export const MISSIONS = [
-  { id: 1, name: { da: "Hverdagssnavs",    en: "Daily dirt" },    paint: "#0e4d2c", metal: 0.9,  scrub: 1.0,  time3: 70,  time2: 115 },
-  { id: 2, name: { da: "Efter regnvejr",   en: "After the rain" }, paint: "#15171c", metal: 0.9,  scrub: 0.8,  time3: 80,  time2: 125 },
-  { id: 3, name: { da: "Grusvej",          en: "Gravel road" },    paint: "#8b95a0", metal: 0.95, scrub: 0.66, time3: 90,  time2: 135 },
-  { id: 4, name: { da: "Vinter & vejsalt", en: "Winter salt" },    paint: "#7d1620", metal: 0.9,  scrub: 0.56, time3: 100, time2: 148 },
-  { id: 5, name: { da: "Elite Special",    en: "Elite Special" },  paint: "#b8912f", metal: 1.0,  scrub: 0.5,  time3: 110, time2: 160 },
+  { id: 1, name: { da: "Hverdagssnavs",    en: "Daily dirt" },    paint: "#0e4d2c", metal: 0.9,  scrub: 1.0,  time3: 150, time2: 215 },
+  { id: 2, name: { da: "Efter regnvejr",   en: "After the rain" }, paint: "#15171c", metal: 0.9,  scrub: 0.82, time3: 165, time2: 230 },
+  { id: 3, name: { da: "Grusvej",          en: "Gravel road" },    paint: "#8b95a0", metal: 0.95, scrub: 0.7,  time3: 180, time2: 245 },
+  { id: 4, name: { da: "Vinter & vejsalt", en: "Winter salt" },    paint: "#7d1620", metal: 0.9,  scrub: 0.6,  time3: 195, time2: 260 },
+  { id: 5, name: { da: "Elite Special",    en: "Elite Special" },  paint: "#b8912f", metal: 1.0,  scrub: 0.54, time3: 210, time2: 275 },
 ];
 
 export const SAVE_KEY = "ev_game_v2";
@@ -57,14 +69,14 @@ export function dailyMission(dateStr) {
     t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
-  const time3 = Math.round(75 + rnd() * 30);
+  const time3 = Math.round(160 + rnd() * 40);
   return {
     id: "daily", daily: true, date: dateStr,
     name: { da: "Dagens udfordring", en: "Daily challenge" },
     paint: DAILY_PAINTS[(rnd() * DAILY_PAINTS.length) | 0],
     metal: 0.92,
     scrub: 0.55 + rnd() * 0.3,
-    time3, time2: time3 + 45,
+    time3, time2: time3 + 60,
     golds: 4,
   };
 }
@@ -95,6 +107,8 @@ export const T3 = {
     photo: "Foto", download: "Gem billede", share: "Del", close: "Luk", achPrefix: "Præstation",
     timeUp: "Tiden er udløbet!", timeUpSub: "Bilen nåede ikke at blive helt ren – prøv igen!",
     wax: "Voks fælgene", waxHint: "Sigt på fælgene og hold for at vokse", waxDone: "Fælg vokset! +250 ✨",
+    stage: "TRIN", stageDone: "klaret", discount: "Din belønning: 10% rabat på en rigtig bilvask",
+    discountNote: "Nævn koden når du booker", finaleSub: "Forestil dig, hvad Elite Vask kan gøre for din rigtige bil.",
   },
   en: {
     title: "Car Wash Game", tagline: "Pick a mission – and make the car shine!",
@@ -111,5 +125,7 @@ export const T3 = {
     photo: "Photo", download: "Save image", share: "Share", close: "Close", achPrefix: "Achievement",
     timeUp: "Time's up!", timeUpSub: "The car didn't get fully clean – try again!",
     wax: "Wax the rims", waxHint: "Aim at the rims and hold to wax", waxDone: "Rim waxed! +250 ✨",
+    stage: "STAGE", stageDone: "done", discount: "Your reward: 10% off a real car wash",
+    discountNote: "Mention the code when you book", finaleSub: "Imagine what Elite Vask can do for your real car.",
   },
 };

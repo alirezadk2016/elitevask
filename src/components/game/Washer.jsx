@@ -17,6 +17,8 @@ import { TIME_LIMIT } from "@/lib/game/campaign";
 const buzz = (p) => { try { navigator.vibrate && navigator.vibrate(p); } catch {} };
 const WORLD_UP = new THREE.Vector3(0, 1, 0);
 const JET_SPEED = 15;
+const isWheel = (m) => /^(rim_|tire|wheel)/.test(m.name);
+const isBody = (m) => !isWheel(m);
 
 export default function Washer({ G, isMobile }) {
   const { gl, camera } = useThree();
@@ -89,15 +91,19 @@ export default function Washer({ G, isMobile }) {
       }
     }
 
-    /* water tank (waxing uses no water) */
-    const waxMode = G.tool === "wax";
+    /* current detailing stage decides the tool behaviour */
+    const st = G.stageType || "wash";
+    const usesWater = st === "wash" || st === "rinse" || st === "wheels";
+    const isCoat = st === "foam" || st === "polish" || st === "wax";
+
+    /* water tank (only the water stages drain it) */
     const wantsSpray = G.spraying && playing;
-    let spraying = wantsSpray && (waxMode || (G.water > 0.5 && !G.tankLock));
-    if (!waxMode) {
+    let spraying = wantsSpray && (!usesWater || (G.water > 0.5 && !G.tankLock));
+    if (usesWater) {
       if (wantsSpray && G.water <= 0.5) G.tankLock = true;
       if (G.tankLock && G.water > 18) G.tankLock = false;
     }
-    G.water = Math.max(0, Math.min(100, G.water + (spraying && !waxMode ? -11 : 22) * dt));
+    G.water = Math.max(0, Math.min(100, G.water + (spraying && usesWater ? -11 : 22) * dt));
 
     /* aim */
     ray.setFromCamera(G.pointer, camera);
@@ -142,7 +148,7 @@ export default function Washer({ G, isMobile }) {
          reads as one continuous water line at any frame rate; the spread
          cone widens with distance like a real high-pressure jet */
       const jt = fxJet.current;
-      if (jt && !waxMode) {
+      if (jt && usesWater) {
         tmp.side.crossVectors(dir, WORLD_UP);
         if (tmp.side.lengthSq() < 1e-4) tmp.side.set(1, 0, 0); else tmp.side.normalize();
         tmp.up2.crossVectors(tmp.side, dir);
@@ -167,109 +173,102 @@ export default function Washer({ G, isMobile }) {
         }
       }
 
-      if (hit && waxMode) {
-        /* wax the rims: hold on a rim to polish it to a mirror shine */
-        const nm = hit.object.name;
-        if (/^rim_/.test(nm)) {
-          G.waxLevels = G.waxLevels || {};
-          const before = G.waxLevels[nm] || 0;
-          const v = Math.min(1, before + dt * 0.55);
-          G.waxLevels[nm] = v;
-          const m = hit.object.material;
-          m.roughness = 0.28 - 0.24 * v;
-          m.envMapIntensity = 1.4 + 1.6 * v;
-          if (before < 1 && v >= 1) {
-            G.score += 250;
-            G.lastGain = 250;
-            G.gainSeq = (G.gainSeq || 0) + 1;
-            G.toast = { msg: G.tr.waxDone, t: 2.2 };
-            sndGold();
-            buzz(25);
-          }
-          const sk = fxSpark.current;
-          for (let i = 0; i < 3 && sk; i++) {
-            sk.spawn(
-              hit.point.x + (Math.random() - 0.5) * 0.12,
-              hit.point.y + (Math.random() - 0.5) * 0.12,
-              hit.point.z + (Math.random() - 0.5) * 0.12,
-              (Math.random() - 0.5) * 0.2, 0.15 + Math.random() * 0.2, (Math.random() - 0.5) * 0.2,
-              0.35 + Math.random() * 0.2, 0.014 + Math.random() * 0.016, 0.7);
-          }
-        }
-      } else if (hit) {
+      if (hit) {
         const key = hit.object.userData.dirtKey;
-        if (key && hit.uv && G.dirt) {
-          const brush = 0.09 + dist * 0.014;
-          const strength = Math.max(0.28, Math.min(1, 1.15 - dist * 0.09)) * (G.scrub || 1);
-          G.dirt.paint(key, hit.uv, brush, strength);
-          /* clean-reveal glints */
-          const sk = fxSpark.current;
-          if (sk && Math.random() < 0.3) {
-            const gn = hit.face ? tmp.v2.copy(hit.face.normal).transformDirection(hit.object.matrixWorld) : tmp.v2.set(0, 1, 0);
-            sk.spawn(
-              hit.point.x + gn.x * 0.04, hit.point.y + gn.y * 0.04, hit.point.z + gn.z * 0.04,
-              gn.x * 0.1, 0.12 + Math.random() * 0.15, gn.z * 0.1,
-              0.3 + Math.random() * 0.15, 0.012 + Math.random() * 0.014, 0.6);
-          }
-        }
         const n = hit.face
           ? tmp.v2.copy(hit.face.normal).transformDirection(hit.object.matrixWorld)
           : tmp.v2.set(0, 1, 0);
         const p = hit.point;
-        const sp = fxSplash.current, mi = fxMist.current, fo = fxFoam.current, stm = fxSteam.current, rd = fxRun.current;
+        const sp = fxSplash.current, mi = fxMist.current, fo = fxFoam.current, stm = fxSteam.current, rd = fxRun.current, sk = fxSpark.current;
 
-        /* bouncing spray droplets */
-        for (let i = 0, N = isMobile ? 3 : 5; i < N && sp; i++) {
-          sp.spawn(
-            p.x + n.x * 0.02, p.y + n.y * 0.02, p.z + n.z * 0.02,
-            n.x * (0.8 + Math.random() * 1.4) + (Math.random() - 0.5) * 1.6,
-            n.y * (0.8 + Math.random() * 1.2) + Math.random() * 1.1,
-            n.z * (0.8 + Math.random() * 1.4) + (Math.random() - 0.5) * 1.6,
-            0.28 + Math.random() * 0.14, 0.02 + Math.random() * 0.02, 0.5);
-        }
-        /* fine mist puff */
-        if (mi && Math.random() < 0.6) {
-          mi.spawn(p.x, p.y + 0.03, p.z,
-            (Math.random() - 0.5) * 0.35, 0.2 + Math.random() * 0.25, (Math.random() - 0.5) * 0.35,
-            0.4 + Math.random() * 0.25, 0.14 + Math.random() * 0.1, 0.05);
-        }
-        /* water running down the panel */
-        if (rd) {
-          for (let i = 0, N = isMobile ? 1 : 2; i < N; i++) {
-            rd.spawn(
-              p.x + (Math.random() - 0.5) * 0.14 + n.x * 0.012,
-              p.y + (Math.random() - 0.5) * 0.08,
-              p.z + (Math.random() - 0.5) * 0.14 + n.z * 0.012,
-              (Math.random() - 0.5) * 0.05, -0.3 - Math.random() * 0.25, (Math.random() - 0.5) * 0.05,
-              0.7 + Math.random() * 0.5, 0.035 + Math.random() * 0.03, 0.42);
+        if (isCoat && key && hit.uv && G.dirt) {
+          /* foam / polish / wax: paint the coat mask */
+          const brush = st === "foam" ? 0.14 : 0.1;
+          G.dirt.paintCoat(key, hit.uv, brush, 1);
+          if (st === "foam") {
+            /* thick expanding foam blobs */
+            for (let i = 0, N = isMobile ? 3 : 6; i < N && fo; i++) {
+              fo.spawn(
+                p.x + (Math.random() - 0.5) * 0.22 + n.x * 0.03,
+                p.y + (Math.random() - 0.5) * 0.22 + n.y * 0.03,
+                p.z + (Math.random() - 0.5) * 0.22 + n.z * 0.03,
+                (Math.random() - 0.5) * 0.25, 0.05 + Math.random() * 0.2, (Math.random() - 0.5) * 0.25,
+                1.2 + Math.random() * 0.8, 0.05 + Math.random() * 0.05, 0.85);
+            }
+          } else {
+            /* polish / wax: glossy sparkles */
+            for (let i = 0; i < 4 && sk; i++) {
+              sk.spawn(
+                p.x + n.x * 0.03 + (Math.random() - 0.5) * 0.1,
+                p.y + n.y * 0.03 + (Math.random() - 0.5) * 0.1,
+                p.z + n.z * 0.03 + (Math.random() - 0.5) * 0.1,
+                (Math.random() - 0.5) * 0.25, 0.15 + Math.random() * 0.25, (Math.random() - 0.5) * 0.25,
+                0.3 + Math.random() * 0.2, 0.012 + Math.random() * 0.016, 0.75);
+            }
+          }
+        } else if (usesWater && key && hit.uv && G.dirt) {
+          /* pre-wash / rinse / wheels: erode the dirt mask */
+          const brush = 0.09 + dist * 0.014;
+          const strength = Math.max(0.28, Math.min(1, 1.15 - dist * 0.09)) * (G.scrub || 1);
+          G.dirt.paint(key, hit.uv, brush, strength);
+          if (st === "rinse") G.dirt.paintCoat(key, hit.uv, brush * 1.2, 1, true); // rinse foam off
+          if (sk && Math.random() < 0.3) {
+            sk.spawn(
+              p.x + n.x * 0.04, p.y + n.y * 0.04, p.z + n.z * 0.04,
+              n.x * 0.1, 0.12 + Math.random() * 0.15, n.z * 0.1,
+              0.3 + Math.random() * 0.15, 0.012 + Math.random() * 0.014, 0.6);
           }
         }
-        /* quick suds */
-        for (let i = 0, N = isMobile ? 1 : 2; i < N && fo; i++) {
-          fo.spawn(
-            p.x + (Math.random() - 0.5) * 0.13 + n.x * 0.02,
-            p.y + (Math.random() - 0.5) * 0.13 + n.y * 0.02,
-            p.z + (Math.random() - 0.5) * 0.13 + n.z * 0.02,
-            0, -0.05, 0, 0.7 + Math.random() * 0.4, 0.03 + Math.random() * 0.03, 0.32);
-        }
-        /* steam wisps off freshly washed panels */
-        if (stm && Math.random() < 0.18) {
-          stm.spawn(p.x + (Math.random() - 0.5) * 0.1, p.y + 0.05, p.z + (Math.random() - 0.5) * 0.1,
-            (Math.random() - 0.5) * 0.15, 0.5 + Math.random() * 0.35, (Math.random() - 0.5) * 0.15,
-            1.0 + Math.random() * 0.5, 0.16 + Math.random() * 0.12, 0.06);
+
+        if (usesWater) {
+          for (let i = 0, N = isMobile ? 3 : 5; i < N && sp; i++) {
+            sp.spawn(
+              p.x + n.x * 0.02, p.y + n.y * 0.02, p.z + n.z * 0.02,
+              n.x * (0.8 + Math.random() * 1.4) + (Math.random() - 0.5) * 1.6,
+              n.y * (0.8 + Math.random() * 1.2) + Math.random() * 1.1,
+              n.z * (0.8 + Math.random() * 1.4) + (Math.random() - 0.5) * 1.6,
+              0.28 + Math.random() * 0.14, 0.02 + Math.random() * 0.02, 0.5);
+          }
+          if (mi && Math.random() < 0.6) {
+            mi.spawn(p.x, p.y + 0.03, p.z,
+              (Math.random() - 0.5) * 0.35, 0.2 + Math.random() * 0.25, (Math.random() - 0.5) * 0.35,
+              0.4 + Math.random() * 0.25, 0.14 + Math.random() * 0.1, 0.05);
+          }
+          if (rd) {
+            for (let i = 0, N = isMobile ? 1 : 2; i < N; i++) {
+              rd.spawn(
+                p.x + (Math.random() - 0.5) * 0.14 + n.x * 0.012,
+                p.y + (Math.random() - 0.5) * 0.08,
+                p.z + (Math.random() - 0.5) * 0.14 + n.z * 0.012,
+                (Math.random() - 0.5) * 0.05, -0.3 - Math.random() * 0.25, (Math.random() - 0.5) * 0.05,
+                0.7 + Math.random() * 0.5, 0.035 + Math.random() * 0.03, 0.42);
+            }
+          }
+          if (stm && Math.random() < 0.18) {
+            stm.spawn(p.x + (Math.random() - 0.5) * 0.1, p.y + 0.05, p.z + (Math.random() - 0.5) * 0.1,
+              (Math.random() - 0.5) * 0.15, 0.5 + Math.random() * 0.35, (Math.random() - 0.5) * 0.15,
+              1.0 + Math.random() * 0.5, 0.16 + Math.random() * 0.12, 0.06);
+          }
         }
       }
     } else {
       setSpray(false);
     }
 
-    /* progress sampling + scoring + golden dirt */
+    /* per-stage progress sampling + scoring */
     tmp.acc += dt;
     if (tmp.acc > 0.3 && G.dirt && playing) {
       tmp.acc = 0;
       const before = G.progress;
-      const p = G.dirt.sample();
+      // always keep the raw clean value current (drives paint shine reveal)
+      G.dirt.sample();
+      let p;
+      if (st === "foam") { G.dirt.sampleCoat(); p = G.dirt.subsetCoat(isBody); }
+      else if (st === "polish" || st === "wax") { G.dirt.sampleCoat(); p = G.dirt.subsetCoat(isBody); }
+      else if (st === "wheels") p = G.dirt.subsetClean(isWheel);
+      else p = G.dirt.progress; // wash / rinse
       G.progress = p;
+
       const delta = p - before;
       const comboWas = Math.floor(G.combo);
       if (delta > 0.0004) {
@@ -283,15 +282,9 @@ export default function Washer({ G, isMobile }) {
       }
       G.comboMax = Math.max(G.comboMax || 1, G.combo);
       if (Math.floor(G.combo) > comboWas) { sndCombo(Math.floor(G.combo)); buzz(8); }
-      /* milestone dings at 25 / 50 / 75 % */
-      const MILES = [0.25, 0.5, 0.75];
-      G.nextMile = G.nextMile || 0;
-      while (G.nextMile < MILES.length && p >= MILES[G.nextMile]) {
-        G.toast = { msg: `${Math.round(MILES[G.nextMile] * 100)}% ✓`, t: 1.3 };
-        sndCombo(4);
-        G.nextMile++;
-      }
-      if (G.gold) {
+
+      // golden dirt only during the water-wash stages
+      if (G.gold && usesWater) {
         for (const s of G.gold) {
           if (!s.found && G.dirt.cleanedAt(s.key, s.uv) > 0.55) {
             s.found = true;
@@ -302,7 +295,8 @@ export default function Washer({ G, isMobile }) {
           }
         }
       }
-      if (p >= 0.99) G.finish && G.finish();
+
+      if (p >= (G.stageGoal || 0.99)) G.advanceStage && G.advanceStage();
     }
 
     /* completion celebration: water fountain + LED pulse */

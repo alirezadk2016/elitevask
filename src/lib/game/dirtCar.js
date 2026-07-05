@@ -235,21 +235,25 @@ export function bodyAtlasTexture() {
 const FRAG_COMMON = `
 uniform sampler2D uDirtMap;
 uniform sampler2D uDirtMask;
+uniform sampler2D uCoatMask;
 uniform float uDirtAmt;
 uniform float uDirtRepeat;
+uniform float uCoatMode; // 0 off · 1 foam · 2 polish · 3 wax
 float dirtFactor(vec2 uvv){
   float m = texture2D(uDirtMask, uvv).g;
   float a = texture2D(uDirtMap, uvv * uDirtRepeat).a;
   return a * m * uDirtAmt;
 }`;
 
-function patchMaterial(mat, dirtTex, maskTex, repeat, amount) {
+function patchMaterial(mat, dirtTex, maskTex, coatTex, repeat, amount) {
   mat.defines = Object.assign({}, mat.defines, { USE_UV: "" });
   mat.onBeforeCompile = (shader) => {
     shader.uniforms.uDirtMap = { value: dirtTex };
     shader.uniforms.uDirtMask = { value: maskTex };
+    shader.uniforms.uCoatMask = { value: coatTex };
     shader.uniforms.uDirtAmt = { value: amount };
     shader.uniforms.uDirtRepeat = { value: repeat };
+    shader.uniforms.uCoatMode = { value: 0 };
     mat.userData.shader = shader;
     shader.fragmentShader = shader.fragmentShader
       .replace("#include <common>", "#include <common>\n" + FRAG_COMMON)
@@ -258,17 +262,35 @@ function patchMaterial(mat, dirtTex, maskTex, repeat, amount) {
   float dF = dirtFactor(vUv);
   vec3 dCol = texture2D(uDirtMap, vUv * uDirtRepeat).rgb;
   diffuseColor.rgb = mix(diffuseColor.rgb, dCol, dF);
+  float cM = texture2D(uCoatMask, vUv).g;
+  if (uCoatMode > 0.5 && uCoatMode < 1.5) {
+    // thick white foam blanket with slight blue shadowing
+    vec3 foamC = mix(vec3(0.78,0.82,0.85), vec3(0.96,0.97,0.98), cM);
+    diffuseColor.rgb = mix(diffuseColor.rgb, foamC, cM * 0.96);
+  } else if (uCoatMode > 1.5 && uCoatMode < 2.5) {
+    // polish: subtle brightening where buffed
+    diffuseColor.rgb = mix(diffuseColor.rgb, diffuseColor.rgb * 1.12 + 0.02, cM * 0.5);
+  } else if (uCoatMode > 2.5) {
+    // wax: warm golden depth
+    diffuseColor.rgb = mix(diffuseColor.rgb, diffuseColor.rgb * vec3(1.09,1.07,0.98), cM * 0.6);
+  }
 }`)
       .replace("#include <roughnessmap_fragment>", `#include <roughnessmap_fragment>
 {
   float dF = dirtFactor(vUv);
   /* washed areas get a WET sheen – glossier than the paint ever was dry */
   roughnessFactor = mix(roughnessFactor * 0.42, 0.95, dF);
+  float cM = texture2D(uCoatMask, vUv).g;
+  if (uCoatMode > 0.5 && uCoatMode < 1.5) roughnessFactor = mix(roughnessFactor, 0.92, cM);
+  else if (uCoatMode > 1.5 && uCoatMode < 2.5) roughnessFactor = mix(roughnessFactor, roughnessFactor * 0.5, cM);
+  else if (uCoatMode > 2.5) roughnessFactor = mix(roughnessFactor, roughnessFactor * 0.32, cM);
 }`)
       .replace("#include <metalnessmap_fragment>", `#include <metalnessmap_fragment>
 {
   float dF = dirtFactor(vUv);
   metalnessFactor *= (1.0 - 0.78 * dF);
+  float cM = texture2D(uCoatMask, vUv).g;
+  if (uCoatMode > 0.5 && uCoatMode < 1.5) metalnessFactor *= (1.0 - 0.9 * cM);
 }`);
   };
   mat.needsUpdate = true;
@@ -392,8 +414,17 @@ export class CarDirt {
     maskTex.minFilter = THREE.LinearFilter;
     const dirtTex = texture || grungeTexture();
     const rep = texture ? 1 : repeat;
+    // coat canvas (foam / polish / wax) painted at runtime, black = none
+    const coatCv = document.createElement("canvas");
+    coatCv.width = coatCv.height = maskRes;
+    const coatCtx = coatCv.getContext("2d");
+    coatCtx.fillStyle = "#000";
+    coatCtx.fillRect(0, 0, maskRes, maskRes);
+    const coatTex = new THREE.CanvasTexture(coatCv);
+    coatTex.generateMipmaps = false;
+    coatTex.minFilter = THREE.LinearFilter;
     mesh.material = mesh.material.clone();
-    patchMaterial(mesh.material, dirtTex, maskTex, rep, amount);
+    patchMaterial(mesh.material, dirtTex, maskTex, coatTex, rep, amount);
     mesh.userData.dirtKey = mesh.uuid;
 
     /* per-texel dirt weights (atlas textures aren't uniform, so progress
@@ -412,8 +443,82 @@ export class CarDirt {
     const box = new THREE.Box3().setFromObject(mesh);
     const size = box.getSize(new THREE.Vector3());
     const area = Math.max(0.05, (size.x * size.y + size.y * size.z + size.x * size.z) * 0.5) * weight;
-    this.items.set(mesh.uuid, { mesh, maskCv, ctx, maskTex, tpm, area, clean: 0, changed: true, weights, wSum });
+    this.items.set(mesh.uuid, { mesh, maskCv, ctx, maskTex, coatCv, coatCtx, coatTex, tpm, area, clean: 0, coat: 0, coatChanged: true, changed: true, weights, wSum });
     return true;
+  }
+
+  /* set which coat the shader renders (0 off · 1 foam · 2 polish · 3 wax) */
+  setCoatMode(mode) {
+    for (const it of this.items.values()) {
+      const sh = it.mesh.material.userData.shader;
+      if (sh) sh.uniforms.uCoatMode.value = mode;
+    }
+  }
+
+  /* paint the coat mask (foam blanket, polish, wax) at uv; erase=true rinses it off */
+  paintCoat(key, uv, worldR, strength = 1, erase = false) {
+    const it = this.items.get(key);
+    if (!it) return;
+    const res = it.coatCv.width;
+    const r = Math.min(res / 2.2, Math.max(3, worldR * it.tpm));
+    const x = uv.x * res, y = (1 - uv.y) * res;
+    const c = it.coatCtx;
+    c.save();
+    if (erase) c.globalCompositeOperation = "destination-out";
+    const grad = c.createRadialGradient(x, y, 0, x, y, r);
+    const col = erase ? "0,0,0" : "0,255,0";
+    grad.addColorStop(0, `rgba(${col},${0.75 * strength})`);
+    grad.addColorStop(0.6, `rgba(${col},${0.4 * strength})`);
+    grad.addColorStop(1, `rgba(${col},0)`);
+    c.fillStyle = grad;
+    c.beginPath(); c.arc(x, y, r, 0, Math.PI * 2); c.fill();
+    c.restore();
+    it.coatTex.needsUpdate = true;
+    it.coatChanged = true;
+  }
+
+  /* weighted clean / coat over a subset of meshes (by predicate) */
+  subsetClean(pred) {
+    let s = 0, w = 0;
+    for (const it of this.items.values()) { if (!pred(it.mesh)) continue; s += it.clean * it.area; w += it.area; }
+    return w ? Math.min(1, (s / w) / 0.94) : 0;
+  }
+  subsetCoat(pred) {
+    let s = 0, w = 0;
+    for (const it of this.items.values()) { if (!pred(it.mesh)) continue; s += it.coat * it.area; w += it.area; }
+    return w ? Math.min(1, (s / w) / 0.9) : 0;
+  }
+
+  clearCoat() {
+    for (const it of this.items.values()) {
+      it.coatCtx.fillStyle = "#000";
+      it.coatCtx.fillRect(0, 0, it.coatCv.width, it.coatCv.height);
+      it.coatTex.needsUpdate = true;
+      it.coatChanged = true;
+      it.coat = 0;
+    }
+  }
+
+  /* coverage of the coat mask over dirt-weighted texels (0..1) */
+  sampleCoat() {
+    for (const it of this.items.values()) {
+      if (!it.coatChanged) continue;
+      it.coatChanged = false;
+      this._smpCtx.clearRect(0, 0, 48, 48);
+      this._smpCtx.drawImage(it.coatCv, 0, 0, 48, 48);
+      const img = this._smpCtx.getImageData(0, 0, 48, 48).data;
+      let acc = 0;
+      if (it.weights) {
+        for (let i = 0; i < 48 * 48; i++) acc += (img[i * 4 + 1] / 255) * it.weights[i];
+        it.coat = acc / it.wSum;
+      } else {
+        for (let i = 0; i < 48 * 48; i++) acc += img[i * 4 + 1] / 255;
+        it.coat = acc / (48 * 48);
+      }
+    }
+    let sum = 0, w = 0;
+    for (const it of this.items.values()) { sum += it.coat * it.area; w += it.area; }
+    return w ? Math.min(1, (sum / w) / 0.9) : 0;
   }
 
   paint(key, uv, worldR, strength = 1) {
@@ -466,11 +571,13 @@ export class CarDirt {
       it.changed = true;
       it.clean = 0;
     }
+    this.clearCoat();
+    this.setCoatMode(0);
     this.progress = 0;
   }
 
   dispose() {
-    for (const it of this.items.values()) it.maskTex.dispose();
+    for (const it of this.items.values()) { it.maskTex.dispose(); it.coatTex.dispose(); }
     this.whiteTex.dispose();
     this.items.clear();
   }
