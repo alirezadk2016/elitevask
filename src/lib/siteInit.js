@@ -831,11 +831,14 @@ function submitBooking(cb){
       slotsNeeded:({lille:2,mellem:3,stor:4,varebil:3}[wiz.car?wiz.car.id:'']||2)
     })
   }).then(function(r){
-    return r.json().then(function(d){return {status:r.status,data:d};});
+    return r.json().then(function(d){return {status:r.status,data:d};},function(){return {status:r.status,data:null};});
   }).then(function(res){
-    if((res.status===409||res.status===400)&&res.data&&res.data.message){cb(res.data.message);}
-    else{cb(null);}
-  }).catch(function(){cb(null);});
+    // Success only on a 2xx {ok:true}. Any error status with a message is shown
+    // to the customer (slot taken, invalid email, or "we couldn't confirm – call us").
+    if(res.status>=200&&res.status<300&&res.data&&res.data.ok){cb(null);}
+    else if(res.data&&res.data.message){cb(res.data.message);}
+    else{cb(LANG==='da'?'Noget gik galt. Ring venligst til os på +45 24 44 03 21, så booker vi din tid.':'Something went wrong. Please call us on +45 24 44 03 21 and we will book your time.');}
+  }).catch(function(){cb(LANG==='da'?'Netværksfejl. Ring venligst til os på +45 24 44 03 21.':'Network error. Please call us on +45 24 44 03 21.');});
 }
 
 /* ====== LIGHTBOX ====== */

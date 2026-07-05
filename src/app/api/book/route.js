@@ -98,6 +98,21 @@ async function bookSlot(key, value) {
   memSlots.set(key, value);
 }
 
+// Release reserved slots (used when we could NOT notify anyone about the booking,
+// so the slot must not stay red for a booking nobody knows about).
+async function releaseSlots(date, times, cancelToken) {
+  try {
+    const kv = await getKV();
+    if (kv) {
+      await Promise.all(times.map((t) => kv.del(slotKey(date, t))));
+      if (cancelToken) await kv.del(`booking:${cancelToken}`);
+      return;
+    }
+  } catch {}
+  for (const t of times) memSlots.delete(slotKey(date, t));
+  if (cancelToken) memBookings.delete(cancelToken);
+}
+
 async function getBookedSlots(date) {
   try {
     const kv = await getKV();
@@ -202,6 +217,7 @@ export async function POST(request) {
   const L = lang !== 'en';
 
   let cancelToken = null;
+  let bookedSlots = [];
 
   if (date && time) {
     // Past slot check
@@ -223,7 +239,6 @@ export async function POST(request) {
 
     // Book slots + store booking record
     cancelToken = secureToken(); // 64-char hex, cryptographically secure
-    const bookedSlots = [];
     const bookedAt = new Date().toISOString();
     const cancelExpiresAt = new Date(Date.now() + CANCEL_TTL * 1000).toISOString();
 
@@ -279,7 +294,25 @@ export async function POST(request) {
 
   const transport = buildTransport();
 
-  if (transport) {
+  // A booking nobody is notified about is worse than no booking: if we can't
+  // even email the company, release the slot so it doesn't stay red, and tell
+  // the customer to call instead of falsely showing "confirmed".
+  const notifyFailed = async (reason) => {
+    console.error(`[book] notification failed (${reason}) — releasing slots`, { date, time });
+    if (date && bookedSlots.length) await releaseSlots(date, bookedSlots, cancelToken);
+    return Response.json({
+      error: 'notify_failed',
+      message: L
+        ? 'Vi kunne desværre ikke bekræfte din booking online lige nu. Ring venligst til os på +45 24 44 03 21, så booker vi din tid med det samme.'
+        : 'We could not confirm your booking online right now. Please call us on +45 24 44 03 21 and we will book your time straight away.',
+    }, { status: 503 });
+  };
+
+  if (!transport) {
+    return await notifyFailed('no_smtp');
+  }
+
+  {
     // ── Company notification ─────────────────────────────────────────────────
     try {
       await transport.sendMail({
@@ -310,8 +343,7 @@ export async function POST(request) {
         }),
       });
     } catch (err) {
-      console.error('[book] Company email failed:', err.message);
-      return Response.json({ ok: false, error: 'email_failed' }, { status: 500 });
+      return await notifyFailed('company_email:' + err.message);
     }
 
     // ── Customer confirmation ────────────────────────────────────────────────
@@ -406,7 +438,4 @@ export async function POST(request) {
 
     return Response.json({ ok: true, ...(cancelToken ? { token: cancelToken } : {}) });
   }
-
-  console.warn('[book] No SMTP configured — booking not emailed.');
-  return Response.json({ ok: true, warn: 'no_smtp', ...(cancelToken ? { token: cancelToken } : {}) });
 }
