@@ -259,6 +259,8 @@ export async function POST(request) {
       bookedAt, cancelExpiresAt,
       ip, userAgent: request.headers.get('user-agent') || '',
     };
+    // If the record can't be stored, release the slots: a red slot must
+    // ALWAYS have a matching booking visible in the admin.
     try {
       const kv = await getKV();
       if (kv) {
@@ -266,7 +268,16 @@ export async function POST(request) {
       } else {
         memBookings.set(cancelToken, bookingRecord);
       }
-    } catch {}
+    } catch (err) {
+      console.error('[book] booking record store FAILED — releasing slots', err?.message);
+      await releaseSlots(date, bookedSlots, cancelToken);
+      return Response.json({
+        error: 'store_failed',
+        message: L
+          ? 'Vi kunne desværre ikke gennemføre din booking online lige nu. Ring venligst til os på +45 24 44 03 21, så booker vi din tid med det samme.'
+          : 'We could not complete your booking online right now. Please call us on +45 24 44 03 21 and we will book your time straight away.',
+      }, { status: 503 });
+    }
 
     // Index booking by email for customer portal
     if (email) {
