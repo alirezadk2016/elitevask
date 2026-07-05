@@ -164,6 +164,7 @@ function BookingCard({ b, secret, onCancel, onDelete }) {
 
       <div style={{ fontSize:13, color:T.t2, lineHeight:1.9, marginBottom:6 }}>
         <span style={{ color:T.t4 }}>📅</span> {fmtDate(b.date)} · kl. {b.time}
+        {b.time ? `–${String(parseInt(b.time.split(":")[0], 10) + (b.slotsNeeded || (Array.isArray(b.slots) ? b.slots.length : 2))).padStart(2, "0")}:00` : ""}
         {" · "}<span style={{ color:T.accent, fontWeight:700 }}>{b.price || "-"}</span>
       </div>
       <div style={{ fontSize:13, color:T.t2, lineHeight:1.9, marginBottom:2 }}>
@@ -844,9 +845,11 @@ export default function AdminPanel() {
                                 return (
                                   <div key={di} style={{ flex:1, minWidth:COL_W, borderRight: di<6 ? `1px solid ${T.border}` : "none", padding:"3px 4px", background:isToday?"rgba(55,210,120,.025)":"transparent", position:"relative", minHeight:ROW_H, display:"flex", flexDirection:"column", gap:3 }}>
                                     {startingHere.map(b => {
+                                      // each slot = 1 full hour (SLOT_TIMES are hourly)
                                       const slots = slotCount(b);
-                                      const durationMin = slots * 30;
-                                      const heightPx = Math.round((durationMin / 60) * ROW_H) - 6;
+                                      const startH = bookingStartHour(b);
+                                      const endTime = startH != null ? `${String(startH + slots).padStart(2, "0")}:00` : "";
+                                      const heightPx = slots * ROW_H - 6;
                                       const isCancelled = b.status === "cancelled";
                                       const isPending   = b.status === "pending";
                                       const isCompleted = b.status === "completed";
@@ -860,7 +863,7 @@ export default function AdminPanel() {
                                       return (
                                         <div key={b.token}
                                           onClick={() => { setSelectedBooking(b); setModalState("idle"); }}
-                                          style={{ background:cardBg, border:`1px solid ${cardBor}`, borderLeft:`3px solid ${cardLeft}`, borderRadius:8, padding:"6px 8px", cursor:"pointer", height:heightPx, minHeight:42, boxSizing:"border-box", display:"flex", flexDirection:"column", justifyContent:"space-between", overflow:"hidden", transition:"filter .15s, transform .1s", opacity:isCancelled?.55:1, WebkitTapHighlightColor:"transparent" }}
+                                          style={{ background:cardBg, border:`1px solid ${cardBor}`, borderLeft:`3px solid ${cardLeft}`, borderRadius:8, padding:"6px 8px", cursor:"pointer", height:heightPx, minHeight:42, boxSizing:"border-box", display:"flex", flexDirection:"column", justifyContent:"space-between", overflow:"hidden", transition:"filter .15s, transform .1s", opacity:isCancelled?.55:1, WebkitTapHighlightColor:"transparent", position:"relative", zIndex:2 }}
                                           onMouseEnter={e => { e.currentTarget.style.filter="brightness(1.2)"; e.currentTarget.style.transform="scale(1.01)"; }}
                                           onMouseLeave={e => { e.currentTarget.style.filter=""; e.currentTarget.style.transform=""; }}
                                         >
@@ -874,7 +877,7 @@ export default function AdminPanel() {
                                             <div style={{ fontSize:10, color:cardText, opacity:.75, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{b.pkg || "-"}</div>
                                           </div>
                                           <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between" }}>
-                                            <span style={{ fontSize:10, fontWeight:700, color:cardText }}>{b.time} · {durationMin}min</span>
+                                            <span style={{ fontSize:10, fontWeight:700, color:cardText, fontVariantNumeric:"tabular-nums" }}>{b.time}–{endTime} · {slots}t</span>
                                             {b.phone && (
                                               <a href={`tel:${b.phone}`} onClick={e => e.stopPropagation()}
                                                 style={{ display:"flex", alignItems:"center", justifyContent:"center", width:22, height:22, borderRadius:6, background:"rgba(255,255,255,.12)", color:cardText, textDecoration:"none", flexShrink:0 }}>
@@ -1820,7 +1823,15 @@ export default function AdminPanel() {
                   </div>
                   <div style={{ background:T.bg0, borderRadius:10, padding:"12px 14px" }}>
                     <div style={{ fontSize:10, color:T.t4, fontWeight:700, letterSpacing:1, textTransform:"uppercase", marginBottom:4 }}>Tidspunkt</div>
-                    <div style={{ fontSize:14, color:T.t1, fontWeight:600 }}>kl. {b.time || "-"}</div>
+                    <div style={{ fontSize:14, color:T.t1, fontWeight:600 }}>
+                      {b.time
+                        ? (() => {
+                            const h = parseInt(b.time.split(":")[0], 10);
+                            const n = b.slotsNeeded || (Array.isArray(b.slots) ? b.slots.length : 2);
+                            return `kl. ${b.time}–${String(h + n).padStart(2, "0")}:00 (${n} timer)`;
+                          })()
+                        : "-"}
+                    </div>
                   </div>
                   <div style={{ background:T.bg0, borderRadius:10, padding:"12px 14px" }}>
                     <div style={{ fontSize:10, color:T.t4, fontWeight:700, letterSpacing:1, textTransform:"uppercase", marginBottom:4 }}>Pakke</div>
