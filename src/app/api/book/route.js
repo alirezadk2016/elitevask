@@ -14,20 +14,24 @@ const DISPOSABLE_DOMAINS = new Set([
   'maileater.com','wegwerfmail.de','trashmail.de','byom.de','tmail.ws','minuteinbox.com',
 ]);
 
-// Verify the email domain can actually receive mail (MX, with A/AAAA fallback)
+// Verify the email domain can actually receive mail (MX, with A/AAAA fallback).
+// Only a DEFINITE "domain does not exist" answer rejects the customer –
+// transient DNS trouble (timeouts, resolver refusals) must never block a
+// real booking, so anything else fails OPEN.
+const DNS_NO = new Set(['ENOTFOUND', 'ENODATA', 'NODATA', 'NXDOMAIN']);
 async function emailDomainHasMail(domain) {
   try {
     const mx = await dns.resolveMx(domain);
     if (mx && mx.length > 0) return true;
-  } catch {}
+  } catch (e) { if (!DNS_NO.has(e.code)) return true; }
   try {
     const a = await dns.resolve(domain);
     if (a && a.length > 0) return true;
-  } catch {}
+  } catch (e) { if (!DNS_NO.has(e.code)) return true; }
   try {
     const aaaa = await dns.resolve6(domain);
     if (aaaa && aaaa.length > 0) return true;
-  } catch {}
+  } catch (e) { if (!DNS_NO.has(e.code)) return true; }
   return false;
 }
 
@@ -98,6 +102,28 @@ async function bookSlot(key, value) {
   memSlots.set(key, value);
 }
 
+/* Atomic reserve (SET NX): returns false if someone else grabbed the slot
+   first – closes the race where two customers pass the availability check
+   at the same moment and both "book" the same hour. */
+async function reserveSlot(key, value) {
+  try {
+    const kv = await getKV();
+    if (kv) {
+      const r = await kv.set(key, JSON.stringify(value), { nx: true, ex: BOOKING_TTL });
+      return !!r; // 'OK' on success, null if the key already existed
+    }
+  } catch {}
+  if (memSlots.has(key)) return false;
+  memSlots.set(key, value);
+  return true;
+}
+
+/* Current date + hour in the salon's timezone, not the server's (UTC). */
+function cphNow() {
+  const s = new Date().toLocaleString('sv-SE', { timeZone: 'Europe/Copenhagen' });
+  return { date: s.slice(0, 10), hour: parseInt(s.slice(11, 13), 10) };
+}
+
 // Release reserved slots (used when we could NOT notify anyone about the booking,
 // so the slot must not stay red for a booking nobody knows about).
 async function releaseSlots(date, times, cancelToken) {
@@ -162,7 +188,7 @@ function fmtDate(d, L) {
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const date = searchParams.get('date');
-  if (!date) return Response.json({ booked: [] });
+  if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) return Response.json({ booked: [] });
   try {
     const times = await getBookedSlots(date);
     return Response.json({ booked: times });
@@ -211,6 +237,14 @@ export async function POST(request) {
   if (addr && addr.length > 200) return Response.json({ error: 'addr_too_long' }, { status: 400 });
   if (msg  && msg.length  > 1000) return Response.json({ error: 'msg_too_long'  }, { status: 400 });
   if (zip  && !/^\d{3,5}$/.test(zip.trim())) return Response.json({ error: 'invalid_zip' }, { status: 400 });
+  if (zip) {
+    const z = parseInt(zip.trim(), 10);
+    if (z < 1000 || z > 4799) {
+      return Response.json({ error: 'outside_area', message: L0
+        ? 'Vi dækker kun Sjælland (postnr. 1000–4799). Ring til os på +45 24 44 03 21, så finder vi en løsning.'
+        : 'We only cover Zealand (postcodes 1000–4799). Call us on +45 24 44 03 21 and we will find a solution.' }, { status: 400 });
+    }
+  }
 
   const CAR_SLOTS = { lille: 2, mellem: 3, stor: 4, varebil: 3 };
   const slotsNeeded = CAR_SLOTS[carId] || Math.max(1, Math.min(parseInt(rawSlots) || 2, 5));
@@ -220,33 +254,52 @@ export async function POST(request) {
   let bookedSlots = [];
 
   if (date && time) {
-    // Past slot check
-
-    // Slot availability check
+    /* date/time must be real, in the future (Copenhagen time), a known slot,
+       and the whole duration must fit inside opening hours */
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !SLOT_TIMES.includes(time)) {
+      return Response.json({
+        error: 'invalid_slot',
+        message: L ? 'Ugyldig dato eller tidspunkt. Prøv venligst igen.' : 'Invalid date or time. Please try again.',
+      }, { status: 400 });
+    }
     const startIdx = SLOT_TIMES.indexOf(time);
-    for (let i = 0; i < slotsNeeded; i++) {
-      const slotTime = SLOT_TIMES[startIdx + i];
-      if (!slotTime) break;
-      if (await isSlotBooked(slotKey(date, slotTime))) {
-        return Response.json({
-          error: 'slot_taken',
-          message: L
-            ? 'Dette tidspunkt er desværre allerede booket. Vælg venligst et andet tidspunkt.'
-            : 'This time slot is already booked. Please choose a different time.',
-        }, { status: 409 });
-      }
+    if (startIdx + slotsNeeded > SLOT_TIMES.length) {
+      return Response.json({
+        error: 'slot_range',
+        message: L
+          ? `Denne bil kræver ${slotsNeeded} timer – vælg venligst et tidligere starttidspunkt.`
+          : `This car needs ${slotsNeeded} hours – please choose an earlier start time.`,
+      }, { status: 400 });
+    }
+    const now = cphNow();
+    if (date < now.date || (date === now.date && parseInt(time, 10) <= now.hour)) {
+      return Response.json({
+        error: 'slot_past',
+        message: L
+          ? 'Tidspunktet er allerede passeret. Vælg venligst et senere tidspunkt.'
+          : 'That time has already passed. Please choose a later time.',
+      }, { status: 400 });
     }
 
-    // Book slots + store booking record
+    // Reserve atomically (SET NX) so two simultaneous customers can never
+    // book the same hour; roll back partial reservations on a clash.
     cancelToken = secureToken(); // 64-char hex, cryptographically secure
     const bookedAt = new Date().toISOString();
     const cancelExpiresAt = new Date(Date.now() + CANCEL_TTL * 1000).toISOString();
 
     for (let i = 0; i < slotsNeeded; i++) {
       const slotTime = SLOT_TIMES[startIdx + i];
-      if (!slotTime) break;
+      const got = await reserveSlot(slotKey(date, slotTime), { name: name || 'unknown', bookedAt, token: cancelToken });
+      if (!got) {
+        if (bookedSlots.length) await releaseSlots(date, bookedSlots, null);
+        return Response.json({
+          error: 'slot_taken',
+          message: L
+            ? 'Dette tidspunkt er desværre lige blevet booket. Vælg venligst et andet tidspunkt.'
+            : 'This time slot was just booked. Please choose a different time.',
+        }, { status: 409 });
+      }
       bookedSlots.push(slotTime);
-      await bookSlot(slotKey(date, slotTime), { name: name || 'unknown', bookedAt, token: cancelToken });
     }
 
     // Store booking with soft-delete support and cancel expiry
@@ -279,17 +332,6 @@ export async function POST(request) {
       }, { status: 503 });
     }
 
-    // Index booking by email for customer portal
-    if (email) {
-      try {
-        const kv2 = await getKV();
-        if (kv2) {
-          const { createHash } = await import('crypto');
-          const emailHash = createHash('sha256').update(email.toLowerCase().trim()).digest('hex');
-          await kv2.sadd(`user:bookings:${emailHash}`, cancelToken);
-        }
-      } catch {}
-    }
   }
 
   // Derive site URL from the incoming request so the cancel link always works
@@ -445,6 +487,19 @@ export async function POST(request) {
       } catch (err) {
         console.error(`[book] Customer email FAILED to ${email}:`, err.message);
       }
+    }
+
+    // Index booking by email for the customer portal – only AFTER the
+    // notification went out, so a released ghost booking never leaves a
+    // dangling token in the user's portal index.
+    if (email && cancelToken) {
+      try {
+        const kv2 = await getKV();
+        if (kv2) {
+          const emailHash = hashEmail(email);
+          await kv2.sadd(`user:bookings:${emailHash}`, cancelToken);
+        }
+      } catch {}
     }
 
     return Response.json({ ok: true, ...(cancelToken ? { token: cancelToken } : {}) });
