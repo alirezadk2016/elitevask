@@ -1070,7 +1070,10 @@ function submitBooking(cb){
     hideTyping();
     var row=document.createElement('div');row.className='chat-row chat-row-'+who;
     if(who==='bot')row.innerHTML=MINI_AV;
-    var d=document.createElement('div');d.className='chat-msg '+who+' msg-in';d.innerHTML=html;
+    var d=document.createElement('div');d.className='chat-msg '+who+' msg-in';
+    // Bot copy is trusted HTML; user text is untrusted → render as plain text
+    // so typed markup/scripts can't execute or break the layout.
+    if(who==='user')d.textContent=html;else d.innerHTML=html;
     row.appendChild(d);msgs.appendChild(row);msgs.scrollTop=msgs.scrollHeight;
   }
   function showFollowUp(arr){

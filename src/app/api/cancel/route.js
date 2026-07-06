@@ -88,7 +88,7 @@ export async function POST(request) {
   // Same 24h rule as the customer portal
   if (date && booking.time) {
     const dt = cphEpoch(date, booking.time);
-    if ((dt - Date.now()) < 24 * 3600 * 1000) {
+    if (Number.isNaN(dt) || (dt - Date.now()) < 24 * 3600 * 1000) {
       return Response.json({ error: 'too_late', message: L
         ? 'Kan ikke annulleres inden for 24 timer. Ring venligst til os på +45 24 44 03 21.'
         : 'Cannot be cancelled within 24 hours. Please call us on +45 24 44 03 21.' }, { status: 409 });
@@ -113,7 +113,7 @@ export async function POST(request) {
 
   const senderUser = process.env.SMTP_USER || process.env.GMAIL_USER || BOOKING_EMAIL;
   const transport = buildTransport();
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://elite-vask.dk';
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_BASE_URL || 'https://elite-vask.dk';
 
   if (transport) {
     if (email) {

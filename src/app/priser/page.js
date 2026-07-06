@@ -13,17 +13,42 @@ export const metadata = {
 };
 
 const PRICES = [
-  { car: "Lille bil", ex: "Aygo, Up!, i10", udv: 500, indv: 600, hele: 800, guld: 2000 },
-  { car: "Mellemstor bil", ex: "Golf, Focus, i20", udv: 550, indv: 700, hele: 950, guld: 2200 },
-  { car: "Stor bil / SUV", ex: "Passat, SUV, stationcar", udv: 650, indv: 850, hele: 1100, guld: 2350 },
-  { car: "Varebil", ex: "Transit, Caddy, Berlingo", udv: 750, indv: 750, hele: 1400, guld: 2200 },
+  { id: "lille",   car: "Lille bil", ex: "Aygo, Up!, i10", udv: 500, indv: 600, hele: 800, guld: 2000 },
+  { id: "mellem",  car: "Mellemstor bil", ex: "Golf, Focus, i20", udv: 550, indv: 700, hele: 950, guld: 2200 },
+  { id: "stor",    car: "Stor bil / SUV", ex: "Passat, SUV, stationcar", udv: 650, indv: 850, hele: 1100, guld: 2350 },
+  { id: "varebil", car: "Varebil", ex: "Transit, Caddy, Berlingo", udv: 750, indv: 750, hele: 1400, guld: 2200 },
 ];
 
 function fmtKr(n) {
   return n.toLocaleString("da-DK") + " kr";
 }
 
-export default function PriserPage() {
+export const revalidate = 60;
+
+// Merge admin-edited prices (KV content:prices) over the code defaults so this
+// page never diverges from the homepage calculator.
+async function getPrices() {
+  try {
+    const { kv } = await import("@vercel/kv");
+    const raw = await kv.get("content:prices");
+    const kvp = typeof raw === "string" ? JSON.parse(raw) : raw;
+    if (kvp && typeof kvp === "object") {
+      return PRICES.map((row) => {
+        const o = kvp[row.id] || {};
+        const num = (v, fb) => (Number.isFinite(Number(v)) && Number(v) > 0 ? Number(v) : fb);
+        return {
+          ...row,
+          udv: num(o.udv, row.udv), indv: num(o.indv, row.indv),
+          hele: num(o.hele, row.hele), guld: num(o.guld, row.guld),
+        };
+      });
+    }
+  } catch (e) {}
+  return PRICES;
+}
+
+export default async function PriserPage() {
+  const prices = await getPrices();
   return (
     <main style={{ background: "#0b1310", color: "#e9f1ec", minHeight: "100vh", fontFamily: "Manrope, system-ui, sans-serif" }}>
       <div style={{ maxWidth: 900, margin: "0 auto", padding: "60px 24px 80px" }}>
@@ -50,7 +75,7 @@ export default function PriserPage() {
               </tr>
             </thead>
             <tbody>
-              {PRICES.map((row, i) => (
+              {prices.map((row, i) => (
                 <tr key={i} style={{ borderBottom: "1px solid rgba(255,255,255,.07)", background: i % 2 === 0 ? "rgba(255,255,255,.02)" : "transparent" }}>
                   <td style={{ padding: "14px 16px" }}>
                     <span style={{ display: "block", fontWeight: 700, color: "#fff" }}>{row.car}</span>

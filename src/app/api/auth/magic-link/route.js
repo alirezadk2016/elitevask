@@ -23,7 +23,7 @@ async function checkRL(kv, key, max, window) {
     const count = await kv.incr(key);
     if (count === 1) await kv.expire(key, window);
     return count <= max;
-  } catch { return true; }
+  } catch { return false; } // fail closed: a KV error must not disable email-bomb protection
 }
 
 export async function POST(request) {
@@ -60,7 +60,7 @@ export async function POST(request) {
   await auditLog(kv, 'magic_link_requested', { emailHash: hashToken(email), ip, ua });
 
   const reqUrl = new URL(request.url);
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || `${reqUrl.protocol}//${reqUrl.host}`;
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_BASE_URL || `${reqUrl.protocol}//${reqUrl.host}`;
   const link = `${siteUrl}/api/auth/verify?token=${rawToken}`;
   const senderUser = process.env.SMTP_USER || process.env.GMAIL_USER || BOOKING_EMAIL;
   const transport = buildTransport();

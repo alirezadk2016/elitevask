@@ -18,7 +18,7 @@ async function getKV() {
 
 export async function GET(request) {
   const reqUrl = new URL(request.url);
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || `${reqUrl.protocol}//${reqUrl.host}`;
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_BASE_URL || `${reqUrl.protocol}//${reqUrl.host}`;
   const { searchParams } = reqUrl;
   const rawToken = searchParams.get('token');
   const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';

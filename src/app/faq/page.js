@@ -36,14 +36,17 @@ const DEFAULT_FAQ = [
   { q: "Hvad dækker tilfredshedsgarantien?", a: "Hvis du ikke er tilfreds med resultatet, kigger vi altid på det igen og udbedrer det, der ikke lever op til vores standard – uden ekstra betaling. Vi beder dig blot kontakte os inden for 24 timer efter vasken med en beskrivelse og evt. billeder." },
 ];
 
+export const revalidate = 60;
+
 async function getFaqItems() {
+  // Read KV directly (same source as /api/site-content) instead of an HTTP
+  // self-fetch to a hardcoded domain — works on any deploy/environment.
   try {
-    const base = "https://www.elite-vask.dk";
-    const res = await fetch(`${base}/api/site-content`, { next: { revalidate: 60 } });
-    if (!res.ok) return DEFAULT_FAQ;
-    const data = await res.json();
-    if (data.faq && data.faq.length >= 5) {
-      return data.faq.map((f) => ({
+    const { kv } = await import("@vercel/kv");
+    const raw = await kv.get("content:faq");
+    const faq = typeof raw === "string" ? JSON.parse(raw) : raw;
+    if (Array.isArray(faq) && faq.length >= 5) {
+      return faq.map((f) => ({
         q: f.q?.da || f.q || "",
         a: f.a?.da || f.a || "",
       }));

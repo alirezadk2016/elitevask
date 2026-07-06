@@ -58,7 +58,7 @@ export function emailShell({ title, preheader = '', body, lang = 'da' }) {
                 <a href="mailto:${INFO_EMAIL}" style="color:#0d4a25;text-decoration:none">${INFO_EMAIL}</a> · <a href="tel:+4524440321" style="color:#0d4a25;text-decoration:none">+45 24 44 03 21</a>
               </td>
               <td align="right" style="font-size:11px;color:#bbb">
-                <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://elite-vask.dk'}" style="color:#0d4a25;text-decoration:none">elite-vask.dk</a>
+                <a href="${process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_BASE_URL || 'https://elite-vask.dk'}" style="color:#0d4a25;text-decoration:none">elite-vask.dk</a>
               </td>
             </tr>
           </table>

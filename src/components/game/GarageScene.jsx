@@ -1223,7 +1223,7 @@ export default function GarageScene() {
             </div>
 
             <div className="gp-actions">
-              <a href={`/#vaelg?code=${DISCOUNT_CODE}`} className="btn btn-green btn-lg gp-book">{tr.book} · –10%</a>
+              <a href={`/?code=${DISCOUNT_CODE}#vaelg`} className="btn btn-green btn-lg gp-book">{tr.book} · –10%</a>
               <div className="gp-actions-row">
                 <button className="btn gp-ghost" onClick={() => (dailyActive ? startDaily() : startMission(missionIdx))}>{tr.again}</button>
                 {result.hasNext && MISSIONS[missionIdx + 1].id <= save.unlocked && (

@@ -8,15 +8,14 @@ export default function CookieConsent() {
     if (!localStorage.getItem("cookie_consent")) setVisible(true);
   }, []);
 
-  function accept() {
-    localStorage.setItem("cookie_consent", "accepted");
+  function setConsent(value) {
+    try { localStorage.setItem("cookie_consent", value); } catch {}
+    // Let consent-gated scripts (e.g. Google Analytics) react immediately.
+    try { window.dispatchEvent(new Event("cookie-consent-changed")); } catch {}
     setVisible(false);
   }
-
-  function decline() {
-    localStorage.setItem("cookie_consent", "declined");
-    setVisible(false);
-  }
+  function accept()  { setConsent("accepted"); }
+  function decline() { setConsent("declined"); }
 
   if (!visible) return null;
 

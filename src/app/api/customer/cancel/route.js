@@ -54,7 +54,8 @@ export async function POST(request) {
 
   if (booking.date && booking.time) {
     const dt = cphEpoch(booking.date, booking.time);
-    if ((dt - Date.now()) < 24 * 3600 * 1000) {
+    // Malformed date/time → treat as "too late" rather than skipping the guard.
+    if (Number.isNaN(dt) || (dt - Date.now()) < 24 * 3600 * 1000) {
       return Response.json({ error: 'too_late', message: 'Kan ikke annulleres inden for 24 timer.' }, { status: 409 });
     }
   }
@@ -72,7 +73,7 @@ export async function POST(request) {
   const { date, time, car, pkg, name, price, lang } = booking;
   const L = lang !== 'en';
   const senderUser = process.env.SMTP_USER || process.env.GMAIL_USER || BOOKING_EMAIL;
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://elite-vask.dk';
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_BASE_URL || 'https://elite-vask.dk';
   const transport = buildTransport();
 
   if (transport) {
