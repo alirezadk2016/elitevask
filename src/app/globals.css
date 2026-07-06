@@ -79,7 +79,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 .btn-gold{background:linear-gradient(135deg,#e6c75a,var(--gold));color:#2b2206;padding:10px 20px;font-size:14px}
 .btn-gold:hover{filter:brightness(1.06)}
 .btn-lg{padding:15px 30px;font-size:15.5px}
-.menu-toggle{display:none;background:none;border:none;color:#fff;cursor:pointer;padding:4px}
+.menu-toggle{display:none;background:none;border:none;color:#fff;cursor:pointer;padding:10px;margin:-10px -8px -10px 0;line-height:0}
 .menu-toggle svg{width:26px;height:26px}
 /* Mobile drawer */
 .nav-drawer{display:none;flex-direction:column;background:rgba(10,18,14,.98);border-top:1px solid var(--line);padding:8px 0 16px}
@@ -417,7 +417,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 .gcar-btn:disabled{cursor:default}
 .gcar-btn{transition:background .2s,border-color .25s,transform .25s,box-shadow .2s,opacity .3s ease}
 .gcar-dots{display:flex;justify-content:center;gap:7px;margin-top:20px}
-.gcar-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.2);border:none;cursor:pointer;transition:background .25s,transform .25s;padding:0}
+.gcar-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.2);border:none;cursor:pointer;transition:background .25s,transform .25s;padding:8px;box-sizing:content-box;background-clip:content-box}
 .gcar-dot.active{background:#d4af37;transform:scale(1.35)}
 /* legacy .gallery on /galleri page — keep grid */
 .gal-page .gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-top:34px}
@@ -608,7 +608,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 .summary .sr{display:flex;justify-content:space-between;align-items:flex-start;font-size:13.5px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.05)}
 .summary .sr:last-of-type{border-bottom:none}
 .summary .sr .k{color:rgba(255,255,255,.4);font-size:12px;font-weight:700;letter-spacing:.3px;text-transform:uppercase;padding-top:1px}
-.summary .sr .v{font-weight:600;color:rgba(255,255,255,.9);text-align:right;max-width:60%}
+.summary .sr .v{font-weight:600;color:rgba(255,255,255,.9);text-align:right;max-width:62%;overflow-wrap:anywhere;word-break:break-word}
 .summary .tot{border-top:1px solid rgba(255,255,255,.1)!important;margin-top:4px;padding-top:12px!important;font-size:15px}
 .summary .tot .k{color:rgba(255,255,255,.6)!important;font-size:13px!important}
 .summary .tot .v{color:var(--green)!important;font-size:17px;font-weight:800}
@@ -810,7 +810,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 .wiz-plate-result.err{background:rgba(200,40,40,.08);border:1px solid rgba(200,40,40,.25);color:#f87171}
 @media(max-width:880px){
   .trustbar{display:none}
-  .nav-links{display:none}.nav-phone{display:none}.nav-book-btn{display:none}.lang{display:none}.lang-mobile{display:none}.menu-toggle{display:block}
+  .nav-links{display:none}.nav-phone{display:none}.nav-book-btn{display:none}.lang{display:none}.lang-mobile{display:none}.menu-toggle{display:inline-flex;align-items:center;justify-content:center;min-width:44px;min-height:44px}
   /* tighter header (kept ~12-14% shorter) */
   .nav-inner{padding:10px 18px}
   .ann-bar{padding:8px 16px}
@@ -911,11 +911,29 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
   .extras-grid{grid-template-columns:1fr}
   .wiz-plate-row{flex-direction:column}
   .wiz-plate-lookup{width:100%}
-  /* carousel: keep arrows on mobile but compact so cards still get room */
-  /* compact arrows on mobile so the 2 cards get more width */
-  .gcar-btn{width:30px;height:30px;margin:0 1px}
-  .gcar-btn svg{width:14px;height:14px}
+  /* carousel arrows: keep a ≥40px tap target on mobile */
+  .gcar-btn{width:40px;height:40px;margin:0 1px}
+  .gcar-btn svg{width:16px;height:16px}
   .gcar-wrap{gap:0}
+  /* Booking wizard on phones: top-align so the soft keyboard can't hide the
+     focused field or the Næste/Book button, and use dvh so the iOS URL bar
+     doesn't push the modal off-screen. */
+  .modal{align-items:flex-start;padding:10px 10px calc(10px + env(safe-area-inset-bottom))}
+  .wiz{max-height:94vh;max-height:94dvh}
+  .field input,.field textarea{font-size:16px}      /* ≥16px stops iOS auto-zoom on focus */
+  .field input,.field textarea{scroll-margin-top:80px}
+  /* Bigger primary escape/close controls */
+  .wiz-close,.chat-close{width:40px;height:40px}
+  .ba-thumb-expand{width:40px;height:40px}
+  /* Announcement bar must never clip on small phones: let the slogan shrink,
+     keep the Trustpilot badge intact. */
+  .ann-inner{max-width:100%;min-width:0}
+  .ann-text{min-width:0}
+  .ann-text strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;display:inline-block;max-width:100%;vertical-align:bottom}
+}
+@media(max-width:380px){
+  /* first/last name etc. stack so neither field truncates */
+  .field .row2{grid-template-columns:1fr}
 }
 @media(max-width:520px){
   html,body{overflow-x:clip}
@@ -981,7 +999,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 @media(max-width:520px){.scroll-top{bottom:calc(98px + env(safe-area-inset-bottom));left:12px;width:36px;height:36px}}
 
 /* LEGAL PAGES */
-.legal-page{min-height:100vh;background:var(--bg);padding:60px 0 100px}
+.legal-page{min-height:100vh;min-height:100dvh;background:var(--bg);padding:60px 0 100px}
 .legal-wrap{max-width:780px;margin:0 auto;padding:0 24px}
 .legal-back{display:inline-flex;align-items:center;gap:6px;color:var(--green);font-size:14px;font-weight:600;text-decoration:none;margin-bottom:40px;opacity:.85;transition:opacity .2s}
 .legal-back:hover{opacity:1}
@@ -1064,7 +1082,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 .cookie-btn:hover{opacity:.85}
 
 /* ===== CUSTOMER PORTAL ===== */
-.portal-auth-page{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:var(--bg)}
+.portal-auth-page{min-height:100vh;min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:24px;background:var(--bg)}
 .portal-auth-card{width:100%;max-width:420px;background:var(--surface);border:1px solid var(--line-2);border-radius:var(--r);padding:40px 36px}
 .portal-auth-logo{display:flex;align-items:center;gap:10px;margin-bottom:32px;text-decoration:none}
 .portal-auth-logo-mark{width:36px;height:36px;background:var(--green);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#062313}
@@ -1091,7 +1109,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 .portal-sent h1{font-size:22px;font-weight:800;color:#fff;margin-bottom:12px}
 .portal-sent p{font-size:14px;color:var(--muted);margin-bottom:8px;line-height:1.5}
 .portal-sent-hint{font-size:12px;color:var(--muted-2)!important;margin-bottom:20px!important}
-.portal-page{min-height:100vh;background:var(--bg)}
+.portal-page{min-height:100vh;min-height:100dvh;background:var(--bg)}
 .portal-header{background:rgba(11,19,16,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:50}
 .portal-header-inner{max-width:900px;margin:0 auto;padding:13px 24px;display:flex;align-items:center;justify-content:space-between}
 .portal-logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:#fff;font-weight:700;font-size:15px}
@@ -1178,7 +1196,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 .gallery-cta:hover{background:linear-gradient(180deg,rgba(212,175,55,.2),rgba(212,175,55,.08));border-color:rgba(212,175,55,.75);transform:translateY(-2px);box-shadow:0 14px 34px rgba(212,175,55,.16)}
 .gallery-cta:hover::after{transform:translateX(4px)}
 
-.gal-page{min-height:100vh;background:radial-gradient(120% 60% at 50% 0%,rgba(212,175,55,.05),transparent 50%),var(--bg);color:var(--txt)}
+.gal-page{min-height:100vh;min-height:100dvh;background:radial-gradient(120% 60% at 50% 0%,rgba(212,175,55,.05),transparent 50%),var(--bg);color:var(--txt)}
 .gal-topbar{position:sticky;top:0;z-index:40;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 28px;background:rgba(11,19,16,.82);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
 .gal-back{display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:var(--muted);transition:color .2s}
 .gal-back:hover{color:var(--green)}
