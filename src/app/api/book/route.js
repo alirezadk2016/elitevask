@@ -38,6 +38,14 @@ async function emailDomainHasMail(domain) {
 function hashEmail(email) {
   return createHash('sha256').update(email.toLowerCase().trim()).digest('hex');
 }
+
+// User input goes into HTML emails – escape it so nobody can inject
+// links/markup into the company's or the customer's inbox.
+function esc(v) {
+  return String(v ?? '')
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
 const CANCEL_TTL = 60 * 60 * 24;      // 24 hours for cancel link
 const BOOKING_TTL = 60 * 60 * 24 * 30; // 30 days for slot records
 
@@ -106,13 +114,14 @@ async function bookSlot(key, value) {
    first – closes the race where two customers pass the availability check
    at the same moment and both "book" the same hour. */
 async function reserveSlot(key, value) {
-  try {
-    const kv = await getKV();
-    if (kv) {
-      const r = await kv.set(key, JSON.stringify(value), { nx: true, ex: BOOKING_TTL });
-      return !!r; // 'OK' on success, null if the key already existed
-    }
-  } catch {}
+  const kv = await getKV();
+  if (kv) {
+    // If KV is configured but errors, do NOT fall back to per-instance
+    // memory (invisible to other instances → double booking). Let the
+    // error propagate so the caller can answer 503.
+    const r = await kv.set(key, JSON.stringify(value), { nx: true, ex: BOOKING_TTL });
+    return !!r; // 'OK' on success, null if the key already existed
+  }
   if (memSlots.has(key)) return false;
   memSlots.set(key, value);
   return true;
@@ -127,14 +136,23 @@ function cphNow() {
 // Release reserved slots (used when we could NOT notify anyone about the booking,
 // so the slot must not stay red for a booking nobody knows about).
 async function releaseSlots(date, times, cancelToken) {
-  try {
-    const kv = await getKV();
-    if (kv) {
-      await Promise.all(times.map((t) => kv.del(slotKey(date, t))));
-      if (cancelToken) await kv.del(`booking:${cancelToken}`);
-      return;
+  let kv = null;
+  try { kv = await getKV(); } catch {}
+  if (kv) {
+    // allSettled + one retry: a transient Redis hiccup must not leave
+    // orphaned red slots for 30 days.
+    const delAll = () => Promise.allSettled([
+      ...times.map((t) => kv.del(slotKey(date, t))),
+      ...(cancelToken ? [kv.del(`booking:${cancelToken}`)] : []),
+    ]);
+    const results = await delAll();
+    if (results.some((r) => r.status === 'rejected')) {
+      const retry = await delAll();
+      const failed = retry.filter((r) => r.status === 'rejected').length;
+      if (failed) console.error(`[book] releaseSlots: ${failed} key(s) could not be deleted`, { date, times });
     }
-  } catch {}
+    return;
+  }
   for (const t of times) memSlots.delete(slotKey(date, t));
   if (cancelToken) memBookings.delete(cancelToken);
 }
@@ -149,26 +167,6 @@ async function getBookedSlots(date) {
   } catch {}
   const prefix = `slot:${date}:`;
   return [...memSlots.keys()].filter(k => k.startsWith(prefix)).map(k => k.slice(prefix.length));
-}
-
-// Check duplicate booking by phone+date
-async function isDuplicateBooking(phone, date) {
-  if (!phone || !date) return false;
-  const key = `dup:${phone.replace(/\D/g,'')}:${date}`;
-  try {
-    const kv = await getKV();
-    if (kv) return !!(await kv.get(key));
-  } catch {}
-  return false;
-}
-
-async function markDuplicateBooking(phone, date) {
-  if (!phone || !date) return;
-  const key = `dup:${phone.replace(/\D/g,'')}:${date}`;
-  try {
-    const kv = await getKV();
-    if (kv) { await kv.set(key, '1', { ex: BOOKING_TTL }); return; }
-  } catch {}
 }
 
 function slotKey(date, time) { return `slot:${date}:${time}`; }
@@ -239,7 +237,7 @@ export async function POST(request) {
   if (zip  && !/^\d{3,5}$/.test(zip.trim())) return Response.json({ error: 'invalid_zip' }, { status: 400 });
   if (zip) {
     const z = parseInt(zip.trim(), 10);
-    if (z < 1000 || z > 4799) {
+    if (z < 1000 || z > 4799 || (z >= 3700 && z <= 3790)) { // 37xx = Bornholm
       return Response.json({ error: 'outside_area', message: L0
         ? 'Vi dækker kun Sjælland (postnr. 1000–4799). Ring til os på +45 24 44 03 21, så finder vi en løsning.'
         : 'We only cover Zealand (postcodes 1000–4799). Call us on +45 24 44 03 21 and we will find a solution.' }, { status: 400 });
@@ -280,6 +278,18 @@ export async function POST(request) {
           : 'That time has already passed. Please choose a later time.',
       }, { status: 400 });
     }
+    // Slot keys live BOOKING_TTL (30 days) – a booking further out than that
+    // would silently reappear as free before the appointment. Cap at 28 days.
+    const maxDate = new Date(Date.parse(now.date + 'T00:00:00Z') + 28 * 86400000)
+      .toISOString().slice(0, 10);
+    if (date > maxDate) {
+      return Response.json({
+        error: 'too_far',
+        message: L
+          ? 'Der kan bookes højst 28 dage frem. Ring til os på +45 24 44 03 21 for tider længere ude.'
+          : 'Bookings can be made up to 28 days ahead. Call us on +45 24 44 03 21 for later dates.',
+      }, { status: 400 });
+    }
 
     // Reserve atomically (SET NX) so two simultaneous customers can never
     // book the same hour; roll back partial reservations on a clash.
@@ -289,7 +299,19 @@ export async function POST(request) {
 
     for (let i = 0; i < slotsNeeded; i++) {
       const slotTime = SLOT_TIMES[startIdx + i];
-      const got = await reserveSlot(slotKey(date, slotTime), { name: name || 'unknown', bookedAt, token: cancelToken });
+      let got;
+      try {
+        got = await reserveSlot(slotKey(date, slotTime), { name: name || 'unknown', bookedAt, token: cancelToken });
+      } catch (err) {
+        console.error('[book] KV error during reservation — aborting', err?.message);
+        if (bookedSlots.length) await releaseSlots(date, bookedSlots, null);
+        return Response.json({
+          error: 'store_failed',
+          message: L
+            ? 'Vi kunne desværre ikke gennemføre din booking online lige nu. Ring venligst til os på +45 24 44 03 21, så booker vi din tid med det samme.'
+            : 'We could not complete your booking online right now. Please call us on +45 24 44 03 21 and we will book your time straight away.',
+        }, { status: 503 });
+      }
       if (!got) {
         if (bookedSlots.length) await releaseSlots(date, bookedSlots, null);
         return Response.json({
@@ -338,7 +360,7 @@ export async function POST(request) {
   // regardless of which Vercel deployment or domain is active.
   // NEXT_PUBLIC_SITE_URL env var can override if needed.
   const reqUrl = new URL(request.url);
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ||
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_BASE_URL ||
     `${reqUrl.protocol}//${reqUrl.host}`;
 
   const extrasStr = extras?.length ? (Array.isArray(extras) ? extras.join(', ') : extras) : (L ? 'Ingen' : 'None');
@@ -380,17 +402,17 @@ export async function POST(request) {
             <p style="color:#333;margin:0 0 20px;font-size:15px;line-height:1.6">En ny bookingforespørgsel er modtaget via hjemmesiden.</p>
             <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;margin-bottom:20px">
               ${tr('Dato & tid', `${fmtDate(date, true)} · kl. ${time}`, true)}
-              ${tr('Adresse', addr ? `<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${addr}, ${zip} ${city}`)}" style="color:#0d4a25;font-weight:700">${addr}, ${zip} ${city} 📍</a>` : '-')}
-              ${tr('Bil', car || '-', true)}
-              ${tr('Pakke', pkg || '-')}
-              ${tr('Tilvalg', extrasStr, true)}
-              ${tr('Anslået pris', price || '-')}
+              ${tr('Adresse', addr ? `<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${addr}, ${zip} ${city}`)}" style="color:#0d4a25;font-weight:700">${esc(addr)}, ${esc(zip)} ${esc(city)} 📍</a>` : '-')}
+              ${tr('Bil', esc(car) || '-', true)}
+              ${tr('Pakke', esc(pkg) || '-')}
+              ${tr('Tilvalg', esc(extrasStr), true)}
+              ${tr('Anslået pris', esc(price) || '-')}
             </table>
             <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;margin-bottom:20px;border-top:2px solid #e0e8e3">
-              ${tr('Navn', name || '-', true)}
-              ${tr('Telefon', `<a href="tel:${(phone||'').replace(/\s/g,'')}" style="color:#0d4a25">${phone || '-'}</a>`)}
-              ${tr('Email', email ? `<a href="mailto:${email}" style="color:#0d4a25">${email}</a>` : '-', true)}
-              ${msg ? tr('Besked', msg) : ''}
+              ${tr('Navn', esc(name) || '-', true)}
+              ${tr('Telefon', `<a href="tel:${esc((phone||'').replace(/[^\d+]/g,''))}" style="color:#0d4a25">${esc(phone) || '-'}</a>`)}
+              ${tr('Email', email ? `<a href="mailto:${esc(email)}" style="color:#0d4a25">${esc(email)}</a>` : '-', true)}
+              ${msg ? tr('Besked', esc(msg)) : ''}
             </table>
           `,
         }),
@@ -422,7 +444,7 @@ export async function POST(request) {
             lang: lang || 'da',
             body: `
               <p style="color:#333;margin:0 0 20px;font-size:15px;line-height:1.7">
-                ${L ? `Hej ${name || ''},` : `Hi ${name || ''},`}<br><br>
+                ${L ? `Hej ${esc(name) || ''},` : `Hi ${esc(name) || ''},`}<br><br>
                 ${L
                   ? 'Vi har modtaget din bookingforespørgsel og vender tilbage hurtigst muligt for at bekræfte tid og endelig pris.'
                   : "We've received your booking request and will get back to you as soon as possible to confirm the time and final price."}
@@ -430,12 +452,19 @@ export async function POST(request) {
 
               <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;margin-bottom:24px">
                 ${tr(L ? 'Dato & tid' : 'Date & time', `${fmtDate(date, L)} · kl. ${time}`, true)}
-                ${tr(L ? 'Bil' : 'Car', car || '-')}
-                ${tr(L ? 'Pakke' : 'Package', pkg || '-', true)}
-                ${extras?.length ? tr(L ? 'Tilvalg' : 'Add-ons', extrasStr) : ''}
-                ${tr(L ? 'Adresse' : 'Address', `${addr || ''}, ${zip || ''} ${city || ''}`, true)}
-                ${tr(L ? 'Anslået pris' : 'Est. price', `<strong style="color:#0d4a25;font-size:15px">${price || '-'}</strong>`)}
+                ${tr(L ? 'Bil' : 'Car', esc(car) || '-')}
+                ${tr(L ? 'Pakke' : 'Package', esc(pkg) || '-', true)}
+                ${extras?.length ? tr(L ? 'Tilvalg' : 'Add-ons', esc(extrasStr)) : ''}
+                ${tr(L ? 'Adresse' : 'Address', esc(`${addr || ''}, ${zip || ''} ${city || ''}`), true)}
+                ${tr(L ? 'Anslået pris' : 'Est. price', `<strong style="color:#0d4a25;font-size:15px">${esc(price) || '-'}</strong>`)}
               </table>
+
+              ${cancelLink ? `
+              <p style="font-size:13px;color:#777;margin:0 0 20px;line-height:1.7">
+                ${L
+                  ? `Skal du alligevel ikke bruge tiden? <a href="${cancelLink}" style="color:#0d4a25;font-weight:600">Annullér din booking her</a> (linket virker i 24 timer).`
+                  : `Need to cancel? <a href="${cancelLink}" style="color:#0d4a25;font-weight:600">Cancel your booking here</a> (link valid for 24 hours).`}
+              </p>` : ''}
 
 
               <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:20px">

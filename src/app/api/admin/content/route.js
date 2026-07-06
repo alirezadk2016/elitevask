@@ -1,12 +1,21 @@
+import { createHash, timingSafeEqual, randomUUID } from 'crypto';
 import { kv } from '@vercel/kv';
 import { put, del } from '@vercel/blob';
 
 const AUTH = process.env.ADMIN_SECRET;
 
 function authorized(req) {
+  // No secret configured → deny everything (never accept "Bearer undefined").
+  if (!AUTH) return false;
   const h = req.headers.get('authorization') || '';
-  return h === `Bearer ${AUTH}`;
+  const a = createHash('sha256').update(h).digest();
+  const b = createHash('sha256').update(`Bearer ${AUTH}`).digest();
+  return timingSafeEqual(a, b);
 }
+
+// Only these content collections may be written – prevents a bogus ?type=
+// from creating/overwriting arbitrary content:* keys.
+const CONTENT_TYPES = new Set(['gallery', 'videos', 'faq', 'extras', 'beforeafter']);
 
 // GET /api/admin/content?type=gallery|videos|faq|extras|packages
 export async function GET(req) {
@@ -40,7 +49,7 @@ export async function POST(req) {
       const b = await put(`elite-vask/beforeafter/${Date.now()}-b-${beforeFile.name}`, beforeFile, { access: 'public' });
       const a = await put(`elite-vask/beforeafter/${Date.now()}-a-${afterFile.name}`, afterFile, { access: 'public' });
       const baItem = {
-        id: Date.now().toString(),
+        id: randomUUID(),
         before: b.url,
         after: a.url,
         caption,
@@ -64,7 +73,7 @@ export async function POST(req) {
     });
 
     item = {
-      id: Date.now().toString(),
+      id: randomUUID(),
       url: blob.url,
       caption,
       ...(album ? { album } : {}),
@@ -80,14 +89,29 @@ export async function POST(req) {
     const body = await req.json();
     const { type = 'gallery' } = body;
 
-    // Packages: replace entire price matrix
+    // Packages: replace entire price matrix (validated: only known car/pkg
+    // keys, numeric cells; empty/NaN cells dropped so the public site never
+    // gets "fra kr. 0" or string-concatenation totals).
     if (type === 'packages') {
       const { prices } = body;
-      if (!prices || typeof prices !== 'object') {
+      if (!prices || typeof prices !== 'object' || Array.isArray(prices)) {
         return Response.json({ error: 'invalid_prices' }, { status: 400 });
       }
-      await kv.set('content:prices', prices);
-      return Response.json({ ok: true });
+      const CARS = ['lille', 'mellem', 'stor', 'varebil'];
+      const PKGS = ['hele', 'udv', 'indv', 'guld'];
+      const clean = {};
+      for (const car of CARS) {
+        const row = prices[car];
+        if (!row || typeof row !== 'object') continue;
+        const cleanRow = {};
+        for (const p of PKGS) {
+          const n = Number(row[p]);
+          if (Number.isFinite(n) && n > 0) cleanRow[p] = n;
+        }
+        if (Object.keys(cleanRow).length) clean[car] = cleanRow;
+      }
+      await kv.set('content:prices', clean);
+      return Response.json({ ok: true, prices: clean });
     }
 
     // FAQ item
@@ -96,7 +120,7 @@ export async function POST(req) {
       if (!faqItem || !faqItem.q || !faqItem.a) {
         return Response.json({ error: 'invalid_item' }, { status: 400 });
       }
-      const newItem = { id: Date.now().toString(), ...faqItem };
+      const newItem = { id: randomUUID(), ...faqItem };
       const existing = await kv.get('content:faq') || [];
       await kv.set('content:faq', [...existing, newItem]);
       return Response.json({ ok: true, item: newItem });
@@ -108,7 +132,7 @@ export async function POST(req) {
       if (!extItem || !extItem.name) {
         return Response.json({ error: 'invalid_item' }, { status: 400 });
       }
-      const newItem = { id: Date.now().toString(), ...extItem };
+      const newItem = { id: randomUUID(), ...extItem };
       const existing = await kv.get('content:extras') || [];
       await kv.set('content:extras', [...existing, newItem]);
       return Response.json({ ok: true, item: newItem });
@@ -118,18 +142,29 @@ export async function POST(req) {
     if (type === 'beforeafter') {
       const { before, after, caption = '' } = body;
       if (!before || !after) return Response.json({ error: 'need_two_urls' }, { status: 400 });
-      const baItem = { id: Date.now().toString(), before, after, caption, source: 'url', uploadedAt: new Date().toISOString() };
+      const baItem = { id: randomUUID(), before, after, caption, source: 'url', uploadedAt: new Date().toISOString() };
       const existingBa = await kv.get('content:beforeafter') || [];
       await kv.set('content:beforeafter', [baItem, ...existingBa]);
       return Response.json({ ok: true, item: baItem });
     }
 
-    // URL-based (gallery / videos)
+    // URL-based (gallery / videos) — reject unknown collections
+    if (!CONTENT_TYPES.has(type)) {
+      return Response.json({ error: 'invalid_type' }, { status: 400 });
+    }
     const { url, caption = '', title = '', album = '' } = body;
     if (!url) return Response.json({ error: 'no_url' }, { status: 400 });
 
+    if (type === 'videos') {
+      const isYT = /youtube\.com|youtu\.be/.test(url);
+      const isVimeo = /vimeo\.com/.test(url);
+      if (!isYT && !isVimeo) {
+        return Response.json({ error: 'unsupported_video', message: 'Kun YouTube- og Vimeo-links understøttes.' }, { status: 400 });
+      }
+    }
+
     item = {
-      id: Date.now().toString(),
+      id: randomUUID(),
       url,
       caption,
       title,

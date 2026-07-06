@@ -69,8 +69,11 @@ export async function GET(request) {
 
   await auditLog(kv, 'login_success', { emailHash: hashToken(magic.email), ip, ua });
 
-  return Response.redirect(`${siteUrl}/portal`, {
-    headers: { 'Set-Cookie': makeSessionCookie(sessionRaw) },
+  return new Response(null, {
     status: 302,
+    headers: {
+      Location: `${siteUrl}/portal`,
+      'Set-Cookie': makeSessionCookie(sessionRaw),
+    },
   });
 }

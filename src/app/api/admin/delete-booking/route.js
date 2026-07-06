@@ -1,4 +1,22 @@
+import { createHash, timingSafeEqual } from 'crypto';
 import { buildTransport, emailShell, tr, CONTACT_EMAIL, BOOKING_EMAIL } from '@/lib/mailer';
+
+const CAR_SLOTS = { lille: 2, mellem: 3, stor: 4, varebil: 3 };
+const SLOT_TIMES = ['08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00'];
+
+// Reconstruct the reserved hours for a booking that predates the `slots` field.
+function slotsFor(data) {
+  if (Array.isArray(data.slots) && data.slots.length) return data.slots;
+  if (!data.time) return [];
+  const start = SLOT_TIMES.indexOf(data.time);
+  if (start < 0) return [];
+  const n = data.slotsNeeded || CAR_SLOTS[data.carId] || 1;
+  return SLOT_TIMES.slice(start, start + n);
+}
+
+function hashEmail(email) {
+  return createHash('sha256').update(String(email).toLowerCase().trim()).digest('hex');
+}
 
 function fmtDate(d) {
   if (!d) return d;
@@ -77,7 +95,12 @@ async function getKV() {
 function checkAuth(request) {
   const secret = process.env.ADMIN_SECRET;
   if (!secret) return false;
-  return request.headers.get('authorization') === `Bearer ${secret}`;
+  const header = request.headers.get('authorization') || '';
+  const expected = `Bearer ${secret}`;
+  // Constant-time compare (hash first so unequal lengths don't leak / throw)
+  const a = createHash('sha256').update(header).digest();
+  const b = createHash('sha256').update(expected).digest();
+  return timingSafeEqual(a, b);
 }
 
 // Cancel booking (keeps record, frees slots, sets status=cancelled)
@@ -92,8 +115,8 @@ export async function PATCH(request) {
     if (!booking) return Response.json({ error: 'not_found' }, { status: 404 });
     const data = typeof booking === 'string' ? JSON.parse(booking) : booking;
     data.status = 'cancelled';
-    if (data.date && data.slots) {
-      await Promise.all(data.slots.map(t => kv.del(`slot:${data.date}:${t}`)));
+    if (data.date) {
+      await Promise.all(slotsFor(data).map(t => kv.del(`slot:${data.date}:${t}`)));
     }
     await kv.set(`booking:${token}`, JSON.stringify(data), { ex: 60 * 60 * 24 * 30 });
     await sendCancelEmails(data).catch(() => {});
@@ -112,16 +135,20 @@ export async function DELETE(request) {
     const kv = await getKV();
     if (!kv) return Response.json({ error: 'no_redis' }, { status: 503 });
     const booking = await kv.get(`booking:${token}`);
+    let email = null;
     if (booking) {
       const data = typeof booking === 'string' ? JSON.parse(booking) : booking;
-      if (data.date && data.slots) {
-        await Promise.all(data.slots.map(t => kv.del(`slot:${data.date}:${t}`)));
+      email = data.email || null;
+      if (data.date) {
+        await Promise.all(slotsFor(data).map(t => kv.del(`slot:${data.date}:${t}`)));
       }
       if (data.status !== 'cancelled') {
         await sendCancelEmails(data).catch(() => {});
       }
     }
     await kv.del(`booking:${token}`);
+    // Remove the dangling token from the customer portal index.
+    if (email) { try { await kv.srem(`user:bookings:${hashEmail(email)}`, token); } catch {} }
     return Response.json({ ok: true });
   } catch (e) {
     return Response.json({ error: e.message }, { status: 500 });

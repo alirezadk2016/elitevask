@@ -1,4 +1,5 @@
 import { hashToken, getSession } from '@/lib/auth';
+import { cphEpoch } from '@/lib/cphTime';
 
 let kvClient = null;
 async function getKV() {
@@ -31,7 +32,7 @@ export async function GET(request) {
       if (!raw) continue;
       const b = typeof raw === 'string' ? JSON.parse(raw) : raw;
       if ((b.email || '').toLowerCase() !== email) continue; // ownership check
-      const bookingDt = b.date && b.time ? new Date(`${b.date}T${b.time}:00`) : null;
+      const bookingDt = b.date && b.time ? cphEpoch(b.date, b.time) : null;
       const canCancel = bookingDt ? (bookingDt - Date.now()) > 24 * 3600 * 1000 : false;
       bookings.push({
         token,

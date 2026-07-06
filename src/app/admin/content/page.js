@@ -360,6 +360,14 @@ export default function AdminPanel() {
 
   async function fetchContent(type) {
     const res = await fetch(`/api/admin/content?type=${type}`, { headers:{ Authorization:`Bearer ${secret}` } });
+    if (res.status === 401 || res.status === 403) {
+      // Stored secret is stale/rotated — drop it and force re-login instead of
+      // showing empty lists that invite a re-seed.
+      try { sessionStorage.removeItem("adm"); } catch {}
+      setAuthed(false); setSecret(""); setLoginErr("Session udløbet – log ind igen.");
+      return;
+    }
+    if (!res.ok) return;
     const data = await res.json();
     if (type === "gallery")  setGallery(data.items || []);
     else if (type === "videos")  setVideos(data.items || []);
@@ -691,9 +699,14 @@ export default function AdminPanel() {
 
             function slotCount(b) {
               if (b.slotsNeeded) return b.slotsNeeded;
-              const p = (b.pkg||"").toLowerCase();
-              if (p.includes("stor") || p.includes("varebil")) return 4;
-              if (p.includes("mellem")) return 3;
+              // Mirror the server CAR_SLOTS map, keyed on CAR type (not package).
+              const CAR_SLOTS = { lille: 2, mellem: 3, stor: 4, varebil: 3 };
+              if (b.carId && CAR_SLOTS[b.carId]) return CAR_SLOTS[b.carId];
+              const c = (b.car || b.pkg || "").toLowerCase();
+              if (c.includes("varebil") || c.includes("van")) return 3;
+              if (c.includes("stor") || c.includes("suv") || c.includes("large")) return 4;
+              if (c.includes("mellem") || c.includes("medium")) return 3;
+              if (c.includes("lille") || c.includes("small")) return 2;
               return 2;
             }
 
@@ -829,7 +842,7 @@ export default function AdminPanel() {
                           const isPast = weekOffset < 0 || (weekOffset === 0 && hour < nowH);
                           const isCurrentHour = weekOffset === 0 && hour === nowH;
                           return (
-                            <div key={hour} style={{ display:"flex", borderBottom: isLast?"none":`1px solid ${T.border}`, minHeight:ROW_H, position:"relative", background: isPast ? "rgba(0,0,0,.12)" : "transparent" }}>
+                            <div key={hour} style={{ display:"flex", borderBottom: isLast?"none":`1px solid ${T.border}`, minHeight:ROW_H, position:"relative", background:"transparent" }}>
                               {/* Time label */}
                               <div style={{ width:TIME_W, flexShrink:0, borderRight:`1px solid ${T.border}`, padding:"6px 8px 0", textAlign:"right", paddingTop:8 }}>
                                 <span style={{ fontSize:11, color:isCurrentHour?"#e5534b":isPast?T.t4:T.t3, fontWeight:isCurrentHour?700:500, fontVariantNumeric:"tabular-nums" }}>
@@ -841,15 +854,25 @@ export default function AdminPanel() {
                               {weekDays.map((d, di) => {
                                 const iso = toISO(d);
                                 const isToday = iso === todayISO;
+                                const isPastCell = iso < todayISO || (iso === todayISO && hour < nowTime.getHours());
+                                const cellBg = isPastCell ? "rgba(0,0,0,.12)" : (isToday ? "rgba(55,210,120,.025)" : "transparent");
                                 const startingHere = bookings.filter(b => b.date === iso && bookingStartHour(b) === hour);
                                 return (
-                                  <div key={di} style={{ flex:1, minWidth:COL_W, borderRight: di<6 ? `1px solid ${T.border}` : "none", padding:"3px 4px", background:isToday?"rgba(55,210,120,.025)":"transparent", position:"relative", minHeight:ROW_H, display:"flex", flexDirection:"column", gap:3 }}>
-                                    {startingHere.map(b => {
+                                  <div key={di} style={{ flex:1, minWidth:COL_W, borderRight: di<6 ? `1px solid ${T.border}` : "none", padding:"3px 4px", background:cellBg, position:"relative", height:ROW_H, boxSizing:"border-box" }}>
+                                    {startingHere.map((b, bi) => {
                                       // each slot = 1 full hour (SLOT_TIMES are hourly)
                                       const slots = slotCount(b);
                                       const startH = bookingStartHour(b);
-                                      const endTime = startH != null ? `${String(startH + slots).padStart(2, "0")}:00` : "";
-                                      const heightPx = slots * ROW_H - 6;
+                                      // Clamp the end so a long booking never draws past the 20:00 grid bottom.
+                                      const endH = Math.min(startH + slots, 21);
+                                      const endTime = startH != null ? `${String(endH).padStart(2, "0")}:00` : "";
+                                      const drawSlots = startH != null ? endH - startH : slots;
+                                      // Overlay tall cards across the hours below without stretching this row.
+                                      const heightPx = drawSlots * ROW_H - 6;
+                                      // Side-by-side if two bookings somehow share a start hour.
+                                      const cnt = startingHere.length;
+                                      const widthPct = cnt > 1 ? `calc(${(100/cnt).toFixed(2)}% - 6px)` : "calc(100% - 8px)";
+                                      const leftPct = cnt > 1 ? `calc(${(bi*100/cnt).toFixed(2)}% + 4px)` : 4;
                                       const isCancelled = b.status === "cancelled";
                                       const isPending   = b.status === "pending";
                                       const isCompleted = b.status === "completed";
@@ -863,7 +886,7 @@ export default function AdminPanel() {
                                       return (
                                         <div key={b.token}
                                           onClick={() => { setSelectedBooking(b); setModalState("idle"); }}
-                                          style={{ background:cardBg, border:`1px solid ${cardBor}`, borderLeft:`3px solid ${cardLeft}`, borderRadius:8, padding:"6px 8px", cursor:"pointer", height:heightPx, minHeight:42, boxSizing:"border-box", display:"flex", flexDirection:"column", justifyContent:"space-between", overflow:"hidden", transition:"filter .15s, transform .1s", opacity:isCancelled?.55:1, WebkitTapHighlightColor:"transparent", position:"relative", zIndex:2 }}
+                                          style={{ background:cardBg, border:`1px solid ${cardBor}`, borderLeft:`3px solid ${cardLeft}`, borderRadius:8, padding:"6px 8px", cursor:"pointer", height:heightPx, minHeight:42, boxSizing:"border-box", display:"flex", flexDirection:"column", justifyContent:"space-between", overflow:"hidden", transition:"filter .15s, transform .1s", opacity:isCancelled?.55:1, WebkitTapHighlightColor:"transparent", position:"absolute", top:3, left:leftPct, width:widthPct, zIndex:isCancelled?2:3 }}
                                           onMouseEnter={e => { e.currentTarget.style.filter="brightness(1.2)"; e.currentTarget.style.transform="scale(1.01)"; }}
                                           onMouseLeave={e => { e.currentTarget.style.filter=""; e.currentTarget.style.transform=""; }}
                                         >
@@ -1000,7 +1023,7 @@ export default function AdminPanel() {
                               style={{ width:36, height:36, borderRadius:"50%", background:"rgba(255,255,255,.12)", border:"1px solid rgba(255,255,255,.25)", color:"#fff", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center" }}>
                               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                             </button>
-                            <button onClick={() => setEditingGallery({ id:item.id, caption:item.caption||"", album:item.album||"" })}
+                            <button onClick={() => setEditingGallery({ id:item.id, caption:item.caption||"", album:item.album||"Enkelt" })}
                               style={{ width:36, height:36, borderRadius:"50%", background:"rgba(255,255,255,.12)", border:"1px solid rgba(255,255,255,.25)", color:"#fff", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center" }}>
                               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                             </button>
@@ -1827,8 +1850,9 @@ export default function AdminPanel() {
                       {b.time
                         ? (() => {
                             const h = parseInt(b.time.split(":")[0], 10);
-                            const n = b.slotsNeeded || (Array.isArray(b.slots) ? b.slots.length : 2);
-                            return `kl. ${b.time}–${String(h + n).padStart(2, "0")}:00 (${n} timer)`;
+                            const n = b.slotsNeeded || (Array.isArray(b.slots) ? b.slots.length : ({lille:2,mellem:3,stor:4,varebil:3}[b.carId] || 2));
+                            const endH = Math.min(h + n, 21);
+                            return `kl. ${b.time}–${String(endH).padStart(2, "0")}:00 (${n} timer)`;
                           })()
                         : "-"}
                     </div>

@@ -1,4 +1,5 @@
 import { isSameOrigin } from '@/lib/csrf';
+import { cphEpoch } from '@/lib/cphTime';
 import { buildTransport, emailShell, tr, BOOKING_EMAIL, INFO_EMAIL, CONTACT_EMAIL } from '@/lib/mailer';
 
 let kvClient = null;
@@ -84,6 +85,16 @@ export async function POST(request) {
     return Response.json({ error: 'link_expired' }, { status: 410 });
   }
 
+  // Same 24h rule as the customer portal
+  if (date && booking.time) {
+    const dt = cphEpoch(date, booking.time);
+    if ((dt - Date.now()) < 24 * 3600 * 1000) {
+      return Response.json({ error: 'too_late', message: L
+        ? 'Kan ikke annulleres inden for 24 timer. Ring venligst til os på +45 24 44 03 21.'
+        : 'Cannot be cancelled within 24 hours. Please call us on +45 24 44 03 21.' }, { status: 409 });
+    }
+  }
+
   // Free all booked slots
   if (Array.isArray(slots)) {
     for (const slotTime of slots) {
@@ -91,11 +102,13 @@ export async function POST(request) {
     }
   }
 
-  // Soft delete — mark as cancelled instead of deleting
+  // Soft delete — mark as cancelled instead of deleting. If the write fails,
+  // retry; never delete the record (it must stay visible in the admin).
+  const cancelled = JSON.stringify({ ...booking, status: 'cancelled', cancelledAt: new Date().toISOString() });
   try {
-    await kv.set(`booking:${token}`, JSON.stringify({ ...booking, status: 'cancelled', cancelledAt: new Date().toISOString() }), { ex: 60 * 60 * 24 * 60 });
+    await kv.set(`booking:${token}`, cancelled, { ex: 60 * 60 * 24 * 60 });
   } catch {
-    await kv.del(`booking:${token}`);
+    try { await kv.set(`booking:${token}`, cancelled, { ex: 60 * 60 * 24 * 60 }); } catch {}
   }
 
   const senderUser = process.env.SMTP_USER || process.env.GMAIL_USER || BOOKING_EMAIL;

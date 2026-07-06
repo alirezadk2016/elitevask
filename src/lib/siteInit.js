@@ -19,10 +19,10 @@ var CARS=[
   {id:"varebil",label:{da:"Varebil",en:"Van"},ex:{da:"Transit, Caddy, Berlingo",en:"Transit, Caddy, Berlingo"},time:{da:"90–180 min",en:"90–180 min"},prices:{hele:1400,udv:750,indv:750,guld:2200},svg:'<path d="M6 48 L6 18 Q6 14 12 14 L74 14 Q82 14 88 22 L108 38 Q112 41 112 46 L112 47 Q112 48 108 48"/><path d="M40 48 L82 48"/><circle cx="28" cy="48" r="8.5"/><circle cx="28" cy="48" r="3"/><circle cx="92" cy="48" r="8.5"/><circle cx="92" cy="48" r="3"/><path d="M74 16 L80 30 L110 30"/><path d="M38 14 L38 30 L6 30"/>'}
 ];
 var PKGS=[
-  {id:"hele",pop:true,gold:false,includes:[],relevant:["motor","lak","haar","barnesaede"],name:{da:"Hele bilen",en:"Full car"},desc:{da:"Ind & ud – komplet behandling",en:"In & out – complete service"},feat:{da:["Udvendig håndvask + fælge","Grundig indvendig støvsugning","Rens af måtter & sæder","Dampbehandling af kabine","Voksfinish & ruder ind/ud"],en:["Exterior hand wash + rims","Thorough interior vacuum","Mats & seats cleaned","Cabin steam treatment","Wax finish & windows"]}},
+  {id:"hele",pop:true,gold:false,includes:[],relevant:["motor","lak","pleje","haar","saede","barnesaede"],name:{da:"Hele bilen",en:"Full car"},desc:{da:"Ind & ud – komplet behandling",en:"In & out – complete service"},feat:{da:["Udvendig håndvask + fælge","Grundig indvendig støvsugning","Rens af måtter & sæder","Dampbehandling af kabine","Voksfinish & ruder ind/ud"],en:["Exterior hand wash + rims","Thorough interior vacuum","Mats & seats cleaned","Cabin steam treatment","Wax finish & windows"]}},
   {id:"udv",pop:false,gold:false,includes:[],relevant:["motor","lak"],name:{da:"Udvendig",en:"Exterior"},desc:{da:"Skånsom udvendig dampvask",en:"Gentle exterior steam wash"},feat:{da:["Udvendig håndvask","Fælge & dæk","Lakrens: tjære & insekter","Voksfinish","Ruder udvendigt"],en:["Exterior hand wash","Rims & tyres","Paint: tar & insects","Wax finish","Windows outside"]}},
-  {id:"indv",pop:false,gold:false,includes:[],relevant:["haar","barnesaede"],name:{da:"Indvendig",en:"Interior"},desc:{da:"Dybderens af kabinen",en:"Deep clean of the cabin"},feat:{da:["Grundig støvsugning","Rens af måtter","Dampbehandling af sæder","Desinficering","Ruder indvendigt"],en:["Thorough vacuum","Mat cleaning","Seat steam treatment","Disinfection","Windows inside"]}},
-  {id:"guld",pop:false,gold:true,includes:["motor","lak"],relevant:["haar","barnesaede"],name:{da:"Guld pakke",en:"Gold package"},desc:{da:"Motorrens + lakforsegling + dybdebehandling inkl.",en:"Engine clean + paint sealant + deep treatment incl."},feat:{da:["Alt ind & ud","+ Motorrens","+ Lak- & glansbeskyttelse","+ Dybderens ved uheld","+ Interiørbeskyttelse"],en:["Everything in & out","+ Engine clean","+ Paint & gloss protection","+ Deep clean if needed","+ Interior protection"]}}
+  {id:"indv",pop:false,gold:false,includes:[],relevant:["pleje","haar","saede","barnesaede"],name:{da:"Indvendig",en:"Interior"},desc:{da:"Dybderens af kabinen",en:"Deep clean of the cabin"},feat:{da:["Grundig støvsugning","Rens af måtter","Dampbehandling af sæder","Desinficering","Ruder indvendigt"],en:["Thorough vacuum","Mat cleaning","Seat steam treatment","Disinfection","Windows inside"]}},
+  {id:"guld",pop:false,gold:true,includes:["motor","lak"],relevant:["pleje","haar","saede","barnesaede"],name:{da:"Guld pakke",en:"Gold package"},desc:{da:"Motorrens + lakforsegling + dybdebehandling inkl.",en:"Engine clean + paint sealant + deep treatment incl."},feat:{da:["Alt ind & ud","+ Motorrens","+ Lak- & glansbeskyttelse","+ Dybderens ved uheld","+ Interiørbeskyttelse"],en:["Everything in & out","+ Engine clean","+ Paint & gloss protection","+ Deep clean if needed","+ Interior protection"]}}
 ];
 var EXTRAS=[
   {id:"motor",name:{da:"Motorrens",en:"Engine clean"},price:400,desc:{da:"Grundig afrensning af motorrum",en:"Thorough engine bay cleaning"}},
@@ -335,7 +335,10 @@ var wiz={car:null,pkg:null,extras:[],addr:"",zip:"",city:"",addrVerified:false,d
 var step=1, TOTAL=7;
 function W(k){return WIZ[LANG][k]||k;}
 function openWiz(car,pkg){
+  // Full reset so a second booking never inherits the previous one's
+  // date/time/address (which could already be booked or unverified).
   wiz.car=car||null;wiz.pkg=pkg||null;wiz.zip="";wiz.extras=[];wiz.addrVerified=false;
+  wiz.date="";wiz.time="";wiz.addr="";wiz.city="";wiz.name="";wiz.phone="";wiz.email="";wiz.msg="";
   if(car&&pkg){step=3;}
   else if(car){step=2;}
   else{wiz.car=selCar||CARS[0];step=1;}
@@ -405,7 +408,13 @@ function drawWiz(){
     h+='<div class="wiz-q">'+W('s3')+'</div>';
     var pkgIncludes=(wiz.pkg&&wiz.pkg.includes)||[];
     var pkgRelevant=(wiz.pkg&&wiz.pkg.relevant)||EXTRAS.map(function(e){return e.id;});
-    var optionalExtras=EXTRAS.filter(function(ex){return pkgRelevant.indexOf(ex.id)>=0&&pkgIncludes.indexOf(ex.id)<0;});
+    // Every extra id the built-in packages know about. Anything outside this
+    // set is an admin-added custom extra (KV override) and should always show.
+    var KNOWN_EXT={};PKGS.forEach(function(p){(p.relevant||[]).concat(p.includes||[]).forEach(function(id){KNOWN_EXT[id]=1;});});
+    var optionalExtras=EXTRAS.filter(function(ex){
+      if(pkgIncludes.indexOf(ex.id)>=0)return false;
+      return pkgRelevant.indexOf(ex.id)>=0||!KNOWN_EXT[ex.id];
+    });
     if(pkgIncludes.length>0){
       h+='<p style="font-size:13px;color:var(--green);margin-bottom:8px;font-weight:600">'+(LANG==='da'?'✓ Inkluderet i din pakke:':'✓ Included in your package:')+'</p>';
       h+='<div class="extras-grid" style="margin-bottom:16px">';
@@ -723,7 +732,12 @@ function nowCopenhagen(){
   return new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Copenhagen',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}).format(new Date()).replace(' ','T');
 }
 function isPastSlot(date,time){
-  return (date+'T'+time)<nowCopenhagen();
+  // The server rejects any slot whose hour is <= the current Copenhagen hour,
+  // so hide a today slot as soon as we're inside (or past) that hour.
+  var now=nowCopenhagen(); // "YYYY-MM-DDTHH:MM"
+  if(date>now.slice(0,10))return false;      // future day
+  if(date<now.slice(0,10))return true;       // past day
+  return parseInt(time,10)<=parseInt(now.slice(11,13),10); // today: hour must be strictly later
 }
 function renderSlotGrid(grid,booked,date){
   var SLOTS=['08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00'];
@@ -740,6 +754,10 @@ function renderSlotGrid(grid,booked,date){
     for(var i=0;i<need;i++){var t=SLOTS[idx+i];if(!t||booked.indexOf(t)>=0)return false;}
     return true;
   }
+  // Drop a previously chosen start time if it is no longer bookable
+  // (car type changed → longer duration, or the range got booked meanwhile,
+  // or the hour slipped into the past). Prevents a silent 400/409 at submit.
+  if(wiz.time&&(isPastSlot(date,wiz.time)||!canBook(wiz.time)))wiz.time='';
   // Which slots are in the selected range
   var selStart=wiz.time?SLOTS.indexOf(wiz.time):-1;
   var selSlots={};
@@ -752,7 +770,10 @@ function renderSlotGrid(grid,booked,date){
     var label=s+(isBooked?' <small>🔴</small>':'');
     return '<button class="slot'+(cls?' '+cls:'')+'" data-slot="'+s+'"'+((isBooked||blocked)?' disabled':'')+'>'+label+'</button>';
   }).join('');
-  if(need>1&&!document.querySelector('.slot-dur-hint')){
+  // Always refresh the duration hint with the CURRENT need (car type may
+  // have changed since it was first inserted).
+  var oldHint=document.querySelector('.slot-dur-hint');if(oldHint)oldHint.remove();
+  if(need>1){
     grid.insertAdjacentHTML('beforebegin','<p class="slot-dur-hint">'+(LANG==='da'?'Behandlingstid: <strong>~'+need+' timer</strong> – de markerede tider reserveres automatisk':'Service time: <strong>~'+need+' hours</strong> – marked slots reserved automatically')+'</p>');
   }
   grid.querySelectorAll('.slot:not([disabled])').forEach(function(btn){
@@ -763,21 +784,23 @@ function renderSlotGrid(grid,booked,date){
   });
 }
 var _slotPollTimer=null;
+var _slotReqSeq=0;
 function loadSlots(date){
   var grid=document.getElementById('slotGrid');if(!grid)return;
+  var seq=++_slotReqSeq; // guard against out-of-order responses when dates change
   grid.innerHTML='<div class="slot-hint" style="grid-column:1/-1">'+(LANG==='da'?'Henter ledige tider…':'Loading available times…')+'</div>';
   fetch('/api/book?date='+encodeURIComponent(date))
     .then(function(r){return r.json();})
-    .then(function(res){renderSlotGrid(grid,res.booked||[],date);})
-    .catch(function(){renderSlotGrid(grid,[],date);});
+    .then(function(res){if(seq!==_slotReqSeq||wiz.date!==date)return;var g=document.getElementById('slotGrid');if(g)renderSlotGrid(g,res.booked||[],date);})
+    .catch(function(){if(seq!==_slotReqSeq||wiz.date!==date)return;var g=document.getElementById('slotGrid');if(g)renderSlotGrid(g,[],date);});
   // Poll every 30s so newly booked slots from other users appear automatically
   if(_slotPollTimer)clearInterval(_slotPollTimer);
   _slotPollTimer=setInterval(function(){
     var g=document.getElementById('slotGrid');
-    if(!g){clearInterval(_slotPollTimer);_slotPollTimer=null;return;}
+    if(!g||wiz.date!==date){clearInterval(_slotPollTimer);_slotPollTimer=null;return;}
     fetch('/api/book?date='+encodeURIComponent(date))
       .then(function(r){return r.json();})
-      .then(function(res){var g2=document.getElementById('slotGrid');if(g2)renderSlotGrid(g2,res.booked||[],date);})
+      .then(function(res){var g2=document.getElementById('slotGrid');if(g2&&wiz.date===date)renderSlotGrid(g2,res.booked||[],date);})
       .catch(function(){});
   },30000);
 }
@@ -791,7 +814,7 @@ function fmtDate(d,lang){
   return dn[dt.getDay()]+' '+dt.getDate()+'. '+mn[dt.getMonth()]+' '+p[0];
 }
 function isServiceZip(z){var n=parseInt(z);if(isNaN(n)||String(z).replace(/\D/g,'').length<4)return false;if(n>=3700&&n<=3790)return false;return n>=1000&&n<=4799;}
-function isValidPhone(p){var d=p.replace(/\D/g,'');return(d.startsWith('45')&&d.length>=10)||(!d.startsWith('45')&&false);}
+function isValidPhone(p){var d=(p||'').replace(/\D/g,'');if(d.startsWith('00'))d=d.slice(2);if(d.startsWith('45')&&d.length===10)return true;return d.length===8;}
 var DISPOSABLE_EMAIL_DOMAINS=['mailinator.com','tempmail.com','temp-mail.org','10minutemail.com','guerrillamail.com','guerrillamail.net','sharklasers.com','yopmail.com','yopmail.fr','trashmail.com','getnada.com','nada.email','throwawaymail.com','fakeinbox.com','dispostable.com','maildrop.cc','mailnesia.com','tempinbox.com','mintemail.com','mohmal.com','emailondeck.com','spambog.com','mytemp.email','tempr.email','discard.email','mailcatch.com','inboxbear.com','tempmailo.com','luxusmail.org','mailto.plus','fakemail.net','burnermail.io','33mail.com','spam4.me','grr.la','guerrillamailblock.com','maileater.com','wegwerfmail.de','trashmail.de','byom.de','tmail.ws','minuteinbox.com'];
 function isValidEmail(e){e=(e||'').trim().toLowerCase();if(!/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/.test(e))return false;var d=e.split('@')[1];if(DISPOSABLE_EMAIL_DOMAINS.indexOf(d)!==-1)return false;return true;}
 function isDisposableEmail(e){e=(e||'').trim().toLowerCase();var d=e.split('@')[1];return DISPOSABLE_EMAIL_DOMAINS.indexOf(d)!==-1;}

@@ -1,5 +1,6 @@
 import { hashToken, getSession, auditLog } from '@/lib/auth';
 import { isSameOrigin } from '@/lib/csrf';
+import { cphEpoch } from '@/lib/cphTime';
 import { buildTransport, emailShell, tr, BOOKING_EMAIL, CONTACT_EMAIL } from '@/lib/mailer';
 
 let kvClient = null;
@@ -52,8 +53,8 @@ export async function POST(request) {
   }
 
   if (booking.date && booking.time) {
-    const dt = new Date(`${booking.date}T${booking.time}:00+02:00`);
-    if ((dt.getTime() - Date.now()) < 24 * 3600 * 1000) {
+    const dt = cphEpoch(booking.date, booking.time);
+    if ((dt - Date.now()) < 24 * 3600 * 1000) {
       return Response.json({ error: 'too_late', message: 'Kan ikke annulleres inden for 24 timer.' }, { status: 409 });
     }
   }
