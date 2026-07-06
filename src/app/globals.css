@@ -911,10 +911,15 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
   .extras-grid{grid-template-columns:1fr}
   .wiz-plate-row{flex-direction:column}
   .wiz-plate-lookup{width:100%}
-  /* carousel arrows: keep a ≥40px tap target on mobile */
-  .gcar-btn{width:40px;height:40px;margin:0 1px}
-  .gcar-btn svg{width:16px;height:16px}
-  .gcar-wrap{gap:0}
+  /* On phones, move the prev/next arrows BELOW the cards so the two
+     before/after cards get the full width instead of being squeezed by
+     side arrows. The viewport takes the whole row; both buttons wrap to a
+     centered row underneath. */
+  .gcar-wrap{flex-wrap:wrap;justify-content:center;column-gap:20px;row-gap:14px;margin-top:24px}
+  .gcar-viewport{flex:1 0 100%;order:0}
+  .gcar-btn{order:1;width:44px;height:44px;margin:0}
+  .gcar-btn svg{width:18px;height:18px}
+  .gcar-dots{margin-top:14px}
   /* Booking wizard on phones: top-align so the soft keyboard can't hide the
      focused field or the Næste/Book button, and use dvh so the iOS URL bar
      doesn't push the modal off-screen. */
