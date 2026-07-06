@@ -87,7 +87,7 @@ function renderCars(){
     var d=document.createElement('div');d.className='car';d.dataset.id=c.id;
     if(selCar&&selCar.id===c.id)d.classList.add('on');
     var minPrice=Math.min(c.prices.udv,c.prices.indv,c.prices.hele);
-    d.innerHTML='<span class="car-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><div class="car-stage"><svg class="cs" viewBox="0 0 120 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><g transform="translate(120,0) scale(-1,1)">'+c.svg+'</g></svg></div><div class="nm">'+c.label[LANG]+'</div><div class="ex">'+c.ex[LANG]+'</div><div class="car-price"><span class="car-price-from">'+(LANG==='da'?'Fra':'From')+'</span> '+fmtKr(minPrice)+'</div>';
+    d.innerHTML='<span class="car-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><div class="car-stage"><img class="car-photo" src="/cars/'+c.id+'.png" alt="'+c.label[LANG]+'" loading="lazy" decoding="async" onerror="this.remove()"><svg class="cs" viewBox="0 0 120 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><g transform="translate(120,0) scale(-1,1)">'+c.svg+'</g></svg></div><div class="nm">'+c.label[LANG]+'</div><div class="ex">'+c.ex[LANG]+'</div><div class="car-price"><span class="car-price-from">'+(LANG==='da'?'Fra':'From')+'</span> '+fmtKr(minPrice)+'</div>';
     d.addEventListener('mouseenter',function(){activateCar(c);});
     d.addEventListener('click',function(){activateCar(c);setTimeout(function(){document.getElementById('calc').scrollIntoView({behavior:'smooth',block:'nearest'});},60);});
     g.appendChild(d);
@@ -97,7 +97,7 @@ function renderCars(){
 function renderCalc(){
   if(!selCar)return;
   document.getElementById('calcTitle').textContent=selCar.label[LANG];
-  document.getElementById('calcIcon').innerHTML=svgWrap(selCar.svg,60,34,'#9af0bd');
+  document.getElementById('calcIcon').innerHTML='<img class="calc-photo" src="/cars/'+selCar.id+'.png" alt="'+selCar.label[LANG]+'" decoding="async" onerror="this.remove()">'+svgWrap(selCar.svg,60,34,'#9af0bd');
   var timeEl=document.getElementById('calcTime');
   if(timeEl){timeEl.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> '+(LANG==='da'?'Behandlingstid':'Service time')+': <strong>'+selCar.time[LANG]+'</strong>';}
   var fee=0;
@@ -390,7 +390,7 @@ function drawWiz(){
   if(step===1){
     h+='<div class="wiz-q">'+W('s1')+'</div>';
     h+='<div class="opt-grid">';
-    CARS.forEach(function(c){var minP=Math.min(c.prices.udv,c.prices.indv,c.prices.hele);h+='<div class="opt'+(wiz.car&&wiz.car.id===c.id?' sel':'')+'" data-car="'+c.id+'"><div class="opt-icon-wrap">'+svgWrap(c.svg,46,26)+'</div><span class="opt-lbl">'+c.label[LANG]+'</span><span class="opt-ex">'+c.ex[LANG]+'</span><span class="opt-fra">'+(LANG==='da'?'Fra ':'From ')+fmtKr(minP)+'</span><span class="opt-time">'+c.time[LANG]+'</span></div>';});
+    CARS.forEach(function(c){var minP=Math.min(c.prices.udv,c.prices.indv,c.prices.hele);h+='<div class="opt'+(wiz.car&&wiz.car.id===c.id?' sel':'')+'" data-car="'+c.id+'"><div class="opt-icon-wrap"><img class="opt-photo" src="/cars/'+c.id+'.png" alt="" loading="lazy" decoding="async" onerror="this.remove()">'+svgWrap(c.svg,46,26)+'</div><span class="opt-lbl">'+c.label[LANG]+'</span><span class="opt-ex">'+c.ex[LANG]+'</span><span class="opt-fra">'+(LANG==='da'?'Fra ':'From ')+fmtKr(minP)+'</span><span class="opt-time">'+c.time[LANG]+'</span></div>';});
     h+='</div>';
   }else if(step===2){
     h+='<div class="wiz-q">'+W('s2')+'</div><div class="opt-row">';
