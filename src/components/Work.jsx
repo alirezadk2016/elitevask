@@ -39,8 +39,8 @@ const HTML = `<!-- BEFORE/AFTER + GALLERY -->
     <button type="button" class="gcar-btn gcar-next" id="baNext" aria-label="Næste">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
     </button>
+    <div class="gcar-dots" id="baDots"></div>
   </div>
-  <div class="gcar-dots" id="baDots"></div>
   <div class="gallery-cta-row">
     <a href="/galleri#foer-efter" class="gallery-cta" data-i18n="see_all_ba">Se alle før &amp; efter</a>
   </div>
@@ -64,8 +64,8 @@ const HTML = `<!-- BEFORE/AFTER + GALLERY -->
     <button type="button" class="gcar-btn gcar-next" id="galNext" aria-label="Næste">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
     </button>
+    <div class="gcar-dots" id="galDots"></div>
   </div>
-  <div class="gcar-dots" id="galDots"></div>
   <div class="gallery-cta-row">
     <a href="/galleri#galleri" class="gallery-cta" data-i18n="see_all_gallery">Se hele galleriet</a>
   </div>

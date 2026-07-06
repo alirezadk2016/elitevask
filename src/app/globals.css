@@ -403,8 +403,11 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 .empty-state h4{font-size:18px;font-weight:700;color:#fff;margin-bottom:8px}
 .empty-state p{font-size:14px;color:var(--muted);max-width:440px;margin:0 auto 22px}
 /* GALLERY CAROUSEL */
-.gcar-wrap{position:relative;display:flex;align-items:center;gap:0;margin-top:34px}
-.gcar-viewport{flex:1;overflow:hidden;border-radius:18px;min-width:0;-webkit-transform:translateZ(0);transform:translateZ(0)}
+.gcar-wrap{position:relative;display:flex;flex-wrap:wrap;align-items:center;gap:0;margin-top:34px}
+.gcar-prev{order:0}
+.gcar-viewport{order:1;flex:1;overflow:hidden;border-radius:18px;min-width:0;-webkit-transform:translateZ(0);transform:translateZ(0)}
+.gcar-next{order:2}
+.gcar-dots{order:3;flex-basis:100%}       /* desktop: full-width row below the carousel */
 .gcar-track{display:flex;gap:16px;transition:transform .5s cubic-bezier(.22,1,.36,1);will-change:transform}
 .gcar-track .gitem{flex-shrink:0;min-width:0} /* width set by JS */
 /* Responsive fallback widths so the static markup already matches the JS
@@ -911,15 +914,15 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
   .extras-grid{grid-template-columns:1fr}
   .wiz-plate-row{flex-direction:column}
   .wiz-plate-lookup{width:100%}
-  /* On phones, move the prev/next arrows BELOW the cards so the two
-     before/after cards get the full width instead of being squeezed by
-     side arrows. The viewport takes the whole row; both buttons wrap to a
-     centered row underneath. */
-  .gcar-wrap{flex-wrap:wrap;justify-content:center;column-gap:20px;row-gap:14px;margin-top:24px}
-  .gcar-viewport{flex:1 0 100%;order:0}
-  .gcar-btn{order:1;width:44px;height:44px;margin:0}
+  /* On phones the before/after cards get the full width; the controls
+     collapse to ONE tidy row underneath: ◀  • • •  ▶ */
+  .gcar-wrap{justify-content:center;align-items:center;column-gap:16px;row-gap:14px;margin-top:22px}
+  .gcar-viewport{order:0;flex:1 0 100%}
+  .gcar-prev{order:1}
+  .gcar-dots{order:2;flex-basis:auto;margin-top:0}
+  .gcar-next{order:3}
+  .gcar-btn{width:44px;height:44px;margin:0}
   .gcar-btn svg{width:18px;height:18px}
-  .gcar-dots{margin-top:14px}
   /* Booking wizard on phones: top-align so the soft keyboard can't hide the
      focused field or the Næste/Book button, and use dvh so the iOS URL bar
      doesn't push the modal off-screen. */
