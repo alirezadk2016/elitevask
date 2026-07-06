@@ -317,6 +317,47 @@ export default function AdminPanel() {
     return () => clearInterval(id);
   }, [tab]);
 
+  // Warn on browser refresh/close when there are unsaved edits (the in-app
+  // nav guard only covers tab switches). Reads a ref so it isn't re-bound
+  // constantly; the ref is updated every render below.
+  const unsavedRef = useRef(false);
+  useEffect(() => {
+    const onBeforeUnload = (e) => {
+      if (!unsavedRef.current) return;
+      e.preventDefault();
+      e.returnValue = "";
+      return "";
+    };
+    window.addEventListener("beforeunload", onBeforeUnload);
+    return () => window.removeEventListener("beforeunload", onBeforeUnload);
+  }, []);
+
+  // Esc closes the top-most overlay (matches native modal expectations).
+  useEffect(() => {
+    if (!authed) return;
+    const onKey = (e) => {
+      if (e.key !== "Escape") return;
+      if (deleteConfirm)       { setDeleteConfirm(null); return; }
+      if (navGuard)            { setNavGuard(null); return; }
+      if (previewItem)         { setPreviewItem(null); return; }
+      if (selectedBooking)     { setSelectedBooking(null); return; }
+      if (editingGallery)      { setEditingGallery(null); return; }
+      if (editingExt)          { setEditingExt(null); return; }
+      if (editingBA)           { setEditingBA(null); return; }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [authed, deleteConfirm, navGuard, previewItem, selectedBooking, editingGallery, editingExt, editingBA]);
+
+  // Lock background scroll while a full-screen overlay is open.
+  useEffect(() => {
+    const open = deleteConfirm || navGuard || previewItem || selectedBooking;
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = prev; };
+  }, [deleteConfirm, navGuard, previewItem, selectedBooking]);
+
   // Auto-scroll calendar to today column on mobile
   useEffect(() => {
     if (tab === "bookings" && narrow && calScrollRef.current && todayColRef.current) {
@@ -331,7 +372,12 @@ export default function AdminPanel() {
     setBLoading(true); setBError("");
     try {
       const r = await fetch("/api/admin/bookings", { headers:{ Authorization:`Bearer ${s}` } });
-      if (r.status === 401) { setBError("Forkert adgangskode."); return; }
+      if (r.status === 401 || r.status === 403) {
+        try { sessionStorage.removeItem("adm"); } catch {}
+        setAuthed(false); setSecret(""); setLoginErr("Session udløbet – log ind igen.");
+        return;
+      }
+      if (!r.ok) { setBError("Kunne ikke hente bookinger — prøv igen."); return; }
       const data = await r.json();
       setBookings(data.bookings || []);
     } catch { setBError("Netværksfejl — prøv igen."); }
@@ -345,17 +391,29 @@ export default function AdminPanel() {
     } catch {}
   }, [loadBookings]);
 
+  const [loggingIn, setLoggingIn] = useState(false);
   async function login(e) {
     e.preventDefault();
-    const r = await fetch("/api/admin/bookings", { headers:{ Authorization:`Bearer ${secretInput}` } });
-    if (r.ok) {
-      try { sessionStorage.setItem("adm", secretInput); } catch {}
-      const data = await r.json();
-      setBookings(data.bookings || []);
-      setSecret(secretInput); setAuthed(true);
-    } else {
-      setLoginErr("Forkert adgangskode");
-    }
+    if (loggingIn) return;
+    setLoggingIn(true); setLoginErr("");
+    try {
+      const r = await fetch("/api/admin/bookings", { headers:{ Authorization:`Bearer ${secretInput}` } });
+      if (r.ok) {
+        try { sessionStorage.setItem("adm", secretInput); } catch {}
+        const data = await r.json();
+        setBookings(data.bookings || []);
+        setSecret(secretInput); setAuthed(true);
+      } else if (r.status === 401 || r.status === 403) {
+        setLoginErr("Forkert adgangskode");
+      } else {
+        setLoginErr("Serverfejl — prøv igen om lidt.");
+      }
+    } catch { setLoginErr("Netværksfejl — tjek din forbindelse."); }
+    finally { setLoggingIn(false); }
+  }
+  function logout() {
+    try { sessionStorage.removeItem("adm"); } catch {}
+    setAuthed(false); setSecret(""); setSecretInput(""); setBookings([]);
   }
 
   async function fetchContent(type) {
@@ -367,7 +425,7 @@ export default function AdminPanel() {
       setAuthed(false); setSecret(""); setLoginErr("Session udløbet – log ind igen.");
       return;
     }
-    if (!res.ok) return;
+    if (!res.ok) { addToast("err", "Kunne ikke hente data — prøv igen"); return; }
     const data = await res.json();
     if (type === "gallery")  setGallery(data.items || []);
     else if (type === "videos")  setVideos(data.items || []);
@@ -435,12 +493,16 @@ export default function AdminPanel() {
   }
 
   async function deleteItem(type, id, blobUrl) {
-    await fetch("/api/admin/content", {
-      method:"DELETE",
-      headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" },
-      body: JSON.stringify({ type, id, blobUrl:blobUrl||null }),
-    });
-    fetchContent(type);
+    try {
+      const res = await fetch("/api/admin/content", {
+        method:"DELETE",
+        headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" },
+        body: JSON.stringify({ type, id, blobUrl:blobUrl||null }),
+      });
+      if (!res.ok) { addToast("err", "Sletning fejlede – prøv igen"); return; }
+      addToast("ok", "Slettet");
+      fetchContent(type);
+    } catch { addToast("err", "Netværksfejl"); }
   }
 
   async function uploadBeforeAfter() {
@@ -504,12 +566,16 @@ export default function AdminPanel() {
   }
 
   async function deleteBeforeAfter(item) {
-    await fetch("/api/admin/content", {
-      method:"DELETE",
-      headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" },
-      body: JSON.stringify({ type:"beforeafter", id:item.id, blobUrls: item.source === "upload" ? [item.before, item.after] : undefined }),
-    });
-    fetchContent("beforeafter");
+    try {
+      const res = await fetch("/api/admin/content", {
+        method:"DELETE",
+        headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" },
+        body: JSON.stringify({ type:"beforeafter", id:item.id, blobUrls: item.source === "upload" ? [item.before, item.after] : undefined }),
+      });
+      if (!res.ok) { addToast("err", "Sletning fejlede – prøv igen"); return; }
+      addToast("ok", "Slettet");
+      fetchContent("beforeafter");
+    } catch { addToast("err", "Netværksfejl"); }
   }
 
   function onDrop(e, type) {
@@ -535,8 +601,9 @@ export default function AdminPanel() {
             <input style={{ width:"100%", padding:"13px 16px", borderRadius:10, border:`1px solid ${T.border}`, background:T.bg0, color:T.t1, fontSize:15, boxSizing:"border-box", marginBottom:12, outline:"none", fontFamily:FF }}
               type="password" placeholder="Adgangskode" value={secretInput}
               onChange={e => { setSecretInput(e.target.value); setLoginErr(""); }} autoFocus />
-            <button style={{ width:"100%", padding:13, background:T.accent, color:T.bg0, border:"none", borderRadius:10, fontWeight:800, fontSize:15, cursor:"pointer", fontFamily:FF }} type="submit">
-              Log ind
+            <button disabled={loggingIn||!secretInput} style={{ width:"100%", padding:13, background:T.accent, color:T.bg0, border:"none", borderRadius:10, fontWeight:800, fontSize:15, cursor:(loggingIn||!secretInput)?"default":"pointer", opacity:(loggingIn||!secretInput)?.6:1, fontFamily:FF, display:"flex", alignItems:"center", justifyContent:"center", gap:8 }} type="submit">
+              {loggingIn && <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{ animation:"admSpin .7s linear infinite" }}><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>}
+              {loggingIn ? "Logger ind…" : "Log ind"}
             </button>
           </form>
           {loginErr && (
@@ -587,7 +654,8 @@ export default function AdminPanel() {
 
   // ── MAIN RENDER ────────────────────────────────────────────────────────────
   const hasPriceChanges = JSON.stringify(priceEdits) !== JSON.stringify(pricesData);
-  const hasUnsaved = Object.keys(faqDrafts).length > 0 || hasPriceChanges || editingExt !== null || editingGallery !== null;
+  const hasUnsaved = Object.keys(faqDrafts).length > 0 || hasPriceChanges || editingExt !== null || editingGallery !== null || editingBA !== null;
+  unsavedRef.current = hasUnsaved;
 
   return (
     <div style={{ minHeight:"100dvh", background:T.bg0, fontFamily:FF, color:T.t2 }}>
@@ -609,6 +677,14 @@ export default function AdminPanel() {
             {icons.refresh} {bLoading ? "…" : "Opdater"}
           </button>
         )}
+        <button onClick={() => { if (hasUnsaved) { setNavGuard({ pendingTab: tab, logout: true }); } else logout(); }}
+          title="Log ud"
+          style={{ display:"flex", alignItems:"center", gap:6, padding:"7px 12px", background:"transparent", border:`1px solid ${T.border}`, borderRadius:8, color:T.t3, fontSize:12, fontWeight:600, cursor:"pointer", fontFamily:FF }}
+          onMouseEnter={e=>{e.currentTarget.style.color=T.danger;e.currentTarget.style.borderColor=T.dangerBorder;}}
+          onMouseLeave={e=>{e.currentTarget.style.color=T.t3;e.currentTarget.style.borderColor=T.border;}}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          <span style={{ display: narrow ? "none" : "inline" }}>Log ud</span>
+        </button>
       </div>
 
       {/* UNSAVED CHANGES BANNER */}
@@ -714,6 +790,43 @@ export default function AdminPanel() {
               if (!b.time) return null;
               const [h] = b.time.split(":").map(Number);
               return h;
+            }
+            function bookingSpan(b) {
+              const s = bookingStartHour(b);
+              if (s == null) return null;
+              return [s, Math.min(s + slotCount(b), 21)];
+            }
+            // Assign each day's bookings a column so overlapping ranges (even with
+            // different start hours) sit side-by-side instead of hiding each other.
+            const dayLayoutCache = {};
+            function dayLayout(iso) {
+              if (dayLayoutCache[iso]) return dayLayoutCache[iso];
+              const items = bookings
+                .filter(b => b.date === iso && bookingSpan(b))
+                .sort((a, z) => bookingSpan(a)[0] - bookingSpan(z)[0]);
+              const layout = {};
+              const active = []; // {end, col}
+              let cluster = [], clusterMaxCol = 0;
+              const flush = () => {
+                cluster.forEach(tok => { layout[tok].ncols = clusterMaxCol + 1; });
+                cluster = []; clusterMaxCol = 0;
+              };
+              for (const b of items) {
+                const [s, e] = bookingSpan(b);
+                // free columns whose booking has ended by this start
+                for (let i = active.length - 1; i >= 0; i--) if (active[i].end <= s) active.splice(i, 1);
+                if (active.length === 0 && cluster.length) flush();
+                let col = 0;
+                const used = new Set(active.map(a => a.col));
+                while (used.has(col)) col++;
+                active.push({ end: e, col });
+                layout[b.token] = { col, ncols: 1 };
+                cluster.push(b.token);
+                clusterMaxCol = Math.max(clusterMaxCol, col);
+              }
+              flush();
+              dayLayoutCache[iso] = layout;
+              return layout;
             }
 
             const navBtn = (onClick, children, active) => (
@@ -869,10 +982,11 @@ export default function AdminPanel() {
                                       const drawSlots = startH != null ? endH - startH : slots;
                                       // Overlay tall cards across the hours below without stretching this row.
                                       const heightPx = drawSlots * ROW_H - 6;
-                                      // Side-by-side if two bookings somehow share a start hour.
-                                      const cnt = startingHere.length;
-                                      const widthPct = cnt > 1 ? `calc(${(100/cnt).toFixed(2)}% - 6px)` : "calc(100% - 8px)";
-                                      const leftPct = cnt > 1 ? `calc(${(bi*100/cnt).toFixed(2)}% + 4px)` : 4;
+                                      // Column layout: overlapping ranges (any start hour) sit side-by-side.
+                                      const lay = dayLayout(iso)[b.token] || { col:0, ncols:1 };
+                                      const ncols = lay.ncols;
+                                      const widthPct = ncols > 1 ? `calc(${(100/ncols).toFixed(2)}% - 6px)` : "calc(100% - 8px)";
+                                      const leftPct = ncols > 1 ? `calc(${(lay.col*100/ncols).toFixed(2)}% + 4px)` : 4;
                                       const isCancelled = b.status === "cancelled";
                                       const isPending   = b.status === "pending";
                                       const isCompleted = b.status === "completed";
@@ -920,11 +1034,44 @@ export default function AdminPanel() {
                       </div>
                     </div>
 
+                    {/* Safety net: bookings this week that fall outside the 08–20 grid
+                        would otherwise be invisible. List them so they're never lost. */}
+                    {(() => {
+                      const outOfRange = weekBookings.filter(b => {
+                        const h = bookingStartHour(b);
+                        return h == null || h < 8 || h > 20;
+                      });
+                      if (!outOfRange.length) return null;
+                      return (
+                        <div style={{ marginTop:16, background:"rgba(245,166,35,.06)", border:`1px solid rgba(245,166,35,.22)`, borderRadius:12, padding:"12px 16px" }}>
+                          <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:8 }}>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={T.gold} strokeWidth="2.5" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                            <span style={{ fontSize:12, fontWeight:700, color:T.gold }}>Bookinger uden for kalendervisningen (08–20)</span>
+                          </div>
+                          <div style={{ display:"flex", flexDirection:"column", gap:6 }}>
+                            {outOfRange.map(b => (
+                              <button key={b.token} onClick={() => { setSelectedBooking(b); setModalState("idle"); }}
+                                style={{ display:"flex", alignItems:"center", gap:10, textAlign:"left", background:T.bg0, border:`1px solid ${T.border}`, borderRadius:8, padding:"8px 12px", cursor:"pointer", fontFamily:FF }}>
+                                <span style={{ fontSize:12, fontWeight:700, color:T.t1, fontVariantNumeric:"tabular-nums" }}>{b.date} · {b.time || "??"}</span>
+                                <span style={{ fontSize:12, color:T.t2, flex:1, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{b.name || "Ukendt"} — {b.car || b.pkg || "-"}</span>
+                                {b.status === "cancelled" && <span style={{ fontSize:10, color:T.amber, fontWeight:700 }}>ANNULLERET</span>}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })()}
+
                     {bookings.length === 0 && !bLoading && (
                       <div style={{ textAlign:"center", padding:"60px 0" }}>
                         <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke={T.t4} strokeWidth="1.5" strokeLinecap="round" style={{ marginBottom:16, opacity:.4 }}><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                         <p style={{ fontSize:16, fontWeight:700, color:T.t2, margin:"0 0 6px" }}>Ingen bookinger endnu</p>
                         <p style={{ fontSize:13, color:T.t3, margin:0 }}>Nye bookinger vises automatisk her</p>
+                      </div>
+                    )}
+                    {bError && !bLoading && (
+                      <div style={{ marginTop:16, textAlign:"center", padding:"16px", background:T.dangerDim, border:`1px solid ${T.dangerBorder}`, borderRadius:12, color:T.danger, fontSize:13, fontWeight:600 }}>
+                        {bError}
                       </div>
                     )}
                     </div>{/* end wrapper */}
@@ -962,7 +1109,7 @@ export default function AdminPanel() {
                       <div style={{ width:48, height:48, borderRadius:"50%", background:T.accentDim, display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 16px" }}>
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={T.accent} strokeWidth="2" strokeLinecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                       </div>
-                      <p style={{ fontSize:15, fontWeight:600, color:T.t1, margin:"0 0 4px" }}>Træk billeder hertil</p>
+                      <p style={{ fontSize:15, fontWeight:600, color:T.t1, margin:"0 0 4px" }}>Træk et billede hertil</p>
                       <p style={{ color:T.t3, fontSize:13, margin:0 }}>eller <span style={{ color:T.accent }}>klik for at vælge</span></p>
                       <p style={{ color:T.t4, fontSize:11, marginTop:8, marginBottom:0 }}>JPG · PNG · WEBP — maks 4,5 MB</p>
                     </>
@@ -1053,13 +1200,17 @@ export default function AdminPanel() {
                           <div style={{ display:"flex", gap:6 }}>
                             <button
                               onClick={async () => {
-                                await fetch("/api/admin/content", {
-                                  method:"PUT",
-                                  headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" },
-                                  body: JSON.stringify({ type:"gallery", id:item.id, item:{ caption:editingGallery.caption, album:editingGallery.album } }),
-                                });
-                                setEditingGallery(null);
-                                fetchContent("gallery");
+                                try {
+                                  const res = await fetch("/api/admin/content", {
+                                    method:"PUT",
+                                    headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" },
+                                    body: JSON.stringify({ type:"gallery", id:item.id, item:{ caption:editingGallery.caption, album:editingGallery.album } }),
+                                  });
+                                  if (!res.ok) { addToast("err", "Kunne ikke gemme – prøv igen"); return; }
+                                  addToast("ok", "Gemt!");
+                                  setEditingGallery(null);
+                                  fetchContent("gallery");
+                                } catch { addToast("err", "Netværksfejl"); }
                               }}
                               style={{ flex:1, padding:"7px 0", background:T.accent, color:T.bg0, border:"none", borderRadius:7, fontWeight:700, fontSize:12, cursor:"pointer", fontFamily:FF }}
                             >Gem</button>
@@ -1248,17 +1399,20 @@ export default function AdminPanel() {
             }
             async function addFaq(e) {
               e.preventDefault();
+              if (cmsLoading) return;
               if (!faqNewQda.trim() || !faqNewAda.trim()) return;
               setCmsLoading(true); setCmsMsg(null);
-              const res = await fetch("/api/admin/content", {
-                method:"POST",
-                headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" },
-                body: JSON.stringify({ type:"faq", item:{ q:{da:faqNewQda.trim(), en:faqNewQen.trim()||faqNewQda.trim()}, a:{da:faqNewAda.trim(), en:faqNewAen.trim()||faqNewAda.trim()} } }),
-              });
-              const data = await res.json();
-              setCmsLoading(false);
-              if (data.ok) { addToast("ok", "Tilføjet!"); setFaqNewQda(""); setFaqNewAda(""); setFaqNewQen(""); setFaqNewAen(""); setAddFaqOpen(false); fetchContent("faq"); }
-              else addToast("err", "Fejl – prøv igen");
+              try {
+                const res = await fetch("/api/admin/content", {
+                  method:"POST",
+                  headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" },
+                  body: JSON.stringify({ type:"faq", item:{ q:{da:faqNewQda.trim(), en:faqNewQen.trim()||faqNewQda.trim()}, a:{da:faqNewAda.trim(), en:faqNewAen.trim()||faqNewAda.trim()} } }),
+                });
+                const data = await res.json().catch(() => ({}));
+                if (res.ok && data.ok) { addToast("ok", "Tilføjet!"); setFaqNewQda(""); setFaqNewAda(""); setFaqNewQen(""); setFaqNewAen(""); setAddFaqOpen(false); fetchContent("faq"); }
+                else addToast("err", data.error || "Fejl – prøv igen");
+              } catch { addToast("err", "Netværksfejl"); }
+              finally { setCmsLoading(false); }
             }
             async function saveFaqItem(id) {
               const item = faqItems.find(i => i.id === id);
@@ -1276,19 +1430,29 @@ export default function AdminPanel() {
               else addToast("err", "Fejl – prøv igen");
             }
             async function deleteFaq(id) {
-              await fetch("/api/admin/content", { method:"DELETE", headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" }, body:JSON.stringify({ type:"faq", id }) });
-              fetchContent("faq");
+              try {
+                const res = await fetch("/api/admin/content", { method:"DELETE", headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" }, body:JSON.stringify({ type:"faq", id }) });
+                if (!res.ok) { addToast("err", "Sletning fejlede – prøv igen"); return; }
+                addToast("ok", "Slettet");
+                fetchContent("faq");
+              } catch { addToast("err", "Netværksfejl"); }
             }
             async function seedAllFaq() {
+              if (cmsLoading) return;
               setCmsLoading(true); setCmsMsg(null);
-              // Delete existing items first to avoid duplicates
-              for (const item of faqItems) {
-                await fetch("/api/admin/content", { method:"DELETE", headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" }, body:JSON.stringify({ type:"faq", id:item.id }) });
-              }
-              for (const faq of DEFAULT_FAQ) {
-                await fetch("/api/admin/content", { method:"POST", headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" }, body: JSON.stringify({ type:"faq", item:{ q:faq.q, a:faq.a } }) });
-              }
-              setCmsLoading(false); addToast("ok", "Alle standarddata gemt!"); fetchContent("faq");
+              try {
+                // Delete existing items first to avoid duplicates
+                for (const item of faqItems) {
+                  const d = await fetch("/api/admin/content", { method:"DELETE", headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" }, body:JSON.stringify({ type:"faq", id:item.id }) });
+                  if (!d.ok) throw new Error("delete");
+                }
+                for (const faq of DEFAULT_FAQ) {
+                  const p = await fetch("/api/admin/content", { method:"POST", headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" }, body: JSON.stringify({ type:"faq", item:{ q:faq.q, a:faq.a } }) });
+                  if (!p.ok) throw new Error("post");
+                }
+                addToast("ok", "Alle standarddata gemt!");
+              } catch { addToast("err", "Noget gik galt undervejs — tjek listen og prøv igen"); }
+              finally { setCmsLoading(false); fetchContent("faq"); }
             }
             const txStyle = { width:"100%", padding:"9px 12px", borderRadius:7, border:`1px solid ${T.border}`, background:T.bg0, color:T.t1, fontSize:13, outline:"none", fontFamily:FF, boxSizing:"border-box", resize:"vertical" };
             return (
@@ -1446,22 +1610,33 @@ export default function AdminPanel() {
             const PKG_LABELS = { hele:"Hele bilen", udv:"Udvendig", indv:"Indvendig", guld:"Guld pakke" };
 
             async function savePrices() {
+              if (cmsLoading) return;
               setCmsLoading(true); setCmsMsg(null);
-              const res = await fetch("/api/admin/content", {
-                method:"POST",
-                headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" },
-                body: JSON.stringify({ type:"packages", prices:priceEdits }),
-              });
-              const data = await res.json();
-              setCmsLoading(false);
-              if (data.ok) { addToast("ok", "Priser gemt!"); setPricesData({...priceEdits}); setPricesFromDefault(false); }
-              else addToast("err", "Fejl – prøv igen");
+              try {
+                const res = await fetch("/api/admin/content", {
+                  method:"POST",
+                  headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" },
+                  body: JSON.stringify({ type:"packages", prices:priceEdits }),
+                });
+                const data = await res.json().catch(() => ({}));
+                if (res.ok && data.ok) {
+                  // Adopt the server's cleaned matrix so the UI matches exactly
+                  // what was stored (empty/0/NaN cells were dropped server-side).
+                  const saved = data.prices || {};
+                  setPricesData(saved); setPriceEdits(saved); setPricesFromDefault(false);
+                  addToast("ok", "Priser gemt!");
+                } else addToast("err", data.error || "Fejl – prøv igen");
+              } catch { addToast("err", "Netværksfejl"); }
+              finally { setCmsLoading(false); }
             }
 
             function setPrice(carId, pkgId, val) {
+              // Store as a number (or "" when cleared) so comparisons against the
+              // numeric KV values don't false-positive on string-vs-number.
+              const v = val === "" ? "" : Number(val);
               setPriceEdits(prev => ({
                 ...prev,
-                [carId]: { ...(prev[carId]||{}), [pkgId]: val }
+                [carId]: { ...(prev[carId]||{}), [pkgId]: v }
               }));
             }
 
@@ -1523,17 +1698,20 @@ export default function AdminPanel() {
           {tab === "extras" && (() => {
             async function addExtra(e) {
               e.preventDefault();
+              if (cmsLoading) return;
               if (!extNewNameDa.trim()) return;
               setCmsLoading(true); setCmsMsg(null);
-              const res = await fetch("/api/admin/content", {
-                method:"POST",
-                headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" },
-                body: JSON.stringify({ type:"extras", item:{ name:{da:extNewNameDa.trim(), en:extNewNameEn.trim()||extNewNameDa.trim()}, desc:{da:extNewDescDa.trim(), en:extNewDescEn.trim()||extNewDescDa.trim()}, price:Number(extNewPrice)||0 } }),
-              });
-              const data = await res.json();
-              setCmsLoading(false);
-              if (data.ok) { addToast("ok", "Tilføjet!"); setExtNewNameDa(""); setExtNewNameEn(""); setExtNewDescDa(""); setExtNewDescEn(""); setExtNewPrice(""); fetchContent("extras"); }
-              else addToast("err", "Fejl – prøv igen");
+              try {
+                const res = await fetch("/api/admin/content", {
+                  method:"POST",
+                  headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" },
+                  body: JSON.stringify({ type:"extras", item:{ name:{da:extNewNameDa.trim(), en:extNewNameEn.trim()||extNewNameDa.trim()}, desc:{da:extNewDescDa.trim(), en:extNewDescEn.trim()||extNewDescDa.trim()}, price:Number(extNewPrice)||0 } }),
+                });
+                const data = await res.json().catch(() => ({}));
+                if (res.ok && data.ok) { addToast("ok", "Tilføjet!"); setExtNewNameDa(""); setExtNewNameEn(""); setExtNewDescDa(""); setExtNewDescEn(""); setExtNewPrice(""); fetchContent("extras"); }
+                else addToast("err", data.error || "Fejl – prøv igen");
+              } catch { addToast("err", "Netværksfejl"); }
+              finally { setCmsLoading(false); }
             }
             async function saveExtra(item) {
               setCmsLoading(true);
@@ -1548,8 +1726,12 @@ export default function AdminPanel() {
               else addToast("err", "Fejl – prøv igen");
             }
             async function deleteExtra(id) {
-              await fetch("/api/admin/content", { method:"DELETE", headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" }, body:JSON.stringify({ type:"extras", id }) });
-              fetchContent("extras");
+              try {
+                const res = await fetch("/api/admin/content", { method:"DELETE", headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" }, body:JSON.stringify({ type:"extras", id }) });
+                if (!res.ok) { addToast("err", "Sletning fejlede – prøv igen"); return; }
+                addToast("ok", "Slettet");
+                fetchContent("extras");
+              } catch { addToast("err", "Netværksfejl"); }
             }
             const inp = (val, onChange, ph) => <input value={val} onChange={e=>onChange(e.target.value)} placeholder={ph} style={{ width:"100%", padding:"10px 13px", borderRadius:8, border:`1px solid ${T.border}`, background:T.bg0, color:T.t1, fontSize:13, outline:"none", fontFamily:FF, boxSizing:"border-box" }} />;
             return (
@@ -1813,7 +1995,7 @@ export default function AdminPanel() {
         return (
           <div onClick={() => setSelectedBooking(null)}
             style={{ position:"fixed", inset:0, background:"rgba(0,0,0,.88)", backdropFilter:"blur(10px)", zIndex:300, display:"flex", alignItems:"center", justifyContent:"center", padding:24 }}>
-            <div onClick={e => e.stopPropagation()}
+            <div onClick={e => e.stopPropagation()} role="dialog" aria-modal="true"
               style={{ background:T.bg1, border:`1px solid ${T.border}`, borderRadius:20, padding:32, maxWidth:480, width:"100%", boxShadow:T.shadowL, maxHeight:"90vh", overflowY:"auto", boxSizing:"border-box" }}>
 
               {/* Header */}
@@ -1985,7 +2167,7 @@ export default function AdminPanel() {
       {navGuard && (
         <div onClick={() => setNavGuard(null)}
           style={{ position:"fixed", inset:0, background:"rgba(0,0,0,.75)", backdropFilter:"blur(8px)", zIndex:250, display:"flex", alignItems:"center", justifyContent:"center", padding:24 }}>
-          <div onClick={e => e.stopPropagation()}
+          <div onClick={e => e.stopPropagation()} role="dialog" aria-modal="true"
             style={{ background:T.bg1, border:`1px solid ${T.goldBorder}`, borderRadius:16, padding:28, maxWidth:360, width:"100%", boxShadow:T.shadowL }}>
             <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:16 }}>
               <div style={{ width:38, height:38, borderRadius:"50%", background:T.goldDim, border:`1px solid ${T.goldBorder}`, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
@@ -1996,9 +2178,11 @@ export default function AdminPanel() {
             <p style={{ color:T.t2, fontSize:14, margin:"0 0 24px", lineHeight:1.6 }}>Du har ændringer der ikke er gemt. Vil du forlade denne side og miste ændringerne?</p>
             <div style={{ display:"flex", gap:8 }}>
               <button onClick={() => {
-                  const id = navGuard.pendingTab;
+                  const g = navGuard;
                   setNavGuard(null);
-                  setTab(id); setMsg(null); setUrlInput(""); setCmsMsg(null); setExpandedFaqId(null); setFaqDrafts({}); setAddFaqOpen(false); setEditingExt(null); setEditingGallery(null);
+                  setFaqDrafts({}); setEditingExt(null); setEditingGallery(null); setEditingBA(null); setPriceEdits(pricesData);
+                  if (g.logout) { logout(); return; }
+                  setTab(g.pendingTab); setMsg(null); setUrlInput(""); setCmsMsg(null); setExpandedFaqId(null); setAddFaqOpen(false);
                 }}
                 style={{ flex:1, padding:"11px 0", background:"rgba(245,166,35,.15)", color:T.gold, border:`1px solid ${T.goldBorder}`, borderRadius:9, fontWeight:700, fontSize:14, cursor:"pointer", fontFamily:FF }}>
                 Forlad alligevel
@@ -2016,7 +2200,7 @@ export default function AdminPanel() {
       {deleteConfirm && (
         <div onClick={() => setDeleteConfirm(null)}
           style={{ position:"fixed", inset:0, background:"rgba(0,0,0,.75)", backdropFilter:"blur(8px)", zIndex:250, display:"flex", alignItems:"center", justifyContent:"center", padding:24 }}>
-          <div onClick={e => e.stopPropagation()}
+          <div onClick={e => e.stopPropagation()} role="dialog" aria-modal="true"
             style={{ background:T.bg1, border:`1px solid ${T.dangerBorder}`, borderRadius:16, padding:28, maxWidth:360, width:"100%", boxShadow:T.shadowL }}>
             <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:16 }}>
               <div style={{ width:38, height:38, borderRadius:"50%", background:T.dangerDim, border:`1px solid ${T.dangerBorder}`, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
@@ -2026,7 +2210,7 @@ export default function AdminPanel() {
             </div>
             <p style={{ color:T.t2, fontSize:14, margin:"0 0 24px", lineHeight:1.6 }}>{deleteConfirm.label}</p>
             <div style={{ display:"flex", gap:8 }}>
-              <button onClick={() => { deleteConfirm.onConfirm(); setDeleteConfirm(null); }}
+              <button onClick={async () => { const fn = deleteConfirm.onConfirm; setDeleteConfirm(null); try { await fn?.(); } catch {} }}
                 style={{ flex:1, padding:"11px 0", background:"#c0392b", color:"#fff", border:"none", borderRadius:9, fontWeight:700, fontSize:14, cursor:"pointer", fontFamily:FF }}>
                 Slet
               </button>
@@ -2043,11 +2227,11 @@ export default function AdminPanel() {
       {previewItem && (
         <div onClick={() => setPreviewItem(null)}
           style={{ position:"fixed", inset:0, background:"rgba(0,0,0,.88)", backdropFilter:"blur(10px)", zIndex:200, display:"flex", alignItems:"center", justifyContent:"center", padding:24 }}>
-          <button onClick={() => setPreviewItem(null)}
+          <button onClick={() => setPreviewItem(null)} aria-label="Luk"
             style={{ position:"absolute", top:20, right:20, width:40, height:40, borderRadius:"50%", background:"rgba(255,255,255,.1)", border:"1px solid rgba(255,255,255,.15)", color:T.t1, display:"flex", alignItems:"center", justifyContent:"center", cursor:"pointer", fontFamily:FF, fontSize:18, flexShrink:0 }}>
             ✕
           </button>
-          <div onClick={e => e.stopPropagation()} style={{ textAlign:"center" }}>
+          <div onClick={e => e.stopPropagation()} role="dialog" aria-modal="true" style={{ textAlign:"center" }}>
             <img src={previewItem.url} alt={previewItem.caption||""} style={{ maxWidth:"90vw", maxHeight:"80vh", objectFit:"contain", borderRadius:12, boxShadow:"0 8px 48px rgba(0,0,0,.7)", display:"block" }} />
             {previewItem.caption && <p style={{ color:T.t2, fontSize:14, marginTop:16, margin:"16px 0 0" }}>{previewItem.caption}</p>}
           </div>

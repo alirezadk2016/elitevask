@@ -1,8 +1,12 @@
+import { createHash, timingSafeEqual } from 'crypto';
+
 export async function GET(request) {
   const secret = process.env.ADMIN_SECRET;
   if (!secret) return Response.json({ error: 'not_configured' }, { status: 503 });
   const auth = request.headers.get('authorization') || '';
-  if (auth !== `Bearer ${secret}`) return Response.json({ error: 'unauthorized' }, { status: 401 });
+  const a = createHash('sha256').update(auth).digest();
+  const b = createHash('sha256').update(`Bearer ${secret}`).digest();
+  if (!timingSafeEqual(a, b)) return Response.json({ error: 'unauthorized' }, { status: 401 });
 
   try {
     const { Redis } = await import('@upstash/redis');
