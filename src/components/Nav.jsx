@@ -5,7 +5,7 @@ const HTML = `<!-- NAV -->
     <span class="logo-text"><span class="a">ELITE VASK</span><span class="b">MOBIL BIL DAMPVASK</span></span>
   </a>
   <div class="nav-links">
-    <a href="#vaelg" data-i18n="nav_choose">Se priser</a>
+    <a href="/priser" data-i18n="nav_choose">Se priser</a>
     <a href="/galleri" data-i18n="nav_work">Galleri</a>
     <a href="/faq">FAQ</a>
     <a href="/kontakt" data-i18n="nav_contact">Kontakt</a>
@@ -23,7 +23,7 @@ const HTML = `<!-- NAV -->
   </div>
 </div>
 <div class="nav-drawer" id="navDrawer">
-  <a href="#vaelg" class="drawer-link" data-i18n="nav_choose">Se priser</a>
+  <a href="/priser" class="drawer-link" data-i18n="nav_choose">Se priser</a>
   <a href="/galleri" class="drawer-link" data-i18n="nav_work">Galleri</a>
   <a href="/guide" class="drawer-link" data-i18n="nav_guide">Guide</a>
   <a href="/faq" class="drawer-link">FAQ</a>

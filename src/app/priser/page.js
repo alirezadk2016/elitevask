@@ -1,14 +1,18 @@
 import Link from "next/link";
+import JsonLd from "@/components/JsonLd";
+import RelatedLinks from "@/components/RelatedLinks";
+import { breadcrumbLd, SITE } from "@/lib/seo";
 
 export const metadata = {
-  title: "Elite Vask – Priser | Mobil bil dampvask på Sjælland",
+  title: "Priser – Elite Vask | Mobil bil dampvask på Sjælland",
   description: "Se priser på mobil bil dampvask fra Elite Vask. Udvendig vask fra 500 kr, hel bil fra 800 kr, Guld pakke fra 2.000 kr. Gratis kørsel på Sjælland.",
   alternates: { canonical: "/priser" },
   openGraph: {
-    title: "Elite Vask – Priser | Mobil bil dampvask på Sjælland",
+    title: "Priser – Elite Vask | Mobil bil dampvask på Sjælland",
     description: "Se priser på mobil bil dampvask. Udvendig fra 500 kr, hel bil fra 800 kr, Guld pakke fra 2.000 kr. Gratis kørsel på Sjælland.",
     type: "website",
     locale: "da_DK",
+    url: "/priser",
   },
 };
 
@@ -17,6 +21,15 @@ const PRICES = [
   { id: "mellem",  car: "Mellemstor bil", ex: "Golf, Focus, i20", udv: 550, indv: 700, hele: 950, guld: 2200 },
   { id: "stor",    car: "Stor bil / SUV", ex: "Passat, SUV, stationcar", udv: 650, indv: 850, hele: 1100, guld: 2350 },
   { id: "varebil", car: "Varebil", ex: "Transit, Caddy, Berlingo", udv: 750, indv: 750, hele: 1400, guld: 2200 },
+];
+
+const EXTRAS = [
+  { id: "motor",      name: "Motorrens", desc: "Grundig afrensning af motorrum", price: 400 },
+  { id: "lak",        name: "Lak- & glansbeskyttelse", desc: "Udvendig – langvarig ekstra glans", price: 300 },
+  { id: "pleje",      name: "Indvendig pleje & beskyttelse", desc: "Beskytter og fornyer interiøret", price: 200 },
+  { id: "haar",       name: "Fjernelse af dyrehår", desc: "Effektiv fjernelse af hår og fnug", price: 300 },
+  { id: "saede",      name: "Sæderens (stof)", desc: "Dybderens af stofsæder", price: 400 },
+  { id: "barnesaede", name: "Barnesæde rens", desc: "Grundig og sikker rengøring", price: 100 },
 ];
 
 function fmtKr(n) {
@@ -47,31 +60,90 @@ async function getPrices() {
   return PRICES;
 }
 
+// Admin-managed add-ons (KV content:extras) with the code defaults as fallback.
+async function getExtras() {
+  try {
+    const { kv } = await import("@vercel/kv");
+    const raw = await kv.get("content:extras");
+    const arr = typeof raw === "string" ? JSON.parse(raw) : raw;
+    if (Array.isArray(arr) && arr.length) {
+      return arr
+        .map((e) => ({
+          name: e.name?.da || e.name || "",
+          desc: e.desc?.da || e.desc || "",
+          price: Number(e.price) || 0,
+        }))
+        .filter((e) => e.name);
+    }
+  } catch (e) {}
+  return EXTRAS;
+}
+
 export default async function PriserPage() {
-  const prices = await getPrices();
+  const [prices, extras] = await Promise.all([getPrices(), getExtras()]);
+
+  // Structured data: price list as a Service with an OfferCatalog — helps
+  // search engines show pricing and improves the page's SEO footprint.
+  const offersLd = {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    name: "Mobil bil dampvask",
+    serviceType: "Car wash",
+    provider: { "@type": "LocalBusiness", name: "Elite Vask", url: SITE },
+    areaServed: "Sjælland",
+    hasOfferCatalog: {
+      "@type": "OfferCatalog",
+      name: "Priser på mobil bilvask",
+      itemListElement: prices.map((row) => ({
+        "@type": "Offer",
+        name: `Hele bilen – ${row.car}`,
+        priceCurrency: "DKK",
+        price: row.hele,
+        priceSpecification: {
+          "@type": "PriceSpecification",
+          priceCurrency: "DKK",
+          minPrice: Math.min(row.udv, row.indv, row.hele, row.guld),
+        },
+      })),
+    },
+  };
+
   return (
-    <main style={{ background: "#0b1310", color: "#e9f1ec", minHeight: "100vh", fontFamily: "Manrope, system-ui, sans-serif" }}>
-      <div style={{ maxWidth: 900, margin: "0 auto", padding: "60px 24px 80px" }}>
+    <main style={{ background: "#0b1310", color: "#e9f1ec", minHeight: "100vh", minHeight: "100dvh", fontFamily: "Manrope, system-ui, sans-serif" }}>
+      <JsonLd
+        items={[
+          breadcrumbLd([
+            { name: "Forside", path: "/" },
+            { name: "Priser", path: "/priser" },
+          ]),
+          offersLd,
+        ]}
+      />
+      <div style={{ maxWidth: 900, margin: "0 auto", padding: "48px 24px 80px" }}>
+        <a href="/" style={{ display: "inline-flex", alignItems: "center", gap: 6, color: "#37d278", fontSize: 14, fontWeight: 600, textDecoration: "none", marginBottom: 32, opacity: 0.9 }}>
+          ← Tilbage til forsiden
+        </a>
+
         <p style={{ fontSize: 12, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", color: "#37d278", marginBottom: 12 }}>
           Priser
         </p>
         <h1 style={{ fontSize: "clamp(28px,4vw,44px)", fontWeight: 800, letterSpacing: -1, color: "#fff", lineHeight: 1.1, marginBottom: 16 }}>
           Priser på mobil bilvask
         </h1>
-        <p style={{ fontSize: 16, color: "#94a89c", maxWidth: 600, lineHeight: 1.65, marginBottom: 48 }}>
+        <p style={{ fontSize: 16, color: "#94a89c", maxWidth: 600, lineHeight: 1.65, marginBottom: 40 }}>
           Elite Vask tilbyder professionel mobil bil dampvask direkte til din adresse på Sjælland.
           Vælg den pakke der passer til din bil og dine behov. <strong style={{ color: "#fff" }}>Kørsel er gratis</strong> til hele Sjælland.
         </p>
 
-        <div style={{ overflowX: "auto", marginBottom: 48 }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14 }}>
+        <div style={{ overflowX: "auto", marginBottom: 40, borderRadius: 14, border: "1px solid rgba(255,255,255,.07)" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14, minWidth: 480 }}>
             <thead>
               <tr style={{ borderBottom: "2px solid rgba(55,210,120,.25)" }}>
-                <th style={{ textAlign: "left", padding: "12px 16px", color: "#94a89c", fontWeight: 600 }}>Biltype</th>
-                <th style={{ textAlign: "right", padding: "12px 16px", color: "#94a89c", fontWeight: 600 }}>Udvendig</th>
-                <th style={{ textAlign: "right", padding: "12px 16px", color: "#94a89c", fontWeight: 600 }}>Indvendig</th>
-                <th style={{ textAlign: "right", padding: "12px 16px", color: "#94a89c", fontWeight: 600 }}>Hele bilen</th>
-                <th style={{ textAlign: "right", padding: "12px 16px", color: "#d4af37", fontWeight: 600 }}>Guld pakke</th>
+                <th style={{ textAlign: "left", padding: "13px 16px", color: "#94a89c", fontWeight: 600 }}>Biltype</th>
+                <th style={{ textAlign: "right", padding: "13px 16px", color: "#94a89c", fontWeight: 600 }}>Udvendig</th>
+                <th style={{ textAlign: "right", padding: "13px 16px", color: "#94a89c", fontWeight: 600 }}>Indvendig</th>
+                <th style={{ textAlign: "right", padding: "13px 16px", color: "#94a89c", fontWeight: 600 }}>Hele bilen</th>
+                <th style={{ textAlign: "right", padding: "13px 16px", color: "#d4af37", fontWeight: 600 }}>Guld pakke</th>
               </tr>
             </thead>
             <tbody>
@@ -113,14 +185,38 @@ export default async function PriserPage() {
           </div>
         </div>
 
-        <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
+        {extras.length > 0 && (
+          <div style={{ marginBottom: 48 }}>
+            <h2 style={{ fontSize: 22, fontWeight: 800, color: "#fff", marginBottom: 6 }}>Ekstra ydelser</h2>
+            <p style={{ fontSize: 14, color: "#94a89c", lineHeight: 1.6, marginBottom: 18 }}>
+              Tilvalg du kan lægge til din pakke – vælges nemt under booking.
+            </p>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(240px,1fr))", gap: 12 }}>
+              {extras.map((ex, i) => (
+                <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12, background: "#15211b", border: "1px solid rgba(255,255,255,.08)", borderRadius: 12, padding: "16px 16px" }}>
+                  <div>
+                    <div style={{ fontSize: 14.5, fontWeight: 700, color: "#fff", marginBottom: 4 }}>{ex.name}</div>
+                    <div style={{ fontSize: 12.5, color: "#94a89c", lineHeight: 1.5 }}>{ex.desc}</div>
+                  </div>
+                  {ex.price > 0 && (
+                    <span style={{ flexShrink: 0, fontSize: 14, fontWeight: 800, color: "#37d278", whiteSpace: "nowrap" }}>+{fmtKr(ex.price)}</span>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div style={{ display: "flex", gap: 14, flexWrap: "wrap", marginBottom: 56 }}>
           <Link href="/#vaelg" style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "#37d278", color: "#062313", borderRadius: 10, padding: "13px 26px", fontWeight: 700, fontSize: 15, textDecoration: "none" }}>
-            Se priser & book direkte →
+            Beregn din pris & book →
           </Link>
-          <Link href="/" style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(255,255,255,.06)", border: "1px solid rgba(255,255,255,.14)", color: "#fff", borderRadius: 10, padding: "13px 26px", fontWeight: 600, fontSize: 15, textDecoration: "none" }}>
-            Tilbage til forsiden
+          <Link href="/kontakt" style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(255,255,255,.06)", border: "1px solid rgba(255,255,255,.14)", color: "#fff", borderRadius: 10, padding: "13px 26px", fontWeight: 600, fontSize: 15, textDecoration: "none" }}>
+            Kontakt os
           </Link>
         </div>
+
+        <RelatedLinks />
       </div>
     </main>
   );
