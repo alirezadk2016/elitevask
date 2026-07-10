@@ -10,7 +10,6 @@ const HTML = `<!-- NAV -->
     <a href="/faq">FAQ</a>
     <a href="/kontakt" data-i18n="nav_contact">Kontakt</a>
     <a href="/guide" class="guide-nav-link" data-i18n="nav_guide">Guide</a>
-    <a href="/game" class="nav-game-link"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 11h4M8 9v4"/><circle cx="15.5" cy="11" r=".5" fill="currentColor"/><circle cx="18" cy="13" r=".5" fill="currentColor"/><path d="M17.32 5H6.68a4 4 0 0 0-3.98 3.6L2 17.5a2.5 2.5 0 0 0 4.4 1.8l2.1-2.3h7l2.1 2.3a2.5 2.5 0 0 0 4.4-1.8l-.7-8.9A4 4 0 0 0 17.32 5Z"/></svg><span data-i18n="nav_game">Spil</span></a>
   </div>
   <div class="nav-right">
     <div class="lang">
@@ -28,7 +27,6 @@ const HTML = `<!-- NAV -->
   <a href="/guide" class="drawer-link" data-i18n="nav_guide">Guide</a>
   <a href="/faq" class="drawer-link">FAQ</a>
   <a href="/kontakt" class="drawer-link" data-i18n="nav_contact">Kontakt</a>
-  <a href="/game" class="drawer-link drawer-game-link"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px;margin-right:7px;color:var(--green)"><path d="M6 11h4M8 9v4"/><circle cx="15.5" cy="11" r=".5" fill="currentColor"/><circle cx="18" cy="13" r=".5" fill="currentColor"/><path d="M17.32 5H6.68a4 4 0 0 0-3.98 3.6L2 17.5a2.5 2.5 0 0 0 4.4 1.8l2.1-2.3h7l2.1 2.3a2.5 2.5 0 0 0 4.4-1.8l-.7-8.9A4 4 0 0 0 17.32 5Z"/></svg><span data-i18n="nav_game">Spil</span></a>
   <div class="drawer-sep"></div>
   <div class="drawer-lang">
     <button type="button" aria-label="Skift til dansk" aria-pressed="true" data-lang="da" class="drawer-lang-btn on" title="Dansk"><svg viewBox="0 0 20 14" width="20" height="14" aria-hidden="true"><rect width="20" height="14" fill="#C60C30"/><rect x="6" y="0" width="3" height="14" fill="white"/><rect x="0" y="5.5" width="20" height="3" fill="white"/></svg>DK</button>
