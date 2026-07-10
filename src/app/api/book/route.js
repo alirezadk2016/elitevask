@@ -1,5 +1,6 @@
 import { randomBytes, createHash } from 'crypto';
 import dns from 'node:dns/promises';
+import { cphEpoch } from '@/lib/cphTime';
 import { buildTransport, emailShell, tr, BOOKING_EMAIL, INFO_EMAIL, CONTACT_EMAIL } from '@/lib/mailer';
 
 // Known disposable / throwaway email domains – block fake bookings
@@ -46,7 +47,6 @@ function esc(v) {
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
-const CANCEL_TTL = 60 * 60 * 24;      // 24 hours for cancel link
 const BOOKING_TTL = 60 * 60 * 24 * 30; // 30 days for slot records
 
 // In-memory fallback
@@ -92,22 +92,6 @@ async function checkRateLimit(ip) {
 
 function secureToken() {
   return randomBytes(32).toString('hex'); // 64 hex chars, cryptographically random
-}
-
-async function isSlotBooked(key) {
-  try {
-    const kv = await getKV();
-    if (kv) return !!(await kv.get(key));
-  } catch {}
-  return memSlots.has(key);
-}
-
-async function bookSlot(key, value) {
-  try {
-    const kv = await getKV();
-    if (kv) { await kv.set(key, JSON.stringify(value), { ex: BOOKING_TTL }); return; }
-  } catch {}
-  memSlots.set(key, value);
 }
 
 /* Atomic reserve (SET NX): returns false if someone else grabbed the slot
@@ -295,7 +279,10 @@ export async function POST(request) {
     // book the same hour; roll back partial reservations on a clash.
     cancelToken = secureToken(); // 64-char hex, cryptographically secure
     const bookedAt = new Date().toISOString();
-    const cancelExpiresAt = new Date(Date.now() + CANCEL_TTL * 1000).toISOString();
+    // The self-service cancel link works right up until the 24h-before-
+    // appointment cutoff (matching the cancellation policy), not just 24h
+    // after booking — a customer booking a week ahead can still cancel day 5.
+    const cancelExpiresAt = new Date(cphEpoch(date, time) - 24 * 3600 * 1000).toISOString();
 
     for (let i = 0; i < slotsNeeded; i++) {
       const slotTime = SLOT_TIMES[startIdx + i];
@@ -462,8 +449,8 @@ export async function POST(request) {
               ${cancelLink ? `
               <p style="font-size:13px;color:#777;margin:0 0 20px;line-height:1.7">
                 ${L
-                  ? `Skal du alligevel ikke bruge tiden? <a href="${cancelLink}" style="color:#0d4a25;font-weight:600">Annullér din booking her</a> (linket virker i 24 timer).`
-                  : `Need to cancel? <a href="${cancelLink}" style="color:#0d4a25;font-weight:600">Cancel your booking here</a> (link valid for 24 hours).`}
+                  ? `Skal du alligevel ikke bruge tiden? <a href="${cancelLink}" style="color:#0d4a25;font-weight:600">Annullér din booking her</a> (kan bruges indtil 24 timer før din tid).`
+                  : `Need to cancel? <a href="${cancelLink}" style="color:#0d4a25;font-weight:600">Cancel your booking here</a> (usable until 24 hours before your appointment).`}
               </p>` : ''}
 
 

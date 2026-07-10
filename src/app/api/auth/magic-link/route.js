@@ -41,6 +41,11 @@ export async function POST(request) {
   }
 
   const kv = await getKV();
+  // Without KV the magic token can't be stored, so the emailed link would be
+  // dead AND nothing would rate-limit the endpoint. Refuse instead.
+  if (!kv) {
+    return Response.json({ error: 'unavailable', message: 'Login er midlertidigt utilgængeligt. Prøv igen om lidt.' }, { status: 503 });
+  }
 
   const emailOk = await checkRL(kv, `rl:magic:email:${hashToken(email)}`, 3, 3600);
   const ipOk    = await checkRL(kv, `rl:magic:ip:${ip}`, 8, 3600);

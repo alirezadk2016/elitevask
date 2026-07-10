@@ -109,7 +109,7 @@ export default async function PriserPage() {
   };
 
   return (
-    <main style={{ background: "#0b1310", color: "#e9f1ec", minHeight: "100vh", minHeight: "100dvh", fontFamily: "Manrope, system-ui, sans-serif" }}>
+    <main style={{ background: "#0b1310", color: "#e9f1ec", minHeight: "100dvh", fontFamily: "Manrope, system-ui, sans-serif" }}>
       <JsonLd
         items={[
           breadcrumbLd([

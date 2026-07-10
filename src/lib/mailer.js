@@ -1,5 +1,14 @@
 import nodemailer from 'nodemailer';
 
+// ─── HTML escaping ──────────────────────────────────────────────────────────
+// Customer-supplied strings must be escaped before interpolation into email
+// HTML — otherwise a booking name/message can inject live markup into inboxes.
+export function esc(v) {
+  return String(v ?? '')
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
 // ─── Email addresses ────────────────────────────────────────────────────────
 export const BOOKING_EMAIL = 'booking@elite-vask.dk';  // SMTP sender, receives booking alerts
 export const INFO_EMAIL    = 'info@elite-vask.dk';     // Public website, footer, legal pages

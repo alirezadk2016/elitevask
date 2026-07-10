@@ -1,5 +1,5 @@
 import { createHash, timingSafeEqual } from 'crypto';
-import { buildTransport, emailShell, tr, CONTACT_EMAIL, BOOKING_EMAIL } from '@/lib/mailer';
+import { buildTransport, emailShell, tr, esc, CONTACT_EMAIL, BOOKING_EMAIL } from '@/lib/mailer';
 
 const CAR_SLOTS = { lille: 2, mellem: 3, stor: 4, varebil: 3 };
 const SLOT_TIMES = ['08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00'];
@@ -43,13 +43,13 @@ async function sendCancelEmails(data) {
         lang: data.lang || 'da',
         body: `
           <p style="color:#333;margin:0 0 20px;font-size:15px;line-height:1.7">
-            ${L ? `Hej ${data.name || ''},` : `Hi ${data.name || ''},`}<br><br>
+            ${L ? `Hej ${esc(data.name) || ''},` : `Hi ${esc(data.name) || ''},`}<br><br>
             ${L ? 'Vi bekræfter hermed, at din booking er blevet annulleret.' : 'We confirm that your booking has been cancelled.'}
           </p>
           <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;margin-bottom:24px">
-            ${tr(L ? 'Dato & tid' : 'Date & time', `${fmtDate(data.date)} · kl. ${data.time}`, true)}
-            ${tr(L ? 'Bil' : 'Car', data.car || '-')}
-            ${tr(L ? 'Pakke' : 'Package', data.pkg || '-', true)}
+            ${tr(L ? 'Dato & tid' : 'Date & time', `${esc(fmtDate(data.date))} · kl. ${esc(data.time)}`, true)}
+            ${tr(L ? 'Bil' : 'Car', esc(data.car) || '-')}
+            ${tr(L ? 'Pakke' : 'Package', esc(data.pkg) || '-', true)}
           </table>
           <p style="font-size:13px;color:#777;margin:0;line-height:1.7">
             ${L
@@ -65,19 +65,19 @@ async function sendCancelEmails(data) {
   await transport.sendMail({
     from: `"Elite Vask System" <booking@elite-vask.dk>`,
     to: BOOKING_EMAIL,
-    subject: `❌ Booking annulleret: ${data.name || '?'} – ${fmtDate(data.date)} kl. ${data.time}`,
+    subject: `❌ Booking annulleret: ${(data.name || '?').replace(/[\r\n]/g, ' ')} – ${fmtDate(data.date)} kl. ${data.time}`,
     html: emailShell({
       title: '❌ Booking annulleret af admin',
       lang: 'da',
       body: `
         <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;margin-bottom:24px">
-          ${tr('Navn', data.name || '-', true)}
-          ${tr('Dato & tid', `${fmtDate(data.date)} · kl. ${data.time}`)}
-          ${tr('Bil', data.car || '-', true)}
-          ${tr('Pakke', data.pkg || '-')}
-          ${tr('Pris', data.price || '-', true)}
-          ${tr('E-mail', data.email || '-')}
-          ${tr('Telefon', data.phone || '-', true)}
+          ${tr('Navn', esc(data.name) || '-', true)}
+          ${tr('Dato & tid', `${esc(fmtDate(data.date))} · kl. ${esc(data.time)}`)}
+          ${tr('Bil', esc(data.car) || '-', true)}
+          ${tr('Pakke', esc(data.pkg) || '-')}
+          ${tr('Pris', esc(data.price) || '-', true)}
+          ${tr('E-mail', esc(data.email) || '-')}
+          ${tr('Telefon', esc(data.phone) || '-', true)}
         </table>
       `,
     }),

@@ -625,7 +625,8 @@ export default function AdminPanel() {
     const active = tab === id;
     return (
       <button onClick={() => {
-          if (hasUnsaved && tab !== id) { setNavGuard({ pendingTab: id }); return; }
+          if (tab === id) return; // clicking the active tab must never wipe in-progress edits
+          if (hasUnsaved) { setNavGuard({ pendingTab: id }); return; }
           setTab(id); setMsg(null); setUrlInput(""); setCmsMsg(null); setExpandedFaqId(null); setFaqDrafts({}); setAddFaqOpen(false); setEditingExt(null); setEditingGallery(null);
         }}
         style={{ display:"flex", alignItems:"center", gap:8, width:"100%", padding:"7px 9px", borderRadius:7, fontSize:13, fontWeight:active?600:400, color:active?T.accent:T.t3, background:active?T.accentDim:"transparent", border:"none", cursor:"pointer", fontFamily:FF, textAlign:"left", transition:"all .12s", marginBottom:1 }}>
@@ -721,7 +722,8 @@ export default function AdminPanel() {
           <div style={{ display:"flex", gap:8, padding:"16px 16px 0", overflowX:"auto" }}>
             {[["bookings","Bookinger",icons.bookings],["gallery","Galleri",icons.gallery],["videos","Videoer",icons.videos],["beforeafter","Før & efter",icons.beforeafter],["faq","FAQ",icons.faq],["priser","Priser",icons.priser],["extras","Ekstra",icons.extras]].map(([id,label,icon]) => (
               <button key={id} onClick={() => {
-                  if (hasUnsaved && tab !== id) { setNavGuard({ pendingTab: id }); return; }
+                  if (tab === id) return; // never wipe edits on same-tab click
+                  if (hasUnsaved) { setNavGuard({ pendingTab: id }); return; }
                   setTab(id); setMsg(null); setUrlInput(""); setCmsMsg(null); setExpandedFaqId(null); setFaqDrafts({}); setAddFaqOpen(false); setEditingExt(null); setEditingGallery(null);
                 }}
                 style={{ display:"flex", alignItems:"center", gap:6, padding:"8px 16px", borderRadius:8, border:`1px solid ${tab===id?T.accentBorder:T.border}`, background:tab===id?T.accentDim:"transparent", color:tab===id?T.accent:T.t3, fontSize:13, fontWeight:600, cursor:"pointer", fontFamily:FF, whiteSpace:"nowrap" }}>
@@ -802,7 +804,13 @@ export default function AdminPanel() {
             function dayLayout(iso) {
               if (dayLayoutCache[iso]) return dayLayoutCache[iso];
               const items = bookings
-                .filter(b => b.date === iso && bookingSpan(b))
+                .filter(b => {
+                  if (b.date !== iso) return false;
+                  const s = bookingSpan(b);
+                  // only bookings actually drawn in the 08–20 grid may claim a
+                  // column — out-of-range ones live in the safety list below
+                  return s && s[0] >= 8 && s[0] <= 20;
+                })
                 .sort((a, z) => bookingSpan(a)[0] - bookingSpan(z)[0]);
               const layout = {};
               const active = []; // {end, col}
@@ -1195,7 +1203,7 @@ export default function AdminPanel() {
                             style={{ width:"100%", padding:"8px 10px", borderRadius:7, border:`1px solid ${T.border}`, background:T.bg0, color:editingGallery.album?T.t1:T.t4, fontSize:12, outline:"none", fontFamily:FF, cursor:"pointer" }}
                           >
                             <option value="Enkelt">Enkelt billede</option>
-                            <option value="F\xf8r & Efter">F\xf8r &amp; Efter</option>
+                            <option value="Før & Efter">Før &amp; Efter</option>
                           </select>
                           <div style={{ display:"flex", gap:6 }}>
                             <button
@@ -1671,7 +1679,7 @@ export default function AdminPanel() {
                         <tr key={carId} style={{ background: ri%2===0?"transparent":"rgba(255,255,255,.02)" }}>
                           <td style={{ padding:"10px 10px", fontSize:13, color:T.t1, fontWeight:600, borderBottom:`1px solid rgba(255,255,255,.04)`, whiteSpace:"nowrap" }}>{CAR_LABELS[carId]}</td>
                           {PKGS.map(pkgId => {
-                            const val = (priceEdits[carId]||{})[pkgId] || "";
+                            const val = (priceEdits[carId]||{})[pkgId] ?? ""; // ?? keeps a typed 0 visible
                             return (
                               <td key={pkgId} style={{ padding:"8px 6px", borderBottom:`1px solid rgba(255,255,255,.04)` }}>
                                 <input

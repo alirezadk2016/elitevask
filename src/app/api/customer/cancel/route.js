@@ -1,7 +1,7 @@
 import { hashToken, getSession, auditLog } from '@/lib/auth';
 import { isSameOrigin } from '@/lib/csrf';
 import { cphEpoch } from '@/lib/cphTime';
-import { buildTransport, emailShell, tr, BOOKING_EMAIL, CONTACT_EMAIL } from '@/lib/mailer';
+import { buildTransport, emailShell, tr, esc, BOOKING_EMAIL, CONTACT_EMAIL } from '@/lib/mailer';
 
 let kvClient = null;
 async function getKV() {
@@ -90,13 +90,13 @@ export async function POST(request) {
             lang: lang || 'da',
             body: `
               <p style="color:#333;margin:0 0 20px;font-size:15px;line-height:1.7">
-                ${L ? `Hej ${name || ''},` : `Hi ${name || ''},`}<br><br>
+                ${L ? `Hej ${esc(name) || ''},` : `Hi ${esc(name) || ''},`}<br><br>
                 ${L ? 'Vi bekræfter, at din booking er annulleret via kundeportalen.' : 'We confirm that your booking has been cancelled via the customer portal.'}
               </p>
               <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;margin-bottom:24px">
-                ${tr(L ? 'Dato & tid' : 'Date & time', `${date} · kl. ${time}`, true)}
-                ${tr(L ? 'Bil' : 'Car', car || '-')}
-                ${tr(L ? 'Pakke' : 'Package', pkg || '-', true)}
+                ${tr(L ? 'Dato & tid' : 'Date & time', `${esc(date)} · kl. ${esc(time)}`, true)}
+                ${tr(L ? 'Bil' : 'Car', esc(car) || '-')}
+                ${tr(L ? 'Pakke' : 'Package', esc(pkg) || '-', true)}
               </table>
               <p style="color:#555;margin:0 0 20px;font-size:14px;line-height:1.6">
                 ${L ? 'Ønsker du at booke en ny tid, er du altid velkommen.' : 'You are always welcome to book a new time.'}
@@ -121,12 +121,12 @@ export async function POST(request) {
           body: `
             <p style="color:#333;margin:0 0 16px;font-size:14px">En kunde har annulleret sin booking via kundeportalen.</p>
             <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;margin-bottom:16px">
-              ${tr('Dato & tid', `${date} · kl. ${time}`, true)}
-              ${tr('Bil', `${car || '-'} · ${pkg || '-'}`)}
-              ${tr('Pris', price || '-', true)}
-              ${tr('Navn', name || '-')}
-              ${tr('Email', booking.email ? `<a href="mailto:${booking.email}" style="color:#0d4a25">${booking.email}</a>` : '-', true)}
-              ${tr('Telefon', booking.phone ? `<a href="tel:${(booking.phone||'').replace(/\s/g,'')}" style="color:#0d4a25">${booking.phone}</a>` : '-')}
+              ${tr('Dato & tid', `${esc(date)} · kl. ${esc(time)}`, true)}
+              ${tr('Bil', `${esc(car) || '-'} · ${esc(pkg) || '-'}`)}
+              ${tr('Pris', esc(price) || '-', true)}
+              ${tr('Navn', esc(name) || '-')}
+              ${tr('Email', booking.email ? `<a href="mailto:${esc(booking.email)}" style="color:#0d4a25">${esc(booking.email)}</a>` : '-', true)}
+              ${tr('Telefon', booking.phone ? `<a href="tel:${esc((booking.phone||'').replace(/[^\d+]/g,''))}" style="color:#0d4a25">${esc(booking.phone)}</a>` : '-')}
             </table>
           `,
         }),
