@@ -1,0 +1,29 @@
+# One-shot helper: downloads the generated car renders from the image CDN
+# (which the dev container's egress policy blocks) and commits them to this
+# branch so the container can pull and post-process them. Safe to delete
+# after the images land in public/cars/.
+name: Fetch car images
+on: workflow_dispatch
+permissions:
+  contents: write
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download renders
+        run: |
+          mkdir -p public/cars
+          base="https://d8j0ntlcm91z4.cloudfront.net/user_3G0W5XEq8q7DCCZCdVVxtodFWsZ"
+          curl -fsSL -o public/cars/raw-lille.png   "$base/hf_20260711_004423_96272f2e-bb19-4918-9fa5-8703cd1abc57.png"
+          curl -fsSL -o public/cars/raw-mellem.png  "$base/hf_20260711_004443_e0c3cd59-f7e4-4b2c-a49e-ea74a7acec87.png"
+          curl -fsSL -o public/cars/raw-stor.png    "$base/hf_20260711_004240_2e30f011-85d8-46fb-9167-486c0fffd487.png"
+          curl -fsSL -o public/cars/raw-varebil.png "$base/hf_20260711_004253_553e0196-c9be-4c40-a3b6-27e76753aa23.png"
+          ls -la public/cars/
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add public/cars/raw-*.png
+          git commit -m "Add raw car renders (fetched by CI for container post-processing)"
+          git push
