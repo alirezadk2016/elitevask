@@ -586,6 +586,11 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 .opt-icon-wrap{width:56px;height:34px;display:flex;align-items:center;justify-content:center;border-radius:10px;background:rgba(255,255,255,.04);transition:background .18s;margin-bottom:2px}
 .opt.sel .opt-icon-wrap{background:rgba(55,210,120,.12)}
 .opt.sel .opt-icon-wrap:has(img.opt-photo){background:transparent}
+/* On phones the wizard cards are full-width single-column — let the car
+   photos breathe so the step feels as premium as the price cards. */
+@media(max-width:520px){
+  .opt-icon-wrap:has(img.opt-photo){width:150px;height:62px;margin-bottom:4px}
+}
 .opt svg,.opt-icon-wrap svg{width:46px;height:26px;color:rgba(255,255,255,.35);transition:color .18s}
 .opt:hover svg,.opt:hover .opt-icon-wrap svg{color:rgba(55,210,120,.7)}
 .opt.sel svg,.opt.sel .opt-icon-wrap svg{color:var(--green)}
