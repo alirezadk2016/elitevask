@@ -1,24 +1,22 @@
 # Bilbilleder til pris-/valglisten
 
-De fire PNG-filer nedenfor er AKTIVE på sitet. Udskift en fil (samme navn) for at opdatere bilen — SVG-tegningen bruges automatisk som fallback, hvis en fil mangler.
-de tegnede SVG-biler i pris-/bookinglisten. Mangler en fil, vises SVG-tegningen
-som fallback (siden går aldrig i stykker).
+De fire PNG-filer her er **aktive på sitet** og vises tre steder: pris-kortene
+på forsiden, bil-valget i booking-guiden og ikonet i pris-beregneren.
 
-Filnavne (præcis disse):
+| Fil            | Biltype        |
+|----------------|----------------|
+| `lille.png`    | Lille bil      |
+| `mellem.png`   | Mellem bil     |
+| `stor.png`     | Stor bil / SUV |
+| `varebil.png`  | Varebil        |
 
-| Fil            | Biltype        | Prompt-reference        |
-|----------------|----------------|-------------------------|
-| `lille.png`    | Lille bil      | Compact city car        |
-| `mellem.png`   | Mellem bil     | Executive sedan         |
-| `stor.png`     | Stor bil / SUV | Full-size SUV / estate  |
-| `varebil.png`  | Varebil        | Executive van / minivan |
+## Sådan udskiftes et billede
+Upload en ny fil med **samme filnavn** — resten sker automatisk.
+Mangler en fil, vises den tegnede SVG-bil som fallback (siden går aldrig i stykker).
 
-Anbefaling:
-- Format: PNG, gennemsigtig baggrund (ingen gulv, ingen skygge-platform, ingen ramme)
-- Størrelse: 1280 × 704 (16:9)
-- Bilen set fra siden, vendt mod **venstre**
-- Ensartet look: obsidian black pearl + champagne-gold accenter
-- Ingen logoer, ingen nummerplade
-
-Vises tre steder på sitet: pris-/valgkortene på forsiden, bil-valget i
-booking-guiden og ikonet i pris-beregneren.
+## Billedernes format
+- PNG med gennemsigtig baggrund, bilen i sideprofil vendt mod venstre
+- Alle fire ligger på et fælles 640×270-lærred med **realistisk indbyrdes
+  skala** (bilens bredde svarer til den virkelige længde: Mini 3,85 m …
+  varebil 5,14 m) og fælles grundlinje — sådan ser en lille bil også lille ud
+- Look: obsidian-sort lak med champagne-guld accenter (ensartet serie)

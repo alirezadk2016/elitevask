@@ -174,14 +174,23 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 /* Real car photos (drop PNGs in /public/cars/) — shown instead of the line-art
    SVG when the file exists; if the image is missing it removes itself and the
    SVG fallback stays. */
-.car-photo{position:relative;z-index:1;width:100%;max-width:150px;height:100%;object-fit:contain;object-position:center bottom;display:block;filter:drop-shadow(0 10px 18px rgba(0,0,0,.45));transition:transform .45s cubic-bezier(.22,1,.36,1)}
-.car:hover .car-photo,.car.on .car-photo{transform:translateY(-2px) scale(1.04)}
+.car-photo{position:relative;z-index:1;width:100%;max-width:150px;height:100%;object-fit:contain;object-position:center bottom;display:block;filter:drop-shadow(0 10px 18px rgba(0,0,0,.45));transition:transform .45s cubic-bezier(.22,1,.36,1),filter .45s ease}
+.car:hover .car-photo,.car.on .car-photo{transform:translateY(-3px) scale(1.05);filter:drop-shadow(0 14px 22px rgba(0,0,0,.55)) drop-shadow(0 0 18px rgba(212,175,55,.14))}
 .car-stage:has(img.car-photo) svg.cs{display:none}
+/* With real photos the stage lighting goes warm champagne (matches the
+   black+gold renders) and the car gets a grounded contact shadow. The green
+   glow remains for the SVG fallback. */
+.car-stage:has(img.car-photo)::before{background:radial-gradient(ellipse 62% 70% at 50% 40%,rgba(212,175,55,.13),transparent 70%);opacity:.5}
+.car:hover .car-stage:has(img.car-photo)::before,.car.on .car-stage:has(img.car-photo)::before{opacity:1}
+.car-stage:has(img.car-photo)::after{background:radial-gradient(ellipse,rgba(0,0,0,.55) 0%,rgba(212,175,55,.08) 55%,transparent 75%);opacity:.7;width:112px;height:10px;bottom:-4px}
+.car:hover .car-stage:has(img.car-photo)::after,.car.on .car-stage:has(img.car-photo)::after{opacity:1;width:126px}
 .opt-icon-wrap{position:relative}
-.opt-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block}
+.opt-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block;filter:drop-shadow(0 4px 8px rgba(0,0,0,.4))}
 .opt-icon-wrap:has(img.opt-photo)>svg{visibility:hidden}
-.calc-photo{width:100%;height:100%;object-fit:contain;display:block}
+.opt-icon-wrap:has(img.opt-photo){width:76px;height:38px;background:transparent}
+.calc-photo{width:100%;height:100%;object-fit:contain;object-position:left center;display:block;filter:drop-shadow(0 6px 12px rgba(0,0,0,.5))}
 #calcIcon:has(img.calc-photo)>svg{display:none}
+.calc-head .pi:has(img.calc-photo){width:110px;height:48px;filter:none}
 .car.on svg.cs{transform:scale(1.04)}
 .car .nm{font-size:15px;font-weight:800;color:#fff;letter-spacing:-.2px}
 .car .ex{font-size:11.5px;color:var(--muted-2);margin-top:4px;letter-spacing:.2px}
@@ -576,6 +585,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 .opt.sel{border-color:var(--green);background:rgba(55,210,120,.08);transform:translateY(-1px);box-shadow:0 0 0 1px rgba(55,210,120,.2),0 6px 24px rgba(55,210,120,.12)}
 .opt-icon-wrap{width:56px;height:34px;display:flex;align-items:center;justify-content:center;border-radius:10px;background:rgba(255,255,255,.04);transition:background .18s;margin-bottom:2px}
 .opt.sel .opt-icon-wrap{background:rgba(55,210,120,.12)}
+.opt.sel .opt-icon-wrap:has(img.opt-photo){background:transparent}
 .opt svg,.opt-icon-wrap svg{width:46px;height:26px;color:rgba(255,255,255,.35);transition:color .18s}
 .opt:hover svg,.opt:hover .opt-icon-wrap svg{color:rgba(55,210,120,.7)}
 .opt.sel svg,.opt.sel .opt-icon-wrap svg{color:var(--green)}
