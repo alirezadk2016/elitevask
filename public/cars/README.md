@@ -1,6 +1,6 @@
 # Bilbilleder til pris-/valglisten
 
-Læg fire PNG-filer med **gennemsigtig baggrund** her, så erstatter de automatisk
+De fire PNG-filer nedenfor er AKTIVE på sitet. Udskift en fil (samme navn) for at opdatere bilen — SVG-tegningen bruges automatisk som fallback, hvis en fil mangler.
 de tegnede SVG-biler i pris-/bookinglisten. Mangler en fil, vises SVG-tegningen
 som fallback (siden går aldrig i stykker).
 
