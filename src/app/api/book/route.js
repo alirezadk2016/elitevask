@@ -1,6 +1,7 @@
 import { randomBytes, createHash } from 'crypto';
 import dns from 'node:dns/promises';
 import { cphEpoch } from '@/lib/cphTime';
+import { buildSlotTimes, carSlotCount, isClosedDay, normalizeHours, DEFAULT_HOURS } from '@/lib/hours';
 import { buildTransport, emailShell, tr, BOOKING_EMAIL, INFO_EMAIL, CONTACT_EMAIL } from '@/lib/mailer';
 
 // Known disposable / throwaway email domains – block fake bookings
@@ -160,11 +161,19 @@ async function getBookedSlots(date) {
 
 function slotKey(date, time) { return `slot:${date}:${time}`; }
 
-// Opening hours 15:30–22:00 in 30-minute slots. A booking occupies
-// CAR_SLOTS[carId] consecutive slots (2 slots = 1 hour), and the whole
-// duration must finish by 22:00 (the block after 21:30).
-const SLOT_TIMES = ['15:30','16:00','16:30','17:00','17:30','18:00','18:30','19:00','19:30','20:00','20:30','21:00','21:30'];
-
+// Opening hours are manager-editable (admin → Åbningstider), stored in KV
+// under `content:hours`. A booking occupies carSlotCount() consecutive slots
+// and the whole duration must finish by the closing time.
+async function loadHours() {
+  try {
+    const kv = await getKV();
+    if (kv) {
+      const h = await kv.get('content:hours');
+      if (h) return normalizeHours(h);
+    }
+  } catch {}
+  return normalizeHours(DEFAULT_HOURS);
+}
 
 function fmtDate(d, L) {
   if (!d) return d;
@@ -197,7 +206,7 @@ export async function POST(request) {
     return Response.json({ error: 'Invalid JSON' }, { status: 400 });
   }
 
-  const { car, pkg, extras, addr, zip, city, date, time, name, phone, email, msg, price, lang, carId, slotsNeeded: rawSlots } = body;
+  const { car, pkg, extras, addr, zip, city, date, time, name, phone, email, msg, price, lang, carId } = body;
 
   // Input validation
   const L0 = lang !== 'en';
@@ -236,9 +245,10 @@ export async function POST(request) {
     }
   }
 
-  // 30-min units: lille 2h=4, mellem 3h=6, stor 4h=8, varebil 3h=6
-  const CAR_SLOTS = { lille: 4, mellem: 6, stor: 8, varebil: 6 };
-  const slotsNeeded = CAR_SLOTS[carId] || Math.max(2, Math.min(parseInt(rawSlots) || 4, 10));
+  // Current opening hours (manager-configurable) drive the slot grid + duration.
+  const hours = await loadHours();
+  const SLOT_TIMES = buildSlotTimes(hours);
+  const slotsNeeded = carSlotCount(hours, carId);
   const L = lang !== 'en';
 
   let cancelToken = null;
@@ -251,6 +261,14 @@ export async function POST(request) {
       return Response.json({
         error: 'invalid_slot',
         message: L ? 'Ugyldig dato eller tidspunkt. Prøv venligst igen.' : 'Invalid date or time. Please try again.',
+      }, { status: 400 });
+    }
+    if (isClosedDay(hours, date)) {
+      return Response.json({
+        error: 'closed_day',
+        message: L
+          ? 'Vi holder lukket den valgte dag. Vælg venligst en anden dato.'
+          : 'We are closed on the selected day. Please choose another date.',
       }, { status: 400 });
     }
     const startIdx = SLOT_TIMES.indexOf(time);

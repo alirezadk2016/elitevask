@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { DEFAULT_ALBUM, DEFAULT_BEFORE_AFTER } from "@/lib/galleryData";
+import { DEFAULT_HOURS, normalizeHours, buildSlotTimes, toMin, ALLOWED_SLOT_MINUTES } from "@/lib/hours";
 
 const T = {
   bg0:          "#08110a",
@@ -191,6 +192,13 @@ export default function AdminPanel() {
   const [cmsLoading, setCmsLoading]       = useState(false);
   const [cmsMsg, setCmsMsg]               = useState(null);
   const [pricesFromDefault, setPricesFromDefault] = useState(false);
+
+  // Opening hours (manager-editable). `hours` = saved value, `hoursDraft` = edits.
+  const [hours, setHours]                 = useState(DEFAULT_HOURS);
+  const [hoursDraft, setHoursDraft]       = useState(DEFAULT_HOURS);
+  const [hoursLoading, setHoursLoading]   = useState(false);
+  const [hoursSaving, setHoursSaving]     = useState(false);
+  const [hoursIsDefault, setHoursIsDefault] = useState(true);
   const [albumInput, setAlbumInput]               = useState("Enkelt");
   const [galleryAlbum, setGalleryAlbum]           = useState("alle");
 
@@ -291,12 +299,25 @@ export default function AdminPanel() {
     finally { setBLoading(false); }
   }, []);
 
+  const loadHours = useCallback(async (s) => {
+    setHoursLoading(true);
+    try {
+      const r = await fetch("/api/admin/content?type=hours", { headers:{ Authorization:`Bearer ${s}` } });
+      if (r.ok) {
+        const data = await r.json();
+        const h = normalizeHours(data.hours);
+        setHours(h); setHoursDraft(h); setHoursIsDefault(!!data.isDefault);
+      }
+    } catch {}
+    finally { setHoursLoading(false); }
+  }, []);
+
   useEffect(() => {
     try {
       const saved = sessionStorage.getItem("adm");
-      if (saved) { setSecret(saved); setAuthed(true); loadBookings(saved); }
+      if (saved) { setSecret(saved); setAuthed(true); loadBookings(saved); loadHours(saved); }
     } catch {}
-  }, [loadBookings]);
+  }, [loadBookings, loadHours]);
 
   const [loggingIn, setLoggingIn] = useState(false);
   async function login(e) {
@@ -310,6 +331,7 @@ export default function AdminPanel() {
         const data = await r.json();
         setBookings(data.bookings || []);
         setSecret(secretInput); setAuthed(true);
+        loadHours(secretInput);
       } else if (r.status === 401 || r.status === 403) {
         setLoginErr("Forkert adgangskode");
       } else {
@@ -346,6 +368,30 @@ export default function AdminPanel() {
       setPriceEdits(prices);
       setPricesFromDefault(!hasPrices);
     }
+  }
+
+  async function saveHours() {
+    if (hoursSaving) return;
+    setHoursSaving(true);
+    try {
+      const r = await fetch("/api/admin/content", {
+        method:"POST",
+        headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" },
+        body: JSON.stringify({ type:"hours", hours: hoursDraft }),
+      });
+      if (r.ok) {
+        const data = await r.json();
+        const h = normalizeHours(data.hours);
+        setHours(h); setHoursDraft(h); setHoursIsDefault(false);
+        addToast("ok", "Åbningstider gemt");
+      } else if (r.status === 401 || r.status === 403) {
+        try { sessionStorage.removeItem("adm"); } catch {}
+        setAuthed(false); setSecret(""); setLoginErr("Session udløbet – log ind igen.");
+      } else {
+        addToast("err", "Kunne ikke gemme — prøv igen");
+      }
+    } catch { addToast("err", "Netværksfejl — prøv igen"); }
+    finally { setHoursSaving(false); }
   }
 
   useEffect(() => {
@@ -558,11 +604,13 @@ export default function AdminPanel() {
     extras:   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>,
     beforeafter: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="11" height="14" rx="2"/><rect x="11" y="5" width="11" height="14" rx="2"/><line x1="12" y1="3" x2="12" y2="21"/></svg>,
     refresh:  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 11-9-9c2.52 0 4.8.99 6.48 2.59L21 8"/><path d="M21 3v5h-5"/></svg>,
+    hours:    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
   };
 
   // ── MAIN RENDER ────────────────────────────────────────────────────────────
   const hasPriceChanges = JSON.stringify(priceEdits) !== JSON.stringify(pricesData);
-  const hasUnsaved = Object.keys(faqDrafts).length > 0 || hasPriceChanges || editingExt !== null || editingGallery !== null || editingBA !== null;
+  const hoursDirty = JSON.stringify(hoursDraft) !== JSON.stringify(hours);
+  const hasUnsaved = Object.keys(faqDrafts).length > 0 || hasPriceChanges || editingExt !== null || editingGallery !== null || editingBA !== null || hoursDirty;
   unsavedRef.current = hasUnsaved;
 
   return (
@@ -612,6 +660,7 @@ export default function AdminPanel() {
           <aside style={{ background:T.bg0, borderRight:`1px solid ${T.border}`, padding:"24px 12px", position:"sticky", top:52, height:"calc(100dvh - 52px)", overflowY:"auto", boxSizing:"border-box" }}>
             {sectionLabel("Navigation")}
             {navItem("bookings", "Bookinger", icons.bookings, activeBookings || undefined)}
+            {navItem("hours", "Åbningstider", icons.hours)}
             <div style={{ height:1, background:T.border, margin:"14px 4px" }}/>
             {sectionLabel("Indhold")}
             {navItem("gallery", "Galleri", icons.gallery, gallery.length || undefined)}
@@ -627,7 +676,7 @@ export default function AdminPanel() {
           </aside>
         ) : (
           <div style={{ display:"flex", gap:8, padding:"16px 16px 0", overflowX:"auto" }}>
-            {[["bookings","Bookinger",icons.bookings],["gallery","Galleri",icons.gallery],["videos","Videoer",icons.videos],["beforeafter","Før & efter",icons.beforeafter],["faq","FAQ",icons.faq],["priser","Priser",icons.priser],["extras","Ekstra",icons.extras]].map(([id,label,icon]) => (
+            {[["bookings","Bookinger",icons.bookings],["hours","Åbningstider",icons.hours],["gallery","Galleri",icons.gallery],["videos","Videoer",icons.videos],["beforeafter","Før & efter",icons.beforeafter],["faq","FAQ",icons.faq],["priser","Priser",icons.priser],["extras","Ekstra",icons.extras]].map(([id,label,icon]) => (
               <button key={id} onClick={() => {
                   if (tab === id) return; // never wipe edits on same-tab click
                   if (hasUnsaved) { setNavGuard({ pendingTab: id }); return; }
@@ -646,10 +695,10 @@ export default function AdminPanel() {
           {/* Page title + badge */}
           <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:28 }}>
             <h1 style={{ fontSize:22, fontWeight:800, color:T.t1, margin:0, letterSpacing:"-.3px" }}>
-              {tab === "bookings" ? "Bookinger" : tab === "gallery" ? "Galleri" : tab === "videos" ? "Videoer" : tab === "beforeafter" ? "Før & efter" : tab === "faq" ? "FAQ" : tab === "priser" ? "Priser" : "Ekstra ydelser"}
+              {tab === "bookings" ? "Bookinger" : tab === "hours" ? "Åbningstider" : tab === "gallery" ? "Galleri" : tab === "videos" ? "Videoer" : tab === "beforeafter" ? "Før & efter" : tab === "faq" ? "FAQ" : tab === "priser" ? "Priser" : "Ekstra ydelser"}
             </h1>
             <span style={{ background:T.accentDim, color:T.accent, borderRadius:20, padding:"3px 12px", fontSize:12, fontWeight:700 }}>
-              {tab === "bookings" ? `${activeBookings} aktive` : tab === "gallery" ? `${gallery.length} ${gallery.length===1?"billede":"billeder"}` : tab === "videos" ? `${videos.length} ${videos.length===1?"video":"videoer"}` : tab === "beforeafter" ? `${beforeAfter.length} ${beforeAfter.length===1?"par":"par"}` : tab === "faq" ? `${faqItems.length} spørgsmål` : tab === "priser" ? "Prismatrix" : `${extrasItems.length} ydelser`}
+              {tab === "bookings" ? `${activeBookings} aktive` : tab === "hours" ? `${hours.open}–${hours.close}` : tab === "gallery" ? `${gallery.length} ${gallery.length===1?"billede":"billeder"}` : tab === "videos" ? `${videos.length} ${videos.length===1?"video":"videoer"}` : tab === "beforeafter" ? `${beforeAfter.length} ${beforeAfter.length===1?"par":"par"}` : tab === "faq" ? `${faqItems.length} spørgsmål` : tab === "priser" ? "Prismatrix" : `${extrasItems.length} ydelser`}
             </span>
           </div>
 
@@ -676,11 +725,12 @@ export default function AdminPanel() {
             const activeThisWeek = weekBookings.filter(b => b.status !== "cancelled").length;
             const totalActive = bookings.filter(b => b.status !== "cancelled").length;
 
-            // Opening hours 15:30 → 22:00 in 30-minute rows (13 slots).
-            const GRID_START = 15 * 60 + 30;   // 15:30 in minutes
-            const GRID_END   = 22 * 60;        // 22:00
-            const SLOT_MIN   = 30;
-            const N_ROWS = (GRID_END - GRID_START) / SLOT_MIN; // 13
+            // Opening hours come from the manager-configured settings (admin →
+            // Åbningstider), so the calendar always matches what customers book.
+            const GRID_START = toMin(hours.open);
+            const GRID_END   = toMin(hours.close);
+            const SLOT_MIN   = hours.slotMinutes || 30;
+            const N_ROWS = Math.max(1, Math.round((GRID_END - GRID_START) / SLOT_MIN));
             const ROWS = Array.from({ length: N_ROWS }, (_, i) => {
               const m = GRID_START + i * SLOT_MIN;
               return { min: m, label: `${String(Math.floor(m/60)).padStart(2,"0")}:${String(m%60).padStart(2,"0")}` };
@@ -690,19 +740,20 @@ export default function AdminPanel() {
             const TIME_W = 52;
             const minToLabel = (m) => `${String(Math.floor(m/60)).padStart(2,"0")}:${String(m%60).padStart(2,"0")}`;
 
-            // Duration in 30-minute slots (stored slotsNeeded/slots are already
-            // in 30-min units; the fallback map mirrors the server's CAR_SLOTS).
+            // Duration in slot units. A booking stores its own slotsNeeded (in
+            // the interval it was booked under); the fallback derives from the
+            // current interval so unknown/legacy records still render sensibly.
+            const CAR_SLOTS = { lille: SLOT_MIN?Math.round(120/SLOT_MIN):4, mellem: SLOT_MIN?Math.round(180/SLOT_MIN):6, stor: SLOT_MIN?Math.round(240/SLOT_MIN):8, varebil: SLOT_MIN?Math.round(180/SLOT_MIN):6 };
             function slotCount(b) {
               if (b.slotsNeeded) return b.slotsNeeded;
               if (Array.isArray(b.slots) && b.slots.length) return b.slots.length;
-              const CAR_SLOTS = { lille: 4, mellem: 6, stor: 8, varebil: 6 };
               if (b.carId && CAR_SLOTS[b.carId]) return CAR_SLOTS[b.carId];
               const c = (b.car || b.pkg || "").toLowerCase();
-              if (c.includes("varebil") || c.includes("van")) return 6;
-              if (c.includes("stor") || c.includes("suv") || c.includes("large")) return 8;
-              if (c.includes("mellem") || c.includes("medium")) return 6;
-              if (c.includes("lille") || c.includes("small")) return 4;
-              return 4;
+              if (c.includes("varebil") || c.includes("van")) return CAR_SLOTS.varebil;
+              if (c.includes("stor") || c.includes("suv") || c.includes("large")) return CAR_SLOTS.stor;
+              if (c.includes("mellem") || c.includes("medium")) return CAR_SLOTS.mellem;
+              if (c.includes("lille") || c.includes("small")) return CAR_SLOTS.lille;
+              return CAR_SLOTS.mellem;
             }
 
             function bookingStartMin(b) {
@@ -975,7 +1026,7 @@ export default function AdminPanel() {
                         <div style={{ marginTop:16, background:"rgba(245,166,35,.06)", border:`1px solid rgba(245,166,35,.22)`, borderRadius:12, padding:"12px 16px" }}>
                           <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:8 }}>
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={T.gold} strokeWidth="2.5" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                            <span style={{ fontSize:12, fontWeight:700, color:T.gold }}>Bookinger uden for kalendervisningen (15:30–22:00)</span>
+                            <span style={{ fontSize:12, fontWeight:700, color:T.gold }}>Bookinger uden for kalendervisningen ({hours.open}–{hours.close})</span>
                           </div>
                           <div style={{ display:"flex", flexDirection:"column", gap:6 }}>
                             {outOfRange.map(b => (
@@ -1007,6 +1058,136 @@ export default function AdminPanel() {
                   </>
                 )}
               </>
+            );
+          })()}
+
+          {/* ── ÅBNINGSTIDER ── */}
+          {tab === "hours" && (() => {
+            const WEEK = [[1,"Man"],[2,"Tir"],[3,"Ons"],[4,"Tor"],[5,"Fre"],[6,"Lør"],[0,"Søn"]];
+            const openM = toMin(hoursDraft.open), closeM = toMin(hoursDraft.close);
+            const invalid = !(closeM > openM);
+            const preview = invalid ? [] : buildSlotTimes(hoursDraft);
+            const setDraft = (patch) => setHoursDraft(d => ({ ...d, ...patch }));
+            const toggleDay = (d) => setHoursDraft(h => {
+              const set = new Set(h.closedDays || []);
+              if (set.has(d)) set.delete(d); else set.add(d);
+              return { ...h, closedDays: [...set].sort((a,b)=>a-b) };
+            });
+            const card = (children, extra) => (
+              <div style={{ background:T.bg1, border:`1px solid ${T.border}`, borderRadius:16, padding:24, marginBottom:20, ...extra }}>{children}</div>
+            );
+            const lbl = (t) => <p style={{ fontSize:10, letterSpacing:2, fontWeight:700, color:T.t3, textTransform:"uppercase", margin:"0 0 4px" }}>{t}</p>;
+            const inputStyle = { background:T.bg0, border:`1px solid ${T.border}`, borderRadius:10, color:T.t1, fontSize:20, fontWeight:700, padding:"12px 14px", fontFamily:FF, width:150, fontVariantNumeric:"tabular-nums", colorScheme:"dark" };
+            const timeStep = (hoursDraft.slotMinutes || 30) * 60;
+            return (
+              <div style={{ maxWidth:720 }}>
+                {hoursLoading && <div style={{ color:T.t3, fontSize:13, marginBottom:16 }}>Indlæser…</div>}
+
+                <p style={{ color:T.t3, fontSize:13.5, lineHeight:1.6, margin:"0 0 22px", maxWidth:620 }}>
+                  Her styrer du, hvornår kunder kan booke online. Ændringer træder i kraft med det samme
+                  – både i bookingkalenderen på hjemmesiden og på kontaktsiden.
+                </p>
+
+                {/* Åbningstid */}
+                {card(
+                  <>
+                    {lbl("Åbningstid")}
+                    <p style={{ color:T.t4, fontSize:12.5, margin:"0 0 16px", lineHeight:1.5 }}>Første og sidste tidspunkt bilen kan påbegyndes. Alle behandlinger afsluttes senest ved lukketid.</p>
+                    <div style={{ display:"flex", gap:24, flexWrap:"wrap", alignItems:"flex-end" }}>
+                      <div>
+                        <p style={{ fontSize:12, color:T.t3, fontWeight:600, margin:"0 0 6px" }}>Åbner</p>
+                        <input type="time" step={timeStep} value={hoursDraft.open} onChange={e=>setDraft({ open:e.target.value })} style={inputStyle} />
+                      </div>
+                      <div style={{ color:T.t4, fontSize:22, fontWeight:700, paddingBottom:12 }}>→</div>
+                      <div>
+                        <p style={{ fontSize:12, color:T.t3, fontWeight:600, margin:"0 0 6px" }}>Lukker</p>
+                        <input type="time" step={timeStep} value={hoursDraft.close} onChange={e=>setDraft({ close:e.target.value })} style={{ ...inputStyle, borderColor: invalid ? T.dangerBorder : T.border }} />
+                      </div>
+                    </div>
+                    {invalid && <p style={{ color:T.danger, fontSize:12.5, margin:"14px 0 0", fontWeight:600 }}>Lukketid skal være efter åbningstid.</p>}
+                  </>
+                )}
+
+                {/* Interval */}
+                {card(
+                  <>
+                    {lbl("Interval mellem tider")}
+                    <p style={{ color:T.t4, fontSize:12.5, margin:"0 0 14px", lineHeight:1.5 }}>Hvor tæt bookingtiderne ligger. 30 minutter passer de fleste.</p>
+                    <div style={{ display:"flex", gap:8 }}>
+                      {ALLOWED_SLOT_MINUTES.map(m => {
+                        const on = (hoursDraft.slotMinutes || 30) === m;
+                        return (
+                          <button key={m} onClick={()=>setDraft({ slotMinutes:m })}
+                            style={{ padding:"10px 20px", borderRadius:10, border:`1px solid ${on?T.accentBorder:T.border}`, background:on?T.accentDim:"transparent", color:on?T.accent:T.t3, fontSize:14, fontWeight:700, cursor:"pointer", fontFamily:FF }}>
+                            {m} min
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </>
+                )}
+
+                {/* Lukkedage */}
+                {card(
+                  <>
+                    {lbl("Lukkedage")}
+                    <p style={{ color:T.t4, fontSize:12.5, margin:"0 0 14px", lineHeight:1.5 }}>Marker de ugedage hvor I holder lukket. Kunder kan ikke booke disse dage.</p>
+                    <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
+                      {WEEK.map(([d,label]) => {
+                        const closed = (hoursDraft.closedDays || []).includes(d);
+                        return (
+                          <button key={d} onClick={()=>toggleDay(d)}
+                            style={{ width:60, padding:"10px 0", borderRadius:10, border:`1px solid ${closed?T.dangerBorder:T.border}`, background:closed?T.dangerDim:"transparent", color:closed?T.danger:T.t2, fontSize:13, fontWeight:700, cursor:"pointer", fontFamily:FF, textAlign:"center" }}>
+                            {label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <p style={{ color:T.t4, fontSize:12, margin:"12px 0 0" }}>
+                      {(hoursDraft.closedDays || []).length === 0 ? "Åbent alle ugens dage." : `Lukket: ${WEEK.filter(([d])=>hoursDraft.closedDays.includes(d)).map(([,l])=>l).join(", ")}.`}
+                    </p>
+                  </>
+                )}
+
+                {/* Preview */}
+                {card(
+                  <>
+                    {lbl("Forhåndsvisning")}
+                    {invalid ? (
+                      <p style={{ color:T.t4, fontSize:13, margin:"10px 0 0" }}>Ret åbningstiden for at se tiderne.</p>
+                    ) : (
+                      <>
+                        <p style={{ color:T.t2, fontSize:13.5, margin:"6px 0 14px", lineHeight:1.6 }}>
+                          <strong style={{ color:T.accent }}>{preview.length}</strong> starttider pr. dag · {hoursDraft.open}–{hoursDraft.close} · hver {hoursDraft.slotMinutes} min
+                        </p>
+                        <div style={{ display:"flex", flexWrap:"wrap", gap:6 }}>
+                          {preview.map(t => (
+                            <span key={t} style={{ fontSize:12, fontWeight:600, color:T.t2, background:T.bg0, border:`1px solid ${T.border}`, borderRadius:8, padding:"5px 9px", fontVariantNumeric:"tabular-nums" }}>{t}</span>
+                          ))}
+                        </div>
+                      </>
+                    )}
+                  </>,
+                  { background:"transparent" }
+                )}
+
+                {/* Save bar */}
+                <div style={{ display:"flex", alignItems:"center", gap:12, position:"sticky", bottom:0, background:T.bg0, padding:"14px 0", borderTop:`1px solid ${T.border}` }}>
+                  <button onClick={saveHours} disabled={!hoursDirty || invalid || hoursSaving}
+                    style={{ padding:"12px 28px", borderRadius:10, border:"none", background: (!hoursDirty || invalid) ? "rgba(255,255,255,.08)" : T.accent, color:(!hoursDirty || invalid) ? T.t4 : "#052010", fontSize:14, fontWeight:700, cursor:(!hoursDirty || invalid || hoursSaving) ? "default" : "pointer", fontFamily:FF }}>
+                    {hoursSaving ? "Gemmer…" : "Gem åbningstider"}
+                  </button>
+                  {hoursDirty && !hoursSaving && (
+                    <button onClick={()=>setHoursDraft(hours)}
+                      style={{ padding:"12px 20px", borderRadius:10, border:`1px solid ${T.border}`, background:"transparent", color:T.t3, fontSize:13, fontWeight:600, cursor:"pointer", fontFamily:FF }}>
+                      Fortryd
+                    </button>
+                  )}
+                  <span style={{ color:T.t4, fontSize:12.5 }}>
+                    {hoursDirty ? "Ugemte ændringer" : hoursIsDefault ? "Bruger standard (15:30–22:00)" : "Gemt"}
+                  </span>
+                </div>
+              </div>
             );
           })()}
 
@@ -1962,10 +2143,12 @@ export default function AdminPanel() {
                         ? (() => {
                             const [h, mm] = b.time.split(":").map(Number);
                             const startMin = h * 60 + (mm || 0);
-                            const n = b.slotsNeeded || (Array.isArray(b.slots) ? b.slots.length : ({lille:4,mellem:6,stor:8,varebil:6}[b.carId] || 4)); // 30-min units
-                            const endMin = Math.min(startMin + n * 30, 22 * 60);
+                            const SM = hours.slotMinutes || 30;
+                            const dfl = { lille:Math.round(120/SM), mellem:Math.round(180/SM), stor:Math.round(240/SM), varebil:Math.round(180/SM) };
+                            const n = b.slotsNeeded || (Array.isArray(b.slots) ? b.slots.length : (dfl[b.carId] || dfl.mellem));
+                            const endMin = startMin + n * SM;
                             const endTime = `${String(Math.floor(endMin/60)).padStart(2,"0")}:${String(endMin%60).padStart(2,"0")}`;
-                            return `kl. ${b.time}–${endTime} (${n/2} timer)`;
+                            return `kl. ${b.time}–${endTime} (${(n*SM/60).toLocaleString("da-DK")} timer)`;
                           })()
                         : "-"}
                     </div>
@@ -2111,7 +2294,7 @@ export default function AdminPanel() {
               <button onClick={() => {
                   const g = navGuard;
                   setNavGuard(null);
-                  setFaqDrafts({}); setEditingExt(null); setEditingGallery(null); setEditingBA(null); setPriceEdits(pricesData);
+                  setFaqDrafts({}); setEditingExt(null); setEditingGallery(null); setEditingBA(null); setPriceEdits(pricesData); setHoursDraft(hours);
                   if (g.logout) { logout(); return; }
                   setTab(g.pendingTab); setMsg(null); setUrlInput(""); setCmsMsg(null); setExpandedFaqId(null); setAddFaqOpen(false);
                 }}

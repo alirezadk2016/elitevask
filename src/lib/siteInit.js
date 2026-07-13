@@ -1,4 +1,5 @@
 // Auto-extracted from original elitevask.html — runs once on mount.
+import { DEFAULT_HOURS, buildSlotTimes, carSlotCount, isClosedDay } from './hours';
 export function initSite(overrides){overrides=overrides||{};
 // Document/window-level listeners below accumulate on every init (React
 // StrictMode runs effects twice in dev; client-side navigation back to the
@@ -34,6 +35,12 @@ var EXTRAS=[
 ];
 if(overrides.prices){CARS.forEach(function(c){if(overrides.prices[c.id])Object.assign(c.prices,overrides.prices[c.id]);});}
 if(overrides.extras&&overrides.extras.length)EXTRAS=overrides.extras;
+// Manager-configurable opening hours (admin → Åbningstider). Drives the
+// booking slot grid + duration. Falls back to the default window.
+var HOURS=overrides.hours||DEFAULT_HOURS;
+// Reflect the configured hours on the contact card so the displayed
+// opening time always matches what the booking grid offers.
+try{var __ht=document.querySelector('.cl-item-hours .htime');if(__ht)__ht.textContent=HOURS.open+' – '+HOURS.close;}catch(e){}
 var REVIEWS=[];
 var FAQ=[
   {q:{da:"Kan dampvask skade lakken?",en:"Can steam washing damage the paintwork?"},a:{da:"Nej – dampvask er faktisk <strong>skånsom for lakken</strong> end traditionel højtryk- eller tunnelvask. Vi bruger professionel damp ved kontrolleret temperatur og bløde mikrofiberklude. Der bruges ingen roterende børster, der kan ridse, og ingen aggressive kemikalier, der kan angribe lakken. Metoden er anbefalet til biler med keramisk coating, poleret lak og sarte overflader.",en:"No – steam washing is actually <strong>gentler on paintwork</strong> than traditional high-pressure or tunnel washing. We use professional steam at controlled temperature and soft microfibre cloths. No rotating brushes that can scratch, and no aggressive chemicals that attack the paint. The method is recommended for cars with ceramic coating, polished paint and delicate surfaces."}},
@@ -752,9 +759,13 @@ function isPastSlot(date,time){
   return slotMinutes(time)<=nowMin;          // today: slot must be strictly later
 }
 function renderSlotGrid(grid,booked,date){
-  var SLOTS=['15:30','16:00','16:30','17:00','17:30','18:00','18:30','19:00','19:30','20:00','20:30','21:00','21:30'];
-  var CAR_SLOTS={lille:4,mellem:6,stor:8,varebil:6}; // 30-min units
-  var need=CAR_SLOTS[wiz.car?wiz.car.id:'']||2;
+  if(isClosedDay(HOURS,date)){
+    grid.innerHTML='<div class="slot-hint" style="grid-column:1/-1">'+(LANG==='da'?'Vi holder lukket denne dag. Vælg venligst en anden dato.':'We are closed this day. Please choose another date.')+'</div>';
+    var oh=document.querySelector('.slot-dur-hint');if(oh)oh.remove();
+    return;
+  }
+  var SLOTS=buildSlotTimes(HOURS);
+  var need=carSlotCount(HOURS,wiz.car?wiz.car.id:'');
   var visible=SLOTS.filter(function(s){return !isPastSlot(date,s);});
   if(visible.length===0){
     grid.innerHTML='<div class="slot-hint" style="grid-column:1/-1">'+(LANG==='da'?'Ingen ledige tider for denne dag. Vælg en anden dato.':'No available times for this day. Choose another date.')+'</div>';
@@ -786,7 +797,7 @@ function renderSlotGrid(grid,booked,date){
   // have changed since it was first inserted).
   var oldHint=document.querySelector('.slot-dur-hint');if(oldHint)oldHint.remove();
   if(need>1){
-    var hrs=need/2; // slots are 30 min
+    var hrs=(need*HOURS.slotMinutes)/60;
     grid.insertAdjacentHTML('beforebegin','<p class="slot-dur-hint">'+(LANG==='da'?'Behandlingstid: <strong>~'+hrs+' timer</strong> – de markerede tider reserveres automatisk':'Service time: <strong>~'+hrs+' hours</strong> – marked slots reserved automatically')+'</p>');
   }
   grid.querySelectorAll('.slot:not([disabled])').forEach(function(btn){
@@ -864,7 +875,7 @@ function submitBooking(cb){
       date:wiz.date,time:wiz.time,
       name:wiz.name,phone:wiz.phone,email:wiz.email,msg:wiz.msg,
       price:priceStr,lang:LANG,
-      slotsNeeded:({lille:4,mellem:6,stor:8,varebil:6}[wiz.car?wiz.car.id:'']||4) // 30-min units
+      slotsNeeded:carSlotCount(HOURS,wiz.car?wiz.car.id:'') // slot units
     })
   }).then(function(r){
     return r.json().then(function(d){return {status:r.status,data:d};},function(){return {status:r.status,data:null};});

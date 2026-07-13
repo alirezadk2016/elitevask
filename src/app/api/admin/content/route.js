@@ -1,6 +1,7 @@
 import { createHash, timingSafeEqual, randomUUID } from 'crypto';
 import { kv } from '@vercel/kv';
 import { put, del } from '@vercel/blob';
+import { normalizeHours, DEFAULT_HOURS } from '@/lib/hours';
 
 const AUTH = process.env.ADMIN_SECRET;
 
@@ -24,6 +25,10 @@ export async function GET(req) {
   if (type === 'packages') {
     const prices = await kv.get('content:prices') || {};
     return Response.json({ prices });
+  }
+  if (type === 'hours') {
+    const stored = await kv.get('content:hours');
+    return Response.json({ hours: normalizeHours(stored || DEFAULT_HOURS), isDefault: !stored });
   }
   const items = await kv.get(`content:${type}`) || [];
   return Response.json({ items });
@@ -112,6 +117,13 @@ export async function POST(req) {
       }
       await kv.set('content:prices', clean);
       return Response.json({ ok: true, prices: clean });
+    }
+
+    // Opening hours: validate + store the whole config (single object).
+    if (type === 'hours') {
+      const clean = normalizeHours(body.hours);
+      await kv.set('content:hours', clean);
+      return Response.json({ ok: true, hours: clean });
     }
 
     // FAQ item
