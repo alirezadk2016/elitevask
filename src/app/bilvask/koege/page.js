@@ -65,7 +65,7 @@ export default function BilvaskKoege() {
         <p><strong>Vasker I leasingbiler inden aflevering?</strong><br/>
         Ja, vi klargør leasingbiler til aflevering med et professionelt resultat.</p>
         <p><strong>Kan I komme i weekenden?</strong><br/>
-        Ja, vi arbejder lørdag og søndag 10–20.</p>
+        Ja, vi arbejder alle dage kl. 15:30–22:00.</p>
 
         <div style={{marginTop:'2rem',padding:'1.5rem',background:'#f0faf4',borderRadius:'12px',textAlign:'center'}}>
           <p style={{margin:'0 0 1rem',fontWeight:700,fontSize:'1.1rem'}}>Book mobil bilvask i Køge i dag</p>

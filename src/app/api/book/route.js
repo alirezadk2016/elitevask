@@ -114,8 +114,13 @@ async function reserveSlot(key, value) {
 /* Current date + hour in the salon's timezone, not the server's (UTC). */
 function cphNow() {
   const s = new Date().toLocaleString('sv-SE', { timeZone: 'Europe/Copenhagen' });
-  return { date: s.slice(0, 10), hour: parseInt(s.slice(11, 13), 10) };
+  return {
+    date: s.slice(0, 10),
+    hour: parseInt(s.slice(11, 13), 10),
+    minutes: parseInt(s.slice(11, 13), 10) * 60 + parseInt(s.slice(14, 16), 10),
+  };
 }
+function toMinutes(t) { return parseInt(t.slice(0, 2), 10) * 60 + parseInt(t.slice(3, 5), 10); }
 
 // Release reserved slots (used when we could NOT notify anyone about the booking,
 // so the slot must not stay red for a booking nobody knows about).
@@ -155,7 +160,10 @@ async function getBookedSlots(date) {
 
 function slotKey(date, time) { return `slot:${date}:${time}`; }
 
-const SLOT_TIMES = ['08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00'];
+// Opening hours 15:30–22:00 in 30-minute slots. A booking occupies
+// CAR_SLOTS[carId] consecutive slots (2 slots = 1 hour), and the whole
+// duration must finish by 22:00 (the block after 21:30).
+const SLOT_TIMES = ['15:30','16:00','16:30','17:00','17:30','18:00','18:30','19:00','19:30','20:00','20:30','21:00','21:30'];
 
 
 function fmtDate(d, L) {
@@ -228,8 +236,9 @@ export async function POST(request) {
     }
   }
 
-  const CAR_SLOTS = { lille: 2, mellem: 3, stor: 4, varebil: 3 };
-  const slotsNeeded = CAR_SLOTS[carId] || Math.max(1, Math.min(parseInt(rawSlots) || 2, 5));
+  // 30-min units: lille 2h=4, mellem 3h=6, stor 4h=8, varebil 3h=6
+  const CAR_SLOTS = { lille: 4, mellem: 6, stor: 8, varebil: 6 };
+  const slotsNeeded = CAR_SLOTS[carId] || Math.max(2, Math.min(parseInt(rawSlots) || 4, 10));
   const L = lang !== 'en';
 
   let cancelToken = null;
@@ -246,15 +255,16 @@ export async function POST(request) {
     }
     const startIdx = SLOT_TIMES.indexOf(time);
     if (startIdx + slotsNeeded > SLOT_TIMES.length) {
+      const hrs = slotsNeeded / 2;
       return Response.json({
         error: 'slot_range',
         message: L
-          ? `Denne bil kræver ${slotsNeeded} timer – vælg venligst et tidligere starttidspunkt.`
-          : `This car needs ${slotsNeeded} hours – please choose an earlier start time.`,
+          ? `Denne bil kræver ${hrs} timer – vælg venligst et tidligere starttidspunkt.`
+          : `This car needs ${hrs} hours – please choose an earlier start time.`,
       }, { status: 400 });
     }
     const now = cphNow();
-    if (date < now.date || (date === now.date && parseInt(time, 10) <= now.hour)) {
+    if (date < now.date || (date === now.date && toMinutes(time) <= now.minutes)) {
       return Response.json({
         error: 'slot_past',
         message: L

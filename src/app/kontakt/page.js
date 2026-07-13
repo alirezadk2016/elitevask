@@ -85,8 +85,7 @@ export default function Kontakt() {
             <span className="cl-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" /></svg></span>
             <span><span className="lab">Åbningstider</span>
               <div className="hours-grid">
-                <div className="hrow"><span className="hday">Man – Fre</span><span className="htime">08:00 – 20:00</span></div>
-                <div className="hrow"><span className="hday">Lør – Søn</span><span className="htime">10:00 – 20:00</span></div>
+                <div className="hrow"><span className="hday">Alle dage</span><span className="htime">15:30 – 22:00</span></div>
                 <div className="hrow hrow-note"><span>eller efter aftale</span></div>
               </div>
             </span>

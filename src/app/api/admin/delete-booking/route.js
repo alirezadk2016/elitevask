@@ -1,8 +1,8 @@
 import { createHash, timingSafeEqual } from 'crypto';
 import { buildTransport, emailShell, tr, esc, CONTACT_EMAIL, BOOKING_EMAIL } from '@/lib/mailer';
 
-const CAR_SLOTS = { lille: 2, mellem: 3, stor: 4, varebil: 3 };
-const SLOT_TIMES = ['08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00'];
+const CAR_SLOTS = { lille: 4, mellem: 6, stor: 8, varebil: 6 }; // 30-min units
+const SLOT_TIMES = ['15:30','16:00','16:30','17:00','17:30','18:00','18:30','19:00','19:30','20:00','20:30','21:00','21:30'];
 
 // Reconstruct the reserved hours for a booking that predates the `slots` field.
 function slotsFor(data) {

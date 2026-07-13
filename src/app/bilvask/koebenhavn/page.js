@@ -74,7 +74,7 @@ export default function BilvaskKoebenhavn() {
           Det tager under to minutter at booke din bilvask online. Vælg din biltype, den pakke du ønsker, og en dato der passer dig. Vi bekræfter inden for få timer og møder op til aftalt tid.
         </p>
         <p>
-          Du kan også ringe til os på <a href="tel:+4524440321">+45 24 44 03 21</a> – vi er klar til at hjælpe mandag til fredag 08–20 og i weekenden 10–20.
+          Du kan også ringe til os på <a href="tel:+4524440321">+45 24 44 03 21</a> – vi er klar til at hjælpe alle dage kl. 15:30–22:00.
         </p>
 
         <h2>Elbiler og leasingbiler i København</h2>

@@ -769,34 +769,50 @@ export default function AdminPanel() {
             const activeThisWeek = weekBookings.filter(b => b.status !== "cancelled").length;
             const totalActive = bookings.filter(b => b.status !== "cancelled").length;
 
-            // 08:00 → 20:00 = 13 hours
-            const HOURS = Array.from({length:13}, (_,i) => i + 8);
-            const ROW_H = 52;
+            // Opening hours 15:30 → 22:00 in 30-minute rows (13 slots).
+            const GRID_START = 15 * 60 + 30;   // 15:30 in minutes
+            const GRID_END   = 22 * 60;        // 22:00
+            const SLOT_MIN   = 30;
+            const N_ROWS = (GRID_END - GRID_START) / SLOT_MIN; // 13
+            const ROWS = Array.from({ length: N_ROWS }, (_, i) => {
+              const m = GRID_START + i * SLOT_MIN;
+              return { min: m, label: `${String(Math.floor(m/60)).padStart(2,"0")}:${String(m%60).padStart(2,"0")}` };
+            });
+            const ROW_H = 40;
             const COL_W = narrow ? 120 : 140;
             const TIME_W = 52;
+            const minToLabel = (m) => `${String(Math.floor(m/60)).padStart(2,"0")}:${String(m%60).padStart(2,"0")}`;
 
+            // Duration in 30-minute slots (stored slotsNeeded/slots are already
+            // in 30-min units; the fallback map mirrors the server's CAR_SLOTS).
             function slotCount(b) {
               if (b.slotsNeeded) return b.slotsNeeded;
-              // Mirror the server CAR_SLOTS map, keyed on CAR type (not package).
-              const CAR_SLOTS = { lille: 2, mellem: 3, stor: 4, varebil: 3 };
+              if (Array.isArray(b.slots) && b.slots.length) return b.slots.length;
+              const CAR_SLOTS = { lille: 4, mellem: 6, stor: 8, varebil: 6 };
               if (b.carId && CAR_SLOTS[b.carId]) return CAR_SLOTS[b.carId];
               const c = (b.car || b.pkg || "").toLowerCase();
-              if (c.includes("varebil") || c.includes("van")) return 3;
-              if (c.includes("stor") || c.includes("suv") || c.includes("large")) return 4;
-              if (c.includes("mellem") || c.includes("medium")) return 3;
-              if (c.includes("lille") || c.includes("small")) return 2;
-              return 2;
+              if (c.includes("varebil") || c.includes("van")) return 6;
+              if (c.includes("stor") || c.includes("suv") || c.includes("large")) return 8;
+              if (c.includes("mellem") || c.includes("medium")) return 6;
+              if (c.includes("lille") || c.includes("small")) return 4;
+              return 4;
             }
 
-            function bookingStartHour(b) {
+            function bookingStartMin(b) {
               if (!b.time) return null;
-              const [h] = b.time.split(":").map(Number);
-              return h;
+              const [h, m] = b.time.split(":").map(Number);
+              return h * 60 + (m || 0);
+            }
+            // Row index (fractional) within the grid; null if before the window.
+            function bookingStartIndex(b) {
+              const mn = bookingStartMin(b);
+              if (mn == null) return null;
+              return (mn - GRID_START) / SLOT_MIN;
             }
             function bookingSpan(b) {
-              const s = bookingStartHour(b);
+              const s = bookingStartIndex(b);
               if (s == null) return null;
-              return [s, Math.min(s + slotCount(b), 21)];
+              return [s, Math.min(s + slotCount(b), N_ROWS)];
             }
             // Assign each day's bookings a column so overlapping ranges (even with
             // different start hours) sit side-by-side instead of hiding each other.
@@ -807,9 +823,9 @@ export default function AdminPanel() {
                 .filter(b => {
                   if (b.date !== iso) return false;
                   const s = bookingSpan(b);
-                  // only bookings actually drawn in the 08–20 grid may claim a
-                  // column — out-of-range ones live in the safety list below
-                  return s && s[0] >= 8 && s[0] <= 20;
+                  // only bookings actually drawn in the grid may claim a column —
+                  // out-of-range ones live in the safety list below
+                  return s && s[0] >= 0 && s[0] < N_ROWS;
                 })
                 .sort((a, z) => bookingSpan(a)[0] - bookingSpan(z)[0]);
               const layout = {};
@@ -935,13 +951,10 @@ export default function AdminPanel() {
 
                         {/* Current time line — only shown when this week is visible */}
                         {weekOffset === 0 && (() => {
-                          const nowH = nowTime.getHours();
-                          const nowM = nowTime.getMinutes();
-                          const nowS = nowTime.getSeconds();
-                          if (nowH < 8 || nowH >= 21) return null;
-                          // Header height ~67px, each row ROW_H px
+                          const nowMinutes = nowTime.getHours() * 60 + nowTime.getMinutes() + nowTime.getSeconds() / 60;
+                          if (nowMinutes < GRID_START || nowMinutes > GRID_END) return null;
                           const HEADER_H = 67;
-                          const topPx = HEADER_H + (nowH - 8) * ROW_H + ((nowM * 60 + nowS) / 3600) * ROW_H;
+                          const topPx = HEADER_H + ((nowMinutes - GRID_START) / SLOT_MIN) * ROW_H;
                           const todayIdx = weekDays.findIndex(d => toISO(d) === todayISO);
                           const leftPx = TIME_W + todayIdx * COL_W;
                           return (
@@ -956,18 +969,19 @@ export default function AdminPanel() {
                           );
                         })()}
 
-                        {/* Time rows */}
-                        {HOURS.map((hour, hi) => {
-                          const isLast = hi === HOURS.length - 1;
-                          const nowH = nowTime.getHours();
-                          const isPast = weekOffset < 0 || (weekOffset === 0 && hour < nowH);
-                          const isCurrentHour = weekOffset === 0 && hour === nowH;
+                        {/* Time rows (30-min slots, 15:30–22:00) */}
+                        {ROWS.map((row, hi) => {
+                          const isLast = hi === ROWS.length - 1;
+                          const nowMinutes = nowTime.getHours() * 60 + nowTime.getMinutes();
+                          const isPast = weekOffset < 0 || (weekOffset === 0 && row.min + SLOT_MIN <= nowMinutes);
+                          const isCurrentRow = weekOffset === 0 && nowMinutes >= row.min && nowMinutes < row.min + SLOT_MIN;
+                          const onHour = row.min % 60 === 0;
                           return (
-                            <div key={hour} style={{ display:"flex", borderBottom: isLast?"none":`1px solid ${T.border}`, minHeight:ROW_H, position:"relative", background:"transparent" }}>
+                            <div key={row.min} style={{ display:"flex", borderBottom: isLast?"none":`1px solid ${onHour?T.border:"rgba(255,255,255,.045)"}`, minHeight:ROW_H, position:"relative", background:"transparent" }}>
                               {/* Time label */}
-                              <div style={{ width:TIME_W, flexShrink:0, borderRight:`1px solid ${T.border}`, padding:"6px 8px 0", textAlign:"right", paddingTop:8 }}>
-                                <span style={{ fontSize:11, color:isCurrentHour?"#e5534b":isPast?T.t4:T.t3, fontWeight:isCurrentHour?700:500, fontVariantNumeric:"tabular-nums" }}>
-                                  {String(hour).padStart(2,"0")}:00
+                              <div style={{ width:TIME_W, flexShrink:0, borderRight:`1px solid ${T.border}`, padding:"4px 8px 0", textAlign:"right" }}>
+                                <span style={{ fontSize:11, color:isCurrentRow?"#e5534b":isPast?T.t4:onHour?T.t3:T.t4, fontWeight:isCurrentRow?700:onHour?600:500, fontVariantNumeric:"tabular-nums" }}>
+                                  {row.label}
                                 </span>
                               </div>
 
@@ -975,20 +989,20 @@ export default function AdminPanel() {
                               {weekDays.map((d, di) => {
                                 const iso = toISO(d);
                                 const isToday = iso === todayISO;
-                                const isPastCell = iso < todayISO || (iso === todayISO && hour < nowTime.getHours());
+                                const isPastCell = iso < todayISO || (iso === todayISO && row.min + SLOT_MIN <= nowMinutes);
                                 const cellBg = isPastCell ? "rgba(0,0,0,.12)" : (isToday ? "rgba(55,210,120,.025)" : "transparent");
-                                const startingHere = bookings.filter(b => b.date === iso && bookingStartHour(b) === hour);
+                                const startingHere = bookings.filter(b => b.date === iso && bookingStartMin(b) === row.min);
                                 return (
                                   <div key={di} style={{ flex:1, minWidth:COL_W, borderRight: di<6 ? `1px solid ${T.border}` : "none", padding:"3px 4px", background:cellBg, position:"relative", height:ROW_H, boxSizing:"border-box" }}>
                                     {startingHere.map((b, bi) => {
-                                      // each slot = 1 full hour (SLOT_TIMES are hourly)
-                                      const slots = slotCount(b);
-                                      const startH = bookingStartHour(b);
-                                      // Clamp the end so a long booking never draws past the 20:00 grid bottom.
-                                      const endH = Math.min(startH + slots, 21);
-                                      const endTime = startH != null ? `${String(endH).padStart(2, "0")}:00` : "";
-                                      const drawSlots = startH != null ? endH - startH : slots;
-                                      // Overlay tall cards across the hours below without stretching this row.
+                                      const slots = slotCount(b); // 30-min units
+                                      const startMin = bookingStartMin(b);
+                                      // Clamp the end so a long booking never draws past the 22:00 grid bottom.
+                                      const endMin = Math.min(startMin + slots * SLOT_MIN, GRID_END);
+                                      const endTime = minToLabel(endMin);
+                                      const drawSlots = (endMin - startMin) / SLOT_MIN;
+                                      const hoursLabel = slots / 2;
+                                      // Overlay tall cards across the rows below without stretching this row.
                                       const heightPx = drawSlots * ROW_H - 6;
                                       // Column layout: overlapping ranges (any start hour) sit side-by-side.
                                       const lay = dayLayout(iso)[b.token] || { col:0, ncols:1 };
@@ -1022,7 +1036,7 @@ export default function AdminPanel() {
                                             <div style={{ fontSize:10, color:cardText, opacity:.75, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{b.pkg || "-"}</div>
                                           </div>
                                           <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between" }}>
-                                            <span style={{ fontSize:10, fontWeight:700, color:cardText, fontVariantNumeric:"tabular-nums" }}>{b.time}–{endTime} · {slots}t</span>
+                                            <span style={{ fontSize:10, fontWeight:700, color:cardText, fontVariantNumeric:"tabular-nums" }}>{b.time}–{endTime} · {hoursLabel}t</span>
                                             {b.phone && (
                                               <a href={`tel:${b.phone}`} onClick={e => e.stopPropagation()}
                                                 style={{ display:"flex", alignItems:"center", justifyContent:"center", width:22, height:22, borderRadius:6, background:"rgba(255,255,255,.12)", color:cardText, textDecoration:"none", flexShrink:0 }}>
@@ -1042,19 +1056,19 @@ export default function AdminPanel() {
                       </div>
                     </div>
 
-                    {/* Safety net: bookings this week that fall outside the 08–20 grid
-                        would otherwise be invisible. List them so they're never lost. */}
+                    {/* Safety net: bookings this week that fall outside the 15:30–22:00
+                        grid would otherwise be invisible. List them so they're never lost. */}
                     {(() => {
                       const outOfRange = weekBookings.filter(b => {
-                        const h = bookingStartHour(b);
-                        return h == null || h < 8 || h > 20;
+                        const idx = bookingStartIndex(b);
+                        return idx == null || idx < 0 || idx >= N_ROWS;
                       });
                       if (!outOfRange.length) return null;
                       return (
                         <div style={{ marginTop:16, background:"rgba(245,166,35,.06)", border:`1px solid rgba(245,166,35,.22)`, borderRadius:12, padding:"12px 16px" }}>
                           <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:8 }}>
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={T.gold} strokeWidth="2.5" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                            <span style={{ fontSize:12, fontWeight:700, color:T.gold }}>Bookinger uden for kalendervisningen (08–20)</span>
+                            <span style={{ fontSize:12, fontWeight:700, color:T.gold }}>Bookinger uden for kalendervisningen (15:30–22:00)</span>
                           </div>
                           <div style={{ display:"flex", flexDirection:"column", gap:6 }}>
                             {outOfRange.map(b => (
@@ -2039,10 +2053,12 @@ export default function AdminPanel() {
                     <div style={{ fontSize:14, color:T.t1, fontWeight:600 }}>
                       {b.time
                         ? (() => {
-                            const h = parseInt(b.time.split(":")[0], 10);
-                            const n = b.slotsNeeded || (Array.isArray(b.slots) ? b.slots.length : ({lille:2,mellem:3,stor:4,varebil:3}[b.carId] || 2));
-                            const endH = Math.min(h + n, 21);
-                            return `kl. ${b.time}–${String(endH).padStart(2, "0")}:00 (${n} timer)`;
+                            const [h, mm] = b.time.split(":").map(Number);
+                            const startMin = h * 60 + (mm || 0);
+                            const n = b.slotsNeeded || (Array.isArray(b.slots) ? b.slots.length : ({lille:4,mellem:6,stor:8,varebil:6}[b.carId] || 4)); // 30-min units
+                            const endMin = Math.min(startMin + n * 30, 22 * 60);
+                            const endTime = `${String(Math.floor(endMin/60)).padStart(2,"0")}:${String(endMin%60).padStart(2,"0")}`;
+                            return `kl. ${b.time}–${endTime} (${n/2} timer)`;
                           })()
                         : "-"}
                     </div>

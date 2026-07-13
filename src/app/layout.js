@@ -57,8 +57,7 @@ const JSONLD = [
   "priceRange":"500–2350 kr","vatID":"DK46392264",
   "address":{"@type":"PostalAddress","addressLocality":"København","addressRegion":"Sjælland","addressCountry":"DK"},
   "openingHoursSpecification":[
-    {"@type":"OpeningHoursSpecification","dayOfWeek":["Monday","Tuesday","Wednesday","Thursday","Friday"],"opens":"08:00","closes":"20:00"},
-    {"@type":"OpeningHoursSpecification","dayOfWeek":["Saturday","Sunday"],"opens":"10:00","closes":"20:00"}
+    {"@type":"OpeningHoursSpecification","dayOfWeek":["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],"opens":"15:30","closes":"22:00"}
   ],
   "sameAs":["https://instagram.com/elitevasksjaelland"]
 },
