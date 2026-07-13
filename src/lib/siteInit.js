@@ -781,7 +781,10 @@ function renderSlotGrid(grid,booked,date){
     var cls=isBooked?'booked':selSlots[s]?selSlots[s]:blocked?'unavail':'';
     var label=s+(isBooked?' <small>🔴</small>':'');
     return '<button class="slot'+(cls?' '+cls:'')+'" data-slot="'+s+'"'+((isBooked||blocked)?' disabled':'')+'>'+label+'</button>';
-  }).join('');
+  }).join('')
+  // 22:00 = lukketid. Vises som markør i bunden af griddet, kan ikke vælges
+  // (alle behandlinger skal være færdige senest kl. 22:00).
+  +'<button class="slot slot-close" type="button" disabled aria-hidden="true">22:00 <small>'+(LANG==='da'?'lukket':'closed')+'</small></button>';
   // Always refresh the duration hint with the CURRENT need (car type may
   // have changed since it was first inserted).
   var oldHint=document.querySelector('.slot-dur-hint');if(oldHint)oldHint.remove();
