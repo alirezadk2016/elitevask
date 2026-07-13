@@ -782,9 +782,9 @@ function renderSlotGrid(grid,booked,date){
     var label=s+(isBooked?' <small>🔴</small>':'');
     return '<button class="slot'+(cls?' '+cls:'')+'" data-slot="'+s+'"'+((isBooked||blocked)?' disabled':'')+'>'+label+'</button>';
   }).join('')
-  // 22:00 = lukketid. Vises som markør i bunden af griddet, kan ikke vælges
-  // (alle behandlinger skal være færdige senest kl. 22:00).
-  +'<button class="slot slot-close" type="button" disabled aria-hidden="true">22:00 <small>'+(LANG==='da'?'lukket':'closed')+'</small></button>';
+  // Lukketid-note (ikke en valgbar tid): griddet slutter synligt ved kl. 22:00.
+  // Alle behandlinger afsluttes senest kl. 22:00.
+  +'<div class="slot-close-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg><span>'+(LANG==='da'?'Åbent til kl. 22:00':'Open until 22:00')+'</span></div>';
   // Always refresh the duration hint with the CURRENT need (car type may
   // have changed since it was first inserted).
   var oldHint=document.querySelector('.slot-dur-hint');if(oldHint)oldHint.remove();
