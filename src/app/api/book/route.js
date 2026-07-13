@@ -273,7 +273,7 @@ export async function POST(request) {
     }
     const startIdx = SLOT_TIMES.indexOf(time);
     if (startIdx + slotsNeeded > SLOT_TIMES.length) {
-      const hrs = slotsNeeded / 2;
+      const hrs = +(slotsNeeded * hours.slotMinutes / 60).toFixed(1);
       return Response.json({
         error: 'slot_range',
         message: L

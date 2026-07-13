@@ -730,7 +730,10 @@ export default function AdminPanel() {
             const GRID_START = toMin(hours.open);
             const GRID_END   = toMin(hours.close);
             const SLOT_MIN   = hours.slotMinutes || 30;
-            const N_ROWS = Math.max(1, Math.round((GRID_END - GRID_START) / SLOT_MIN));
+            // Rows must equal the actual bookable start times (open may not sit
+            // on a whole multiple of the interval), so the grid never draws a
+            // phantom trailing row that no booking can start in.
+            const N_ROWS = Math.max(1, buildSlotTimes(hours).length);
             const ROWS = Array.from({ length: N_ROWS }, (_, i) => {
               const m = GRID_START + i * SLOT_MIN;
               return { min: m, label: `${String(Math.floor(m/60)).padStart(2,"0")}:${String(m%60).padStart(2,"0")}` };
@@ -959,7 +962,7 @@ export default function AdminPanel() {
                                       const endMin = Math.min(startMin + slots * SLOT_MIN, GRID_END);
                                       const endTime = minToLabel(endMin);
                                       const drawSlots = (endMin - startMin) / SLOT_MIN;
-                                      const hoursLabel = slots / 2;
+                                      const hoursLabel = +(slots * SLOT_MIN / 60).toFixed(1);
                                       // Overlay tall cards across the rows below without stretching this row.
                                       const heightPx = drawSlots * ROW_H - 6;
                                       // Column layout: overlapping ranges (any start hour) sit side-by-side.
@@ -1064,9 +1067,17 @@ export default function AdminPanel() {
           {/* ── ÅBNINGSTIDER ── */}
           {tab === "hours" && (() => {
             const WEEK = [[1,"Man"],[2,"Tir"],[3,"Ons"],[4,"Tor"],[5,"Fre"],[6,"Lør"],[0,"Søn"]];
+            const CAR_LABELS = [["lille","Lille bil",120],["mellem","Mellem bil",180],["stor","Stor bil / SUV",240],["varebil","Varebil",180]];
+            const SM = hoursDraft.slotMinutes || 30;
             const openM = toMin(hoursDraft.open), closeM = toMin(hoursDraft.close);
-            const invalid = !(closeM > openM);
-            const preview = invalid ? [] : buildSlotTimes(hoursDraft);
+            // Need at least one whole slot; a sub-slot window would be silently
+            // widened on save, so block it in the UI too.
+            const tooShort = !(closeM - openM >= SM);
+            const allClosed = (hoursDraft.closedDays || []).length >= 7;
+            const invalid = tooShort || allClosed;
+            const preview = tooShort ? [] : buildSlotTimes(hoursDraft);
+            // Car types that no longer fit inside the configured window.
+            const unfit = tooShort ? [] : CAR_LABELS.filter(([, , dur]) => Math.round(dur / SM) > preview.length);
             const setDraft = (patch) => setHoursDraft(d => ({ ...d, ...patch }));
             const toggleDay = (d) => setHoursDraft(h => {
               const set = new Set(h.closedDays || []);
@@ -1078,14 +1089,16 @@ export default function AdminPanel() {
             );
             const lbl = (t) => <p style={{ fontSize:10, letterSpacing:2, fontWeight:700, color:T.t3, textTransform:"uppercase", margin:"0 0 4px" }}>{t}</p>;
             const inputStyle = { background:T.bg0, border:`1px solid ${T.border}`, borderRadius:10, color:T.t1, fontSize:20, fontWeight:700, padding:"12px 14px", fontFamily:FF, width:150, fontVariantNumeric:"tabular-nums", colorScheme:"dark" };
-            const timeStep = (hoursDraft.slotMinutes || 30) * 60;
+            // 5-min picker granularity, independent of the slot interval so any
+            // open/close time is selectable (e.g. 15:30 open with 60-min slots).
+            const timeStep = 300;
             return (
               <div style={{ maxWidth:720 }}>
                 {hoursLoading && <div style={{ color:T.t3, fontSize:13, marginBottom:16 }}>Indlæser…</div>}
 
                 <p style={{ color:T.t3, fontSize:13.5, lineHeight:1.6, margin:"0 0 22px", maxWidth:620 }}>
-                  Her styrer du, hvornår kunder kan booke online. Ændringer træder i kraft med det samme
-                  – både i bookingkalenderen på hjemmesiden og på kontaktsiden.
+                  Her styrer du, hvornår kunder kan booke online. Ændringer slår igennem på
+                  bookingkalenderen og kontaktsiden inden for ca. et minut.
                 </p>
 
                 {/* Åbningstid */}
@@ -1101,10 +1114,10 @@ export default function AdminPanel() {
                       <div style={{ color:T.t4, fontSize:22, fontWeight:700, paddingBottom:12 }}>→</div>
                       <div>
                         <p style={{ fontSize:12, color:T.t3, fontWeight:600, margin:"0 0 6px" }}>Lukker</p>
-                        <input type="time" step={timeStep} value={hoursDraft.close} onChange={e=>setDraft({ close:e.target.value })} style={{ ...inputStyle, borderColor: invalid ? T.dangerBorder : T.border }} />
+                        <input type="time" step={timeStep} value={hoursDraft.close} onChange={e=>setDraft({ close:e.target.value })} style={{ ...inputStyle, borderColor: tooShort ? T.dangerBorder : T.border }} />
                       </div>
                     </div>
-                    {invalid && <p style={{ color:T.danger, fontSize:12.5, margin:"14px 0 0", fontWeight:600 }}>Lukketid skal være efter åbningstid.</p>}
+                    {tooShort && <p style={{ color:T.danger, fontSize:12.5, margin:"14px 0 0", fontWeight:600 }}>Lukketid skal være mindst {SM} min efter åbningstid.</p>}
                   </>
                 )}
 
@@ -1143,8 +1156,8 @@ export default function AdminPanel() {
                         );
                       })}
                     </div>
-                    <p style={{ color:T.t4, fontSize:12, margin:"12px 0 0" }}>
-                      {(hoursDraft.closedDays || []).length === 0 ? "Åbent alle ugens dage." : `Lukket: ${WEEK.filter(([d])=>hoursDraft.closedDays.includes(d)).map(([,l])=>l).join(", ")}.`}
+                    <p style={{ color: allClosed ? T.danger : T.t4, fontSize:12, margin:"12px 0 0", fontWeight: allClosed ? 600 : 400 }}>
+                      {allClosed ? "⚠️ Alle dage er markeret lukket – kunder kan slet ikke booke. Åbn mindst én dag." : (hoursDraft.closedDays || []).length === 0 ? "Åbent alle ugens dage." : `Lukket: ${WEEK.filter(([d])=>hoursDraft.closedDays.includes(d)).map(([,l])=>l).join(", ")}.`}
                     </p>
                   </>
                 )}
@@ -1153,7 +1166,7 @@ export default function AdminPanel() {
                 {card(
                   <>
                     {lbl("Forhåndsvisning")}
-                    {invalid ? (
+                    {tooShort ? (
                       <p style={{ color:T.t4, fontSize:13, margin:"10px 0 0" }}>Ret åbningstiden for at se tiderne.</p>
                     ) : (
                       <>
@@ -1165,6 +1178,11 @@ export default function AdminPanel() {
                             <span key={t} style={{ fontSize:12, fontWeight:600, color:T.t2, background:T.bg0, border:`1px solid ${T.border}`, borderRadius:8, padding:"5px 9px", fontVariantNumeric:"tabular-nums" }}>{t}</span>
                           ))}
                         </div>
+                        {unfit.length > 0 && (
+                          <p style={{ color:T.gold, fontSize:12.5, margin:"14px 0 0", lineHeight:1.5, fontWeight:600 }}>
+                            ⚠️ Vinduet er for kort til: {unfit.map(([,l])=>l).join(", ")}. Disse biltyper kan ikke bookes med de nuværende tider.
+                          </p>
+                        )}
                       </>
                     )}
                   </>,

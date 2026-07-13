@@ -19,6 +19,7 @@ export const ALLOWED_SLOT_MINUTES = [15, 30, 60];
 const TIME_RE = /^([01]\d|2[0-3]):([0-5]\d)$/;
 
 export function toMin(t) {
+  if (t === '24:00') return 24 * 60; // midnight close, kept stable on round-trip
   const m = TIME_RE.exec(String(t || ''));
   if (!m) return NaN;
   return parseInt(m[1], 10) * 60 + parseInt(m[2], 10);
@@ -41,10 +42,11 @@ export function normalizeHours(raw) {
   let closeM = toMin(h.close);
   if (Number.isNaN(openM)) openM = toMin(DEFAULT_HOURS.open);
   if (Number.isNaN(closeM)) closeM = toMin(DEFAULT_HOURS.close);
-  // Snap to the slot grid and guarantee at least one bookable slot.
-  openM = Math.round(openM / slot) * slot;
-  closeM = Math.round(closeM / slot) * slot;
-  if (closeM - openM < slot) closeM = openM + slot;
+  // WYSIWYG: keep the manager's exact open/close (no snapping to the grid,
+  // which would silently move the window). Only guarantee at least one whole
+  // bookable slot fits, and never let the window run past midnight.
+  if (closeM > 24 * 60) closeM = 24 * 60;
+  if (closeM - openM < slot) closeM = Math.min(openM + slot, 24 * 60);
 
   const closedDays = Array.isArray(h.closedDays)
     ? [...new Set(h.closedDays.map(Number).filter(d => d >= 0 && d <= 6))].sort((a, b) => a - b)
