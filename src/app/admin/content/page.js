@@ -960,17 +960,6 @@ export default function AdminPanel() {
                             </div>
                           );
                         })}
-
-                        {/* Closing boundary: 22:00 tick at the very bottom so the
-                            grid visibly runs "til kl. 22:00", not just to 21:30. */}
-                        <div style={{ display:"flex", minHeight:0 }}>
-                          <div style={{ width:TIME_W, flexShrink:0, borderRight:`1px solid ${T.border}`, padding:"2px 8px 4px", textAlign:"right" }}>
-                            <span style={{ fontSize:11, color:T.t3, fontWeight:600, fontVariantNumeric:"tabular-nums" }}>22:00</span>
-                          </div>
-                          <div style={{ flex:1, display:"flex", alignItems:"center", padding:"2px 8px" }}>
-                            <span style={{ fontSize:10, color:T.t4, fontWeight:600, letterSpacing:1, textTransform:"uppercase" }}>Lukket</span>
-                          </div>
-                        </div>
                       </div>
                     </div>
 
