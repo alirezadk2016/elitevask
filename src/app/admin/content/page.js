@@ -1157,6 +1157,7 @@ export default function AdminPanel() {
                                 // grid), so a start that isn't on a grid multiple still renders
                                 // (and is positioned precisely via topOffset) instead of vanishing.
                                 const startingHere = bookings.filter(b => {
+                                  if (b.date !== iso) return false; // this day's column only
                                   const sm = bookingStartMin(b);
                                   if (sm == null || sm < GRID_START || sm >= GRID_END) return false;
                                   return Math.floor((sm - GRID_START) / SLOT_MIN) === hi;
