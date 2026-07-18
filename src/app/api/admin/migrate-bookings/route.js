@@ -1,4 +1,5 @@
 import { createHash } from 'crypto';
+import { checkBearer } from '@/lib/adminAuth';
 
 // One-time migration: index all existing booking:* records under user:bookings:{emailHash}
 // Protected by ADMIN_SECRET env var. Run once after deploying the customer portal.
@@ -21,13 +22,8 @@ async function getKV() {
 }
 
 export async function POST(request) {
-  const secret = process.env.ADMIN_SECRET;
-  if (!secret) return Response.json({ error: 'not_configured' }, { status: 503 });
-
-  const auth = request.headers.get('authorization') || '';
-  if (auth !== `Bearer ${secret}`) {
-    return Response.json({ error: 'unauthorized' }, { status: 401 });
-  }
+  if (!process.env.ADMIN_SECRET) return Response.json({ error: 'not_configured' }, { status: 503 });
+  if (!checkBearer(request)) return Response.json({ error: 'unauthorized' }, { status: 401 });
 
   const kv = await getKV();
   if (!kv) return Response.json({ error: 'no_kv' }, { status: 503 });

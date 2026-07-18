@@ -10,12 +10,6 @@ function checkSecret(secret) {
   return diff === 0;
 }
 
-export async function GET(request) {
-  const { searchParams } = new URL(request.url);
-  if (!checkSecret(searchParams.get('secret'))) return new Response('forbidden', { status: 403 });
-  return clearAll();
-}
-
 export async function POST(request) {
   if (!isSameOrigin(request)) return Response.json({ error: 'forbidden' }, { status: 403 });
   const { secret } = await request.json().catch(() => ({}));

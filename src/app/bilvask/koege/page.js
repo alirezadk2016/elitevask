@@ -1,6 +1,7 @@
 import RelatedLinks from "@/components/RelatedLinks";
 import JsonLd from "@/components/JsonLd";
 import { breadcrumbLd, cityServiceLd } from "@/lib/seo";
+import { getHours, hoursDisplay } from "@/lib/getHours";
 export const metadata = {
   title: "Mobil bilvask i Køge – Elite Vask dampvask til din dør",
   description: "Professionel mobil dampvask i Køge og omegn. Vi kører til dig – gratis kørsel, betal efter vask. Dampvask af bil uden ridser og med minimal miljøpåvirkning.",
@@ -13,7 +14,8 @@ export const metadata = {
   },
 };
 
-export default function BilvaskKoege() {
+export default async function BilvaskKoege() {
+  const hd = hoursDisplay(await getHours(), "da");
   return (
     <div className="legal-page">
       <JsonLd items={[breadcrumbLd([{name:"Forside",path:"/"},{name:"Mobil bilvask i Køge",path:"/bilvask/koege"}]),cityServiceLd({city:"Køge",path:"/bilvask/koege"})]} />
@@ -65,7 +67,7 @@ export default function BilvaskKoege() {
         <p><strong>Vasker I leasingbiler inden aflevering?</strong><br/>
         Ja, vi klargør leasingbiler til aflevering med et professionelt resultat.</p>
         <p><strong>Kan I komme i weekenden?</strong><br/>
-        Ja, vi arbejder alle dage kl. 15:30–22:00.</p>
+        Ja, vi arbejder {hd.days.toLowerCase()} kl. {hd.time.replace(" – ", "–")}.</p>
 
         <div style={{marginTop:'2rem',padding:'1.5rem',background:'#f0faf4',borderRadius:'12px',textAlign:'center'}}>
           <p style={{margin:'0 0 1rem',fontWeight:700,fontSize:'1.1rem'}}>Book mobil bilvask i Køge i dag</p>

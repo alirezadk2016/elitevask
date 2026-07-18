@@ -39,8 +39,8 @@ const HTML = `<!-- CHATBOT -->
     <div id="chatMessages" class="chat-messages"></div>
     <div class="chat-quick" id="chatQuick"></div>
     <div class="chat-input-row">
-      <input id="chatInput" type="text" placeholder="Skriv dit spørgsmål..." autocomplete="off">
-      <button id="chatSend" class="btn btn-green chat-send-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg></button>
+      <input id="chatInput" type="text" placeholder="Skriv dit spørgsmål..." autocomplete="off" aria-label="Skriv dit spørgsmål" data-i18n-ph="chat_ph">
+      <button id="chatSend" class="btn btn-green chat-send-btn" aria-label="Send" data-i18n-aria="chat_send"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg></button>
     </div>
   </div>
 </div>`;

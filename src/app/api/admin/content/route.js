@@ -2,7 +2,7 @@ import { createHash, timingSafeEqual, randomUUID } from 'crypto';
 import { kv } from '@vercel/kv';
 import { put, del } from '@vercel/blob';
 import { normalizeHours, DEFAULT_HOURS } from '@/lib/hours';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
 
 const AUTH = process.env.ADMIN_SECRET;
 
@@ -126,7 +126,7 @@ export async function POST(req) {
       await kv.set('content:hours', clean);
       // Bust the cached public content route so the booking wizard picks up
       // the new hours on the next request instead of after the 60s TTL.
-      try { revalidatePath('/api/site-content'); } catch {}
+      try { revalidatePath('/api/site-content'); revalidateTag('hours'); } catch {}
       return Response.json({ ok: true, hours: clean });
     }
 

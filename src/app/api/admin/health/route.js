@@ -1,9 +1,9 @@
 // Protected diagnostics endpoint — checks all required env vars and connections
+import { checkBearer } from '@/lib/adminAuth';
+
 export async function GET(request) {
-  const secret = process.env.ADMIN_SECRET;
-  if (!secret) return Response.json({ error: 'not_configured' }, { status: 503 });
-  const auth = request.headers.get('authorization') || '';
-  if (auth !== `Bearer ${secret}`) return Response.json({ error: 'unauthorized' }, { status: 401 });
+  if (!process.env.ADMIN_SECRET) return Response.json({ error: 'not_configured' }, { status: 503 });
+  if (!checkBearer(request)) return Response.json({ error: 'unauthorized' }, { status: 401 });
 
   const results = {};
 

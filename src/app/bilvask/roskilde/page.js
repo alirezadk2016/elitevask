@@ -1,6 +1,7 @@
 import RelatedLinks from "@/components/RelatedLinks";
 import JsonLd from "@/components/JsonLd";
 import { breadcrumbLd, cityServiceLd } from "@/lib/seo";
+import { getHours, hoursDisplay } from "@/lib/getHours";
 export const metadata = {
   title: "Mobil bilvask i Roskilde – Elite Vask dampvask til din dør",
   description: "Professionel mobil dampvask i Roskilde. Vi kører til din adresse – hjemme eller på arbejdet. Gratis kørsel, betal efter vask. Book online.",
@@ -13,7 +14,8 @@ export const metadata = {
   },
 };
 
-export default function BilvaskRoskilde() {
+export default async function BilvaskRoskilde() {
+  const hd = hoursDisplay(await getHours(), "da");
   return (
     <div className="legal-page">
       <JsonLd items={[breadcrumbLd([{name:"Forside",path:"/"},{name:"Mobil bilvask i Roskilde",path:"/bilvask/roskilde"}]),cityServiceLd({city:"Roskilde",path:"/bilvask/roskilde"})]} />
@@ -63,7 +65,7 @@ export default function BilvaskRoskilde() {
         <p><strong>Hvad koster kørsel til Roskilde?</strong><br/>
         Kørsel er gratis til alle adresser i Roskilde og omegn.</p>
         <p><strong>Kan I vaske min bil på weekenden?</strong><br/>
-        Ja, vi arbejder alle dage kl. 15:30–22:00.</p>
+        Ja, vi arbejder {hd.days.toLowerCase()} kl. {hd.time.replace(" – ", "–")}.</p>
 
         <div style={{marginTop:'2rem',padding:'1.5rem',background:'#f0faf4',borderRadius:'12px',textAlign:'center'}}>
           <p style={{margin:'0 0 1rem',fontWeight:700,fontSize:'1.1rem'}}>Book mobil bilvask i Roskilde i dag</p>

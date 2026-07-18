@@ -18,15 +18,15 @@ const HTML = `<!-- REVIEWS -->
       <svg viewBox="0 0 24 24"><path d="M12 2 15 9l7 .5-5.5 4.5L18 21l-6-3.8L6 21l1.5-7L2 9.5 9 9Z" fill="#FBBC05"/></svg>
       <svg viewBox="0 0 24 24"><path d="M12 2 15 9l7 .5-5.5 4.5L18 21l-6-3.8L6 21l1.5-7L2 9.5 9 9Z" fill="#FBBC05"/></svg>
     </div>
-    <p class="rev-sub">Var du tilfreds med vores service? Del din oplevelse og hjælp andre med at træffe det rigtige valg.</p>
+    <p class="rev-sub" data-i18n="rev_sub">Var du tilfreds med vores service? Del din oplevelse og hjælp andre med at træffe det rigtige valg.</p>
     <div class="rev-actions">
       <a href="https://www.google.com/maps?cid=14890071893602568107&action=write_review" target="_blank" rel="noopener" class="btn btn-green rev-btn-primary">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5Z"/></svg>
-        Skriv en anmeldelse
+        <span data-i18n="rev_write_btn">Skriv en anmeldelse</span>
       </a>
       <a href="https://www.google.com/maps?cid=14890071893602568107" target="_blank" rel="noopener" class="btn rev-btn-ghost">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-        Se på Google Maps
+        <span data-i18n="rev_maps">Se på Google Maps</span>
       </a>
     </div>
     <a href="https://dk.trustpilot.com/review/elite-vask.dk" target="_blank" rel="noopener" class="rev-tp" aria-label="Se vores anmeldelser på Trustpilot">

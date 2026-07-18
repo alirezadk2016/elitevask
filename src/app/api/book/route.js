@@ -235,6 +235,12 @@ export async function POST(request) {
   if (name && name.length > 120) return Response.json({ error: 'name_too_long' }, { status: 400 });
   if (addr && addr.length > 200) return Response.json({ error: 'addr_too_long' }, { status: 400 });
   if (msg  && msg.length  > 1000) return Response.json({ error: 'msg_too_long'  }, { status: 400 });
+  // Bound the free-text/display fields that flow into emails (car/pkg are
+  // interpolated into the subject; price is shown to company + customer).
+  if (car   && String(car).length   > 80)  return Response.json({ error: 'invalid_car'   }, { status: 400 });
+  if (pkg   && String(pkg).length   > 80)  return Response.json({ error: 'invalid_pkg'   }, { status: 400 });
+  if (price && String(price).length > 40)  return Response.json({ error: 'invalid_price' }, { status: 400 });
+  if (carId && !['lille','mellem','stor','varebil'].includes(carId)) return Response.json({ error: 'invalid_car' }, { status: 400 });
   if (zip  && !/^\d{3,5}$/.test(zip.trim())) return Response.json({ error: 'invalid_zip' }, { status: 400 });
   if (zip) {
     const z = parseInt(zip.trim(), 10);
@@ -344,6 +350,9 @@ export async function POST(request) {
       status: 'confirmed',
       date, time, car, pkg, price, lang,
       carId, slotsNeeded, slots: bookedSlots,
+      // Absolute duration in minutes — the admin renders end-time/span from
+      // this so changing the slot interval later never mis-renders old bookings.
+      durationMin: slotsNeeded * hours.slotMinutes,
       name, phone, email, msg, extras,
       addr, zip, city,
       bookedAt, cancelExpiresAt,

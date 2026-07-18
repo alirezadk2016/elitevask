@@ -1,10 +1,12 @@
 export const runtime = 'nodejs';
+import { checkBearer } from '@/lib/adminAuth';
 
-// Debug endpoint — requires ADMIN_SECRET to prevent info leakage in production
+// Debug endpoint — requires ADMIN_SECRET (Authorization: Bearer <secret>) to
+// prevent info leakage; secret is never accepted in the query string (would
+// leak into logs / Referer).
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
-  const secret = process.env.ADMIN_SECRET;
-  if (!secret || searchParams.get('secret') !== secret) {
+  if (!checkBearer(request)) {
     return Response.json({ error: 'forbidden' }, { status: 403 });
   }
 

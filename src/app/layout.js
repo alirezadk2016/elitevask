@@ -3,6 +3,7 @@ import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import CookieConsent from "./components/CookieConsent";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
+import { getHours, openingHoursSpec } from "@/lib/getHours";
 
 const manrope = Manrope({
   subsets: ["latin"],
@@ -56,9 +57,7 @@ const JSONLD = [
   "areaServed":["Næstved","Roskilde","Køge","Ringsted","København","Stevns Kommune","Faxe Kommune","Helsingør","Hillerød","Frederikssund","Sjælland"],
   "priceRange":"500–2350 kr","vatID":"DK46392264",
   "address":{"@type":"PostalAddress","addressLocality":"København","addressRegion":"Sjælland","addressCountry":"DK"},
-  "openingHoursSpecification":[
-    {"@type":"OpeningHoursSpecification","dayOfWeek":["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],"opens":"15:30","closes":"22:00"}
-  ],
+  "openingHoursSpecification":[],
   "sameAs":["https://instagram.com/elitevasksjaelland"]
 },
 {
@@ -116,12 +115,20 @@ const JSONLD = [
 }
 ];
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+  // Reflect the manager-configured opening hours in the business JSON-LD so
+  // Google never advertises stale hours after an admin change.
+  const hours = await getHours();
+  const jsonLd = JSONLD.map((obj) =>
+    obj["@id"] === "https://www.elite-vask.dk/#business"
+      ? { ...obj, openingHoursSpecification: openingHoursSpec(hours) }
+      : obj,
+  );
   return (
     <html lang="da" className={manrope.variable}>
       <head>
         <meta name="trustpilot-one-time-domain-verification-id" content="3c40dbdd-ba69-4e5f-94e9-55aa98bd97b7" />
-        {JSONLD.map((obj, i) => (
+        {jsonLd.map((obj, i) => (
           <script
             key={i}
             type="application/ld+json"

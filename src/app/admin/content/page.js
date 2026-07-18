@@ -743,20 +743,27 @@ export default function AdminPanel() {
             const TIME_W = 52;
             const minToLabel = (m) => `${String(Math.floor(m/60)).padStart(2,"0")}:${String(m%60).padStart(2,"0")}`;
 
-            // Duration in slot units. A booking stores its own slotsNeeded (in
-            // the interval it was booked under); the fallback derives from the
-            // current interval so unknown/legacy records still render sensibly.
-            const CAR_SLOTS = { lille: SLOT_MIN?Math.round(120/SLOT_MIN):4, mellem: SLOT_MIN?Math.round(180/SLOT_MIN):6, stor: SLOT_MIN?Math.round(240/SLOT_MIN):8, varebil: SLOT_MIN?Math.round(180/SLOT_MIN):6 };
-            function slotCount(b) {
-              if (b.slotsNeeded) return b.slotsNeeded;
-              if (Array.isArray(b.slots) && b.slots.length) return b.slots.length;
-              if (b.carId && CAR_SLOTS[b.carId]) return CAR_SLOTS[b.carId];
+            // Absolute duration in MINUTES — decoupled from the current slot
+            // interval so changing the interval never mis-renders old bookings.
+            // Prefer the stored durationMin; older records store slotsNeeded/slots
+            // in the (30-min) interval they were booked under; final fallback is
+            // the car type's real duration.
+            const CAR_MIN = { lille: 120, mellem: 180, stor: 240, varebil: 180 };
+            function bookingDurationMin(b) {
+              if (b.durationMin) return b.durationMin;
+              if (b.slotsNeeded) return b.slotsNeeded * 30;
+              if (Array.isArray(b.slots) && b.slots.length) return b.slots.length * 30;
+              if (b.carId && CAR_MIN[b.carId]) return CAR_MIN[b.carId];
               const c = (b.car || b.pkg || "").toLowerCase();
-              if (c.includes("varebil") || c.includes("van")) return CAR_SLOTS.varebil;
-              if (c.includes("stor") || c.includes("suv") || c.includes("large")) return CAR_SLOTS.stor;
-              if (c.includes("mellem") || c.includes("medium")) return CAR_SLOTS.mellem;
-              if (c.includes("lille") || c.includes("small")) return CAR_SLOTS.lille;
-              return CAR_SLOTS.mellem;
+              if (c.includes("varebil") || c.includes("van")) return CAR_MIN.varebil;
+              if (c.includes("stor") || c.includes("suv") || c.includes("large")) return CAR_MIN.stor;
+              if (c.includes("mellem") || c.includes("medium")) return CAR_MIN.mellem;
+              if (c.includes("lille") || c.includes("small")) return CAR_MIN.lille;
+              return CAR_MIN.mellem;
+            }
+            // Span in current-grid rows (for column layout + drawing height).
+            function slotCount(b) {
+              return Math.max(1, Math.round(bookingDurationMin(b) / SLOT_MIN));
             }
 
             function bookingStartMin(b) {
@@ -914,7 +921,8 @@ export default function AdminPanel() {
                         {weekOffset === 0 && (() => {
                           const nowMinutes = nowTime.getHours() * 60 + nowTime.getMinutes() + nowTime.getSeconds() / 60;
                           if (nowMinutes < GRID_START || nowMinutes > GRID_END) return null;
-                          const HEADER_H = 67;
+                          // Day-header height: 10(pad) +12(label) +6 +32(circle) +4 +13(dots) +8(pad) +1(border) ≈ 86.
+                          const HEADER_H = 86;
                           const topPx = HEADER_H + ((nowMinutes - GRID_START) / SLOT_MIN) * ROW_H;
                           const todayIdx = weekDays.findIndex(d => toISO(d) === todayISO);
                           const leftPx = TIME_W + todayIdx * COL_W;
@@ -952,19 +960,27 @@ export default function AdminPanel() {
                                 const isToday = iso === todayISO;
                                 const isPastCell = iso < todayISO || (iso === todayISO && row.min + SLOT_MIN <= nowMinutes);
                                 const cellBg = isPastCell ? "rgba(0,0,0,.12)" : (isToday ? "rgba(55,210,120,.025)" : "transparent");
-                                const startingHere = bookings.filter(b => b.date === iso && bookingStartMin(b) === row.min);
+                                // A booking belongs to the row its start falls IN (floor to the
+                                // grid), so a start that isn't on a grid multiple still renders
+                                // (and is positioned precisely via topOffset) instead of vanishing.
+                                const startingHere = bookings.filter(b => {
+                                  const sm = bookingStartMin(b);
+                                  if (sm == null || sm < GRID_START || sm >= GRID_END) return false;
+                                  return Math.floor((sm - GRID_START) / SLOT_MIN) === hi;
+                                });
                                 return (
                                   <div key={di} style={{ flex:1, minWidth:COL_W, borderRight: di<6 ? `1px solid ${T.border}` : "none", padding:"3px 4px", background:cellBg, position:"relative", height:ROW_H, boxSizing:"border-box" }}>
                                     {startingHere.map((b, bi) => {
-                                      const slots = slotCount(b); // 30-min units
                                       const startMin = bookingStartMin(b);
-                                      // Clamp the end so a long booking never draws past the 22:00 grid bottom.
-                                      const endMin = Math.min(startMin + slots * SLOT_MIN, GRID_END);
+                                      const durMin = bookingDurationMin(b);
+                                      // Absolute end, clamped to the grid bottom (close time).
+                                      const endMin = Math.min(startMin + durMin, GRID_END);
                                       const endTime = minToLabel(endMin);
-                                      const drawSlots = (endMin - startMin) / SLOT_MIN;
-                                      const hoursLabel = +(slots * SLOT_MIN / 60).toFixed(1);
+                                      const hoursLabel = +(durMin / 60).toFixed(1);
+                                      // Precise vertical offset within the starting row (handles off-grid starts).
+                                      const topOffsetPx = ((startMin - row.min) / SLOT_MIN) * ROW_H;
                                       // Overlay tall cards across the rows below without stretching this row.
-                                      const heightPx = drawSlots * ROW_H - 6;
+                                      const heightPx = ((endMin - startMin) / SLOT_MIN) * ROW_H - 6;
                                       // Column layout: overlapping ranges (any start hour) sit side-by-side.
                                       const lay = dayLayout(iso)[b.token] || { col:0, ncols:1 };
                                       const ncols = lay.ncols;
@@ -983,7 +999,7 @@ export default function AdminPanel() {
                                       return (
                                         <div key={b.token}
                                           onClick={() => { setSelectedBooking(b); setModalState("idle"); }}
-                                          style={{ background:cardBg, border:`1px solid ${cardBor}`, borderLeft:`3px solid ${cardLeft}`, borderRadius:8, padding:"6px 8px", cursor:"pointer", height:heightPx, minHeight:42, boxSizing:"border-box", display:"flex", flexDirection:"column", justifyContent:"space-between", overflow:"hidden", transition:"filter .15s, transform .1s", opacity:isCancelled?.55:1, WebkitTapHighlightColor:"transparent", position:"absolute", top:3, left:leftPct, width:widthPct, zIndex:isCancelled?2:3 }}
+                                          style={{ background:cardBg, border:`1px solid ${cardBor}`, borderLeft:`3px solid ${cardLeft}`, borderRadius:8, padding:"6px 8px", cursor:"pointer", height:heightPx, minHeight:42, boxSizing:"border-box", display:"flex", flexDirection:"column", justifyContent:"space-between", overflow:"hidden", transition:"filter .15s, transform .1s", opacity:isCancelled?.55:1, WebkitTapHighlightColor:"transparent", position:"absolute", top:3 + topOffsetPx, left:leftPct, width:widthPct, zIndex:isCancelled?2:3 }}
                                           onMouseEnter={e => { e.currentTarget.style.filter="brightness(1.2)"; e.currentTarget.style.transform="scale(1.01)"; }}
                                           onMouseLeave={e => { e.currentTarget.style.filter=""; e.currentTarget.style.transform=""; }}
                                         >
@@ -1020,9 +1036,11 @@ export default function AdminPanel() {
                     {/* Safety net: bookings this week that fall outside the 15:30–22:00
                         grid would otherwise be invisible. List them so they're never lost. */}
                     {(() => {
+                      // Mirror the grid's draw bounds exactly: anything whose start
+                      // falls outside [open, close) is listed here so it's never lost.
                       const outOfRange = weekBookings.filter(b => {
-                        const idx = bookingStartIndex(b);
-                        return idx == null || idx < 0 || idx >= N_ROWS;
+                        const sm = bookingStartMin(b);
+                        return sm == null || sm < GRID_START || sm >= GRID_END;
                       });
                       if (!outOfRange.length) return null;
                       return (
@@ -1965,16 +1983,22 @@ export default function AdminPanel() {
                 {extrasItems.length === 0 && (() => {
                   async function seedAllExtras() {
                     setCmsLoading(true); setCmsMsg(null);
-                    for (const ext of DEFAULT_EXTRAS) {
-                      await fetch("/api/admin/content", {
-                        method:"POST",
-                        headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" },
-                        body: JSON.stringify({ type:"extras", item:{ name:ext.name, desc:ext.desc, price:ext.price } }),
-                      });
+                    try {
+                      for (const ext of DEFAULT_EXTRAS) {
+                        const r = await fetch("/api/admin/content", {
+                          method:"POST",
+                          headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" },
+                          body: JSON.stringify({ type:"extras", item:{ name:ext.name, desc:ext.desc, price:ext.price } }),
+                        });
+                        if (!r.ok) throw new Error(String(r.status));
+                      }
+                      addToast("ok", "Alle standarddata gemt!");
+                    } catch {
+                      addToast("err", "Kunne ikke gemme alle — prøv igen");
+                    } finally {
+                      setCmsLoading(false);
+                      fetchContent("extras");
                     }
-                    setCmsLoading(false);
-                    addToast("ok", "Alle standarddata gemt!");
-                    fetchContent("extras");
                   }
                   return (
                     <>
@@ -2161,12 +2185,12 @@ export default function AdminPanel() {
                         ? (() => {
                             const [h, mm] = b.time.split(":").map(Number);
                             const startMin = h * 60 + (mm || 0);
-                            const SM = hours.slotMinutes || 30;
-                            const dfl = { lille:Math.round(120/SM), mellem:Math.round(180/SM), stor:Math.round(240/SM), varebil:Math.round(180/SM) };
-                            const n = b.slotsNeeded || (Array.isArray(b.slots) ? b.slots.length : (dfl[b.carId] || dfl.mellem));
-                            const endMin = startMin + n * SM;
+                            const CAR_MIN = { lille:120, mellem:180, stor:240, varebil:180 };
+                            // Absolute minutes: durationMin (new) → slots*30 (legacy) → car type.
+                            const durMin = b.durationMin || (b.slotsNeeded ? b.slotsNeeded*30 : (Array.isArray(b.slots) && b.slots.length ? b.slots.length*30 : (CAR_MIN[b.carId] || CAR_MIN.mellem)));
+                            const endMin = startMin + durMin;
                             const endTime = `${String(Math.floor(endMin/60)).padStart(2,"0")}:${String(endMin%60).padStart(2,"0")}`;
-                            return `kl. ${b.time}–${endTime} (${(n*SM/60).toLocaleString("da-DK")} timer)`;
+                            return `kl. ${b.time}–${endTime} (${(durMin/60).toLocaleString("da-DK")} timer)`;
                           })()
                         : "-"}
                     </div>

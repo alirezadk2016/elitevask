@@ -1,6 +1,7 @@
 import RelatedLinks from "@/components/RelatedLinks";
 import JsonLd from "@/components/JsonLd";
 import { breadcrumbLd, SITE } from "@/lib/seo";
+import { getHours, hoursDisplay } from "@/lib/getHours";
 
 export const metadata = {
   title: "Kontakt Elite Vask – Mobil bilvask på Sjælland",
@@ -46,7 +47,8 @@ const contactPageLd = {
   },
 };
 
-export default function Kontakt() {
+export default async function Kontakt() {
+  const hd = hoursDisplay(await getHours(), "da");
   return (
     <div className="legal-page">
       <JsonLd
@@ -85,7 +87,7 @@ export default function Kontakt() {
             <span className="cl-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" /></svg></span>
             <span><span className="lab">Åbningstider</span>
               <div className="hours-grid">
-                <div className="hrow"><span className="hday">Alle dage</span><span className="htime">15:30 – 22:00</span></div>
+                <div className="hrow"><span className="hday">{hd.days}</span><span className="htime">{hd.time}</span></div>
                 <div className="hrow hrow-note"><span>eller efter aftale</span></div>
               </div>
             </span>
