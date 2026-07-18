@@ -7,7 +7,11 @@
 // save.
 
 // Opening window 15:30–22:00, 30-minute slots, open every day.
-export const DEFAULT_HOURS = { open: '15:30', close: '22:00', slotMinutes: 30, closedDays: [] };
+// closedDays = weekly closed weekdays (0=Sun..6=Sat);
+// closedDates = specific closed calendar dates ("YYYY-MM-DD"), e.g. holidays.
+export const DEFAULT_HOURS = { open: '15:30', close: '22:00', slotMinutes: 30, closedDays: [], closedDates: [] };
+
+const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 // Real service durations per car type, in minutes. Slot counts are derived
 // from these so changing the slot interval never breaks the math.
@@ -52,7 +56,13 @@ export function normalizeHours(raw) {
     ? [...new Set(h.closedDays.map(Number).filter(d => d >= 0 && d <= 6))].sort((a, b) => a - b)
     : [];
 
-  return { open: minToLabel(openM), close: minToLabel(closeM), slotMinutes: slot, closedDays };
+  // Specific closed dates (holidays). Deduped, valid format only, capped so a
+  // corrupt record can never balloon the config.
+  const closedDates = Array.isArray(h.closedDates)
+    ? [...new Set(h.closedDates.map(String).filter(d => DATE_RE.test(d)))].sort().slice(0, 120)
+    : [];
+
+  return { open: minToLabel(openM), close: minToLabel(closeM), slotMinutes: slot, closedDays, closedDates };
 }
 
 // Ordered list of selectable start times ("HH:MM") within the window.
@@ -81,5 +91,5 @@ export function weekdayOf(dateStr) {
 
 export function isClosedDay(hours, dateStr) {
   const h = normalizeHours(hours);
-  return h.closedDays.includes(weekdayOf(dateStr));
+  return h.closedDays.includes(weekdayOf(dateStr)) || h.closedDates.includes(String(dateStr));
 }

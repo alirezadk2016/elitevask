@@ -139,7 +139,7 @@ export default function AdminPanel() {
   const [secret, setSecret]               = useState("");
   const [authed, setAuthed]               = useState(false);
   const [secretInput, setSecretInput]     = useState("");
-  const [tab, setTab]                     = useState("bookings");
+  const [tab, setTab]                     = useState("oversigt");
 
   // Bookings state
   const [bookings, setBookings]           = useState([]);
@@ -199,6 +199,10 @@ export default function AdminPanel() {
   const [hoursLoading, setHoursLoading]   = useState(false);
   const [hoursSaving, setHoursSaving]     = useState(false);
   const [hoursIsDefault, setHoursIsDefault] = useState(true);
+  const [closedDateInput, setClosedDateInput] = useState("");
+  // Bookings view mode + search (calendar ↔ searchable list)
+  const [bookingView, setBookingView]     = useState("kalender");
+  const [bookingSearch, setBookingSearch] = useState("");
   const [albumInput, setAlbumInput]               = useState("Enkelt");
   const [galleryAlbum, setGalleryAlbum]           = useState("alle");
 
@@ -617,6 +621,7 @@ export default function AdminPanel() {
     beforeafter: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="11" height="14" rx="2"/><rect x="11" y="5" width="11" height="14" rx="2"/><line x1="12" y1="3" x2="12" y2="21"/></svg>,
     refresh:  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 11-9-9c2.52 0 4.8.99 6.48 2.59L21 8"/><path d="M21 3v5h-5"/></svg>,
     hours:    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
+    dashboard: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>,
   };
 
   // ── MAIN RENDER ────────────────────────────────────────────────────────────
@@ -639,7 +644,7 @@ export default function AdminPanel() {
           <span style={{ color:T.t2, fontSize:14 }}>Admin</span>
         </div>
         <div style={{ flex:1 }}/>
-        {tab === "bookings" && (
+        {(tab === "bookings" || tab === "oversigt") && (
           <button onClick={() => loadBookings(secret)}
             style={{ display:"flex", alignItems:"center", gap:6, padding:"7px 14px", background:T.accentDim, border:`1px solid ${T.accentBorder}`, borderRadius:8, color:T.accent, fontSize:12, fontWeight:600, cursor:"pointer", fontFamily:FF }}>
             {icons.refresh} {bLoading ? "…" : "Opdater"}
@@ -671,6 +676,7 @@ export default function AdminPanel() {
         {!narrow ? (
           <aside style={{ background:T.bg0, borderRight:`1px solid ${T.border}`, padding:"24px 12px", position:"sticky", top:52, height:"calc(100dvh - 52px)", overflowY:"auto", boxSizing:"border-box" }}>
             {sectionLabel("Navigation")}
+            {navItem("oversigt", "Oversigt", icons.dashboard)}
             {navItem("bookings", "Bookinger", icons.bookings, activeBookings || undefined)}
             {navItem("hours", "Åbningstider", icons.hours)}
             <div style={{ height:1, background:T.border, margin:"14px 4px" }}/>
@@ -688,7 +694,7 @@ export default function AdminPanel() {
           </aside>
         ) : (
           <div style={{ display:"flex", gap:8, padding:"16px 16px 0", overflowX:"auto" }}>
-            {[["bookings","Bookinger",icons.bookings],["hours","Åbningstider",icons.hours],["gallery","Galleri",icons.gallery],["videos","Videoer",icons.videos],["beforeafter","Før & efter",icons.beforeafter],["faq","FAQ",icons.faq],["priser","Priser",icons.priser],["extras","Ekstra",icons.extras]].map(([id,label,icon]) => (
+            {[["oversigt","Oversigt",icons.dashboard],["bookings","Bookinger",icons.bookings],["hours","Åbningstider",icons.hours],["gallery","Galleri",icons.gallery],["videos","Videoer",icons.videos],["beforeafter","Før & efter",icons.beforeafter],["faq","FAQ",icons.faq],["priser","Priser",icons.priser],["extras","Ekstra",icons.extras]].map(([id,label,icon]) => (
               <button key={id} onClick={() => {
                   if (tab === id) return; // never wipe edits on same-tab click
                   if (hasUnsaved) { setNavGuard({ pendingTab: id }); return; }
@@ -707,12 +713,106 @@ export default function AdminPanel() {
           {/* Page title + badge */}
           <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:28 }}>
             <h1 style={{ fontSize:22, fontWeight:800, color:T.t1, margin:0, letterSpacing:"-.3px" }}>
-              {tab === "bookings" ? "Bookinger" : tab === "hours" ? "Åbningstider" : tab === "gallery" ? "Galleri" : tab === "videos" ? "Videoer" : tab === "beforeafter" ? "Før & efter" : tab === "faq" ? "FAQ" : tab === "priser" ? "Priser" : "Ekstra ydelser"}
+              {tab === "oversigt" ? "Oversigt" : tab === "bookings" ? "Bookinger" : tab === "hours" ? "Åbningstider" : tab === "gallery" ? "Galleri" : tab === "videos" ? "Videoer" : tab === "beforeafter" ? "Før & efter" : tab === "faq" ? "FAQ" : tab === "priser" ? "Priser" : "Ekstra ydelser"}
             </h1>
             <span style={{ background:T.accentDim, color:T.accent, borderRadius:20, padding:"3px 12px", fontSize:12, fontWeight:700 }}>
-              {tab === "bookings" ? `${activeBookings} aktive` : tab === "hours" ? `${hours.open}–${hours.close}` : tab === "gallery" ? `${gallery.length} ${gallery.length===1?"billede":"billeder"}` : tab === "videos" ? `${videos.length} ${videos.length===1?"video":"videoer"}` : tab === "beforeafter" ? `${beforeAfter.length} ${beforeAfter.length===1?"par":"par"}` : tab === "faq" ? `${faqItems.length} spørgsmål` : tab === "priser" ? "Prismatrix" : `${extrasItems.length} ydelser`}
+              {tab === "oversigt" ? new Intl.DateTimeFormat("da-DK",{ weekday:"long", day:"numeric", month:"long", timeZone:"Europe/Copenhagen" }).format(new Date()) : tab === "bookings" ? `${activeBookings} aktive` : tab === "hours" ? `${hours.open}–${hours.close}` : tab === "gallery" ? `${gallery.length} ${gallery.length===1?"billede":"billeder"}` : tab === "videos" ? `${videos.length} ${videos.length===1?"video":"videoer"}` : tab === "beforeafter" ? `${beforeAfter.length} ${beforeAfter.length===1?"par":"par"}` : tab === "faq" ? `${faqItems.length} spørgsmål` : tab === "priser" ? "Prismatrix" : `${extrasItems.length} ydelser`}
             </span>
           </div>
+
+          {/* ── OVERSIGT (dashboard) ── */}
+          {tab === "oversigt" && (() => {
+            const todayISO = new Intl.DateTimeFormat("sv-SE", { timeZone:"Europe/Copenhagen" }).format(new Date());
+            const active = bookings.filter(b => b.status !== "cancelled");
+            const todays = active.filter(b => b.date === todayISO).sort((a,z)=>(a.time||"").localeCompare(z.time||""));
+            const next7ISO = Array.from({length:7},(_,i)=>{const d=new Date();d.setDate(d.getDate()+1+i);return new Intl.DateTimeFormat("sv-SE",{timeZone:"Europe/Copenhagen"}).format(d);});
+            const upcoming = active.filter(b => b.date > todayISO).sort((a,z)=>(a.date+a.time).localeCompare(z.date+z.time));
+            const week7 = active.filter(b => next7ISO.includes(b.date));
+            const parseKr = (p) => { const n = parseInt(String(p||"").replace(/[^\d]/g,""),10); return Number.isFinite(n)?n:0; };
+            const revenue7 = todays.concat(week7).reduce((s,b)=>s+parseKr(b.price),0);
+            const upcomingClosed = (hours.closedDates||[]).filter(d => d >= todayISO).slice(0,6);
+            const endTimeOf = (b) => {
+              if (!b.time) return "";
+              const [h,m] = b.time.split(":").map(Number);
+              const CAR_MIN = { lille:120, mellem:180, stor:240, varebil:180 };
+              const dur = b.durationMin || (b.slotsNeeded ? b.slotsNeeded*30 : (CAR_MIN[b.carId] || 180));
+              const e = h*60+(m||0)+dur;
+              return `${String(Math.floor(e/60)).padStart(2,"0")}:${String(e%60).padStart(2,"0")}`;
+            };
+            const stat = (label, value, accent) => (
+              <div style={{ flex:1, minWidth:130, background:T.bg1, border:`1px solid ${T.border}`, borderRadius:14, padding:"16px 18px" }}>
+                <div style={{ fontSize:24, fontWeight:800, color:accent?T.accent:T.t1, letterSpacing:"-.5px", fontVariantNumeric:"tabular-nums" }}>{value}</div>
+                <div style={{ fontSize:11.5, color:T.t3, fontWeight:600, marginTop:2 }}>{label}</div>
+              </div>
+            );
+            const bookingRow = (b, showDate) => (
+              <button key={b.token} onClick={() => { setSelectedBooking(b); setModalState("idle"); }}
+                style={{ display:"flex", alignItems:"center", gap:12, width:"100%", textAlign:"left", padding:"12px 16px", borderRadius:11, border:`1px solid ${T.border}`, background:T.bg1, cursor:"pointer", fontFamily:FF }}>
+                <div style={{ flexShrink:0, textAlign:"center", minWidth:60 }}>
+                  <div style={{ fontSize:14, fontWeight:800, color:T.accent, fontVariantNumeric:"tabular-nums" }}>{showDate ? fmtDate(b.date) : (b.time || "-")}</div>
+                  <div style={{ fontSize:11, color:T.t4, fontVariantNumeric:"tabular-nums" }}>{showDate ? `kl. ${b.time||"-"}` : `–${endTimeOf(b)}`}</div>
+                </div>
+                <div style={{ flex:1, minWidth:0 }}>
+                  <div style={{ fontSize:14, fontWeight:700, color:T.t1, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{b.name || "Ukendt"}</div>
+                  <div style={{ fontSize:12, color:T.t3, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{b.car || "-"} · {b.pkg || "-"}{b.addr ? ` · ${b.addr}${b.city ? ", "+b.city : ""}` : ""}</div>
+                </div>
+                {!narrow && <span style={{ fontSize:13, fontWeight:700, color:T.accent, flexShrink:0 }}>{b.price || "-"}</span>}
+                {b.phone && (
+                  <a href={`tel:${b.phone}`} onClick={e => e.stopPropagation()}
+                    style={{ display:"flex", alignItems:"center", justifyContent:"center", width:32, height:32, borderRadius:9, background:T.accentDim, border:`1px solid ${T.accentBorder}`, color:T.accent, textDecoration:"none", flexShrink:0 }}>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.15 1.28 2 2 0 012.11 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+                  </a>
+                )}
+              </button>
+            );
+            return (
+              <div style={{ maxWidth:860 }}>
+                {bLoading && <div style={{ color:T.t3, fontSize:13, marginBottom:14 }}>Indlæser…</div>}
+
+                {/* Stats */}
+                <div style={{ display:"flex", gap:10, flexWrap:"wrap", marginBottom:24 }}>
+                  {stat("I dag", todays.length, true)}
+                  {stat("Næste 7 dage", week7.length)}
+                  {stat("Aktive i alt", active.length)}
+                  {stat("Omsætning (7 dage, anslået)", revenue7 ? `${revenue7.toLocaleString("da-DK")} kr` : "–")}
+                </div>
+
+                {/* Today */}
+                <p style={{ fontSize:10, letterSpacing:2, fontWeight:700, color:T.t3, textTransform:"uppercase", margin:"0 0 10px" }}>I dag · {hours.open}–{hours.close}</p>
+                {todays.length === 0 ? (
+                  <div style={{ textAlign:"center", color:T.t4, padding:"26px 0", fontSize:13.5, background:T.bg1, border:`1px dashed ${T.border}`, borderRadius:12, marginBottom:24 }}>
+                    Ingen bookinger i dag.
+                  </div>
+                ) : (
+                  <div style={{ display:"flex", flexDirection:"column", gap:6, marginBottom:24 }}>{todays.map(b => bookingRow(b, false))}</div>
+                )}
+
+                {/* Upcoming */}
+                <p style={{ fontSize:10, letterSpacing:2, fontWeight:700, color:T.t3, textTransform:"uppercase", margin:"0 0 10px" }}>Kommende bookinger</p>
+                {upcoming.length === 0 ? (
+                  <div style={{ textAlign:"center", color:T.t4, padding:"26px 0", fontSize:13.5, background:T.bg1, border:`1px dashed ${T.border}`, borderRadius:12, marginBottom:24 }}>
+                    Ingen kommende bookinger.
+                  </div>
+                ) : (
+                  <div style={{ display:"flex", flexDirection:"column", gap:6, marginBottom:10 }}>{upcoming.slice(0,8).map(b => bookingRow(b, true))}</div>
+                )}
+                {upcoming.length > 8 && (
+                  <button onClick={() => { setTab("bookings"); setBookingView("liste"); }}
+                    style={{ background:"transparent", border:"none", color:T.accent, fontSize:13, fontWeight:700, cursor:"pointer", fontFamily:FF, padding:"4px 0", marginBottom:14 }}>
+                    Se alle {upcoming.length} kommende →
+                  </button>
+                )}
+
+                {/* Upcoming closed dates */}
+                {upcomingClosed.length > 0 && (
+                  <div style={{ marginTop:14, background:"rgba(245,166,35,.06)", border:`1px solid rgba(245,166,35,.22)`, borderRadius:12, padding:"12px 16px" }}>
+                    <span style={{ fontSize:12, fontWeight:700, color:T.gold }}>Kommende lukkedatoer: </span>
+                    <span style={{ fontSize:12.5, color:T.t2 }}>{upcomingClosed.map(fmtDate).join(" · ")}</span>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
 
           {/* ── BOOKINGS WEEKLY CALENDAR ── */}
           {tab === "bookings" && (() => {
@@ -851,7 +951,89 @@ export default function AdminPanel() {
                 {!bLoading && !bError && (
                   <>
                     {/* Wrapper so toolbar and calendar share the same width */}
-                    <div style={{ width: "100%", maxWidth:"100%" }}>
+                    {/* View toggle: calendar ↔ searchable list */}
+                    <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:14, flexWrap:"wrap" }}>
+                      {[["kalender","Kalender"],["liste","Liste & søgning"]].map(([id,label]) => (
+                        <button key={id} onClick={() => setBookingView(id)}
+                          style={{ padding:"8px 16px", borderRadius:9, border:`1px solid ${bookingView===id?T.accentBorder:T.border}`, background:bookingView===id?T.accentDim:"transparent", color:bookingView===id?T.accent:T.t3, fontSize:13, fontWeight:700, cursor:"pointer", fontFamily:FF }}>
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* LIST VIEW — search + export */}
+                    {bookingView === "liste" && (() => {
+                      const q = bookingSearch.trim().toLowerCase();
+                      const matches = (b) => !q || [b.name, b.phone, b.email, b.addr, b.city, b.date, b.car, b.pkg]
+                        .some(v => v && String(v).toLowerCase().includes(q));
+                      const upcoming = bookings.filter(b => b.date >= todayISO && matches(b))
+                        .sort((a,z) => (a.date+a.time).localeCompare(z.date+z.time));
+                      const past = bookings.filter(b => b.date < todayISO && matches(b))
+                        .sort((a,z) => (z.date+z.time).localeCompare(a.date+a.time));
+                      const rows = [...upcoming, ...past];
+                      const exportCsv = () => {
+                        const cols = ["Dato","Tid","Navn","Telefon","Email","Bil","Pakke","Pris","Adresse","Postnr","By","Status","Booket"];
+                        const cell = (v) => `"${String(v ?? "").replace(/"/g,'""')}"`;
+                        const lines = [cols.join(";")].concat(rows.map(b =>
+                          [b.date,b.time,b.name,b.phone,b.email,b.car,b.pkg,b.price,b.addr,b.zip,b.city,STATUS_LABEL[b.status]||b.status,b.bookedAt?.slice(0,16).replace("T"," ")].map(cell).join(";")
+                        ));
+                        // BOM so Danish characters open correctly in Excel
+                        const blob = new Blob(["﻿" + lines.join("\r\n")], { type:"text/csv;charset=utf-8" });
+                        const a = document.createElement("a");
+                        a.href = URL.createObjectURL(blob);
+                        a.download = `bookinger-${todayISO}.csv`;
+                        a.click();
+                        URL.revokeObjectURL(a.href);
+                      };
+                      return (
+                        <div style={{ marginBottom:24 }}>
+                          <div style={{ display:"flex", gap:8, marginBottom:12, flexWrap:"wrap", alignItems:"center" }}>
+                            <div style={{ position:"relative", flex:1, minWidth:220 }}>
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={T.t4} strokeWidth="2.2" strokeLinecap="round" style={{ position:"absolute", left:12, top:"50%", transform:"translateY(-50%)" }}><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                              <input value={bookingSearch} onChange={e=>setBookingSearch(e.target.value)} placeholder="Søg navn, telefon, email, dato, adresse…"
+                                style={{ width:"100%", padding:"10px 12px 10px 34px", borderRadius:10, border:`1px solid ${T.border}`, background:T.bg1, color:T.t1, fontSize:13.5, outline:"none", fontFamily:FF, boxSizing:"border-box" }} />
+                            </div>
+                            <button onClick={exportCsv} disabled={!rows.length}
+                              style={{ display:"flex", alignItems:"center", gap:7, padding:"10px 16px", borderRadius:10, border:`1px solid ${rows.length?T.accentBorder:T.border}`, background:rows.length?T.accentDim:"transparent", color:rows.length?T.accent:T.t4, fontSize:13, fontWeight:700, cursor:rows.length?"pointer":"default", fontFamily:FF, whiteSpace:"nowrap" }}>
+                              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                              Eksportér CSV ({rows.length})
+                            </button>
+                          </div>
+                          {rows.length === 0 ? (
+                            <div style={{ textAlign:"center", color:T.t4, padding:"36px 0", fontSize:13.5, background:T.bg1, border:`1px solid ${T.border}`, borderRadius:12 }}>
+                              {q ? "Ingen bookinger matcher søgningen." : "Ingen bookinger endnu."}
+                            </div>
+                          ) : (
+                            <div style={{ display:"flex", flexDirection:"column", gap:6 }}>
+                              {rows.map(b => {
+                                const isPast = b.date < todayISO;
+                                const isCancelled = b.status === "cancelled";
+                                return (
+                                  <button key={b.token} onClick={() => { setSelectedBooking(b); setModalState("idle"); }}
+                                    style={{ display:"flex", alignItems:"center", gap:12, width:"100%", textAlign:"left", padding:"12px 16px", borderRadius:11, border:`1px solid ${T.border}`, background:T.bg1, cursor:"pointer", fontFamily:FF, opacity: isCancelled ? .55 : isPast ? .7 : 1 }}>
+                                    <div style={{ flexShrink:0, textAlign:"center", minWidth:64 }}>
+                                      <div style={{ fontSize:13, fontWeight:800, color: isPast ? T.t3 : T.accent, fontVariantNumeric:"tabular-nums" }}>{fmtDate(b.date)}</div>
+                                      <div style={{ fontSize:11.5, color:T.t3, fontVariantNumeric:"tabular-nums" }}>kl. {b.time || "-"}</div>
+                                    </div>
+                                    <div style={{ flex:1, minWidth:0 }}>
+                                      <div style={{ fontSize:14, fontWeight:700, color:T.t1, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{b.name || "Ukendt"}</div>
+                                      <div style={{ fontSize:12, color:T.t3, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{b.car || "-"} · {b.pkg || "-"}{b.city ? ` · ${b.city}` : ""}</div>
+                                    </div>
+                                    {!narrow && b.phone && <span style={{ fontSize:12.5, color:T.t2, fontVariantNumeric:"tabular-nums", flexShrink:0 }}>{b.phone}</span>}
+                                    {!narrow && <span style={{ fontSize:12.5, fontWeight:700, color:T.accent, flexShrink:0, minWidth:70, textAlign:"right" }}>{b.price || "-"}</span>}
+                                    <span style={{ fontSize:10.5, fontWeight:700, padding:"3px 9px", borderRadius:20, background:"rgba(0,0,0,.3)", color: STATUS_COLOR[b.status] || T.t3, flexShrink:0 }}>
+                                      {STATUS_LABEL[b.status] || b.status}
+                                    </span>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
+
+                    <div style={{ width: "100%", maxWidth:"100%", display: bookingView === "kalender" ? undefined : "none" }}>
                     {/* Week nav toolbar */}
                     <div style={{ display:"flex", alignItems:"center", gap: narrow ? 8 : 12, marginBottom:16, background:T.bg1, border:`1px solid rgba(255,255,255,.1)`, borderRadius:14, padding: narrow ? "10px 12px" : "12px 18px", boxShadow:"0 0 0 1px rgba(55,210,120,.06), 0 4px 24px rgba(0,0,0,.5)", minWidth:0, overflow:"hidden" }}>
 
@@ -969,7 +1151,8 @@ export default function AdminPanel() {
                                 const iso = toISO(d);
                                 const isToday = iso === todayISO;
                                 const isPastCell = iso < todayISO || (iso === todayISO && row.min + SLOT_MIN <= nowMinutes);
-                                const cellBg = isPastCell ? "rgba(0,0,0,.12)" : (isToday ? "rgba(55,210,120,.025)" : "transparent");
+                                const isClosedCell = (hours.closedDates || []).includes(iso) || (hours.closedDays || []).includes(d.getDay());
+                                const cellBg = isClosedCell ? "rgba(245,166,35,.05)" : isPastCell ? "rgba(0,0,0,.12)" : (isToday ? "rgba(55,210,120,.025)" : "transparent");
                                 // A booking belongs to the row its start falls IN (floor to the
                                 // grid), so a start that isn't on a grid multiple still renders
                                 // (and is positioned precisely via topOffset) instead of vanishing.
@@ -1095,6 +1278,7 @@ export default function AdminPanel() {
           {/* ── ÅBNINGSTIDER ── */}
           {tab === "hours" && (() => {
             const WEEK = [[1,"Man"],[2,"Tir"],[3,"Ons"],[4,"Tor"],[5,"Fre"],[6,"Lør"],[0,"Søn"]];
+            const todayISO = new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Copenhagen" }).format(new Date());
             const CAR_LABELS = [["lille","Lille bil",120],["mellem","Mellem bil",180],["stor","Stor bil / SUV",240],["varebil","Varebil",180]];
             const SM = hoursDraft.slotMinutes || 30;
             const openM = toMin(hoursDraft.open), closeM = toMin(hoursDraft.close);
@@ -1187,6 +1371,40 @@ export default function AdminPanel() {
                     <p style={{ color: allClosed ? T.danger : T.t4, fontSize:12, margin:"12px 0 0", fontWeight: allClosed ? 600 : 400 }}>
                       {allClosed ? "⚠️ Alle dage er markeret lukket – kunder kan slet ikke booke. Åbn mindst én dag." : (hoursDraft.closedDays || []).length === 0 ? "Åbent alle ugens dage." : `Lukket: ${WEEK.filter(([d])=>hoursDraft.closedDays.includes(d)).map(([,l])=>l).join(", ")}.`}
                     </p>
+                  </>
+                )}
+
+                {/* Lukkede datoer (ferie/helligdage) */}
+                {card(
+                  <>
+                    {lbl("Lukkede datoer")}
+                    <p style={{ color:T.t4, fontSize:12.5, margin:"0 0 14px", lineHeight:1.5 }}>Enkeltdage hvor I holder lukket – ferie, helligdage osv. Kunder kan ikke booke disse datoer.</p>
+                    <div style={{ display:"flex", gap:8, alignItems:"center", flexWrap:"wrap", marginBottom: (hoursDraft.closedDates||[]).length ? 14 : 0 }}>
+                      <input type="date" value={closedDateInput} min={todayISO} onChange={e=>setClosedDateInput(e.target.value)}
+                        style={{ background:T.bg0, border:`1px solid ${T.border}`, borderRadius:10, color:T.t1, fontSize:14, fontWeight:600, padding:"10px 12px", fontFamily:FF, colorScheme:"dark" }} />
+                      <button disabled={!closedDateInput}
+                        onClick={()=>{ if(!closedDateInput) return; setHoursDraft(h=>({ ...h, closedDates:[...new Set([...(h.closedDates||[]), closedDateInput])].sort() })); setClosedDateInput(""); }}
+                        style={{ padding:"10px 18px", borderRadius:10, border:`1px solid ${closedDateInput?T.accentBorder:T.border}`, background:closedDateInput?T.accentDim:"transparent", color:closedDateInput?T.accent:T.t4, fontSize:13, fontWeight:700, cursor:closedDateInput?"pointer":"default", fontFamily:FF }}>
+                        + Tilføj lukket dato
+                      </button>
+                    </div>
+                    {(hoursDraft.closedDates||[]).length > 0 && (
+                      <div style={{ display:"flex", flexWrap:"wrap", gap:6 }}>
+                        {hoursDraft.closedDates.map(d => {
+                          const past = d < todayISO;
+                          return (
+                            <span key={d} style={{ display:"inline-flex", alignItems:"center", gap:7, fontSize:12.5, fontWeight:600, color:past?T.t4:T.danger, background:past?"rgba(255,255,255,.04)":T.dangerDim, border:`1px solid ${past?T.border:T.dangerBorder}`, borderRadius:8, padding:"6px 8px 6px 11px", fontVariantNumeric:"tabular-nums", textDecoration:past?"line-through":"none" }}>
+                              {fmtDate(d)}
+                              <button onClick={()=>setHoursDraft(h=>({ ...h, closedDates:(h.closedDates||[]).filter(x=>x!==d) }))}
+                                aria-label={`Fjern ${d}`}
+                                style={{ display:"flex", alignItems:"center", justifyContent:"center", width:18, height:18, borderRadius:5, background:"rgba(255,255,255,.08)", border:"none", color:"inherit", cursor:"pointer", padding:0 }}>
+                                <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                              </button>
+                            </span>
+                          );
+                        })}
+                      </div>
+                    )}
                   </>
                 )}
 

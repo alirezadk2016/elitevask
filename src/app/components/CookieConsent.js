@@ -1,12 +1,18 @@
 "use client";
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 
 export default function CookieConsent() {
   const [visible, setVisible] = useState(false);
+  const pathname = usePathname() || "";
 
   useEffect(() => {
     if (!localStorage.getItem("cookie_consent")) setVisible(true);
   }, []);
+
+  // Internal tools — no marketing scripts run here, and the banner just
+  // covers the admin/portal UI.
+  if (pathname.startsWith("/admin") || pathname.startsWith("/portal")) return null;
 
   function setConsent(value) {
     try { localStorage.setItem("cookie_consent", value); } catch {}
