@@ -410,8 +410,9 @@ export default function AdminPanel() {
       headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" },
       body: JSON.stringify({ type, url:urlInput.trim(), caption:captionInput, title:captionInput, album: type === "gallery" ? albumInput : undefined }),
     });
-    const data = await res.json();
+    const data = await res.json().catch(() => ({}));
     setCLoading(false);
+    if (authFailed(res.status)) return;
     if (data.ok) { addToast("ok", "Tilføjet!"); setUrlInput(""); setCaptionInput(""); fetchContent(type); }
     else addToast("err", "Fejl – prøv igen");
   }
@@ -426,6 +427,7 @@ export default function AdminPanel() {
     xhr.onload = () => {
       let data; try { data = JSON.parse(xhr.responseText); } catch { data = {}; }
       setUploadProgress(null);
+      if (authFailed(xhr.status)) return;
       if (data.ok) { addToast("ok", "Uploadet!"); setCaptionInput(""); fetchContent(type); }
       else addToast("err", data.error || "Upload fejlede");
     };
@@ -445,6 +447,15 @@ export default function AdminPanel() {
     setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 3500);
   }
 
+  // Stale/rotated secret → force re-login instead of opaque write failures.
+  // Returns true when the response was an auth failure (caller should stop).
+  function authFailed(status) {
+    if (status !== 401 && status !== 403) return false;
+    try { sessionStorage.removeItem("adm"); } catch {}
+    setAuthed(false); setSecret(""); setLoginErr("Session udløbet – log ind igen.");
+    return true;
+  }
+
   async function deleteItem(type, id, blobUrl) {
     try {
       const res = await fetch("/api/admin/content", {
@@ -452,6 +463,7 @@ export default function AdminPanel() {
         headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" },
         body: JSON.stringify({ type, id, blobUrl:blobUrl||null }),
       });
+      if (authFailed(res.status)) return;
       if (!res.ok) { addToast("err", "Sletning fejlede – prøv igen"); return; }
       addToast("ok", "Slettet");
       fetchContent(type);
@@ -924,8 +936,6 @@ export default function AdminPanel() {
                           // Day-header height: 10(pad) +12(label) +6 +32(circle) +4 +13(dots) +8(pad) +1(border) ≈ 86.
                           const HEADER_H = 86;
                           const topPx = HEADER_H + ((nowMinutes - GRID_START) / SLOT_MIN) * ROW_H;
-                          const todayIdx = weekDays.findIndex(d => toISO(d) === todayISO);
-                          const leftPx = TIME_W + todayIdx * COL_W;
                           return (
                             <div style={{ position:"absolute", top:topPx, left:0, right:0, zIndex:10, pointerEvents:"none", display:"flex", alignItems:"center" }}>
                               {/* dot on time label */}
@@ -1260,7 +1270,7 @@ export default function AdminPanel() {
                       <p style={{ color:T.t4, fontSize:11, marginTop:8, marginBottom:0 }}>JPG · PNG · WEBP — maks 4,5 MB</p>
                     </>
                   )}
-                  <input ref={fileRef} type="file" accept="image/*" style={{ display:"none" }} onChange={e => uploadFile(e.target.files[0], "gallery")} />
+                  <input ref={fileRef} type="file" accept="image/*" style={{ display:"none" }} onChange={e => { uploadFile(e.target.files[0], "gallery"); e.target.value = ""; }} />
                 </div>
 
                 {/* Divider */}
@@ -1395,7 +1405,7 @@ export default function AdminPanel() {
                     <div onClick={() => baBeforeRef.current?.click()}
                       style={{ border:`2px dashed ${baBeforeFile?T.accentBorder:"rgba(55,210,120,.2)"}`, borderRadius:10, padding:"22px 14px", textAlign:"center", cursor:"pointer", background:baBeforeFile?"rgba(55,210,120,.04)":"transparent" }}>
                       <p style={{ fontSize:13, color:baBeforeFile?T.accent:T.t3, margin:0, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{baBeforeFile ? baBeforeFile.name : "Vælg før-billede"}</p>
-                      <input ref={baBeforeRef} type="file" accept="image/*" style={{ display:"none" }} onChange={e => setBaBeforeFile(e.target.files[0] || null)} />
+                      <input ref={baBeforeRef} type="file" accept="image/*" style={{ display:"none" }} onChange={e => { setBaBeforeFile(e.target.files[0] || null); e.target.value = ""; }} />
                     </div>
                   </div>
                   <div>
@@ -1403,7 +1413,7 @@ export default function AdminPanel() {
                     <div onClick={() => baAfterRef.current?.click()}
                       style={{ border:`2px dashed ${baAfterFile?T.accentBorder:"rgba(55,210,120,.2)"}`, borderRadius:10, padding:"22px 14px", textAlign:"center", cursor:"pointer", background:baAfterFile?"rgba(55,210,120,.04)":"transparent" }}>
                       <p style={{ fontSize:13, color:baAfterFile?T.accent:T.t3, margin:0, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{baAfterFile ? baAfterFile.name : "Vælg efter-billede"}</p>
-                      <input ref={baAfterRef} type="file" accept="image/*" style={{ display:"none" }} onChange={e => setBaAfterFile(e.target.files[0] || null)} />
+                      <input ref={baAfterRef} type="file" accept="image/*" style={{ display:"none" }} onChange={e => { setBaAfterFile(e.target.files[0] || null); e.target.value = ""; }} />
                     </div>
                   </div>
                 </div>
@@ -1716,7 +1726,7 @@ export default function AdminPanel() {
                         <div key={idx} style={{ background:T.bg1, border:`1px solid ${T.border}`, borderRadius:11, display:"flex", alignItems:"center", padding:"12px 16px", gap:10 }}>
                           <span style={{ fontSize:11, fontWeight:700, color:T.t4, minWidth:22, flexShrink:0 }}>#{idx+1}</span>
                           <span style={{ flex:1, fontSize:14, color:T.t2, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{faq.q.da}</span>
-                          <button type="button" onClick={async () => { await fetch("/api/admin/content", { method:"POST", headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" }, body:JSON.stringify({ type:"faq", item:{ q:faq.q, a:faq.a } }) }); fetchContent("faq"); }}
+                          <button type="button" onClick={async () => { const r = await fetch("/api/admin/content", { method:"POST", headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" }, body:JSON.stringify({ type:"faq", item:{ q:faq.q, a:faq.a } }) }); if (!r.ok) { addToast("err", "Kunne ikke gemme — prøv igen"); return; } addToast("ok", "Gemt"); fetchContent("faq"); }}
                             style={{ padding:"5px 12px", background:T.accentDim, border:`1px solid ${T.accentBorder}`, borderRadius:7, color:T.accent, fontSize:12, fontWeight:700, cursor:"pointer", fontFamily:FF, whiteSpace:"nowrap", flexShrink:0 }}>+ Gem</button>
                         </div>
                       ))}
@@ -1737,7 +1747,7 @@ export default function AdminPanel() {
                         <div key={idx} style={{ background:T.bg1, border:`1px solid ${T.border}`, borderRadius:11, display:"flex", alignItems:"center", padding:"12px 16px", gap:10 }}>
                           <span style={{ fontSize:11, fontWeight:700, color:T.t4, minWidth:22, flexShrink:0 }}>#{idx+1}</span>
                           <span style={{ flex:1, fontSize:14, color:T.t2, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{faq.q.da}</span>
-                          <button onClick={async () => { await fetch("/api/admin/content", { method:"POST", headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" }, body:JSON.stringify({ type:"faq", item:{ q:faq.q, a:faq.a } }) }); fetchContent("faq"); }}
+                          <button onClick={async () => { const r = await fetch("/api/admin/content", { method:"POST", headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" }, body:JSON.stringify({ type:"faq", item:{ q:faq.q, a:faq.a } }) }); if (!r.ok) { addToast("err", "Kunne ikke gemme — prøv igen"); return; } addToast("ok", "Gemt"); fetchContent("faq"); }}
                             style={{ padding:"5px 12px", background:T.accentDim, border:`1px solid ${T.accentBorder}`, borderRadius:7, color:T.accent, fontSize:12, fontWeight:700, cursor:"pointer", fontFamily:FF, whiteSpace:"nowrap", flexShrink:0 }}>+ Gem</button>
                         </div>
                       ))}
@@ -2345,7 +2355,7 @@ export default function AdminPanel() {
               </button>
               <button onClick={() => setNavGuard(null)}
                 style={{ flex:1, padding:"11px 0", background:T.accentDim, color:T.accent, border:`1px solid ${T.accentBorder}`, borderRadius:9, fontWeight:600, fontSize:13, cursor:"pointer", fontFamily:FF }}>
-                Bliv og gem
+                Bliv her
               </button>
             </div>
           </div>
