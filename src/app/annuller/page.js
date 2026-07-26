@@ -8,7 +8,7 @@ function CancelContent() {
   const params = useSearchParams();
   const token = params.get("token");
 
-  const [state, setState] = useState("loading"); // loading | found | not_found | expired | already_cancelled | cancelled | error
+  const [state, setState] = useState("loading"); // loading | found | not_found | expired | already_cancelled | too_late | cancelled | error
   const [booking, setBooking] = useState(null);
   const [confirming, setConfirming] = useState(false);
 
@@ -16,15 +16,17 @@ function CancelContent() {
     if (!token) { setState("not_found"); return; }
     fetch(`/api/cancel?token=${encodeURIComponent(token)}`)
       .then(async (r) => {
-        const data = await r.json();
+        const data = await r.json().catch(() => ({}));
         if (r.status === 404) { setState("not_found"); return; }
+        if (r.status === 423 || data.error === "too_late") { setState("too_late"); return; }
         if (r.status === 409) { setState("already_cancelled"); return; }
         if (r.status === 410) { setState("expired"); return; }
-        if (!r.ok) { setState("not_found"); return; }
+        if (!r.ok) { setState("error"); return; }
         setBooking(data);
         setState("found");
       })
-      .catch(() => setState("not_found"));
+      // Network hiccup ≠ invalid link — show a retry-able error, not "not valid".
+      .catch(() => setState("error"));
   }, [token]);
 
   async function handleCancel() {
@@ -35,7 +37,9 @@ function CancelContent() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token }),
       });
+      const data = await r.json().catch(() => ({}));
       if (r.status === 404) { setState("not_found"); return; }
+      if (r.status === 423 || data.error === "too_late") { setState("too_late"); return; }
       if (r.status === 409) { setState("already_cancelled"); return; }
       if (r.status === 410) { setState("expired"); return; }
       if (!r.ok) throw new Error();
@@ -86,13 +90,25 @@ function CancelContent() {
           </div>
         )}
 
+        {state === "too_late" && (
+          <div className="cancel-card cancel-invalid">
+            <div className="cancel-icon">📞</div>
+            <h1>{da ? "Kontakt os for at annullere" : "Contact us to cancel"}</h1>
+            <p>{da
+              ? "Din tid er om mindre end 24 timer, så online-annullering er lukket. Din booking er stadig aktiv — ring til os, så finder vi en løsning."
+              : "Your appointment is less than 24 hours away, so online cancellation is closed. Your booking is still active — call us and we'll find a solution."
+            }</p>
+            <p><a href="tel:+4524440321" style={{fontWeight:700}}>+45 24 44 03 21</a> · info@elite-vask.dk</p>
+          </div>
+        )}
+
         {state === "expired" && (
           <div className="cancel-card cancel-invalid">
             <div className="cancel-icon">⏱</div>
             <h1>{da ? "Link udløbet" : "Link expired"}</h1>
             <p>{da
-              ? "Dette annulleringslink er udløbet (gyldigt i 24 timer). Kontakt os direkte for at ændre din booking."
-              : "This cancellation link has expired (valid for 24 hours). Contact us directly to change your booking."
+              ? "Dette annulleringslink er udløbet (kan bruges indtil 24 timer før din tid). Kontakt os direkte for at ændre din booking."
+              : "This cancellation link has expired (usable until 24 hours before your appointment). Contact us directly to change your booking."
             }</p>
             <p>{da ? "Telefon: +45 24 44 03 21 · info@elite-vask.dk" : "Phone: +45 24 44 03 21 · info@elite-vask.dk"}</p>
             <a href="/" className="btn btn-green" style={{display:"inline-block",marginTop:"16px"}}>

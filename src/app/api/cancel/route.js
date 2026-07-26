@@ -17,11 +17,32 @@ async function getKV() {
   }
 }
 
+// All reserved slot keys for a booking. Prefers the stored slots[] list;
+// legacy records without it are reconstructed from start time + duration in
+// 30-min steps, capped at the booking's own window so we can never free a
+// neighbouring booking's slots.
+function slotTimesFor(booking) {
+  const { time, slots, slotsNeeded, durationMin, carId } = booking;
+  if (Array.isArray(slots) && slots.length) return slots;
+  if (!time || !/^\d{2}:\d{2}$/.test(time)) return [];
+  const CAR_MIN = { lille: 120, mellem: 180, stor: 240, varebil: 180 };
+  const dur = durationMin || (slotsNeeded ? slotsNeeded * 30 : (CAR_MIN[carId] || 180));
+  const [h, m] = time.split(':').map(Number);
+  const start = h * 60 + (m || 0);
+  const out = [];
+  for (let t = start; t < start + dur; t += 30) {
+    out.push(`${String(Math.floor(t / 60)).padStart(2, '0')}:${String(t % 60).padStart(2, '0')}`);
+  }
+  return out;
+}
+
 // GET /api/cancel?token=xxx — look up booking
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const token = searchParams.get('token');
-  if (!token) return Response.json({ error: 'Missing token' }, { status: 400 });
+  if (!token || !/^[a-f0-9]{64}$/.test(token)) {
+    return Response.json({ error: 'not_found' }, { status: 404 });
+  }
 
   const kv = await getKV();
   if (!kv) return Response.json({ error: 'Service unavailable' }, { status: 503 });
@@ -36,6 +57,14 @@ export async function GET(request) {
   }
   if (data.cancelExpiresAt && new Date(data.cancelExpiresAt) < new Date()) {
     return Response.json({ error: 'link_expired' }, { status: 410 });
+  }
+  // Inside the 24h window: tell the page up front (423) so it shows the
+  // "call us" card instead of a confirm button that would only fail.
+  if (data.date && data.time) {
+    const dt = cphEpoch(data.date, data.time);
+    if (Number.isNaN(dt) || (dt - Date.now()) < 24 * 3600 * 1000) {
+      return Response.json({ error: 'too_late' }, { status: 423 });
+    }
   }
 
   // Return only what the page needs — no internal fields
@@ -85,21 +114,28 @@ export async function POST(request) {
     return Response.json({ error: 'link_expired' }, { status: 410 });
   }
 
-  // Same 24h rule as the customer portal
+  // Same 24h rule as the customer portal. 423 (not 409) so the page can
+  // distinguish "too late to cancel" from "already cancelled".
   if (date && booking.time) {
     const dt = cphEpoch(date, booking.time);
     if (Number.isNaN(dt) || (dt - Date.now()) < 24 * 3600 * 1000) {
       return Response.json({ error: 'too_late', message: L
         ? 'Kan ikke annulleres inden for 24 timer. Ring venligst til os på +45 24 44 03 21.'
-        : 'Cannot be cancelled within 24 hours. Please call us on +45 24 44 03 21.' }, { status: 409 });
+        : 'Cannot be cancelled within 24 hours. Please call us on +45 24 44 03 21.' }, { status: 423 });
     }
   }
 
-  // Free all booked slots
-  if (Array.isArray(slots)) {
-    for (const slotTime of slots) {
-      try { await kv.del(`slot:${date}:${slotTime}`); } catch {}
-    }
+  // Short-lived NX lock: two simultaneous cancel clicks must not both run the
+  // free-slots + email sequence (the second could free a slot someone else
+  // just rebooked).
+  try {
+    const lock = await kv.set(`cancel-lock:${token}`, 1, { nx: true, ex: 30 });
+    if (!lock) return Response.json({ error: 'already_cancelled' }, { status: 409 });
+  } catch {}
+
+  // Free all booked slots (reconstructed for legacy records without slots[])
+  for (const slotTime of slotTimesFor(booking)) {
+    try { await kv.del(`slot:${date}:${slotTime}`); } catch {}
   }
 
   // Soft delete — mark as cancelled instead of deleting. If the write fails,

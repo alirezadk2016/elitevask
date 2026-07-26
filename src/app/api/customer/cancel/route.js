@@ -60,10 +60,32 @@ export async function POST(request) {
     }
   }
 
-  if (Array.isArray(booking.slots)) {
-    for (const s of booking.slots) {
-      try { await kv.del(`slot:${booking.date}:${s}`); } catch {}
+  // Short-lived NX lock: two simultaneous cancel clicks must not both run the
+  // free-slots + email sequence (the second could free a slot someone else
+  // just rebooked).
+  try {
+    const lock = await kv.set(`cancel-lock:${token}`, 1, { nx: true, ex: 30 });
+    if (!lock) return Response.json({ error: 'already_cancelled' }, { status: 409 });
+  } catch {}
+
+  // Free all booked slots (reconstructed for legacy records without slots[],
+  // in 30-min steps capped at the booking's own duration so we can never
+  // free a neighbouring booking's slots).
+  const slotTimes = (() => {
+    if (Array.isArray(booking.slots) && booking.slots.length) return booking.slots;
+    if (!booking.time || !/^\d{2}:\d{2}$/.test(booking.time)) return [];
+    const CAR_MIN = { lille: 120, mellem: 180, stor: 240, varebil: 180 };
+    const dur = booking.durationMin || (booking.slotsNeeded ? booking.slotsNeeded * 30 : (CAR_MIN[booking.carId] || 180));
+    const [h, m] = booking.time.split(':').map(Number);
+    const start = h * 60 + (m || 0);
+    const out = [];
+    for (let t = start; t < start + dur; t += 30) {
+      out.push(`${String(Math.floor(t / 60)).padStart(2, '0')}:${String(t % 60).padStart(2, '0')}`);
     }
+    return out;
+  })();
+  for (const s of slotTimes) {
+    try { await kv.del(`slot:${booking.date}:${s}`); } catch {}
   }
 
   const cancelledAt = new Date().toISOString();

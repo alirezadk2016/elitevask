@@ -80,7 +80,7 @@ export function proxy(request) {
   // Portal auth guard
   const cookie = request.headers.get('cookie') || '';
   const hasSession = /(?:^|;\s*)ev_session=/.test(cookie);
-  if (pathname.startsWith('/portal') && !pathname.startsWith('/portal/login')) {
+  if (pathname.startsWith('/portal') && !pathname.startsWith('/portal/login') && !pathname.startsWith('/portal/verify')) {
     if (!hasSession) {
       const url = new URL('/portal/login', request.url);
       url.searchParams.set('from', pathname);

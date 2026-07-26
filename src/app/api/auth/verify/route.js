@@ -16,20 +16,38 @@ async function getKV() {
   } catch { return null; }
 }
 
+// GET no longer consumes the token: corporate mail scanners (SafeLinks,
+// Mimecast, …) prefetch links with GET and would burn the single-use token
+// before the user ever clicked. GET just forwards to the interstitial page,
+// which POSTs the token on an explicit user click.
 export async function GET(request) {
   const reqUrl = new URL(request.url);
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_BASE_URL || `${reqUrl.protocol}//${reqUrl.host}`;
-  const { searchParams } = reqUrl;
-  const rawToken = searchParams.get('token');
-  const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
-  const ua = request.headers.get('user-agent') || '';
-
+  const rawToken = reqUrl.searchParams.get('token');
   if (!rawToken || rawToken.length !== 64) {
     return Response.redirect(`${siteUrl}/portal/login?error=invalid`);
   }
+  return Response.redirect(`${siteUrl}/portal/verify?token=${encodeURIComponent(rawToken)}`);
+}
+
+// POST { token } — consumes the single-use token and creates the session.
+export async function POST(request) {
+  const reqUrl = new URL(request.url);
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_BASE_URL || `${reqUrl.protocol}//${reqUrl.host}`;
+  let body;
+  try { body = await request.json(); } catch {
+    return Response.json({ error: 'invalid' }, { status: 400 });
+  }
+  const rawToken = body.token;
+  const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+  const ua = request.headers.get('user-agent') || '';
+
+  if (!rawToken || typeof rawToken !== 'string' || rawToken.length !== 64) {
+    return Response.json({ error: 'invalid' }, { status: 400 });
+  }
 
   const kv = await getKV();
-  if (!kv) return Response.redirect(`${siteUrl}/portal/login?error=unavailable`);
+  if (!kv) return Response.json({ error: 'unavailable' }, { status: 503 });
 
   const hashed = hashToken(rawToken);
 
@@ -46,14 +64,14 @@ export async function GET(request) {
 
   if (!raw) {
     await auditLog(kv, 'magic_link_not_found_or_replayed', { ip, ua });
-    return Response.redirect(`${siteUrl}/portal/login?error=expired`);
+    return Response.json({ error: 'expired' }, { status: 410 });
   }
 
   const magic = typeof raw === 'string' ? JSON.parse(raw) : raw;
 
   if (new Date(magic.expiresAt) < new Date()) {
     await auditLog(kv, 'magic_link_expired', { ip, ua });
-    return Response.redirect(`${siteUrl}/portal/login?error=expired`);
+    return Response.json({ error: 'expired' }, { status: 410 });
   }
 
   // Create session
@@ -69,11 +87,7 @@ export async function GET(request) {
 
   await auditLog(kv, 'login_success', { emailHash: hashToken(magic.email), ip, ua });
 
-  return new Response(null, {
-    status: 302,
-    headers: {
-      Location: `${siteUrl}/portal`,
-      'Set-Cookie': makeSessionCookie(sessionRaw),
-    },
+  return Response.json({ ok: true }, {
+    headers: { 'Set-Cookie': makeSessionCookie(sessionRaw) },
   });
 }

@@ -1,5 +1,6 @@
 import { randomBytes } from 'crypto';
 import { hashToken, auditLog } from '@/lib/auth';
+import { isSameOrigin } from '@/lib/csrf';
 import { buildTransport, emailShell, BOOKING_EMAIL, INFO_EMAIL, CONTACT_EMAIL } from '@/lib/mailer';
 
 const MAGIC_TTL = 60 * 15;
@@ -27,6 +28,11 @@ async function checkRL(kv, key, max, window) {
 }
 
 export async function POST(request) {
+  // Same-origin only — a third-party page must not be able to fire login
+  // emails at arbitrary addresses.
+  if (!isSameOrigin(request)) {
+    return Response.json({ error: 'forbidden' }, { status: 403 });
+  }
   const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
   const ua = request.headers.get('user-agent') || '';
 
@@ -66,7 +72,8 @@ export async function POST(request) {
 
   const reqUrl = new URL(request.url);
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_BASE_URL || `${reqUrl.protocol}//${reqUrl.host}`;
-  const link = `${siteUrl}/api/auth/verify?token=${rawToken}`;
+  // Lands on the interstitial page; the token is only consumed on click.
+  const link = `${siteUrl}/portal/verify?token=${rawToken}`;
   const senderUser = process.env.SMTP_USER || process.env.GMAIL_USER || BOOKING_EMAIL;
   const transport = buildTransport();
 

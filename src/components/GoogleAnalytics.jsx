@@ -12,13 +12,28 @@ export default function GoogleAnalytics() {
 
   useEffect(() => {
     const read = () => {
-      try { setConsented(localStorage.getItem("cookie_consent") === "accepted"); }
-      catch { setConsented(false); }
+      let ok = false;
+      try { ok = localStorage.getItem("cookie_consent") === "accepted"; } catch {}
+      setConsented(ok);
+      // Accept → decline flip: unmounting doesn't remove the already-loaded
+      // gtag script, so explicitly stop collection and drop GA cookies.
+      if (!ok && typeof window !== "undefined" && window.dataLayer) {
+        try {
+          window[`ga-disable-${id}`] = true;
+          document.cookie.split(";").forEach((c) => {
+            const name = c.split("=")[0].trim();
+            if (/^(_ga|_gid|_gat)/.test(name)) {
+              document.cookie = `${name}=; Max-Age=0; path=/; domain=.${location.hostname.replace(/^www\./, "")}`;
+              document.cookie = `${name}=; Max-Age=0; path=/`;
+            }
+          });
+        } catch {}
+      }
     };
     read();
     window.addEventListener("cookie-consent-changed", read);
     return () => window.removeEventListener("cookie-consent-changed", read);
-  }, []);
+  }, [id]);
 
   if (!id || !consented) return null;
   return (

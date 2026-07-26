@@ -20,10 +20,12 @@ import Lightbox from "@/components/Lightbox";
 import BookingWizard from "@/components/BookingWizard";
 import SiteScripts from "@/components/SiteScripts";
 import Chatbot from "@/components/Chatbot";
+import HomeJsonLd from "@/components/HomeJsonLd";
 
 export default function Page() {
   return (
     <>
+      <HomeJsonLd />
       <AnnouncementBar />
       <TrustBar />
       <Nav />

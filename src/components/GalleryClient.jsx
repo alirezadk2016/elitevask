@@ -47,8 +47,8 @@ function BaSlider({ item }) {
       onPointerUp={endDrag}
       onPointerCancel={endDrag}
     >
-      <img className="ba-before" src={item.before} alt={`${item.caption} – før`} />
-      <img className="ba-after"  src={item.after}  alt={`${item.caption} – efter`}
+      <img className="ba-before" src={item.before} alt={`${item.caption || "Før & efter"} – før`} />
+      <img className="ba-after"  src={item.after}  alt={`${item.caption || "Før & efter"} – efter`}
         style={{ clipPath: `inset(0 0 0 ${pos}%)` }} />
       <span className="ba-lab l" data-i18n="ba_before">Før</span>
       <span className="ba-lab r" data-i18n="ba_after">Efter</span>
@@ -72,7 +72,7 @@ function BaThumb({ item, onExpand }) {
       <button
         type="button"
         className="ba-thumb-expand"
-        aria-label={`Åbn ${item.caption} i fuld størrelse`}
+        aria-label={`Åbn ${item.caption || "billede"} i fuld størrelse`}
         onPointerDown={(e) => e.stopPropagation()}
         onClick={onExpand}
       >

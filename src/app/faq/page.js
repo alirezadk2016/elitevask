@@ -46,10 +46,16 @@ async function getFaqItems() {
     const raw = await kv.get("content:faq");
     const faq = typeof raw === "string" ? JSON.parse(raw) : raw;
     if (Array.isArray(faq) && faq.length >= 5) {
-      return faq.map((f) => ({
-        q: f.q?.da || f.q || "",
-        a: f.a?.da || f.a || "",
-      }));
+      // Force strings: {da:"", en:"..."} must never leak an object into JSX
+      // (that would crash the whole page render).
+      const str = (v) => {
+        if (typeof v === "string") return v;
+        if (v && typeof v === "object") return v.da || v.en || "";
+        return "";
+      };
+      return faq
+        .map((f) => ({ q: str(f.q), a: str(f.a) }))
+        .filter((f) => f.q && f.a);
     }
   } catch (e) {}
   return DEFAULT_FAQ;

@@ -67,10 +67,17 @@ async function getExtras() {
     const raw = await kv.get("content:extras");
     const arr = typeof raw === "string" ? JSON.parse(raw) : raw;
     if (Array.isArray(arr) && arr.length) {
+      // Force strings: an admin-saved item like {da:"", en:"..."} must never
+      // leak an object into JSX (that crashes the whole page render).
+      const str = (v) => {
+        if (typeof v === "string") return v;
+        if (v && typeof v === "object") return v.da || v.en || "";
+        return "";
+      };
       return arr
         .map((e) => ({
-          name: e.name?.da || e.name || "",
-          desc: e.desc?.da || e.desc || "",
+          name: str(e.name),
+          desc: str(e.desc),
           price: Number(e.price) || 0,
         }))
         .filter((e) => e.name);
@@ -89,7 +96,7 @@ export default async function PriserPage() {
     "@type": "Service",
     name: "Mobil bil dampvask",
     serviceType: "Car wash",
-    provider: { "@type": "LocalBusiness", name: "Elite Vask", url: SITE },
+    provider: { "@id": `${SITE}/#business` },
     areaServed: "Sjælland",
     hasOfferCatalog: {
       "@type": "OfferCatalog",
