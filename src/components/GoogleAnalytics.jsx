@@ -20,11 +20,20 @@ export default function GoogleAnalytics() {
       if (!ok && typeof window !== "undefined" && window.dataLayer) {
         try {
           window[`ga-disable-${id}`] = true;
+          // Also tell gtag consent is withdrawn (v2 consent mode).
+          if (typeof window.gtag === "function") {
+            window.gtag("consent", "update", { analytics_storage: "denied", ad_storage: "denied" });
+          }
+          const host = location.hostname;
+          // Only set a domain-scoped cookie for real dot-domains; "domain=.localhost"
+          // (or a bare IP) is rejected by browsers and would silently no-op.
+          const base = host.replace(/^www\./, "");
+          const canScope = base.includes(".") && !/^[\d.]+$/.test(base);
           document.cookie.split(";").forEach((c) => {
             const name = c.split("=")[0].trim();
             if (/^(_ga|_gid|_gat)/.test(name)) {
-              document.cookie = `${name}=; Max-Age=0; path=/; domain=.${location.hostname.replace(/^www\./, "")}`;
               document.cookie = `${name}=; Max-Age=0; path=/`;
+              if (canScope) document.cookie = `${name}=; Max-Age=0; path=/; domain=.${base}`;
             }
           });
         } catch {}

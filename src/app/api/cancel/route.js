@@ -17,23 +17,54 @@ async function getKV() {
   }
 }
 
-// All reserved slot keys for a booking. Prefers the stored slots[] list;
-// legacy records without it are reconstructed from start time + duration in
-// 30-min steps, capped at the booking's own window so we can never free a
-// neighbouring booking's slots.
+// All reserved slot keys for a booking.
+//
+// Only ever derived from data the booking itself carries: the stored slots[]
+// list, or an explicit duration (durationMin / slotsNeeded, both written by
+// the booking API together with the slot interval it used). We deliberately do
+// NOT guess a duration from carId — a wrong guess deletes slot keys belonging
+// to the NEXT booking, which would silently free an occupied hour and allow a
+// double booking on top of an active job. Records with no duration info are
+// swept by scanning the day's actual slot keys instead (see sweepSlots).
 function slotTimesFor(booking) {
-  const { time, slots, slotsNeeded, durationMin, carId } = booking;
+  const { time, slots, slotsNeeded, durationMin, slotMinutes } = booking;
   if (Array.isArray(slots) && slots.length) return slots;
-  if (!time || !/^\d{2}:\d{2}$/.test(time)) return [];
-  const CAR_MIN = { lille: 120, mellem: 180, stor: 240, varebil: 180 };
-  const dur = durationMin || (slotsNeeded ? slotsNeeded * 30 : (CAR_MIN[carId] || 180));
+  if (!time || !/^([01]\d|2[0-3]):([0-5]\d)$/.test(time)) return [];
+  const step = [15, 30, 60].includes(slotMinutes) ? slotMinutes : 30;
+  const dur = durationMin || (slotsNeeded ? slotsNeeded * step : 0);
+  if (!dur) return [];
   const [h, m] = time.split(':').map(Number);
   const start = h * 60 + (m || 0);
   const out = [];
-  for (let t = start; t < start + dur; t += 30) {
+  for (let t = start; t < start + dur; t += step) {
     out.push(`${String(Math.floor(t / 60)).padStart(2, '0')}:${String(t % 60).padStart(2, '0')}`);
   }
   return out;
+}
+
+// Release the slots a booking reserved. When the record carries no usable
+// duration (very old bookings), fall back to scanning that day's slot keys and
+// deleting only those whose stored value points at THIS booking's token — that
+// can never touch another booking's reservation.
+async function releaseBookingSlots(kv, booking, token) {
+  const times = slotTimesFor(booking);
+  if (times.length) {
+    for (const t of times) {
+      try { await kv.del(`slot:${booking.date}:${t}`); } catch {}
+    }
+    return;
+  }
+  if (!booking.date) return;
+  try {
+    const keys = await kv.keys(`slot:${booking.date}:*`);
+    for (const key of keys) {
+      try {
+        const raw = await kv.get(key);
+        const val = typeof raw === 'string' ? JSON.parse(raw) : raw;
+        if (val && val.token === token) await kv.del(key);
+      } catch {}
+    }
+  } catch {}
 }
 
 // GET /api/cancel?token=xxx — look up booking
@@ -127,25 +158,38 @@ export async function POST(request) {
 
   // Short-lived NX lock: two simultaneous cancel clicks must not both run the
   // free-slots + email sequence (the second could free a slot someone else
-  // just rebooked).
+  // just rebooked). 'busy' (429), never 'already_cancelled' — the booking is
+  // still active at this point and must not be reported as cancelled.
+  let locked = false;
   try {
-    const lock = await kv.set(`cancel-lock:${token}`, 1, { nx: true, ex: 30 });
-    if (!lock) return Response.json({ error: 'already_cancelled' }, { status: 409 });
-  } catch {}
-
-  // Free all booked slots (reconstructed for legacy records without slots[])
-  for (const slotTime of slotTimesFor(booking)) {
-    try { await kv.del(`slot:${date}:${slotTime}`); } catch {}
-  }
-
-  // Soft delete — mark as cancelled instead of deleting. If the write fails,
-  // retry; never delete the record (it must stay visible in the admin).
-  const cancelled = JSON.stringify({ ...booking, status: 'cancelled', cancelledAt: new Date().toISOString() });
-  try {
-    await kv.set(`booking:${token}`, cancelled, { ex: 60 * 60 * 24 * 60 });
+    locked = !!(await kv.set(`cancel-lock:${token}`, 1, { nx: true, ex: 30 }));
+    if (!locked) {
+      return Response.json({ error: 'busy', message: L
+        ? 'Annulleringen behandles allerede. Vent et øjeblik og opdater siden.'
+        : 'This cancellation is already being processed. Please wait a moment and refresh.' }, { status: 429 });
+    }
   } catch {
-    try { await kv.set(`booking:${token}`, cancelled, { ex: 60 * 60 * 24 * 60 }); } catch {}
+    // KV error on the lock: proceed (a missed lock is better than blocking a
+    // legitimate cancellation) but log it so it isn't silent.
+    console.error('[cancel] lock unavailable — proceeding without it', token.slice(0, 8));
   }
+
+  // Persist the cancellation FIRST: if the write fails we must not have freed
+  // slots for a booking that still reads as confirmed.
+  const cancelled = JSON.stringify({ ...booking, status: 'cancelled', cancelledAt: new Date().toISOString() });
+  let saved = false;
+  for (let i = 0; i < 2 && !saved; i++) {
+    try { await kv.set(`booking:${token}`, cancelled, { ex: 60 * 60 * 24 * 60 }); saved = true; } catch {}
+  }
+  if (!saved) {
+    if (locked) { try { await kv.del(`cancel-lock:${token}`); } catch {} }
+    return Response.json({ error: 'store_failed', message: L
+      ? 'Vi kunne ikke gennemføre annulleringen. Ring venligst til os på +45 24 44 03 21.'
+      : 'We could not complete the cancellation. Please call us on +45 24 44 03 21.' }, { status: 503 });
+  }
+
+  // Free the slots this booking actually reserved.
+  await releaseBookingSlots(kv, booking, token);
 
   const senderUser = process.env.SMTP_USER || process.env.GMAIL_USER || BOOKING_EMAIL;
   const transport = buildTransport();

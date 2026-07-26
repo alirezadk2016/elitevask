@@ -56,41 +56,72 @@ export async function POST(request) {
     const dt = cphEpoch(booking.date, booking.time);
     // Malformed date/time → treat as "too late" rather than skipping the guard.
     if (Number.isNaN(dt) || (dt - Date.now()) < 24 * 3600 * 1000) {
-      return Response.json({ error: 'too_late', message: 'Kan ikke annulleres inden for 24 timer.' }, { status: 409 });
+      // 423, not 409 — must never be confused with 'already cancelled'.
+      return Response.json({ error: 'too_late', message: 'Kan ikke annulleres inden for 24 timer. Ring til os på +45 24 44 03 21.' }, { status: 423 });
     }
   }
 
   // Short-lived NX lock: two simultaneous cancel clicks must not both run the
-  // free-slots + email sequence (the second could free a slot someone else
-  // just rebooked).
+  // free-slots + email sequence. 'busy' (429), never 'already_cancelled' —
+  // the booking is still active here and must not be reported as cancelled.
+  let locked = false;
   try {
-    const lock = await kv.set(`cancel-lock:${token}`, 1, { nx: true, ex: 30 });
-    if (!lock) return Response.json({ error: 'already_cancelled' }, { status: 409 });
-  } catch {}
+    locked = !!(await kv.set(`cancel-lock:${token}`, 1, { nx: true, ex: 30 }));
+    if (!locked) {
+      return Response.json({ error: 'busy', message: 'Annulleringen behandles allerede. Vent et øjeblik og opdater siden.' }, { status: 429 });
+    }
+  } catch {
+    console.error('[customer/cancel] lock unavailable — proceeding without it', token.slice(0, 8));
+  }
 
-  // Free all booked slots (reconstructed for legacy records without slots[],
-  // in 30-min steps capped at the booking's own duration so we can never
-  // free a neighbouring booking's slots).
+  // Persist FIRST: never free slots for a booking that still reads as confirmed.
+  const cancelledAt = new Date().toISOString();
+  const record = JSON.stringify({ ...booking, status: 'cancelled', cancelledAt, cancelledBy: 'portal' });
+  let saved = false;
+  for (let i = 0; i < 2 && !saved; i++) {
+    try { await kv.set(`booking:${token}`, record, { ex: 60 * 60 * 24 * 60 }); saved = true; } catch {}
+  }
+  if (!saved) {
+    if (locked) { try { await kv.del(`cancel-lock:${token}`); } catch {} }
+    return Response.json({ error: 'store_failed', message: 'Vi kunne ikke gennemføre annulleringen. Ring venligst til os på +45 24 44 03 21.' }, { status: 503 });
+  }
+
+  // Free exactly the slots this booking reserved. Never guess a duration from
+  // carId — a wrong guess would delete the NEXT booking's slot keys.
   const slotTimes = (() => {
     if (Array.isArray(booking.slots) && booking.slots.length) return booking.slots;
-    if (!booking.time || !/^\d{2}:\d{2}$/.test(booking.time)) return [];
-    const CAR_MIN = { lille: 120, mellem: 180, stor: 240, varebil: 180 };
-    const dur = booking.durationMin || (booking.slotsNeeded ? booking.slotsNeeded * 30 : (CAR_MIN[booking.carId] || 180));
+    if (!booking.time || !/^([01]\d|2[0-3]):([0-5]\d)$/.test(booking.time)) return [];
+    const step = [15, 30, 60].includes(booking.slotMinutes) ? booking.slotMinutes : 30;
+    const dur = booking.durationMin || (booking.slotsNeeded ? booking.slotsNeeded * step : 0);
+    if (!dur) return [];
     const [h, m] = booking.time.split(':').map(Number);
     const start = h * 60 + (m || 0);
     const out = [];
-    for (let t = start; t < start + dur; t += 30) {
+    for (let t = start; t < start + dur; t += step) {
       out.push(`${String(Math.floor(t / 60)).padStart(2, '0')}:${String(t % 60).padStart(2, '0')}`);
     }
     return out;
   })();
-  for (const s of slotTimes) {
-    try { await kv.del(`slot:${booking.date}:${s}`); } catch {}
+  if (slotTimes.length) {
+    for (const s of slotTimes) {
+      try { await kv.del(`slot:${booking.date}:${s}`); } catch {}
+    }
+  } else if (booking.date) {
+    // No duration info (very old record): delete only the day's slot keys that
+    // point at THIS token — can never touch another booking's reservation.
+    try {
+      const keys = await kv.keys(`slot:${booking.date}:*`);
+      for (const key of keys) {
+        try {
+          const raw = await kv.get(key);
+          const val = typeof raw === 'string' ? JSON.parse(raw) : raw;
+          if (val && val.token === token) await kv.del(key);
+        } catch {}
+      }
+    } catch {}
   }
 
-  const cancelledAt = new Date().toISOString();
-  await kv.set(`booking:${token}`, JSON.stringify({ ...booking, status: 'cancelled', cancelledAt, cancelledBy: 'portal' }), { ex: 60 * 60 * 24 * 60 });
-  await auditLog(kv, 'booking_cancelled_portal', { ip, emailHash: hashToken(session.email), tokenRef: token.slice(0, 8) });
+  try { await auditLog(kv, 'booking_cancelled_portal', { ip, emailHash: hashToken(session.email), tokenRef: token.slice(0, 8) }); } catch {}
 
   const { date, time, car, pkg, name, price, lang } = booking;
   const L = lang !== 'en';

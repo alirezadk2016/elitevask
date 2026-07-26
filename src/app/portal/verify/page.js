@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Suspense } from "react";
 
@@ -12,9 +12,21 @@ export const dynamic = "force-dynamic";
 function VerifyContent() {
   const params = useSearchParams();
   const router = useRouter();
-  const token = params.get("token") || "";
+  const urlToken = params.get("token") || "";
+  // Keep the token in memory and strip it from the address bar immediately:
+  // analytics pageviews (and browser history / shoulder-surfing) must never
+  // carry a live single-use login token.
+  const tokenRef = useRef(urlToken);
+  if (urlToken && !tokenRef.current) tokenRef.current = urlToken;
+  const token = tokenRef.current;
   const [state, setState] = useState("idle"); // idle | loading | error
   const [errMsg, setErrMsg] = useState("");
+
+  useEffect(() => {
+    if (urlToken) {
+      try { window.history.replaceState(null, "", "/portal/verify"); } catch {}
+    }
+  }, [urlToken]);
 
   const valid = /^[a-f0-9]{64}$/.test(token);
 
@@ -89,8 +101,14 @@ function VerifyContent() {
 
 export default function VerifyPage() {
   return (
-    <Suspense fallback={<div className="portal-auth-page"><div className="portal-auth-card"><p>Indlæser…</p></div></div>}>
-      <VerifyContent />
-    </Suspense>
+    <>
+      {/* The login token sits in the URL — never send it to another origin via
+          Referer. NOT "no-referrer": that serializes Origin as "null" on our
+          own POST, which the same-origin check would reject. */}
+      <meta name="referrer" content="same-origin" />
+      <Suspense fallback={<div className="portal-auth-page"><div className="portal-auth-card"><p>Indlæser…</p></div></div>}>
+        <VerifyContent />
+      </Suspense>
+    </>
   );
 }

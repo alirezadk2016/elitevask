@@ -353,6 +353,9 @@ export async function POST(request) {
       // Absolute duration in minutes — the admin renders end-time/span from
       // this so changing the slot interval later never mis-renders old bookings.
       durationMin: slotsNeeded * hours.slotMinutes,
+      // The interval this booking was made under — lets cancel/admin
+      // reconstruct exact slot keys even after the manager changes it.
+      slotMinutes: hours.slotMinutes,
       name, phone, email, msg, extras,
       addr, zip, city,
       bookedAt, cancelExpiresAt,

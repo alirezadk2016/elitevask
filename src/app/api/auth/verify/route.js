@@ -1,5 +1,6 @@
 import { randomBytes } from 'crypto';
 import { hashToken, makeSessionCookie, auditLog } from '@/lib/auth';
+import { isSameOrigin } from '@/lib/csrf';
 
 const SESSION_TTL = 60 * 60 * 24 * 30;
 
@@ -32,8 +33,11 @@ export async function GET(request) {
 
 // POST { token } — consumes the single-use token and creates the session.
 export async function POST(request) {
-  const reqUrl = new URL(request.url);
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_BASE_URL || `${reqUrl.protocol}//${reqUrl.host}`;
+  // Same-origin only: without this a malicious page could force a victim's
+  // browser to log in to the ATTACKER's account (session fixation).
+  if (!isSameOrigin(request)) {
+    return Response.json({ error: 'forbidden' }, { status: 403 });
+  }
   let body;
   try { body = await request.json(); } catch {
     return Response.json({ error: 'invalid' }, { status: 400 });
