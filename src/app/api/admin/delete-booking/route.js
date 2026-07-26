@@ -1,17 +1,50 @@
 import { createHash, timingSafeEqual } from 'crypto';
 import { buildTransport, emailShell, tr, esc, CONTACT_EMAIL, BOOKING_EMAIL } from '@/lib/mailer';
 
-const CAR_SLOTS = { lille: 4, mellem: 6, stor: 8, varebil: 6 }; // 30-min units
-const SLOT_TIMES = ['15:30','16:00','16:30','17:00','17:30','18:00','18:30','19:00','19:30','20:00','20:30','21:00','21:30'];
-
-// Reconstruct the reserved hours for a booking that predates the `slots` field.
+// The slot keys a booking reserved.
+//
+// Only ever derived from data the booking itself carries — never guessed from
+// carId and never anchored to a hardcoded opening-hours grid (both would break
+// as soon as the manager edits the hours, and a wrong guess deletes slot keys
+// belonging to the NEXT booking, silently freeing an occupied hour). Records
+// with no duration info return [] and are swept by token instead.
 function slotsFor(data) {
-  if (Array.isArray(data.slots) && data.slots.length) return data.slots;
-  if (!data.time) return [];
-  const start = SLOT_TIMES.indexOf(data.time);
-  if (start < 0) return [];
-  const n = data.slotsNeeded || CAR_SLOTS[data.carId] || 1;
-  return SLOT_TIMES.slice(start, start + n);
+  const { time, slots, slotsNeeded, durationMin, slotMinutes } = data;
+  if (Array.isArray(slots) && slots.length) return slots;
+  if (!time || !/^([01]\d|2[0-3]):([0-5]\d)$/.test(time)) return [];
+  const step = [15, 30, 60].includes(slotMinutes) ? slotMinutes : 30;
+  const dur = durationMin || (slotsNeeded ? slotsNeeded * step : 0);
+  if (!dur) return [];
+  const [h, m] = time.split(':').map(Number);
+  const start = h * 60 + (m || 0);
+  const out = [];
+  for (let t = start; t < start + dur; t += step) {
+    out.push(`${String(Math.floor(t / 60)).padStart(2, '0')}:${String(t % 60).padStart(2, '0')}`);
+  }
+  return out;
+}
+
+// Free a booking's slots; falls back to deleting only the day's slot keys that
+// point at THIS token, so another booking's reservation can never be touched.
+async function releaseSlots(kv, data, token) {
+  const times = slotsFor(data);
+  if (times.length) {
+    for (const t of times) {
+      try { await kv.del(`slot:${data.date}:${t}`); } catch {}
+    }
+    return;
+  }
+  if (!data.date) return;
+  try {
+    const keys = await kv.keys(`slot:${data.date}:*`);
+    for (const key of keys) {
+      try {
+        const raw = await kv.get(key);
+        const val = typeof raw === 'string' ? JSON.parse(raw) : raw;
+        if (val && val.token === token) await kv.del(key);
+      } catch {}
+    }
+  } catch {}
 }
 
 function hashEmail(email) {
@@ -115,10 +148,10 @@ export async function PATCH(request) {
     if (!booking) return Response.json({ error: 'not_found' }, { status: 404 });
     const data = typeof booking === 'string' ? JSON.parse(booking) : booking;
     data.status = 'cancelled';
-    if (data.date) {
-      await Promise.all(slotsFor(data).map(t => kv.del(`slot:${data.date}:${t}`)));
-    }
+    // Persist first, then free slots: a failed write must never leave slots
+    // released for a booking that still reads as confirmed.
     await kv.set(`booking:${token}`, JSON.stringify(data), { ex: 60 * 60 * 24 * 30 });
+    if (data.date) await releaseSlots(kv, data, token);
     await sendCancelEmails(data).catch(() => {});
     return Response.json({ ok: true });
   } catch (e) {
@@ -139,9 +172,7 @@ export async function DELETE(request) {
     if (booking) {
       const data = typeof booking === 'string' ? JSON.parse(booking) : booking;
       email = data.email || null;
-      if (data.date) {
-        await Promise.all(slotsFor(data).map(t => kv.del(`slot:${data.date}:${t}`)));
-      }
+      if (data.date) await releaseSlots(kv, data, token);
       if (data.status !== 'cancelled') {
         await sendCancelEmails(data).catch(() => {});
       }

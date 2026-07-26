@@ -52,9 +52,15 @@ export default function PortalPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token }),
       });
-      const data = await r.json();
+      const data = await r.json().catch(() => ({}));
       if (!r.ok) {
-        alert(data.message || "Kunne ikke annullere. Kontakt os på +45 24 44 03 21.");
+        // 429 = another cancel attempt is mid-flight; the booking is still
+        // active, so never imply it was cancelled.
+        alert(
+          r.status === 429
+            ? "Annulleringen behandles allerede. Vent et øjeblik og opdater siden."
+            : data.message || "Kunne ikke annullere. Kontakt os på +45 24 44 03 21."
+        );
         return;
       }
       setCancelDone(Date.now());
@@ -65,8 +71,11 @@ export default function PortalPage() {
     }
   }
 
-  const upcoming = bookings?.filter(b => b.status !== "cancelled" && b.date >= new Date().toISOString().slice(0, 10)) || [];
-  const past = bookings?.filter(b => b.status === "cancelled" || (b.date && b.date < new Date().toISOString().slice(0, 10))) || [];
+  // Copenhagen date, not UTC — otherwise around midnight local time a booking
+  // lands in the wrong group (the server's 24h rules all use Copenhagen too).
+  const todayCph = new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Copenhagen" }).format(new Date());
+  const upcoming = bookings?.filter(b => b.status !== "cancelled" && b.date >= todayCph) || [];
+  const past = bookings?.filter(b => b.status === "cancelled" || (b.date && b.date < todayCph)) || [];
 
   return (
     <div className="portal-page">
