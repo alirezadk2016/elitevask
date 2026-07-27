@@ -172,6 +172,7 @@ function BaLightbox({ items, index, onClose, onPrev, onNext }) {
 export default function GalleryClient() {
   const [ba,    setBa]    = useState(DEFAULT_BEFORE_AFTER);
   const [album, setAlbum] = useState(DEFAULT_ALBUM);
+  const [albumFilter, setAlbumFilter] = useState("alle");
   const [lb,    setLb]    = useState(-1);
   const [baLb,  setBaLb]  = useState(-1);
 
@@ -186,13 +187,18 @@ export default function GalleryClient() {
       .catch(() => {});
   }, []);
 
+  // Albums assigned in the admin ("album" field). Only rendered as filter
+  // chips when the manager has actually used more than one.
+  const albumNames = Array.from(new Set(album.map((it) => (it.album || "").trim()).filter(Boolean)));
+  const shown = albumFilter === "alle" ? album : album.filter((it) => (it.album || "").trim() === albumFilter);
+
   const closeBa   = useCallback(() => setBaLb(-1), []);
   const prevBa    = useCallback(() => setBaLb((i) => (i <= 0 ? ba.length - 1 : i - 1)),    [ba.length]);
   const nextBa    = useCallback(() => setBaLb((i) => (i >= ba.length - 1 ? 0 : i + 1)),    [ba.length]);
 
   const closeAlbum = useCallback(() => setLb(-1), []);
-  const prevAlbum  = useCallback(() => setLb((i) => (i <= 0 ? album.length - 1 : i - 1)), [album.length]);
-  const nextAlbum  = useCallback(() => setLb((i) => (i >= album.length - 1 ? 0 : i + 1)), [album.length]);
+  const prevAlbum  = useCallback(() => setLb((i) => (i <= 0 ? shown.length - 1 : i - 1)), [shown.length]);
+  const nextAlbum  = useCallback(() => setLb((i) => (i >= shown.length - 1 ? 0 : i + 1)), [shown.length]);
 
   useEffect(() => {
     if (lb < 0) return;
@@ -239,10 +245,25 @@ export default function GalleryClient() {
       <section className="gal-section" id="galleri">
         <div className="gal-section-head">
           <h2 className="sec-title">Galleri</h2>
-          <span className="gal-count">{album.length}</span>
+          <span className="gal-count">{shown.length}</span>
         </div>
+        {albumNames.length > 1 && (
+          <div className="gal-albums" role="group" aria-label="Filtrer galleri">
+            {["alle", ...albumNames].map((name) => (
+              <button
+                key={name}
+                type="button"
+                className={`gal-album-chip${albumFilter === name ? " on" : ""}`}
+                aria-pressed={albumFilter === name}
+                onClick={() => { setAlbumFilter(name); setLb(-1); }}
+              >
+                {name === "alle" ? "Alle" : name}
+              </button>
+            ))}
+          </div>
+        )}
         <div className="gallery">
-          {album.map((it, i) => (
+          {shown.map((it, i) => (
             <figure key={it.id} className="gitem" onClick={() => setLb(i)}>
               <img src={it.url} alt={it.caption || "Galleri"} loading="lazy" />
               {it.caption ? <figcaption>{it.caption}</figcaption> : null}
@@ -261,7 +282,7 @@ export default function GalleryClient() {
       )}
 
       {/* Album lightbox */}
-      {lb >= 0 && album[lb] && (
+      {lb >= 0 && shown[lb] && (
         <div className="gal-lb" onClick={(e) => { if (e.target === e.currentTarget) closeAlbum(); }}>
           <button className="gal-lb-close" onClick={closeAlbum} aria-label="Luk">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
@@ -273,8 +294,8 @@ export default function GalleryClient() {
               strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
           </button>
           <figure className="gal-lb-fig">
-            <img src={album[lb].url} alt={album[lb].caption || "Galleri"} />
-            {album[lb].caption ? <figcaption>{album[lb].caption}</figcaption> : null}
+            <img src={shown[lb].url} alt={shown[lb].caption || "Galleri"} />
+            {shown[lb].caption ? <figcaption>{shown[lb].caption}</figcaption> : null}
           </figure>
           <button className="gal-lb-nav r" onClick={nextAlbum} aria-label="Næste">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"

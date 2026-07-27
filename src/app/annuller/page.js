@@ -40,7 +40,7 @@ function CancelContent() {
       const data = await r.json().catch(() => ({}));
       if (r.status === 404) { setState("not_found"); return; }
       if (r.status === 423 || data.error === "too_late") { setState("too_late"); return; }
-      if (r.status === 429) { setState("busy"); return; }
+      if (r.status === 429) { setState(data.error === "rate_limit" ? "rate_limit" : "busy"); return; }
       if (r.status === 409) { setState("already_cancelled"); return; }
       if (r.status === 410) { setState("expired"); return; }
       if (!r.ok) throw new Error();
@@ -88,6 +88,17 @@ function CancelContent() {
             <a href="/" className="btn btn-green" style={{display:"inline-block",marginTop:"16px"}}>
               {da ? "Gå til forsiden" : "Go to homepage"}
             </a>
+          </div>
+        )}
+
+        {state === "rate_limit" && (
+          <div className="cancel-card cancel-invalid">
+            <div className="cancel-icon">🚦</div>
+            <h1>{da ? "For mange forsøg" : "Too many attempts"}</h1>
+            <p>{da
+              ? "Prøv igen om et par minutter, eller ring til os på +45 24 44 03 21."
+              : "Please try again in a few minutes, or call us on +45 24 44 03 21."
+            }</p>
           </div>
         )}
 

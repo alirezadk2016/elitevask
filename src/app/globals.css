@@ -1211,6 +1211,10 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 .gal-section{max-width:1140px;margin:0 auto;padding:30px 24px 10px}
 .gal-section-head{display:flex;align-items:center;gap:14px;margin-bottom:26px}
 .gal-section-head .sec-title{font-size:clamp(22px,3vw,30px)}
+.gal-albums{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 18px}
+.gal-album-chip{padding:7px 15px;border-radius:99px;border:1px solid var(--line);background:transparent;color:rgba(255,255,255,.6);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s}
+.gal-album-chip:hover{border-color:rgba(55,210,120,.45);color:var(--green)}
+.gal-album-chip.on{background:rgba(55,210,120,.12);border-color:rgba(55,210,120,.5);color:var(--green)}
 .gal-count{display:inline-flex;align-items:center;justify-content:center;min-width:30px;height:26px;padding:0 11px;border-radius:99px;font-size:13px;font-weight:800;color:#f3dd84;background:rgba(212,175,55,.12);border:1px solid rgba(212,175,55,.3)}
 .gal-foot-cta{text-align:center;padding:50px 24px 80px}
 /* lightbox */

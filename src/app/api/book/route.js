@@ -2,6 +2,7 @@ import { randomBytes, createHash } from 'crypto';
 import dns from 'node:dns/promises';
 import { cphEpoch } from '@/lib/cphTime';
 import { buildSlotTimes, carSlotCount, isClosedDay, normalizeHours, DEFAULT_HOURS } from '@/lib/hours';
+import { clientIp } from '@/lib/clientIp';
 import { buildTransport, emailShell, tr, BOOKING_EMAIL, INFO_EMAIL, CONTACT_EMAIL } from '@/lib/mailer';
 
 // Known disposable / throwaway email domains – block fake bookings
@@ -161,6 +162,45 @@ async function getBookedSlots(date) {
 
 function slotKey(date, time) { return `slot:${date}:${time}`; }
 
+// ── Server-side price ───────────────────────────────────────────────────────
+// The quote shown in both emails must not be whatever the client posted.
+// Recompute it from the same KV data the public site uses (falling back to the
+// built-in defaults), and only trust the client's string if we can't.
+const DEFAULT_PRICES = {
+  lille:   { hele: 800,  udv: 500, indv: 600, guld: 2000 },
+  mellem:  { hele: 950,  udv: 550, indv: 700, guld: 2200 },
+  stor:    { hele: 1100, udv: 650, indv: 850, guld: 2350 },
+  varebil: { hele: 1400, udv: 750, indv: 750, guld: 2200 },
+};
+const DEFAULT_EXTRA_PRICES = { motor: 400, lak: 300, pleje: 200, haar: 300, saede: 400, barnesaede: 100 };
+
+async function computePrice(carId, pkgId, extraIds) {
+  if (!DEFAULT_PRICES[carId]) return null;
+  const pkg = ['hele', 'udv', 'indv', 'guld'].includes(pkgId) ? pkgId : 'hele';
+  let prices = DEFAULT_PRICES, extraPrices = DEFAULT_EXTRA_PRICES;
+  try {
+    const kv = await getKV();
+    if (kv) {
+      const stored = await kv.get('content:prices');
+      const p = typeof stored === 'string' ? JSON.parse(stored) : stored;
+      if (p && p[carId] && Number(p[carId][pkg]) > 0) prices = p;
+      const rawEx = await kv.get('content:extras');
+      const ex = typeof rawEx === 'string' ? JSON.parse(rawEx) : rawEx;
+      if (Array.isArray(ex) && ex.length) {
+        extraPrices = {};
+        for (const e of ex) if (e && e.id) extraPrices[e.id] = Number(e.price) || 0;
+      }
+    }
+  } catch {}
+  const base = Number(prices[carId]?.[pkg]) || Number(DEFAULT_PRICES[carId][pkg]) || 0;
+  if (!base) return null;
+  const addOns = Array.isArray(extraIds)
+    ? extraIds.slice(0, 12).reduce((s, id) => s + (Number(extraPrices[id]) || 0), 0)
+    : 0;
+  // Travel is free across the service area (driveFee is 0 site-wide).
+  return `${Math.round(base + addOns).toLocaleString('da-DK')} kr`;
+}
+
 // Opening hours are manager-editable (admin → Åbningstider), stored in KV
 // under `content:hours`. A booking occupies carSlotCount() consecutive slots
 // and the whole duration must finish by the closing time.
@@ -196,7 +236,7 @@ export async function GET(request) {
 
 export async function POST(request) {
   // Rate limiting
-  const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+  const ip = clientIp(request);
   if (!await checkRateLimit(ip)) {
     return Response.json({ error: 'rate_limit', message: 'For mange anmodninger. Prøv igen om et minut.' }, { status: 429 });
   }
@@ -206,7 +246,7 @@ export async function POST(request) {
     return Response.json({ error: 'Invalid JSON' }, { status: 400 });
   }
 
-  const { car, pkg, extras, addr, zip, city, date, time, name, phone, email, msg, price, lang, carId } = body;
+  const { car, pkg, extras, addr, zip, city, date, time, name, phone, email, msg, price: clientPrice, lang, carId, pkgId, extraIds } = body;
 
   // Input validation
   const L0 = lang !== 'en';
@@ -239,7 +279,7 @@ export async function POST(request) {
   // interpolated into the subject; price is shown to company + customer).
   if (car   && String(car).length   > 80)  return Response.json({ error: 'invalid_car'   }, { status: 400 });
   if (pkg   && String(pkg).length   > 80)  return Response.json({ error: 'invalid_pkg'   }, { status: 400 });
-  if (price && String(price).length > 40)  return Response.json({ error: 'invalid_price' }, { status: 400 });
+  if (clientPrice && String(clientPrice).length > 40) return Response.json({ error: 'invalid_price' }, { status: 400 });
   if (carId && !['lille','mellem','stor','varebil'].includes(carId)) return Response.json({ error: 'invalid_car' }, { status: 400 });
   if (zip  && !/^\d{3,5}$/.test(zip.trim())) return Response.json({ error: 'invalid_zip' }, { status: 400 });
   if (zip) {
@@ -250,6 +290,9 @@ export async function POST(request) {
         : 'We only cover Zealand (postcodes 1000–4799). Call us on +45 24 44 03 21 and we will find a solution.' }, { status: 400 });
     }
   }
+
+  // Price is recomputed server-side; the client value is only a fallback.
+  const price = (await computePrice(carId, pkgId, extraIds)) || clientPrice;
 
   // Current opening hours (manager-configurable) drive the slot grid + duration.
   const hours = await loadHours();

@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { clientIp } from '@/lib/clientIp';
 
 const BLOCKED_UA_PATTERNS = [
   /sqlmap/i, /nikto/i, /nmap/i, /masscan/i, /zgrab/i,
@@ -20,6 +21,9 @@ const SUSPICIOUS_PATH_PATTERNS = [
 // Public files that must always be served (never treated as scanner probes)
 const ALLOWED_PATHS = new Set(['/sitemap.xml', '/robots.txt', '/manifest.webmanifest']);
 
+// Best-effort burst brake. This map is per serverless instance, so it is NOT a
+// global limit — it only blunts a flood hitting one instance. The limits that
+// actually matter (booking, login email) are KV-backed and global.
 const ipHits = new Map();
 const WINDOW_MS = 60_000;
 const MAX_HITS = 120;
@@ -41,9 +45,7 @@ function isRateLimited(ip) {
 export function proxy(request) {
   const { pathname } = request.nextUrl;
   const ua = request.headers.get('user-agent') || '';
-  const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
-    || request.headers.get('x-real-ip')
-    || 'unknown';
+  const ip = clientIp(request);
 
   // Block suspicious user agents on API routes
   if (pathname.startsWith('/api/')) {

@@ -1,4 +1,5 @@
 import { isSameOrigin } from '@/lib/csrf';
+import { clientIp, rateLimit } from '@/lib/clientIp';
 import { cphEpoch } from '@/lib/cphTime';
 import { buildTransport, emailShell, tr, esc, BOOKING_EMAIL, INFO_EMAIL, CONTACT_EMAIL } from '@/lib/mailer';
 
@@ -127,6 +128,11 @@ export async function POST(request) {
 
   const kv = await getKV();
   if (!kv) return Response.json({ error: 'Service unavailable' }, { status: 503 });
+
+  // Global (KV-backed) limit so the endpoint can't be hammered to probe tokens.
+  if (!(await rateLimit(kv, `rl:cancel:${clientIp(request)}`, 10, 300))) {
+    return Response.json({ error: 'rate_limit', message: 'For mange forsøg. Prøv igen om lidt.' }, { status: 429 });
+  }
 
   const raw = await kv.get(`booking:${token}`);
   if (!raw) return Response.json({ error: 'not_found' }, { status: 404 });
