@@ -103,8 +103,17 @@ export async function POST(request) {
     return out;
   })();
   if (slotTimes.length) {
+    // Ownership-checked: a stale slots[] list must never wipe a reservation
+    // that someone else has made in the meantime.
     for (const s of slotTimes) {
-      try { await kv.del(`slot:${booking.date}:${s}`); } catch {}
+      try {
+        const key = `slot:${booking.date}:${s}`;
+        const raw = await kv.get(key);
+        if (raw === null || raw === undefined) continue;
+        const val = typeof raw === 'string' ? JSON.parse(raw) : raw;
+        if (val && val.token && val.token !== token) continue;
+        await kv.del(key);
+      } catch {}
     }
   } else if (booking.date) {
     // No duration info (very old record): delete only the day's slot keys that

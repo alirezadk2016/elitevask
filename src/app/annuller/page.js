@@ -52,7 +52,12 @@ function CancelContent() {
     }
   }
 
-  const da = !booking || booking.lang !== "en";
+  // Language: the booking record when we have it, else an explicit ?lang=en,
+  // else the visitor's stored site language. Without this every non-success
+  // card rendered in Danish for English customers.
+  const da = booking
+    ? booking.lang !== "en"
+    : ((params.get("lang") || (typeof window !== "undefined" ? (() => { try { return localStorage.getItem("lang"); } catch { return null; } })() : null) || "da") !== "en");
 
   const fmt = (d) => {
     if (!d) return "";

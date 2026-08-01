@@ -47,11 +47,23 @@ function slotTimesFor(booking) {
 // duration (very old bookings), fall back to scanning that day's slot keys and
 // deleting only those whose stored value points at THIS booking's token — that
 // can never touch another booking's reservation.
+// Delete a slot key only when it still belongs to this booking, so a stale
+// slots[] list can never wipe a reservation made since.
+async function delOwnedSlot(kv, key, token) {
+  try {
+    const raw = await kv.get(key);
+    if (raw === null || raw === undefined) return;
+    const val = typeof raw === 'string' ? JSON.parse(raw) : raw;
+    if (val && val.token && val.token !== token) return;
+    await kv.del(key);
+  } catch {}
+}
+
 async function releaseBookingSlots(kv, booking, token) {
   const times = slotTimesFor(booking);
   if (times.length) {
     for (const t of times) {
-      try { await kv.del(`slot:${booking.date}:${t}`); } catch {}
+      await delOwnedSlot(kv, `slot:${booking.date}:${t}`, token);
     }
     return;
   }
@@ -87,16 +99,18 @@ export async function GET(request) {
   if (data.status === 'cancelled') {
     return Response.json({ error: 'already_cancelled' }, { status: 409 });
   }
-  if (data.cancelExpiresAt && new Date(data.cancelExpiresAt) < new Date()) {
-    return Response.json({ error: 'link_expired' }, { status: 410 });
-  }
   // Inside the 24h window: tell the page up front (423) so it shows the
-  // "call us" card instead of a confirm button that would only fail.
+  // "call us — your booking is still active" card instead of a confirm button
+  // that could only fail. This is checked BEFORE cancelExpiresAt because for a
+  // booking made less than 24h ahead that timestamp is already in the past at
+  // creation, which would otherwise show a misleading "link expired".
   if (data.date && data.time) {
     const dt = cphEpoch(data.date, data.time);
     if (Number.isNaN(dt) || (dt - Date.now()) < 24 * 3600 * 1000) {
       return Response.json({ error: 'too_late' }, { status: 423 });
     }
+  } else if (data.cancelExpiresAt && new Date(data.cancelExpiresAt) < new Date()) {
+    return Response.json({ error: 'link_expired' }, { status: 410 });
   }
 
   // Return only what the page needs — no internal fields
@@ -146,13 +160,9 @@ export async function POST(request) {
     return Response.json({ error: 'already_cancelled' }, { status: 409 });
   }
 
-  // Reject expired cancel links
-  if (cancelExpiresAt && new Date(cancelExpiresAt) < new Date()) {
-    return Response.json({ error: 'link_expired' }, { status: 410 });
-  }
-
-  // Same 24h rule as the customer portal. 423 (not 409) so the page can
-  // distinguish "too late to cancel" from "already cancelled".
+  // 24h rule first (423), then the link-expiry fallback — see the GET handler:
+  // for a same-day booking cancelExpiresAt is already past at creation, so
+  // checking it first would show "link expired" instead of "call us".
   if (date && booking.time) {
     const dt = cphEpoch(date, booking.time);
     if (Number.isNaN(dt) || (dt - Date.now()) < 24 * 3600 * 1000) {
@@ -160,6 +170,8 @@ export async function POST(request) {
         ? 'Kan ikke annulleres inden for 24 timer. Ring venligst til os på +45 24 44 03 21.'
         : 'Cannot be cancelled within 24 hours. Please call us on +45 24 44 03 21.' }, { status: 423 });
     }
+  } else if (cancelExpiresAt && new Date(cancelExpiresAt) < new Date()) {
+    return Response.json({ error: 'link_expired' }, { status: 410 });
   }
 
   // Short-lived NX lock: two simultaneous cancel clicks must not both run the

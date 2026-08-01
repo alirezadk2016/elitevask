@@ -1,6 +1,7 @@
 import { randomBytes } from 'crypto';
 import { hashToken, auditLog } from '@/lib/auth';
 import { isSameOrigin } from '@/lib/csrf';
+import { clientIp } from '@/lib/clientIp';
 import { buildTransport, emailShell, BOOKING_EMAIL, INFO_EMAIL, CONTACT_EMAIL } from '@/lib/mailer';
 
 const MAGIC_TTL = 60 * 15;
@@ -33,7 +34,7 @@ export async function POST(request) {
   if (!isSameOrigin(request)) {
     return Response.json({ error: 'forbidden' }, { status: 403 });
   }
-  const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+  const ip = clientIp(request);
   const ua = request.headers.get('user-agent') || '';
 
   let body;

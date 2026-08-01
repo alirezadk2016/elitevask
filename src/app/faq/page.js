@@ -45,7 +45,9 @@ async function getFaqItems() {
     const { kv } = await import("@vercel/kv");
     const raw = await kv.get("content:faq");
     const faq = typeof raw === "string" ? JSON.parse(raw) : raw;
-    if (Array.isArray(faq) && faq.length >= 5) {
+    // Any non-empty admin list wins. (It used to need >= 5, so trimming the
+    // FAQ to a curated 4 silently restored every deleted default answer.)
+    if (Array.isArray(faq) && faq.length > 0) {
       // Force strings: {da:"", en:"..."} must never leak an object into JSX
       // (that would crash the whole page render).
       const str = (v) => {

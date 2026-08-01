@@ -1074,7 +1074,14 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 .ac-drop li:hover{background:var(--green-soft);color:var(--green)}
 
 /* COOKIE CONSENT BANNER */
-.cookie-banner{position:fixed;bottom:0;left:0;right:0;z-index:9999;background:var(--surface);border-top:1px solid var(--line-2);padding:16px 20px;box-shadow:0 -4px 24px rgba(0,0,0,.12)}
+/* z-index 190: above the page and the sticky mobile CTA, but BELOW the booking
+   modal and lightboxes (200). At 9999 it covered the wizard's Næste button on
+   a first visit, so the booking flow was unusable until the banner was
+   dismissed. Hidden outright while a modal is open. */
+.cookie-banner{position:fixed;bottom:0;left:0;right:0;z-index:190;background:var(--surface);border-top:1px solid var(--line-2);padding:16px 20px;box-shadow:0 -4px 24px rgba(0,0,0,.12)}
+body:has(.modal.open) .cookie-banner,
+body:has(.gal-lb) .cookie-banner,
+body:has(.ba-lb) .cookie-banner{display:none}
 .cookie-banner-inner{max-width:960px;margin:0 auto;display:flex;align-items:center;gap:20px;flex-wrap:wrap}
 .cookie-banner-text{font-size:14px;color:var(--muted);margin:0;flex:1;min-width:200px}
 .cookie-banner-link{color:var(--green);text-decoration:underline}

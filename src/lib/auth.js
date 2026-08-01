@@ -10,7 +10,11 @@ export async function getSession(request, kv) {
   const cookie = request.headers.get('cookie') || '';
   const match = cookie.match(/(?:^|;\s*)ev_session=([^;]+)/);
   if (!match) return null;
-  const raw = decodeURIComponent(match[1]);
+  // A malformed percent-escape (e.g. "ev_session=%") makes decodeURIComponent
+  // throw, which would turn every portal request into a 500 instead of a
+  // clean 401. Treat an undecodable cookie as no session.
+  let raw;
+  try { raw = decodeURIComponent(match[1]); } catch { return null; }
   const hash = hashToken(raw);
   try {
     const data = await kv.get(`session:${hash}`);

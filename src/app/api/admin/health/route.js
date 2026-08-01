@@ -61,7 +61,7 @@ export async function GET(request) {
   }
 
   // Env check
-  results.admin = { ADMIN_SECRET: `✅ set (${secret.length} chars)` };
+  results.admin = { ADMIN_SECRET: `✅ set (${(process.env.ADMIN_SECRET || '').length} chars)` };
   results.site  = { NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL || '⚠️ not set (will derive from request)' };
 
   return Response.json(results, { status: 200 });

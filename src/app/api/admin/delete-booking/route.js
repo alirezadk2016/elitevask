@@ -24,13 +24,28 @@ function slotsFor(data) {
   return out;
 }
 
+// Delete a slot key only if it still belongs to this booking. Without this an
+// already-cancelled booking (whose slots were freed and then re-booked by
+// someone else) would, on permanent delete, wipe the NEW booking's
+// reservation — freeing an occupied hour while that booking stays confirmed.
+// Legacy keys with no stored token are still cleaned up.
+async function delOwnedSlot(kv, key, token) {
+  try {
+    const raw = await kv.get(key);
+    if (raw === null || raw === undefined) return;
+    const val = typeof raw === 'string' ? JSON.parse(raw) : raw;
+    if (val && val.token && val.token !== token) return; // belongs to someone else
+    await kv.del(key);
+  } catch {}
+}
+
 // Free a booking's slots; falls back to deleting only the day's slot keys that
 // point at THIS token, so another booking's reservation can never be touched.
 async function releaseSlots(kv, data, token) {
   const times = slotsFor(data);
   if (times.length) {
     for (const t of times) {
-      try { await kv.del(`slot:${data.date}:${t}`); } catch {}
+      await delOwnedSlot(kv, `slot:${data.date}:${t}`, token);
     }
     return;
   }
@@ -172,7 +187,9 @@ export async function DELETE(request) {
     if (booking) {
       const data = typeof booking === 'string' ? JSON.parse(booking) : booking;
       email = data.email || null;
-      if (data.date) await releaseSlots(kv, data, token);
+      // An already-cancelled booking released its slots when it was cancelled;
+      // touching them again could only affect a booking made since.
+      if (data.date && data.status !== 'cancelled') await releaseSlots(kv, data, token);
       if (data.status !== 'cancelled') {
         await sendCancelEmails(data).catch(() => {});
       }
