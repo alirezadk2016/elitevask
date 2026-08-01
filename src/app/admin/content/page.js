@@ -973,7 +973,15 @@ export default function AdminPanel() {
                       const rows = [...upcoming, ...past];
                       const exportCsv = () => {
                         const cols = ["Dato","Tid","Navn","Telefon","Email","Bil","Pakke","Pris","Adresse","Postnr","By","Status","Booket"];
-                        const cell = (v) => `"${String(v ?? "").replace(/"/g,'""')}"`;
+                        // Quote-escape AND neutralise spreadsheet formula injection:
+                        // a customer-supplied name like =HYPERLINK(...) or @SUM(...)
+                        // would otherwise execute when the manager opens the file in
+                        // Excel/Sheets. Leading =+-@ and tab/CR get an apostrophe.
+                        const cell = (v) => {
+                          let s = String(v ?? "");
+                          if (/^[=+\-@\t\r]/.test(s)) s = `'${s}`;
+                          return `"${s.replace(/"/g, '""')}"`;
+                        };
                         const lines = [cols.join(";")].concat(rows.map(b =>
                           [b.date,b.time,b.name,b.phone,b.email,b.car,b.pkg,b.price,b.addr,b.zip,b.city,STATUS_LABEL[b.status]||b.status,b.bookedAt?.slice(0,16).replace("T"," ")].map(cell).join(";")
                         ));

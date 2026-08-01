@@ -304,6 +304,16 @@ export async function POST(request) {
   let bookedSlots = [];
 
   if (date && time) {
+    /* A slot-reserving booking must name a known car type: the duration (how
+       many slots to hold) and the server-side price both derive from it, so an
+       absent carId would mean a guessed duration and a client-controlled
+       price. The wizard always sends one. */
+    if (!['lille', 'mellem', 'stor', 'varebil'].includes(carId)) {
+      return Response.json({
+        error: 'invalid_car',
+        message: L ? 'Vælg venligst en biltype.' : 'Please choose a car type.',
+      }, { status: 400 });
+    }
     /* date/time must be real, in the future (Copenhagen time), a known slot,
        and the whole duration must fit inside opening hours */
     if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !SLOT_TIMES.includes(time)) {

@@ -440,7 +440,10 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 .gcar-btn:disabled{cursor:default}
 .gcar-btn{transition:background .2s,border-color .25s,transform .25s,box-shadow .2s,opacity .3s ease}
 .gcar-dots{display:flex;justify-content:center;gap:7px;margin-top:20px}
-.gcar-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.2);border:none;cursor:pointer;transition:background .25s,transform .25s;padding:8px;box-sizing:content-box;background-clip:content-box}
+.gcar-dot{position:relative;width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.2);border:none;cursor:pointer;transition:background .25s,transform .25s;padding:8px;box-sizing:content-box;background-clip:content-box}
+/* The visible dot is deliberately small, but a 23px hit area fails the WCAG
+   2.5.8 minimum. Extend the touch target to 44px without moving anything. */
+.gcar-dot::after{content:"";position:absolute;top:50%;left:50%;width:44px;height:44px;transform:translate(-50%,-50%)}
 .gcar-dot.active{background:#d4af37;transform:scale(1.35)}
 /* legacy .gallery on /galleri page — keep grid */
 .gal-page .gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-top:34px}
