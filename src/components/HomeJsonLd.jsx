@@ -1,5 +1,35 @@
 import JsonLd from "@/components/JsonLd";
 
+// Built-in price floor/ceiling, overridden by the admin-managed KV matrix so
+// the structured data can never advertise prices the site no longer charges.
+const DEFAULT_PRICES = {
+  lille:   { hele: 800,  udv: 500, indv: 600, guld: 2000 },
+  mellem:  { hele: 950,  udv: 550, indv: 700, guld: 2200 },
+  stor:    { hele: 1100, udv: 650, indv: 850, guld: 2350 },
+  varebil: { hele: 1400, udv: 750, indv: 750, guld: 2200 },
+};
+
+async function priceRange() {
+  let m = DEFAULT_PRICES;
+  try {
+    const { kv } = await import("@vercel/kv");
+    const raw = await kv.get("content:prices");
+    const p = typeof raw === "string" ? JSON.parse(raw) : raw;
+    if (p && typeof p === "object") {
+      m = {};
+      for (const car of Object.keys(DEFAULT_PRICES)) {
+        m[car] = { ...DEFAULT_PRICES[car] };
+        for (const pk of Object.keys(DEFAULT_PRICES[car])) {
+          const n = Number(p[car]?.[pk]);
+          if (Number.isFinite(n) && n > 0) m[car][pk] = n;
+        }
+      }
+    }
+  } catch {}
+  const all = Object.values(m).flatMap((r) => Object.values(r)).filter((n) => Number.isFinite(n) && n > 0);
+  return { low: Math.min(...all), high: Math.max(...all) };
+}
+
 // Homepage-only structured data. These used to live in the root layout, which
 // emitted them on EVERY route — /faq then carried two FAQPage entities (Google
 // treats that as invalid and drops FAQ rich results) and /priser two Service
@@ -36,21 +66,16 @@ const HOME_JSONLD = [
   "contentUrl":"https://www.elite-vask.dk/gallery/elite-vask-demo.mp4",
   "uploadDate":"2026-05-12",
   "publisher":{"@id":"https://www.elite-vask.dk/#business"}
-},
-{
-  "@context":"https://schema.org",
-  "@type":"FAQPage",
-  "mainEntity":[
-    {"@type":"Question","name":"Hvad koster mobil bilvask?","acceptedAnswer":{"@type":"Answer","text":"Prisen afhænger af biltype og pakke. Udvendig vask starter fra 500 kr. Hel bil (ind & ud) fra 800 kr. Guld pakke fra 2.000 kr. Kørsel til din adresse på Sjælland er gratis."}},
-    {"@type":"Question","name":"Hvor lang tid tager det?","acceptedAnswer":{"@type":"Answer","text":"Typisk mellem 1 og 4 timer afhængigt af pakke og bilens størrelse."}},
-    {"@type":"Question","name":"Dækker I hele Sjælland?","acceptedAnswer":{"@type":"Answer","text":"Ja, vi dækker store dele af Sjælland, herunder Storkøbenhavn og Nordsjælland."}},
-    {"@type":"Question","name":"Kan I vaske leasingbiler?","acceptedAnswer":{"@type":"Answer","text":"Ja, vi klargør leasingbiler til aflevering. Vi sørger for at bilen fremstår ren og velholdt – både udvendigt og indvendigt – så du undgår ekstraomkostninger ved aflevering. Vi anbefaler Guld pakken til leasingbiler."}},
-    {"@type":"Question","name":"Kommer I hjem til mig?","acceptedAnswer":{"@type":"Answer","text":"Ja, vi er mobile og kører ud til din adresse – hjemme eller på arbejde."}},
-    {"@type":"Question","name":"Hvad er forskellen på dampvask og almindelig bilvask?","acceptedAnswer":{"@type":"Answer","text":"Dampvask bruger varm damp med minimalt vandforbrug, renser mere skånsomt og desinficerer overflader uden aggressive kemikalier."}}
-  ]
 }
+
 ];
 
-export default function HomeJsonLd() {
-  return <JsonLd items={HOME_JSONLD} />;
+export default async function HomeJsonLd() {
+  const { low, high } = await priceRange();
+  const items = HOME_JSONLD.map((o) =>
+    o["@type"] === "Service" && o.offers
+      ? { ...o, offers: { ...o.offers, lowPrice: String(low), highPrice: String(high) } }
+      : o,
+  );
+  return <JsonLd items={items} />;
 }

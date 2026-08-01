@@ -6,6 +6,9 @@ export const metadata = {
   description: "Hvor tit skal bilen vaskes? Svaret afhænger af årstid, brug og parkeringsforhold. Her er en konkret guide til, hvornår det er nødvendigt.",
   alternates: { canonical: "/guide/hvor-ofte" },
   openGraph: {
+    // Next merges page metadata over the layout SHALLOWLY, so a page that
+    // declares openGraph without images ships with no og:image at all.
+    images: [{ url: "/hero.jpg.png", width: 1672, height: 941, alt: "Elite Vask – mobil bil dampvask" }],
     title: "Hvor ofte bør man vaske sin bil?",
     description: "Svaret afhænger af årstid, brug og parkeringsforhold. Her er en konkret guide til, hvornår det er nødvendigt.",
     type: "article",

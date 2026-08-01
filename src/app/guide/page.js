@@ -9,6 +9,9 @@ export const metadata = {
   description: "Bilpleje Guide fra Elite Vask: hvor ofte du bør vaske bilen, beskyttelse mod vejsalt og dampvask vs. traditionel bilvask. Ekspertråd om mobil bilpleje.",
   alternates: { canonical: "/guide" },
   openGraph: {
+    // Next merges page metadata over the layout SHALLOWLY, so a page that
+    // declares openGraph without images ships with no og:image at all.
+    images: [{ url: "/hero.jpg.png", width: 1672, height: 941, alt: "Elite Vask – mobil bil dampvask" }],
     title: "Bilpleje Guide | Elite Vask",
     description: "Ekspertråd om mobil bilvask og bilpleje på Sjælland.",
     url: "https://www.elite-vask.dk/guide",

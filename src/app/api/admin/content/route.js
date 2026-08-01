@@ -148,8 +148,15 @@ export async function POST(req) {
       if (!extItem || !extItem.name) {
         return Response.json({ error: 'invalid_item' }, { status: 400 });
       }
-      const newItem = { id: randomUUID(), ...extItem };
+      // Keep a stable slug id when one is supplied (the built-in add-ons use
+      // 'motor', 'lak', … and the package "included" logic matches on those).
+      // A random UUID here made the Guld package re-sell services it already
+      // includes. Unknown/unsafe ids still get a UUID.
       const existing = await kv.get('content:extras') || [];
+      const wanted = typeof extItem.id === 'string' && /^[a-z0-9_-]{1,40}$/.test(extItem.id)
+        && !existing.some((e) => e && e.id === extItem.id)
+        ? extItem.id : randomUUID();
+      const newItem = { ...extItem, id: wanted };
       await kv.set('content:extras', [...existing, newItem]);
       return Response.json({ ok: true, item: newItem });
     }

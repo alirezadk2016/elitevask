@@ -10,7 +10,9 @@ export const metadata = {
     url: "https://www.elite-vask.dk/galleri",
     type: "website",
     locale: "da_DK",
-    images: [{ url: "/gallery/steam-bmw.jpg", width: 1200, height: 630 }],
+    // Landscape hero: correct 1.91:1 card ratio. (steam-bmw.jpg is 1200x1600
+    // portrait — declaring it as 1200x630 made previews render distorted.)
+    images: [{ url: "/hero.jpg.png", width: 1672, height: 941, alt: "Elite Vask – mobil bil dampvask" }],
   },
 };
 

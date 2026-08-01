@@ -8,6 +8,9 @@ export const metadata = {
   description: "Kontakt Elite Vask om mobil dampvask, priser og booking. Ring +45 24 44 03 21, skriv til info@elite-vask.dk, eller book online. Vi kører til dig i hele Sjælland.",
   alternates: { canonical: "/kontakt" },
   openGraph: {
+    // Next merges page metadata over the layout SHALLOWLY, so a page that
+    // declares openGraph without images ships with no og:image at all.
+    images: [{ url: "/hero.jpg.png", width: 1672, height: 941, alt: "Elite Vask – mobil bil dampvask" }],
     title: "Kontakt Elite Vask",
     description: "Ring, skriv eller book online. Mobil dampvask – vi kører til dig i hele Sjælland.",
     type: "website",

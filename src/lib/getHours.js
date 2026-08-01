@@ -40,7 +40,9 @@ export function hoursDisplay(hours, lang = 'da') {
       : names.slice(0, -1).join(', ') + joiner + names[names.length - 1];
     days = da ? `Alle dage undtagen ${list}` : `Every day except ${list}`;
   }
-  return { time, days, open: h.open, close: h.close };
+  // Saturday = 6, Sunday = 0
+  const weekendOpen = !closed.includes(6) && !closed.includes(0);
+  return { time, days, weekendOpen, open: h.open, close: h.close };
 }
 
 // schema.org openingHoursSpecification for the open weekdays only.

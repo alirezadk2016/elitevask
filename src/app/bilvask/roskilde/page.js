@@ -7,6 +7,9 @@ export const metadata = {
   description: "Professionel mobil dampvask i Roskilde. Vi kører til din adresse – hjemme eller på arbejdet. Gratis kørsel, betal efter vask. Book online.",
   alternates: { canonical: "/bilvask/roskilde" },
   openGraph: {
+    // Next merges page metadata over the layout SHALLOWLY, so a page that
+    // declares openGraph without images ships with no og:image at all.
+    images: [{ url: "/hero.jpg.png", width: 1672, height: 941, alt: "Elite Vask – mobil bil dampvask" }],
     title: "Mobil bilvask i Roskilde – Elite Vask",
     description: "Professionel mobil dampvask i Roskilde. Vi kører direkte til dig.",
     type: "article",
@@ -65,7 +68,9 @@ export default async function BilvaskRoskilde() {
         <p><strong>Hvad koster kørsel til Roskilde?</strong><br/>
         Kørsel er gratis til alle adresser i Roskilde og omegn.</p>
         <p><strong>Kan I vaske min bil på weekenden?</strong><br/>
-        Ja, vi arbejder {hd.days.toLowerCase()} kl. {hd.time.replace(" – ", "–")}.</p>
+        {hd.weekendOpen
+          ? <>Ja, vi arbejder {hd.days.toLowerCase()} kl. {hd.time.replace(" – ", "–")}.</>
+          : <>Vi har desværre lukket i weekenden, men vi arbejder {hd.days.toLowerCase()} kl. {hd.time.replace(" – ", "–")} – ring til os, så finder vi en tid.</>}</p>
 
         <div style={{marginTop:'2rem',padding:'1.5rem',background:'#f0faf4',borderRadius:'12px',textAlign:'center'}}>
           <p style={{margin:'0 0 1rem',fontWeight:700,fontSize:'1.1rem'}}>Book mobil bilvask i Roskilde i dag</p>

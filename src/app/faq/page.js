@@ -3,6 +3,9 @@ export const metadata = {
   description: "Svar på de mest stillede spørgsmål om Elite Vaskes mobile bil dampvask på Sjælland. Priser, behandlingstid, sikkerhed, elbiler, aftaler og meget mere.",
   alternates: { canonical: "/faq" },
   openGraph: {
+    // Next merges page metadata over the layout SHALLOWLY, so a page that
+    // declares openGraph without images ships with no og:image at all.
+    images: [{ url: "/hero.jpg.png", width: 1672, height: 941, alt: "Elite Vask – mobil bil dampvask" }],
     title: "FAQ – Elite Vask | Ofte stillede spørgsmål",
     description: "Svar på de mest stillede spørgsmål om Elite Vaskes mobile bil dampvask på Sjælland.",
     type: "website",

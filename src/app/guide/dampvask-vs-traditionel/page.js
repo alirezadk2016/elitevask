@@ -6,6 +6,9 @@ export const metadata = {
   description: "Dampvask og traditionel bilvask har meget forskellige resultater. Se hvad forskningen viser om ridser, bakterier, vandforbrug og rengøringseffekt.",
   alternates: { canonical: "/guide/dampvask-vs-traditionel" },
   openGraph: {
+    // Next merges page metadata over the layout SHALLOWLY, so a page that
+    // declares openGraph without images ships with no og:image at all.
+    images: [{ url: "/hero.jpg.png", width: 1672, height: 941, alt: "Elite Vask – mobil bil dampvask" }],
     title: "Dampvask vs. traditionel bilvask: Hvad er forskellen?",
     description: "Se hvad forskningen viser om ridser, bakterier, vandforbrug og rengøringseffekt.",
     type: "article",

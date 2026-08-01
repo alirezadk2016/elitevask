@@ -846,6 +846,12 @@ export default function AdminPanel() {
             // on a whole multiple of the interval), so the grid never draws a
             // phantom trailing row that no booking can start in.
             const N_ROWS = Math.max(1, buildSlotTimes(hours).length);
+            // The drawn grid ends at the last row's bottom, which is EARLIER than
+            // closing time whenever the window isn't an exact multiple of the
+            // interval (e.g. 15:30–22:00 at 60 min = 6 rows ending 21:30). Anything
+            // starting in that leftover sliver must go to the safety list, or it
+            // would match no row and vanish from the calendar entirely.
+            const GRID_DRAWN_END = GRID_START + N_ROWS * SLOT_MIN;
             const ROWS = Array.from({ length: N_ROWS }, (_, i) => {
               const m = GRID_START + i * SLOT_MIN;
               return { min: m, label: `${String(Math.floor(m/60)).padStart(2,"0")}:${String(m%60).padStart(2,"0")}` };
@@ -1167,7 +1173,7 @@ export default function AdminPanel() {
                                 const startingHere = bookings.filter(b => {
                                   if (b.date !== iso) return false; // this day's column only
                                   const sm = bookingStartMin(b);
-                                  if (sm == null || sm < GRID_START || sm >= GRID_END) return false;
+                                  if (sm == null || sm < GRID_START || sm >= GRID_DRAWN_END) return false;
                                   return Math.floor((sm - GRID_START) / SLOT_MIN) === hi;
                                 });
                                 return (
@@ -1176,8 +1182,15 @@ export default function AdminPanel() {
                                       const startMin = bookingStartMin(b);
                                       const durMin = bookingDurationMin(b);
                                       // Absolute end, clamped to the grid bottom (close time).
-                                      const endMin = Math.min(startMin + durMin, GRID_END);
-                                      const endTime = minToLabel(endMin);
+                                      // True finish time — never clamped, or a booking
+                                      // that overruns a shortened closing time would show a
+                                      // false end (e.g. "18:00–20:00 · 4t") and the manager
+                                      // could schedule straight into an occupied slot.
+                                      const trueEndMin = startMin + durMin;
+                                      const endTime = minToLabel(Math.min(trueEndMin, 24 * 60));
+                                      // Drawing height stays inside the grid.
+                                      const endMin = Math.min(trueEndMin, GRID_DRAWN_END);
+                                      const overruns = trueEndMin > GRID_DRAWN_END;
                                       const hoursLabel = +(durMin / 60).toFixed(1);
                                       // Precise vertical offset within the starting row (handles off-grid starts).
                                       const topOffsetPx = ((startMin - row.min) / SLOT_MIN) * ROW_H;
@@ -1215,7 +1228,7 @@ export default function AdminPanel() {
                                             <div style={{ fontSize:10, color:cardText, opacity:.75, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{b.pkg || "-"}</div>
                                           </div>
                                           <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between" }}>
-                                            <span style={{ fontSize:10, fontWeight:700, color:cardText, fontVariantNumeric:"tabular-nums" }}>{b.time}–{endTime} · {hoursLabel}t</span>
+                                            <span style={{ fontSize:10, fontWeight:700, color:overruns ? T.gold : cardText, fontVariantNumeric:"tabular-nums" }} title={overruns ? "Slutter efter lukketid" : undefined}>{b.time}–{endTime} · {hoursLabel}t{overruns ? " ⚠" : ""}</span>
                                             {b.phone && (
                                               <a href={`tel:${b.phone}`} onClick={e => e.stopPropagation()}
                                                 style={{ display:"flex", alignItems:"center", justifyContent:"center", width:22, height:22, borderRadius:6, background:"rgba(255,255,255,.12)", color:cardText, textDecoration:"none", flexShrink:0 }}>
@@ -1242,7 +1255,7 @@ export default function AdminPanel() {
                       // falls outside [open, close) is listed here so it's never lost.
                       const outOfRange = weekBookings.filter(b => {
                         const sm = bookingStartMin(b);
-                        return sm == null || sm < GRID_START || sm >= GRID_END;
+                        return sm == null || sm < GRID_START || sm >= GRID_DRAWN_END;
                       });
                       if (!outOfRange.length) return null;
                       return (
@@ -1944,7 +1957,7 @@ export default function AdminPanel() {
                 ) : null}
                 {faqItems.length > 0 && faqItems.length < 5 && (
                   <>
-                    <button onClick={seedAllFaq} disabled={cmsLoading} style={{ marginTop:10, width:"100%", padding:"11px 0", background:T.accent, border:"none", borderRadius:9, color:T.bg0, fontWeight:700, fontSize:13, cursor:cmsLoading?"not-allowed":"pointer", fontFamily:FF }}>
+                    <button onClick={() => { if (faqItems.length === 0 || confirm(`Dette tilføjer ${DEFAULT_FAQ.length} standardspørgsmål oven i dine ${faqItems.length} eksisterende. Fortsæt?`)) seedAllFaq(); }} disabled={cmsLoading} style={{ marginTop:10, width:"100%", padding:"11px 0", background:T.accent, border:"none", borderRadius:9, color:T.bg0, fontWeight:700, fontSize:13, cursor:cmsLoading?"not-allowed":"pointer", fontFamily:FF }}>
                       {cmsLoading ? "Gemmer…" : "Gem alle standarddata (erstatter nuværende)"}
                     </button>
                     <p style={{ fontSize:11, color:T.t4, margin:"18px 0 8px", letterSpacing:1, fontWeight:700, textTransform:"uppercase" }}>Eller gem enkeltvis:</p>
@@ -2225,7 +2238,7 @@ export default function AdminPanel() {
                         const r = await fetch("/api/admin/content", {
                           method:"POST",
                           headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" },
-                          body: JSON.stringify({ type:"extras", item:{ name:ext.name, desc:ext.desc, price:ext.price } }),
+                          body: JSON.stringify({ type:"extras", item:{ id:ext.id, name:ext.name, desc:ext.desc, price:ext.price } }),
                         });
                         if (!r.ok) throw new Error(String(r.status));
                       }
@@ -2262,7 +2275,7 @@ export default function AdminPanel() {
                                 await fetch("/api/admin/content", {
                                   method:"POST",
                                   headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" },
-                                  body: JSON.stringify({ type:"extras", item:{ name:ext.name, desc:ext.desc, price:ext.price } }),
+                                  body: JSON.stringify({ type:"extras", item:{ id:ext.id, name:ext.name, desc:ext.desc, price:ext.price } }),
                                 });
                                 fetchContent("extras");
                               }}
@@ -2358,9 +2371,12 @@ export default function AdminPanel() {
             if (r.ok) {
               setBookings(bs => bs.map(x => x.token===b.token ? {...x, status:"cancelled"} : x));
               setSelectedBooking(sb => sb ? {...sb, status:"cancelled"} : null);
+              addToast("ok", "Booking annulleret");
+            } else if (!authFailed(r.status)) {
+              addToast("err", "Kunne ikke annullere — prøv igen");
             }
             setModalState("idle");
-          } catch { setModalState("idle"); }
+          } catch { addToast("err", "Netværksfejl — prøv igen"); setModalState("idle"); }
         }
 
         async function doDelete() {
@@ -2374,8 +2390,12 @@ export default function AdminPanel() {
             if (r.ok) {
               setBookings(bs => bs.filter(x => x.token!==b.token));
               setSelectedBooking(null);
-            } else { setModalState("idle"); }
-          } catch { setModalState("idle"); }
+              addToast("ok", "Booking slettet");
+            } else {
+              if (!authFailed(r.status)) addToast("err", "Kunne ikke slette — prøv igen");
+              setModalState("idle");
+            }
+          } catch { addToast("err", "Netværksfejl — prøv igen"); setModalState("idle"); }
         }
 
         const statusColor = STATUS_COLOR[b.status] || T.t3;
