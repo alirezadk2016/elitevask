@@ -79,6 +79,19 @@ const MONTHS =["jan","feb","mar","apr","maj","jun","jul","aug","sep","okt","nov"
 const FULL_MONTHS = ["januar","februar","marts","april","maj","juni","juli","august","september","oktober","november","december"];
 const DAYS = ["Man","Tir","Ons","Tor","Fre","Lør","Søn"];
 
+// Inline editors carry a `_orig` snapshot of the fields they own, taken when
+// the editor is opened, so "unsaved changes" can mean actually-changed.
+const EXT_KEYS = ["nameDa","nameEn","descDa","descEn","price"];
+const GAL_KEYS = ["caption","album"];
+const BA_KEYS  = ["caption"];
+function snapshot(obj, keys) { return JSON.stringify(keys.map(k => String(obj?.[k] ?? ""))); }
+function withSnapshot(obj, keys) { return { ...obj, _orig: snapshot(obj, keys) }; }
+function editorDirty(draft, keys) {
+  if (!draft) return false;
+  if (draft._orig == null) return true; // no snapshot → assume dirty, never lose edits
+  return snapshot(draft, keys) !== draft._orig;
+}
+
 function getWeekStart(offset) {
   const d = new Date();
   const day = d.getDay();
@@ -143,6 +156,7 @@ export default function AdminPanel() {
 
   // Bookings state
   const [bookings, setBookings]           = useState([]);
+  const [lastSync, setLastSync]           = useState(null);
   const [bLoading, setBLoading]           = useState(false);
   const [bError, setBError]               = useState("");
   const [weekOffset, setWeekOffset]       = useState(0);
@@ -287,21 +301,39 @@ export default function AdminPanel() {
     }
   }, [tab, narrow, authed]);
 
-  const loadBookings = useCallback(async (s) => {
-    setBLoading(true); setBError("");
+  // `silent` skips the spinner and the error banner — used by the background
+  // refresh so a poll on a flaky connection never blanks the calendar the
+  // manager is looking at.
+  const loadBookings = useCallback(async (s, silent = false) => {
+    if (!silent) { setBLoading(true); setBError(""); }
     try {
-      const r = await fetch("/api/admin/bookings", { headers:{ Authorization:`Bearer ${s}` } });
+      const r = await fetch("/api/admin/bookings", { headers:{ Authorization:`Bearer ${s}` }, cache:"no-store" });
       if (r.status === 401 || r.status === 403) {
         try { sessionStorage.removeItem("adm"); } catch {}
         setAuthed(false); setSecret(""); setLoginErr("Session udløbet – log ind igen.");
         return;
       }
-      if (!r.ok) { setBError("Kunne ikke hente bookinger — prøv igen."); return; }
+      if (!r.ok) { if (!silent) setBError("Kunne ikke hente bookinger — prøv igen."); return; }
       const data = await r.json();
       setBookings(data.bookings || []);
-    } catch { setBError("Netværksfejl — prøv igen."); }
-    finally { setBLoading(false); }
+      setLastSync(new Date());
+    } catch { if (!silent) setBError("Netværksfejl — prøv igen."); }
+    finally { if (!silent) setBLoading(false); }
   }, []);
+
+  // Two managers, two phones: without this the calendar on screen silently
+  // went stale and a slot could be double-booked by hand. Refresh every 60s
+  // while the bookings/dashboard tabs are visible, and immediately whenever
+  // the tab regains focus.
+  useEffect(() => {
+    if (!authed || !secret) return;
+    if (tab !== "bookings" && tab !== "oversigt") return;
+    const refresh = () => { if (document.visibilityState === "visible") loadBookings(secret, true); };
+    const id = setInterval(refresh, 60000);
+    document.addEventListener("visibilitychange", refresh);
+    window.addEventListener("focus", refresh);
+    return () => { clearInterval(id); document.removeEventListener("visibilitychange", refresh); window.removeEventListener("focus", refresh); };
+  }, [authed, secret, tab, loadBookings]);
 
   const loadHours = useCallback(async (s) => {
     setHoursLoading(true);
@@ -319,6 +351,10 @@ export default function AdminPanel() {
   useEffect(() => {
     try {
       const saved = sessionStorage.getItem("adm");
+      // sessionStorage is browser-only, so this cannot move into the initial
+      // state without a hydration mismatch — restoring the session on mount is
+      // the intended one-off cascade here.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       if (saved) { setSecret(saved); setAuthed(true); loadBookings(saved); loadHours(saved); }
     } catch {}
   }, [loadBookings, loadHours]);
@@ -333,7 +369,7 @@ export default function AdminPanel() {
       if (r.ok) {
         try { sessionStorage.setItem("adm", secretInput); } catch {}
         const data = await r.json();
-        setBookings(data.bookings || []);
+        setBookings(data.bookings || []); setLastSync(new Date());
         setSecret(secretInput); setAuthed(true);
         loadHours(secretInput);
       } else if (r.status === 401 || r.status === 403) {
@@ -398,7 +434,11 @@ export default function AdminPanel() {
     finally { setHoursSaving(false); }
   }
 
+  // Data fetch on tab change: fetchContent is async and only sets state after
+  // the request resolves, so the lint rule's cascading-render concern doesn't
+  // apply here.
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (authed && (tab === "gallery" || tab === "videos")) fetchContent(tab);
     if (authed && tab === "faq")      fetchContent("faq");
     if (authed && tab === "extras")   fetchContent("extras");
@@ -527,7 +567,8 @@ export default function AdminPanel() {
         headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" },
         body: JSON.stringify({ type:"beforeafter", id, item:{ caption:editingBA?.caption||"" } }),
       });
-      const data = await res.json();
+      if (authFailed(res.status)) return;
+      const data = await res.json().catch(() => ({}));
       if (data.ok) { addToast("ok", "Gemt!"); setEditingBA(null); fetchContent("beforeafter"); }
       else addToast("err", "Fejl – prøv igen");
     } catch { setMsg({ type:"err", text:"Netværksfejl" }); }
@@ -627,7 +668,18 @@ export default function AdminPanel() {
   // ── MAIN RENDER ────────────────────────────────────────────────────────────
   const hasPriceChanges = JSON.stringify(priceEdits) !== JSON.stringify(pricesData);
   const hoursDirty = JSON.stringify(hoursDraft) !== JSON.stringify(hours);
-  const hasUnsaved = Object.keys(faqDrafts).length > 0 || hasPriceChanges || editingExt !== null || editingGallery !== null || editingBA !== null || hoursDirty;
+  // "Dirty" must mean *changed*, not merely *open*. Comparing each editor's
+  // draft with the snapshot taken when it was opened means simply clicking
+  // Rediger (or typing and undoing) no longer triggers the leave-warning.
+  const faqDirty = Object.keys(faqDrafts).some(id => {
+    const item = faqItems.find(i => i.id === id);
+    if (!item) return true;
+    const d = faqDrafts[id];
+    return (d.qDa||"") !== (item.q?.da||item.q||"") || (d.qEn||"") !== (item.q?.en||item.qEn||"")
+        || (d.aDa||"") !== (item.a?.da||item.a||"") || (d.aEn||"") !== (item.a?.en||item.aEn||"");
+  });
+  const hasUnsaved = faqDirty || hasPriceChanges || editorDirty(editingExt, EXT_KEYS)
+    || editorDirty(editingGallery, GAL_KEYS) || editorDirty(editingBA, BA_KEYS) || hoursDirty;
   unsavedRef.current = hasUnsaved;
 
   return (
@@ -644,8 +696,14 @@ export default function AdminPanel() {
           <span style={{ color:T.t2, fontSize:14 }}>Admin</span>
         </div>
         <div style={{ flex:1 }}/>
+        {(tab === "bookings" || tab === "oversigt") && lastSync && !narrow && (
+          <span style={{ color:T.t4, fontSize:11, whiteSpace:"nowrap" }}>
+            Opdateret {new Intl.DateTimeFormat("da-DK",{hour:"2-digit",minute:"2-digit",timeZone:"Europe/Copenhagen"}).format(lastSync)}
+          </span>
+        )}
         {(tab === "bookings" || tab === "oversigt") && (
-          <button onClick={() => loadBookings(secret)}
+          <button onClick={() => loadBookings(secret)} disabled={bLoading}
+            title="Opdaterer automatisk hvert minut"
             style={{ display:"flex", alignItems:"center", gap:6, padding:"7px 14px", background:T.accentDim, border:`1px solid ${T.accentBorder}`, borderRadius:8, color:T.accent, fontSize:12, fontWeight:600, cursor:"pointer", fontFamily:FF }}>
             {icons.refresh} {bLoading ? "…" : "Opdater"}
           </button>
@@ -908,6 +966,10 @@ export default function AdminPanel() {
               const items = bookings
                 .filter(b => {
                   if (b.date !== iso) return false;
+                  // Cancelled bookings are drawn faded behind the live ones
+                  // (zIndex 2 vs 3). Letting them claim a column would halve a
+                  // real booking's width for a slot that is actually free.
+                  if (b.status === "cancelled") return false;
                   const s = bookingSpan(b);
                   // only bookings actually drawn in the grid may claim a column —
                   // out-of-range ones live in the safety list below
@@ -1566,7 +1628,7 @@ export default function AdminPanel() {
                               style={{ width:36, height:36, borderRadius:"50%", background:"rgba(255,255,255,.12)", border:"1px solid rgba(255,255,255,.25)", color:"#fff", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center" }}>
                               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                             </button>
-                            <button onClick={() => setEditingGallery({ id:item.id, caption:item.caption||"", album:item.album||"Enkelt" })}
+                            <button onClick={() => setEditingGallery(withSnapshot({ id:item.id, caption:item.caption||"", album:item.album||"Enkelt" }, GAL_KEYS))}
                               style={{ width:36, height:36, borderRadius:"50%", background:"rgba(255,255,255,.12)", border:"1px solid rgba(255,255,255,.25)", color:"#fff", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center" }}>
                               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                             </button>
@@ -1602,6 +1664,7 @@ export default function AdminPanel() {
                                     headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" },
                                     body: JSON.stringify({ type:"gallery", id:item.id, item:{ caption:editingGallery.caption, album:editingGallery.album } }),
                                   });
+                                  if (authFailed(res.status)) return;
                                   if (!res.ok) { addToast("err", "Kunne ikke gemme – prøv igen"); return; }
                                   addToast("ok", "Gemt!");
                                   setEditingGallery(null);
@@ -1739,7 +1802,7 @@ export default function AdminPanel() {
                           </div>
                           {!isEditingThis && (
                             <div style={{ position:"absolute", inset:8, background:"rgba(0,0,0,.55)", display:"flex", alignItems:"center", justifyContent:"center", gap:8, opacity:hoveredId===item.id?1:0, transition:".2s", borderRadius:8 }}>
-                              <button onClick={() => setEditingBA({ id:item.id, caption:item.caption||"" })}
+                              <button onClick={() => setEditingBA(withSnapshot({ id:item.id, caption:item.caption||"" }, BA_KEYS))}
                                 style={{ width:36, height:36, borderRadius:"50%", background:"rgba(255,255,255,.12)", border:"1px solid rgba(255,255,255,.25)", color:"#fff", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center" }}>
                                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                               </button>
@@ -1804,6 +1867,7 @@ export default function AdminPanel() {
                   headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" },
                   body: JSON.stringify({ type:"faq", item:{ q:{da:faqNewQda.trim(), en:faqNewQen.trim()||faqNewQda.trim()}, a:{da:faqNewAda.trim(), en:faqNewAen.trim()||faqNewAda.trim()} } }),
                 });
+                if (authFailed(res.status)) return;
                 const data = await res.json().catch(() => ({}));
                 if (res.ok && data.ok) { addToast("ok", "Tilføjet!"); setFaqNewQda(""); setFaqNewAda(""); setFaqNewQen(""); setFaqNewAen(""); setAddFaqOpen(false); fetchContent("faq"); }
                 else addToast("err", data.error || "Fejl – prøv igen");
@@ -1815,19 +1879,26 @@ export default function AdminPanel() {
               if (!item) return;
               const draft = getDraft(item);
               setCmsLoading(true); setCmsMsg(null);
-              const res = await fetch("/api/admin/content", {
-                method:"PUT",
-                headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" },
-                body: JSON.stringify({ type:"faq", id, item:{ q:{da:draft.qDa||"", en:draft.qEn||draft.qDa||""}, a:{da:draft.aDa||"", en:draft.aEn||draft.aDa||""} } }),
-              });
-              const data = await res.json();
-              setCmsLoading(false);
-              if (data.ok) { addToast("ok", "Gemt!"); setExpandedFaqId(null); setFaqDrafts(d => { const n={...d}; delete n[id]; return n; }); fetchContent("faq"); }
-              else addToast("err", "Fejl – prøv igen");
+              // Without the try/finally a dropped connection left cmsLoading
+              // stuck on true, which disables every button on the tab until
+              // the manager reloads the page.
+              try {
+                const res = await fetch("/api/admin/content", {
+                  method:"PUT",
+                  headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" },
+                  body: JSON.stringify({ type:"faq", id, item:{ q:{da:draft.qDa||"", en:draft.qEn||draft.qDa||""}, a:{da:draft.aDa||"", en:draft.aEn||draft.aDa||""} } }),
+                });
+                if (authFailed(res.status)) return;
+                const data = await res.json().catch(() => ({}));
+                if (res.ok && data.ok) { addToast("ok", "Gemt!"); setExpandedFaqId(null); setFaqDrafts(d => { const n={...d}; delete n[id]; return n; }); fetchContent("faq"); }
+                else addToast("err", data.error || "Fejl – prøv igen");
+              } catch { addToast("err", "Netværksfejl – dine ændringer er ikke gemt"); }
+              finally { setCmsLoading(false); }
             }
             async function deleteFaq(id) {
               try {
                 const res = await fetch("/api/admin/content", { method:"DELETE", headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" }, body:JSON.stringify({ type:"faq", id }) });
+                if (authFailed(res.status)) return;
                 if (!res.ok) { addToast("err", "Sletning fejlede – prøv igen"); return; }
                 addToast("ok", "Slettet");
                 fetchContent("faq");
@@ -1840,10 +1911,12 @@ export default function AdminPanel() {
                 // Delete existing items first to avoid duplicates
                 for (const item of faqItems) {
                   const d = await fetch("/api/admin/content", { method:"DELETE", headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" }, body:JSON.stringify({ type:"faq", id:item.id }) });
+                  if (authFailed(d.status)) return;
                   if (!d.ok) throw new Error("delete");
                 }
                 for (const faq of DEFAULT_FAQ) {
                   const p = await fetch("/api/admin/content", { method:"POST", headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" }, body: JSON.stringify({ type:"faq", item:{ q:faq.q, a:faq.a } }) });
+                  if (authFailed(p.status)) return;
                   if (!p.ok) throw new Error("post");
                 }
                 addToast("ok", "Alle standarddata gemt!");
@@ -1957,7 +2030,7 @@ export default function AdminPanel() {
                 ) : null}
                 {faqItems.length > 0 && faqItems.length < 5 && (
                   <>
-                    <button onClick={() => { if (faqItems.length === 0 || confirm(`Dette tilføjer ${DEFAULT_FAQ.length} standardspørgsmål oven i dine ${faqItems.length} eksisterende. Fortsæt?`)) seedAllFaq(); }} disabled={cmsLoading} style={{ marginTop:10, width:"100%", padding:"11px 0", background:T.accent, border:"none", borderRadius:9, color:T.bg0, fontWeight:700, fontSize:13, cursor:cmsLoading?"not-allowed":"pointer", fontFamily:FF }}>
+                    <button onClick={() => { if (faqItems.length === 0 || confirm(`Dette SLETTER dine ${faqItems.length} nuværende spørgsmål og erstatter dem med ${DEFAULT_FAQ.length} standardspørgsmål. Handlingen kan ikke fortrydes. Fortsæt?`)) seedAllFaq(); }} disabled={cmsLoading} style={{ marginTop:10, width:"100%", padding:"11px 0", background:T.accent, border:"none", borderRadius:9, color:T.bg0, fontWeight:700, fontSize:13, cursor:cmsLoading?"not-allowed":"pointer", fontFamily:FF }}>
                       {cmsLoading ? "Gemmer…" : "Gem alle standarddata (erstatter nuværende)"}
                     </button>
                     <p style={{ fontSize:11, color:T.t4, margin:"18px 0 8px", letterSpacing:1, fontWeight:700, textTransform:"uppercase" }}>Eller gem enkeltvis:</p>
@@ -1966,7 +2039,7 @@ export default function AdminPanel() {
                         <div key={idx} style={{ background:T.bg1, border:`1px solid ${T.border}`, borderRadius:11, display:"flex", alignItems:"center", padding:"12px 16px", gap:10 }}>
                           <span style={{ fontSize:11, fontWeight:700, color:T.t4, minWidth:22, flexShrink:0 }}>#{idx+1}</span>
                           <span style={{ flex:1, fontSize:14, color:T.t2, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{faq.q.da}</span>
-                          <button type="button" onClick={async () => { const r = await fetch("/api/admin/content", { method:"POST", headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" }, body:JSON.stringify({ type:"faq", item:{ q:faq.q, a:faq.a } }) }); if (!r.ok) { addToast("err", "Kunne ikke gemme — prøv igen"); return; } addToast("ok", "Gemt"); fetchContent("faq"); }}
+                          <button type="button" onClick={async () => { const r = await fetch("/api/admin/content", { method:"POST", headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" }, body:JSON.stringify({ type:"faq", item:{ q:faq.q, a:faq.a } }) }); if (authFailed(r.status)) return; if (!r.ok) { addToast("err", "Kunne ikke gemme — prøv igen"); return; } addToast("ok", "Gemt"); fetchContent("faq"); }}
                             style={{ padding:"5px 12px", background:T.accentDim, border:`1px solid ${T.accentBorder}`, borderRadius:7, color:T.accent, fontSize:12, fontWeight:700, cursor:"pointer", fontFamily:FF, whiteSpace:"nowrap", flexShrink:0 }}>+ Gem</button>
                         </div>
                       ))}
@@ -1987,7 +2060,7 @@ export default function AdminPanel() {
                         <div key={idx} style={{ background:T.bg1, border:`1px solid ${T.border}`, borderRadius:11, display:"flex", alignItems:"center", padding:"12px 16px", gap:10 }}>
                           <span style={{ fontSize:11, fontWeight:700, color:T.t4, minWidth:22, flexShrink:0 }}>#{idx+1}</span>
                           <span style={{ flex:1, fontSize:14, color:T.t2, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{faq.q.da}</span>
-                          <button onClick={async () => { const r = await fetch("/api/admin/content", { method:"POST", headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" }, body:JSON.stringify({ type:"faq", item:{ q:faq.q, a:faq.a } }) }); if (!r.ok) { addToast("err", "Kunne ikke gemme — prøv igen"); return; } addToast("ok", "Gemt"); fetchContent("faq"); }}
+                          <button onClick={async () => { const r = await fetch("/api/admin/content", { method:"POST", headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" }, body:JSON.stringify({ type:"faq", item:{ q:faq.q, a:faq.a } }) }); if (authFailed(r.status)) return; if (!r.ok) { addToast("err", "Kunne ikke gemme — prøv igen"); return; } addToast("ok", "Gemt"); fetchContent("faq"); }}
                             style={{ padding:"5px 12px", background:T.accentDim, border:`1px solid ${T.accentBorder}`, borderRadius:7, color:T.accent, fontSize:12, fontWeight:700, cursor:"pointer", fontFamily:FF, whiteSpace:"nowrap", flexShrink:0 }}>+ Gem</button>
                         </div>
                       ))}
@@ -2014,6 +2087,7 @@ export default function AdminPanel() {
                   headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" },
                   body: JSON.stringify({ type:"packages", prices:priceEdits }),
                 });
+                if (authFailed(res.status)) return;
                 const data = await res.json().catch(() => ({}));
                 if (res.ok && data.ok) {
                   // Adopt the server's cleaned matrix so the UI matches exactly
@@ -2103,6 +2177,7 @@ export default function AdminPanel() {
                   headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" },
                   body: JSON.stringify({ type:"extras", item:{ name:{da:extNewNameDa.trim(), en:extNewNameEn.trim()||extNewNameDa.trim()}, desc:{da:extNewDescDa.trim(), en:extNewDescEn.trim()||extNewDescDa.trim()}, price:Number(extNewPrice)||0 } }),
                 });
+                if (authFailed(res.status)) return;
                 const data = await res.json().catch(() => ({}));
                 if (res.ok && data.ok) { addToast("ok", "Tilføjet!"); setExtNewNameDa(""); setExtNewNameEn(""); setExtNewDescDa(""); setExtNewDescEn(""); setExtNewPrice(""); fetchContent("extras"); }
                 else addToast("err", data.error || "Fejl – prøv igen");
@@ -2110,20 +2185,25 @@ export default function AdminPanel() {
               finally { setCmsLoading(false); }
             }
             async function saveExtra(item) {
+              if (cmsLoading) return;
               setCmsLoading(true);
-              const res = await fetch("/api/admin/content", {
-                method:"PUT",
-                headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" },
-                body: JSON.stringify({ type:"extras", id:item.id, item:{ name:{da:item.nameDa||"", en:item.nameEn||item.nameDa||""}, desc:{da:item.descDa||"", en:item.descEn||item.descDa||""}, price:Number(item.price)||0 } }),
-              });
-              const data = await res.json();
-              setCmsLoading(false);
-              if (data.ok) { addToast("ok", "Gemt!"); setEditingExt(null); fetchContent("extras"); }
-              else addToast("err", "Fejl – prøv igen");
+              try {
+                const res = await fetch("/api/admin/content", {
+                  method:"PUT",
+                  headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" },
+                  body: JSON.stringify({ type:"extras", id:item.id, item:{ name:{da:item.nameDa||"", en:item.nameEn||item.nameDa||""}, desc:{da:item.descDa||"", en:item.descEn||item.descDa||""}, price:Number(item.price)||0 } }),
+                });
+                if (authFailed(res.status)) return;
+                const data = await res.json().catch(() => ({}));
+                if (res.ok && data.ok) { addToast("ok", "Gemt!"); setEditingExt(null); fetchContent("extras"); }
+                else addToast("err", data.error || "Fejl – prøv igen");
+              } catch { addToast("err", "Netværksfejl – dine ændringer er ikke gemt"); }
+              finally { setCmsLoading(false); }
             }
             async function deleteExtra(id) {
               try {
                 const res = await fetch("/api/admin/content", { method:"DELETE", headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" }, body:JSON.stringify({ type:"extras", id }) });
+                if (authFailed(res.status)) return;
                 if (!res.ok) { addToast("err", "Sletning fejlede – prøv igen"); return; }
                 addToast("ok", "Slettet");
                 fetchContent("extras");
@@ -2218,7 +2298,7 @@ export default function AdminPanel() {
                                 {descDa && <p style={{ fontSize:12, color:T.t3, margin:0, lineHeight:1.5 }}>{descDa}</p>}
                               </div>
                               <div style={{ display:"flex", gap:6, flexShrink:0 }}>
-                                <button onClick={() => setEditingExt({ id:item.id, nameDa, nameEn, descDa, descEn, price:item.price||"" })}
+                                <button onClick={() => setEditingExt(withSnapshot({ id:item.id, nameDa, nameEn, descDa, descEn, price:item.price||"" }, EXT_KEYS))}
                                   style={{ padding:"6px 12px", background:T.accentDim, border:`1px solid ${T.accentBorder}`, borderRadius:6, color:T.accent, fontSize:12, fontWeight:600, cursor:"pointer", fontFamily:FF }}>Rediger</button>
                                 <button onClick={() => promptDelete("Slet denne ekstra ydelse?", () => deleteExtra(item.id))}
                                   style={{ padding:"6px 12px", background:T.dangerDim, border:`1px solid ${T.dangerBorder}`, borderRadius:6, color:T.danger, fontSize:12, fontWeight:600, cursor:"pointer", fontFamily:FF }}>Slet</button>
@@ -2240,6 +2320,7 @@ export default function AdminPanel() {
                           headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" },
                           body: JSON.stringify({ type:"extras", item:{ id:ext.id, name:ext.name, desc:ext.desc, price:ext.price } }),
                         });
+                        if (authFailed(r.status)) return;
                         if (!r.ok) throw new Error(String(r.status));
                       }
                       addToast("ok", "Alle standarddata gemt!");
@@ -2405,7 +2486,7 @@ export default function AdminPanel() {
           <div onClick={() => setSelectedBooking(null)}
             style={{ position:"fixed", inset:0, background:"rgba(0,0,0,.88)", backdropFilter:"blur(10px)", zIndex:300, display:"flex", alignItems:"center", justifyContent:"center", padding:24 }}>
             <div onClick={e => e.stopPropagation()} role="dialog" aria-modal="true"
-              style={{ background:T.bg1, border:`1px solid ${T.border}`, borderRadius:20, padding:32, maxWidth:480, width:"100%", boxShadow:T.shadowL, maxHeight:"90vh", overflowY:"auto", boxSizing:"border-box" }}>
+              style={{ background:T.bg1, border:`1px solid ${T.border}`, borderRadius:20, padding:32, maxWidth:480, width:"100%", boxShadow:T.shadowL, maxHeight:"90dvh", overflowY:"auto", boxSizing:"border-box" }}>
 
               {/* Header */}
               <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", marginBottom:20 }}>
@@ -2560,8 +2641,17 @@ export default function AdminPanel() {
       })()}
 
       {/* TOASTS */}
+      {/* Toasts sit above the booking modal (z 300) by design, so on a phone
+          a top-right toast landed straight on the modal's header and hid the
+          customer's name. Bottom-centred on narrow screens, top-right on
+          desktop — the toast is still visible without covering anything. */}
       {toasts.length > 0 && (
-        <div style={{ position:"fixed", top:72, right:20, zIndex:310, display:"flex", flexDirection:"column", gap:8, pointerEvents:"none" }}>
+        <div style={{
+          position:"fixed", zIndex:310, display:"flex", flexDirection:"column", gap:8, pointerEvents:"none",
+          ...(narrow
+            ? { left:12, right:12, bottom:"calc(12px + env(safe-area-inset-bottom))", alignItems:"center" }
+            : { top:72, right:20 }),
+        }}>
           {toasts.map(t => {
             const ok = t.type === "ok";
             return (
