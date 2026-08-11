@@ -1,5 +1,6 @@
 "use client";
-import { useState, useEffect } from "react";
+import Link from "next/link";
+import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 
@@ -10,18 +11,20 @@ function LoginContent() {
   const error = params.get("error");
   const [email, setEmail] = useState("");
   const [state, setState] = useState("idle"); // idle | loading | sent | error
-  const [errMsg, setErrMsg] = useState("");
-
-  useEffect(() => {
-    if (error === "expired") setErrMsg("Loginlinket er udløbet eller allerede brugt. Anmod om et nyt.");
-    else if (error === "invalid") setErrMsg("Ugyldigt loginlink.");
-    else if (error === "unavailable") setErrMsg("Tjenesten er midlertidigt utilgængelig. Prøv igen.");
-  }, [error]);
+  // Message for a ?error= in the URL is derived, not state — computing it
+  // during render avoids an effect and the extra render it caused.
+  const urlErrMsg =
+    error === "expired" ? "Loginlinket er udløbet eller allerede brugt. Anmod om et nyt."
+    : error === "invalid" ? "Ugyldigt loginlink."
+    : error === "unavailable" ? "Tjenesten er midlertidigt utilgængelig. Prøv igen."
+    : "";
+  const [submitErr, setSubmitErr] = useState("");
+  const errMsg = submitErr || urlErrMsg;
 
   async function handleSubmit(e) {
     e.preventDefault();
     setState("loading");
-    setErrMsg("");
+    setSubmitErr("");
     try {
       const r = await fetch("/api/auth/magic-link", {
         method: "POST",
@@ -30,13 +33,13 @@ function LoginContent() {
       });
       const data = await r.json();
       if (!r.ok) {
-        setErrMsg(data.message || "Noget gik galt. Prøv igen.");
+        setSubmitErr(data.message || "Noget gik galt. Prøv igen.");
         setState("error");
         return;
       }
       setState("sent");
     } catch {
-      setErrMsg("Netværksfejl. Tjek din forbindelse og prøv igen.");
+      setSubmitErr("Netværksfejl. Tjek din forbindelse og prøv igen.");
       setState("error");
     }
   }
@@ -44,10 +47,10 @@ function LoginContent() {
   return (
     <div className="portal-auth-page">
       <div className="portal-auth-card">
-        <a href="/" className="portal-auth-logo">
+        <Link href="/" className="portal-auth-logo">
           <span className="portal-auth-logo-mark">EV</span>
           <span className="portal-auth-logo-text">Elite Vask</span>
-        </a>
+        </Link>
 
         {state === "sent" ? (
           <div className="portal-sent">
@@ -90,7 +93,7 @@ function LoginContent() {
             </form>
 
             <p className="portal-auth-footer">
-              <a href="/">← Tilbage til forsiden</a>
+              <Link href="/">← Tilbage til forsiden</Link>
             </p>
           </>
         )}

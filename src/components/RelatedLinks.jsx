@@ -1,3 +1,4 @@
+import Link from "next/link";
 // Internal-links block for the standalone pages (city/guide/kontakt/legal),
 // which otherwise only link back to the homepage. Improves crawlability,
 // link equity distribution and on-page navigation. Plain links, no JS.
@@ -6,7 +7,7 @@ export default function RelatedLinks() {
     <nav aria-label="Relaterede sider" className="related-links">
       <h2 className="related-links-title">Udforsk Elite Vask</h2>
       <div className="local-chips" style={{ justifyContent: "flex-start" }}>
-        <a href="/" className="chip">Forside</a>
+        <Link href="/" className="chip">Forside</Link>
         <a href="/priser" className="chip">Priser</a>
         <a href="/galleri" className="chip">Galleri</a>
         <a href="/kontakt" className="chip">Kontakt</a>

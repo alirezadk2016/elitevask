@@ -1,3 +1,4 @@
+import Link from "next/link";
 import RelatedLinks from "@/components/RelatedLinks";
 import JsonLd from "@/components/JsonLd";
 import { breadcrumbLd, cityServiceLd } from "@/lib/seo";
@@ -23,7 +24,7 @@ export default async function BilvaskRoskilde() {
     <div className="legal-page">
       <JsonLd items={[breadcrumbLd([{name:"Forside",path:"/"},{name:"Mobil bilvask i Roskilde",path:"/bilvask/roskilde"}]),cityServiceLd({city:"Roskilde",path:"/bilvask/roskilde"})]} />
       <div className="legal-wrap">
-        <a href="/" className="legal-back">← Tilbage til forsiden</a>
+        <Link href="/" className="legal-back">← Tilbage til forsiden</Link>
 
         <div className="guide-eyebrow">Serviceområde</div>
         <h1>Mobil bilvask i Roskilde</h1>
@@ -74,7 +75,7 @@ export default async function BilvaskRoskilde() {
 
         <div style={{marginTop:'2rem',padding:'1.5rem',background:'#f0faf4',borderRadius:'12px',textAlign:'center'}}>
           <p style={{margin:'0 0 1rem',fontWeight:700,fontSize:'1.1rem'}}>Book mobil bilvask i Roskilde i dag</p>
-          <a href="/#vaelg" className="btn btn-green" style={{display:'inline-block',padding:'0.75rem 2rem',borderRadius:'8px',background:'#22c55e',color:'#fff',textDecoration:'none',fontWeight:700}}>Se priser og book nu</a>
+          <Link href="/#vaelg" className="btn btn-green" style={{display:'inline-block',padding:'0.75rem 2rem',borderRadius:'8px',background:'#22c55e',color:'#fff',textDecoration:'none',fontWeight:700}}>Se priser og book nu</Link>
         </div>
         <RelatedLinks />
       </div>

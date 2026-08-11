@@ -1,3 +1,4 @@
+import Link from "next/link";
 import RelatedLinks from "@/components/RelatedLinks";
 import JsonLd from "@/components/JsonLd";
 import { breadcrumbLd, articleLd } from "@/lib/seo";
@@ -21,7 +22,7 @@ export default function HvorOfte() {
     <div className="legal-page">
       <JsonLd items={[breadcrumbLd([{name:"Forside",path:"/"},{name:"Guide",path:"/guide"},{name:"Hvor ofte bør man vaske sin bil?",path:"/guide/hvor-ofte"}]),articleLd({title:"Hvor ofte bør man vaske sin bil?",description:"Hvor tit skal bilen vaskes? Svaret afhænger af årstid, brug og parkeringsforhold. Her er en konkret guide til, hvornår det er nødvendigt.",path:"/guide/hvor-ofte",datePublished:"2026-06-01"})]} />
       <div className="legal-wrap">
-        <a href="/" className="legal-back">← Tilbage til forsiden</a>
+        <Link href="/" className="legal-back">← Tilbage til forsiden</Link>
 
         <div className="guide-eyebrow">Bilpleje Guide</div>
         <h1>Hvor ofte bør man vaske sin bil?</h1>
@@ -109,7 +110,7 @@ export default function HvorOfte() {
 
         <div className="guide-cta-box">
           <p><strong>Mobil dampvask på hele Sjælland</strong><br />Elite Vask kører ud til dig, uanset om du er hjemme eller på arbejdet. Book en tid direkte her på siden.</p>
-          <a href="/#vaelg" className="btn btn-green guide-cta-btn">Se priser og book tid</a>
+          <Link href="/#vaelg" className="btn btn-green guide-cta-btn">Se priser og book tid</Link>
         </div>
         <RelatedLinks />
       </div>

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import RelatedLinks from "@/components/RelatedLinks";
 import JsonLd from "@/components/JsonLd";
 import { breadcrumbLd, SITE } from "@/lib/seo";
@@ -64,7 +65,7 @@ export default async function Kontakt() {
         ]}
       />
       <div className="legal-wrap">
-        <a href="/" className="legal-back">← Tilbage til forsiden</a>
+        <Link href="/" className="legal-back">← Tilbage til forsiden</Link>
 
         <div className="guide-eyebrow">Kontakt</div>
         <h1>Kontakt Elite Vask</h1>
@@ -73,7 +74,7 @@ export default async function Kontakt() {
         </p>
 
         <div className="contact-cta" style={{ margin: "8px 0 36px" }}>
-          <a href="/#vaelg" className="btn btn-green btn-lg">Se priser &amp; book nu</a>
+          <Link href="/#vaelg" className="btn btn-green btn-lg">Se priser &amp; book nu</Link>
           <a href="tel:+4524440321" className="btn btn-ghost btn-lg">Ring til os</a>
         </div>
 

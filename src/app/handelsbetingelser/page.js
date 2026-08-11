@@ -1,3 +1,4 @@
+import Link from "next/link";
 export const metadata = {
   title: "Handelsbetingelser – Elite Vask",
   description: "Læs Elite Vaskes handelsbetingelser for mobil bil dampvask på Sjælland.",
@@ -8,7 +9,7 @@ export default function Handelsbetingelser() {
   return (
     <div className="legal-page">
       <div className="legal-wrap">
-        <a href="/" className="legal-back">← Tilbage til forsiden</a>
+        <Link href="/" className="legal-back">← Tilbage til forsiden</Link>
         <h1>Handelsbetingelser</h1>
         <p className="legal-updated">Senest opdateret: 19. juni 2026</p>
 
@@ -45,7 +46,7 @@ export default function Handelsbetingelser() {
           Du kan frit aflyse din booking. Vi beder om, at aflysning sker senest <strong>24 timer</strong> før den aftalte tid, så vi kan disponere vores kapacitet optimalt.
         </p>
         <p>
-          Aflysning kan nemt gøres via <strong>annulleringslinket</strong> i din bookingbekræftelse på e-mail – klik blot på "Annuller booking" i mailen. Du kan også kontakte os pr. telefon (+45 24 44 03 21), SMS eller e-mail.
+          Aflysning kan nemt gøres via <strong>annulleringslinket</strong> i din bookingbekræftelse på e-mail – klik blot på &quot;Annuller booking&quot; i mailen. Du kan også kontakte os pr. telefon (+45 24 44 03 21), SMS eller e-mail.
         </p>
         <p>
           Elite Vask kan aflyse eller ombooke i tilfælde af sygdom, ekstreme vejrforhold eller andre uforudsete omstændigheder. Vi kontakter dig hurtigst muligt og tilbyder en ny tid.
@@ -87,7 +88,7 @@ export default function Handelsbetingelser() {
           Enhver tvist mellem parterne er underlagt dansk ret og skal forsøges løst i mindelighed. Kan parterne ikke nå til enighed, kan sagen indbringes for de almindelige danske domstole med værneting i den retskreds, hvor Elite Vask har hjemsted.
         </p>
         <p>
-          Du kan også indbringe en klage til <strong>Forbrugerklagenævnet</strong> via <a href="https://www.forbrug.dk" target="_blank" rel="noopener noreferrer">forbrug.dk</a> eller via EU's online klageportal: <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener noreferrer">ec.europa.eu/consumers/odr</a>.
+          Du kan også indbringe en klage til <strong>Forbrugerklagenævnet</strong> via <a href="https://www.forbrug.dk" target="_blank" rel="noopener noreferrer">forbrug.dk</a> eller via EU&apos;s online klageportal: <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener noreferrer">ec.europa.eu/consumers/odr</a>.
         </p>
       </div>
     </div>

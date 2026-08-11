@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
@@ -69,7 +70,7 @@ function CancelContent() {
   return (
     <div className="legal-page">
       <div className="legal-wrap">
-        <a href="/" className="legal-back">← {da ? "Tilbage til forsiden" : "Back to home"}</a>
+        <Link href="/" className="legal-back">← {da ? "Tilbage til forsiden" : "Back to home"}</Link>
 
         {state === "loading" && (
           <div className="cancel-loading">
@@ -90,9 +91,9 @@ function CancelContent() {
               ? "Kontakt os direkte på +45 24 44 03 21 eller info@elite-vask.dk."
               : "Contact us directly at +45 24 44 03 21 or info@elite-vask.dk."
             }</p>
-            <a href="/" className="btn btn-green" style={{display:"inline-block",marginTop:"16px"}}>
+            <Link href="/" className="btn btn-green" style={{display:"inline-block",marginTop:"16px"}}>
               {da ? "Gå til forsiden" : "Go to homepage"}
-            </a>
+            </Link>
           </div>
         )}
 
@@ -139,9 +140,9 @@ function CancelContent() {
               : "This cancellation link has expired (usable until 24 hours before your appointment). Contact us directly to change your booking."
             }</p>
             <p>{da ? "Telefon: +45 24 44 03 21 · info@elite-vask.dk" : "Phone: +45 24 44 03 21 · info@elite-vask.dk"}</p>
-            <a href="/" className="btn btn-green" style={{display:"inline-block",marginTop:"16px"}}>
+            <Link href="/" className="btn btn-green" style={{display:"inline-block",marginTop:"16px"}}>
               {da ? "Gå til forsiden" : "Go to homepage"}
-            </a>
+            </Link>
           </div>
         )}
 
@@ -153,9 +154,9 @@ function CancelContent() {
               ? "Denne booking er allerede annulleret."
               : "This booking has already been cancelled."
             }</p>
-            <a href="/" className="btn btn-green" style={{display:"inline-block",marginTop:"20px"}}>
+            <Link href="/" className="btn btn-green" style={{display:"inline-block",marginTop:"20px"}}>
               {da ? "Book en ny tid" : "Book a new time"}
-            </a>
+            </Link>
           </div>
         )}
 
@@ -197,9 +198,9 @@ function CancelContent() {
                   : (da ? "Bekræft annullering" : "Confirm cancellation")
                 }
               </button>
-              <a href="/" className="cancel-btn-keep">
+              <Link href="/" className="cancel-btn-keep">
                 {da ? "Behold booking" : "Keep booking"}
-              </a>
+              </Link>
             </div>
           </div>
         )}
@@ -212,9 +213,9 @@ function CancelContent() {
               ? "Din booking er nu annulleret. Du modtager en bekræftelse på e-mail."
               : "Your booking has been cancelled. You will receive a confirmation by email."
             }</p>
-            <a href="/" className="btn btn-green" style={{display:"inline-block",marginTop:"20px"}}>
+            <Link href="/" className="btn btn-green" style={{display:"inline-block",marginTop:"20px"}}>
               {da ? "Book en ny tid" : "Book a new time"}
-            </a>
+            </Link>
           </div>
         )}
 

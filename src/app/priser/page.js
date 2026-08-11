@@ -130,9 +130,9 @@ export default async function PriserPage() {
         ]}
       />
       <div style={{ maxWidth: 900, margin: "0 auto", padding: "48px 24px 80px" }}>
-        <a href="/" style={{ display: "inline-flex", alignItems: "center", gap: 6, color: "#37d278", fontSize: 14, fontWeight: 600, textDecoration: "none", marginBottom: 32, opacity: 0.9 }}>
+        <Link href="/" style={{ display: "inline-flex", alignItems: "center", gap: 6, color: "#37d278", fontSize: 14, fontWeight: 600, textDecoration: "none", marginBottom: 32, opacity: 0.9 }}>
           ← Tilbage til forsiden
-        </a>
+        </Link>
 
         <p style={{ fontSize: 12, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", color: "#37d278", marginBottom: 12 }}>
           Priser

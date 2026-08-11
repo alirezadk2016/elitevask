@@ -1,19 +1,11 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { useConsent } from "@/lib/useConsent";
 
 // Trustpilot invitation script — loaded only after the visitor accepts
-// cookies (same consent gate as Google Analytics), and only once.
+// cookies, and only once.
 export default function TrustpilotInvite() {
-  const [consented, setConsented] = useState(false);
-
-  useEffect(() => {
-    const read = () => {
-      try { setConsented(localStorage.getItem("cookie_consent") === "accepted"); } catch {}
-    };
-    read();
-    window.addEventListener("cookie-consent-changed", read);
-    return () => window.removeEventListener("cookie-consent-changed", read);
-  }, []);
+  const consented = useConsent() === "accepted";
 
   useEffect(() => {
     if (!consented || window.__tpInviteLoaded) return;

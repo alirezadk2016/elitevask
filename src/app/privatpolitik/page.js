@@ -1,3 +1,4 @@
+import Link from "next/link";
 export const metadata = {
   title: "Privatlivspolitik – Elite Vask",
   description: "Læs Elite Vaskes privatlivspolitik og se, hvordan vi behandler dine personoplysninger.",
@@ -8,7 +9,7 @@ export default function Privatpolitik() {
   return (
     <div className="legal-page">
       <div className="legal-wrap">
-        <a href="/" className="legal-back">← Tilbage til forsiden</a>
+        <Link href="/" className="legal-back">← Tilbage til forsiden</Link>
         <h1>Privatlivspolitik</h1>
         <p className="legal-updated">Senest opdateret: 19. juni 2026</p>
 
@@ -74,7 +75,7 @@ export default function Privatpolitik() {
         <ul>
           <li><strong>Indsigt</strong> – få oplyst, hvilke data vi har om dig</li>
           <li><strong>Berigtigelse</strong> – få rettet ukorrekte oplysninger</li>
-          <li><strong>Sletning</strong> – få slettet dine oplysninger ("retten til at blive glemt"), medmindre vi har en lovmæssig pligt til opbevaring</li>
+          <li><strong>Sletning</strong> – få slettet dine oplysninger (&quot;retten til at blive glemt&quot;), medmindre vi har en lovmæssig pligt til opbevaring</li>
           <li><strong>Begrænsning</strong> – få begrænset behandlingen i visse situationer</li>
           <li><strong>Dataportabilitet</strong> – modtage dine data i et struktureret, maskinlæsbart format</li>
           <li><strong>Indsigelse</strong> – gøre indsigelse mod behandling baseret på legitim interesse</li>

@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -81,10 +82,10 @@ export default function PortalPage() {
     <div className="portal-page">
       <header className="portal-header">
         <div className="portal-header-inner">
-          <a href="/" className="portal-logo">
+          <Link href="/" className="portal-logo">
             <span className="portal-logo-mark">EV</span>
             <span>Elite Vask</span>
-          </a>
+          </Link>
           <div className="portal-header-right">
             <span className="portal-email">{email}</span>
             <button className="portal-logout-btn" onClick={handleLogout}>Log ud</button>
@@ -113,7 +114,7 @@ export default function PortalPage() {
               <div className="portal-empty-icon">📋</div>
               <h2>Ingen bookings endnu</h2>
               <p>Du har ikke nogen registrerede bookings på denne e-mail.</p>
-              <a href="/#vaelg" className="portal-btn-primary">Book din første vask →</a>
+              <Link href="/#vaelg" className="portal-btn-primary">Book din første vask →</Link>
             </div>
           )}
 

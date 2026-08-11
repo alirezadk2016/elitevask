@@ -1,5 +1,6 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import Link from "next/link";
+import { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Suspense } from "react";
 
@@ -16,9 +17,9 @@ function VerifyContent() {
   // Keep the token in memory and strip it from the address bar immediately:
   // analytics pageviews (and browser history / shoulder-surfing) must never
   // carry a live single-use login token.
-  const tokenRef = useRef(urlToken);
-  if (urlToken && !tokenRef.current) tokenRef.current = urlToken;
-  const token = tokenRef.current;
+  // Lazy initial state captures the token once, before the effect below
+  // strips it from the address bar. (A ref would be read during render.)
+  const [token] = useState(() => urlToken);
   const [state, setState] = useState("idle"); // idle | loading | error
   const [errMsg, setErrMsg] = useState("");
 
@@ -58,10 +59,10 @@ function VerifyContent() {
   return (
     <div className="portal-auth-page">
       <div className="portal-auth-card">
-        <a href="/" className="portal-auth-logo">
+        <Link href="/" className="portal-auth-logo">
           <span className="portal-auth-logo-mark">EV</span>
           <span className="portal-auth-logo-text">Elite Vask</span>
-        </a>
+        </Link>
         <h1 style={{ fontSize: 20, margin: "18px 0 8px" }}>Log ind på kundeportalen</h1>
 
         {!valid ? (

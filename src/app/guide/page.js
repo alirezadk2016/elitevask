@@ -1,3 +1,4 @@
+import Link from "next/link";
 const GUIDES = [
   { href: "/guide/hvor-ofte", icon: "📅", title: "Hvor ofte bør man vaske sin bil?", desc: "Salt om vinteren, pollen om foråret, insekter om sommeren. Se den konkrete guide til vaskehyppighed efter årstid." },
   { href: "/guide/salt-og-lak", icon: "🧂", title: "Beskyt bilens lak mod vejsalt", desc: "Vejsalt er bilens største fjende i den danske vinter. Lær hvordan salt angriber lakken og hvad du gør ved det." },
@@ -24,12 +25,12 @@ export default function GuidePage() {
   return (
     <div className="gal-page">
       <header className="gal-topbar">
-        <a href="/" className="gal-back">
+        <Link href="/" className="gal-back">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
           <span>Forside</span>
-        </a>
-        <a href="/" className="gal-brand"><span className="gal-brand-mark" />Elite Vask</a>
-        <a href="/#vaelg" className="gal-book">Book nu</a>
+        </Link>
+        <Link href="/" className="gal-brand"><span className="gal-brand-mark" />Elite Vask</Link>
+        <Link href="/#vaelg" className="gal-book">Book nu</Link>
       </header>
 
       <section className="gal-hero">
@@ -52,7 +53,7 @@ export default function GuidePage() {
       </section>
 
       <div className="gal-foot-cta">
-        <a href="/#vaelg" className="btn btn-green btn-lg">Find pris &amp; book din vask</a>
+        <Link href="/#vaelg" className="btn btn-green btn-lg">Find pris &amp; book din vask</Link>
       </div>
     </div>
   );

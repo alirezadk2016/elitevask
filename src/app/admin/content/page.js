@@ -2042,7 +2042,7 @@ export default function AdminPanel() {
               <>
                 {pricesFromDefault && (
                   <div style={{ marginBottom:16, background:"rgba(55,210,120,.06)", border:`1px solid ${T.accentBorder}`, borderRadius:10, padding:"12px 16px" }}>
-                    <span style={{ fontSize:13, color:T.accent, fontWeight:600 }}>Viser standardpriser — rediger og klik 'Gem priser' for at gemme</span>
+                    <span style={{ fontSize:13, color:T.accent, fontWeight:600 }}>Viser standardpriser — rediger og klik &apos;Gem priser&apos; for at gemme</span>
                   </div>
                 )}
                 <div style={{ background:T.bg1, border:`1px solid ${T.border}`, borderRadius:16, padding:24, marginBottom:16, overflowX:"auto" }}>
@@ -2085,7 +2085,7 @@ export default function AdminPanel() {
                     </tbody>
                   </table>
                 </div>
-                <p style={{ fontSize:12, color:T.t4, margin:0 }}>Priser vises som "kr. X" på hjemmesiden. Tomme felter bruger standardpriser fra koden.</p>
+                <p style={{ fontSize:12, color:T.t4, margin:0 }}>Priser vises som &quot;kr. X&quot; på hjemmesiden. Tomme felter bruger standardpriser fra koden.</p>
               </>
             );
           })()}
@@ -2253,7 +2253,7 @@ export default function AdminPanel() {
                   return (
                     <>
                       <div style={{ marginBottom:16, background:"rgba(55,210,120,.06)", border:`1px solid ${T.accentBorder}`, borderRadius:10, padding:"12px 16px", display:"flex", alignItems:"center", justifyContent:"space-between", gap:12, flexWrap:"wrap" }}>
-                        <span style={{ fontSize:13, color:T.accent, fontWeight:600 }}>Viser standardydelser — klik 'Gem alle' for at gøre dem redigerbare</span>
+                        <span style={{ fontSize:13, color:T.accent, fontWeight:600 }}>Viser standardydelser — klik &apos;Gem alle&apos; for at gøre dem redigerbare</span>
                         <button onClick={seedAllExtras} disabled={cmsLoading}
                           style={{ padding:"8px 18px", background:T.accent, color:T.bg0, border:"none", borderRadius:8, fontWeight:700, fontSize:13, cursor:cmsLoading?"not-allowed":"pointer", opacity:cmsLoading?.6:1, fontFamily:FF, whiteSpace:"nowrap" }}>
                           {cmsLoading ? "Gemmer…" : "Gem alle standarddata"}

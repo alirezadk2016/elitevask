@@ -1,3 +1,4 @@
+import Link from "next/link";
 import RelatedLinks from "@/components/RelatedLinks";
 import JsonLd from "@/components/JsonLd";
 import { breadcrumbLd, articleLd } from "@/lib/seo";
@@ -21,7 +22,7 @@ export default function SaltOgLak() {
     <div className="legal-page">
       <JsonLd items={[breadcrumbLd([{name:"Forside",path:"/"},{name:"Guide",path:"/guide"},{name:"Beskyt bilens lak mod vejsalt i Danmark",path:"/guide/salt-og-lak"}]),articleLd({title:"Beskyt bilens lak mod vejsalt i Danmark",description:"Vejsalt er den største trussel mod bilens lak og undervogn i den danske vinter. Læs hvad salt gør ved din bil, og hvordan du beskytter den effektivt.",path:"/guide/salt-og-lak",datePublished:"2026-06-01"})]} />
       <div className="legal-wrap">
-        <a href="/" className="legal-back">← Tilbage til forsiden</a>
+        <Link href="/" className="legal-back">← Tilbage til forsiden</Link>
 
         <div className="guide-eyebrow">Bilpleje Guide</div>
         <h1>Hvordan beskytter du bilens lak mod salt i Danmark?</h1>
@@ -97,7 +98,7 @@ export default function SaltOgLak() {
 
         <div className="guide-cta-box">
           <p><strong>Har du brug for en grundig vintervask?</strong><br />Elite Vask tilbyder mobil dampvask på hele Sjælland – vi kører til dig og renser bilen grundigt for vejsalt, også undervognen.</p>
-          <a href="/#vaelg" className="btn btn-green guide-cta-btn">Se priser og book tid</a>
+          <Link href="/#vaelg" className="btn btn-green guide-cta-btn">Se priser og book tid</Link>
         </div>
         <RelatedLinks />
       </div>
