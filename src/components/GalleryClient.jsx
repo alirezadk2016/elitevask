@@ -9,11 +9,8 @@ function BaSlider({ item }) {
   const dragging = useRef(false);
   const [pos, setPos] = useState(50);
 
-  /* reset position when item changes */
-  useEffect(() => {
-    setPos(50);
-    dragging.current = false;
-  }, [item.id]);
+  /* No reset effect needed: every call site renders the slider with a key
+     tied to item.id, so a different item remounts it with fresh state. */
 
   const move = useCallback((clientX) => {
     const el = ref.current;
@@ -69,7 +66,7 @@ function BaSlider({ item }) {
 function BaThumb({ item, onExpand }) {
   return (
     <figure className="ba-thumb-live">
-      <BaSlider item={item} />
+      <BaSlider key={item.id} item={item} />
       <button
         type="button"
         className="ba-thumb-expand"

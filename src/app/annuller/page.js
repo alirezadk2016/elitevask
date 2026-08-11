@@ -9,12 +9,14 @@ function CancelContent() {
   const params = useSearchParams();
   const token = params.get("token");
 
-  const [state, setState] = useState("loading"); // loading | found | not_found | expired | already_cancelled | too_late | cancelled | error
+  // Derived from the URL, so no effect (and no extra render) is needed to
+  // land on "not_found" when the link carries no token at all.
+  const [state, setState] = useState(() => (token ? "loading" : "not_found"));
   const [booking, setBooking] = useState(null);
   const [confirming, setConfirming] = useState(false);
 
   useEffect(() => {
-    if (!token) { setState("not_found"); return; }
+    if (!token) return;
     fetch(`/api/cancel?token=${encodeURIComponent(token)}`)
       .then(async (r) => {
         const data = await r.json().catch(() => ({}));
