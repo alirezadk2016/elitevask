@@ -62,6 +62,21 @@ export function fmtDateShort(iso) {
   return `${parseInt(d)}. ${months[parseInt(m) - 1]}`;
 }
 
+// "HH:MM" → minutes. Shared so the dialog and the grid agree.
+export function toMinutes(t) {
+  return parseInt(t.slice(0, 2), 10) * 60 + parseInt(t.slice(3, 5), 10);
+}
+
+// Minutes since midnight in Copenhagen — the salon's clock, never the
+// device's. Everything the manager sees is anchored to the same timezone the
+// server validates against.
+export function cphMinutesNow() {
+  const s = new Intl.DateTimeFormat("sv-SE", {
+    timeZone: "Europe/Copenhagen", hour: "2-digit", minute: "2-digit", hour12: false,
+  }).format(new Date());
+  return toMinutes(s);
+}
+
 export function todayISO() {
   return new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Copenhagen" }).format(new Date());
 }

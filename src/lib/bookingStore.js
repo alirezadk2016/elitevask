@@ -54,6 +54,37 @@ export async function delOwnedSlot(kv, date, time, token) {
   await kv.del(key);
 }
 
+/* Release every hour a booking holds.
+ *
+ * Records written before `slots` existed carry no slot list, and their
+ * duration cannot be re-derived safely (guessing it is exactly the old
+ * slot-stealing bug). For those we scan the day's real slot keys and delete
+ * only the ones stamped with this booking's token — same approach the cancel
+ * route uses. Without this, erasing an old booking left its hours red forever
+ * with no booking behind them. */
+export async function releaseBookingSlots(kv, booking) {
+  if (!kv || !booking?.date) return 0;
+  const { date, token, slots } = booking;
+  if (Array.isArray(slots) && slots.length) {
+    let n = 0;
+    for (const t of slots) { try { await delOwnedSlot(kv, date, t, token); n++; } catch {} }
+    return n;
+  }
+  if (!token) return 0;
+  let n = 0;
+  try {
+    const keys = await kv.keys(`slot:${date}:*`);
+    for (const key of keys) {
+      try {
+        const raw = await kv.get(key);
+        const val = typeof raw === 'string' ? JSON.parse(raw) : raw;
+        if (val && val.token === token) { await kv.del(key); n++; }
+      } catch {}
+    }
+  } catch {}
+  return n;
+}
+
 export async function releaseSlots(date, times, token) {
   const kv = await getKV();
   if (!kv) return;
@@ -98,6 +129,24 @@ export const DEFAULT_PRICES = {
   varebil: { hele: 1400, udv: 750, indv: 750, guld: 2200 },
 };
 const DEFAULT_EXTRA_PRICES = { motor: 400, lak: 300, pleje: 200, haar: 300, saede: 400, barnesaede: 100 };
+
+/* Keep only extra-service ids that actually exist (KV list, else the
+   built-in defaults). Unvalidated ids from the request body would otherwise be
+   stored on the booking and shown to the manager as a service that was never
+   ordered — and priced at 0. */
+export async function validExtraIds(extraIds) {
+  if (!Array.isArray(extraIds) || !extraIds.length) return [];
+  let known = new Set(Object.keys(DEFAULT_EXTRA_PRICES));
+  try {
+    const kv = await getKV();
+    if (kv) {
+      const raw = await kv.get('content:extras');
+      const ex = typeof raw === 'string' ? JSON.parse(raw) : raw;
+      if (Array.isArray(ex) && ex.length) known = new Set(ex.filter(e => e && e.id).map(e => String(e.id)));
+    }
+  } catch {}
+  return [...new Set(extraIds.map(String))].filter(id => known.has(id)).slice(0, 12);
+}
 
 export async function computePrice(carId, pkgId, extraIds) {
   if (!DEFAULT_PRICES[carId]) return null;

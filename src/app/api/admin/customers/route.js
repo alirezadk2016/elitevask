@@ -1,5 +1,5 @@
 import { checkBearer } from '@/lib/adminAuth';
-import { getKV, listBookings, customerKey, delOwnedSlot } from '@/lib/bookingStore';
+import { getKV, listBookings, customerKey, releaseBookingSlots } from '@/lib/bookingStore';
 
 /* Customer view. There is no separate customer table — a "customer" is every
    booking that shares a phone number (or, lacking one, an email). Deriving it
@@ -89,11 +89,7 @@ export async function DELETE(request) {
     if (keepFuture && isFuture) { kept++; continue; }
     // Free the hours BEFORE dropping the record: if we die in between, an
     // orphaned slot key is recoverable from the record, but not vice versa.
-    if (b.date && Array.isArray(b.slots)) {
-      for (const t of b.slots) {
-        try { await delOwnedSlot(kv, b.date, t, b.token); freed++; } catch {}
-      }
-    }
+    freed += await releaseBookingSlots(kv, b);
     try { await kv.del(`booking:${b.token}`); deleted++; } catch {}
   }
 

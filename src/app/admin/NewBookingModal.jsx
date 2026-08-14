@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { buildSlotTimes, carSlotCount, isClosedDay } from "@/lib/hours";
-import { T, FF, field, label, CAR_LABELS, PKG_LABELS, CAR_IDS, PKG_IDS, fmtDateLong, todayISO } from "./ui";
+import { T, FF, field, label, CAR_LABELS, PKG_LABELS, CAR_IDS, PKG_IDS, fmtDateLong, todayISO, cphMinutesNow, toMinutes } from "./ui";
 
 /* Manual booking — for the customer who phones instead of using the website.
  *
@@ -36,6 +36,9 @@ export default function NewBookingModal({ secret, hours, extrasItems, prices, na
   const need       = carSlotCount(hours, carId);
   const dayClosed  = date ? isClosedDay(hours, date) : false;
   const today      = todayISO();
+  // Re-read on every render so the grid greys out slots as the evening passes
+  // while the dialog is open.
+  const nowMinCph  = cphMinutesNow();
 
   const loadSlots = useCallback(async (d) => {
     if (!d) return;
@@ -213,7 +216,11 @@ export default function NewBookingModal({ secret, hours, extrasItems, prices, na
                 <div style={{ display: "grid", gridTemplateColumns: `repeat(auto-fill, minmax(${narrow ? 72 : 80}px, 1fr))`, gap: 6 }}>
                   {slotTimes.map(t => {
                     const state = usable[t];
-                    const past = date === today && (parseInt(t.slice(0, 2), 10) * 60 + parseInt(t.slice(3, 5), 10)) <= (new Date().getHours() * 60 + new Date().getMinutes());
+                    // Compared against Copenhagen time, not the device clock:
+                    // a manager travelling (or a laptop left on another
+                    // timezone) would otherwise be offered hours that have
+                    // already passed, and only find out on submit.
+                    const past = date === today && toMinutes(t) <= nowMinCph;
                     const dis = state !== "free" || past;
                     return chip(time === t, dis, () => setTime(t), t, t);
                   })}

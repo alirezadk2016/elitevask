@@ -1,3 +1,4 @@
+import { createHash, timingSafeEqual } from 'crypto';
 import { checkBearer } from '@/lib/adminAuth';
 import { getKV, listBookings } from '@/lib/bookingStore';
 import { cphEpoch } from '@/lib/cphTime';
@@ -21,14 +22,21 @@ export const maxDuration = 60;
  */
 const REMIND_WITHIN_H = 26;  // fires on a daily schedule with margin to spare
 const REMIND_MIN_H    = 2;   // don't "remind" about something starting now
-const FLAG_TTL        = 60 * 60 * 24 * 14;
+const FLAG_TTL        = 60 * 60 * 24 * 14; // set only AFTER the mail is away
+const CLAIM_TTL       = 60 * 10;           // provisional claim while sending
 
 function authorized(request) {
   // Vercel Cron sends the project's CRON_SECRET as a bearer token; the same
   // route can be triggered by hand from the admin panel with ADMIN_SECRET.
-  const header = request.headers.get('authorization') || '';
+  // Both sides are hashed before comparing so the check runs in constant time
+  // and cannot leak the secret one character at a time.
   const cronSecret = process.env.CRON_SECRET;
-  if (cronSecret && header === `Bearer ${cronSecret}`) return true;
+  if (cronSecret) {
+    const header = request.headers.get('authorization') || '';
+    const a = createHash('sha256').update(header).digest();
+    const b = createHash('sha256').update(`Bearer ${cronSecret}`).digest();
+    if (timingSafeEqual(a, b)) return true;
+  }
   return checkBearer(request);
 }
 
@@ -63,10 +71,15 @@ async function run(request, { dryRun = false } = {}) {
 
   let sent = 0, skipped = 0, failed = 0;
   for (const b of due) {
-    // Claim first — a send we aren't sure about must never be retried.
+    // Claim first so two overlapping runs can't both send. The claim is
+    // deliberately SHORT-lived: if this function is killed mid-loop (a
+    // timeout on a big day), a long claim would silently suppress that
+    // customer's reminder for two weeks. A 10-minute claim expires and the
+    // next run retries it. The long flag is written only once the mail is
+    // actually away.
     let claimed = false;
     try {
-      claimed = !!(await kv.set(`reminded:${b.token}`, new Date().toISOString(), { nx: true, ex: FLAG_TTL }));
+      claimed = !!(await kv.set(`reminded:${b.token}`, 'sending', { nx: true, ex: CLAIM_TTL }));
     } catch { failed++; continue; }
     if (!claimed) { skipped++; continue; }
 
@@ -105,6 +118,8 @@ async function run(request, { dryRun = false } = {}) {
               : `Doesn't fit after all? Call <a href="tel:+4524440321" style="color:#0d4a25;font-weight:600">+45 24 44 03 21</a> or <a href="${siteUrl}/annuller?token=${b.token}" style="color:#0d4a25;font-weight:600">cancel here</a>.`}</p>`,
         }),
       });
+      // Mail is away — promote the provisional claim to the real flag.
+      try { await kv.set(`reminded:${b.token}`, new Date().toISOString(), { ex: FLAG_TTL }); } catch {}
       sent++;
     } catch (e) {
       failed++;

@@ -3,7 +3,7 @@ import { emailShell, tr, esc, buildTransport, BOOKING_EMAIL, CONTACT_EMAIL } fro
 import { cphEpoch } from '@/lib/cphTime';
 import {
   getKV, listBookings, slotKey, reserveSlot, releaseSlots, secureToken,
-  computePrice, validateSlot, CAR_LABELS, PKG_LABELS, BOOKING_TTL,
+  computePrice, validateSlot, validExtraIds, CAR_LABELS, PKG_LABELS, BOOKING_TTL,
 } from '@/lib/bookingStore';
 
 export async function GET(request) {
@@ -40,7 +40,7 @@ export async function POST(request) {
   const time  = str(body.time, 5);
   const carId = str(body.carId, 20);
   const pkgId = str(body.pkgId, 20);
-  const extraIds = Array.isArray(body.extraIds) ? body.extraIds.slice(0, 12).map(x => str(x, 40)) : [];
+  const rawExtras = Array.isArray(body.extraIds) ? body.extraIds.slice(0, 24).map(x => str(x, 40)) : [];
   const notify = body.notify !== false; // manager can skip the customer email
 
   if (!name) return Response.json({ error: 'invalid_name', message: 'Indtast kundens navn.' }, { status: 400 });
@@ -63,6 +63,8 @@ export async function POST(request) {
     return Response.json({ error: 'store_unavailable', message: 'Databasen svarer ikke — prøv igen om lidt.' }, { status: 503 });
   }
 
+  // Drop any id that isn't a real extra service before it reaches the record.
+  const extraIds = await validExtraIds(rawExtras);
   const price = (await computePrice(carId, pkgId, extraIds)) || '';
   const token = secureToken();
   const bookedAt = new Date().toISOString();
