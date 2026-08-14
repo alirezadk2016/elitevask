@@ -41,33 +41,10 @@ const HTML = `<!-- BEFORE/AFTER + GALLERY -->
     </button>
     <div class="gcar-dots" id="baDots"></div>
   </div>
-  <div class="gallery-cta-row">
-    <a href="/galleri#foer-efter" class="gallery-cta" data-i18n="see_all_ba">Se alle før &amp; efter</a>
-  </div>
 
-  <div class="center" style="margin-top:76px">
-    <div class="eyebrow" data-i18n="gal_eyebrow">Galleri</div>
-    <h2 class="sec-title" data-i18n="gal_title">Flere billeder fra vores arbejde</h2>
-    <p class="sec-sub" data-i18n="gal_sub2">Flere eksempler på bilvask hjemme og bilrengøring hjemme hos kunden – klik for fuld størrelse.</p>
-  </div>
-  <div class="gcar-wrap" id="galleryNavWrap">
-    <button type="button" class="gcar-btn gcar-prev" id="galPrev" aria-label="Forrige">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-    </button>
-    <div class="gcar-viewport" id="galViewport">
-      <div class="gcar-track" id="gallery">
-        ${galItem('/gallery/steam-bmw.jpg', 'g_bmw', 'Dampvask · BMW', 'Dampvask af BMW')}
-        ${galItem('/gallery/steam-hood.jpg', 'g_hood', 'Motorhjelm · damp', 'Dampvask af motorhjelm')}
-        ${galItem('/gallery/aerial-wash.jpg', 'g_onsite', 'Mobil dampvask · på stedet', 'Mobil dampvask på stedet')}
-      </div>
-    </div>
-    <button type="button" class="gcar-btn gcar-next" id="galNext" aria-label="Næste">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
-    </button>
-    <div class="gcar-dots" id="galDots"></div>
-  </div>
+
   <div class="gallery-cta-row">
-    <a href="/galleri#galleri" class="gallery-cta" data-i18n="see_all_gallery">Se hele galleriet</a>
+    <a href="/galleri" class="gallery-cta" data-i18n="see_all_gallery">Se hele galleriet</a>
   </div>
 </div></section>`;
 export default function Work() {

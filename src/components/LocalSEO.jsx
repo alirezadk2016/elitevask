@@ -1,5 +1,5 @@
 const HTML = `<!-- LOCAL SEO -->
-<section class="sec local"><div class="wrap">
+<section class="sec sec-tight local"><div class="wrap">
   <div class="eyebrow" data-i18n="local_eyebrow">Serviceområde</div>
   <h2 class="sec-title" data-i18n="local_title">Mobil bilvask i hele Sjælland</h2>
   <div class="local-chips">

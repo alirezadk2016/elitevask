@@ -143,12 +143,16 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 @keyframes heroReveal{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
 
 /* SECTIONS */
-.sec{padding:80px 0}
+.sec{padding:clamp(52px,6vw,76px) 0}
+/* Lighter sections sit closer to the one before them, so the page has a
+   rhythm instead of twelve identical blocks. */
+.sec.sec-tight{padding-top:clamp(28px,3vw,40px)}
+.sec.sec-flush{padding-top:0}
 .eyebrow{font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--green);margin-bottom:14px;display:inline-flex;align-items:center;gap:10px}
 .eyebrow::before{content:'';display:inline-block;width:22px;height:2px;background:linear-gradient(90deg,var(--green),rgba(55,210,120,.3));border-radius:2px;flex-shrink:0}
 .center .eyebrow{justify-content:center}
 .sec-title{font-size:clamp(25px,3.5vw,35px);font-weight:800;letter-spacing:-.8px;color:#fff;line-height:1.15}
-.sec-sub{font-size:16px;color:var(--muted);margin-top:12px;max-width:580px}
+.sec-sub{font-size:16px;line-height:1.6;color:var(--muted);margin-top:10px;max-width:560px}
 .center{text-align:center}.center .sec-sub{margin-left:auto;margin-right:auto}
 
 /* CAR SELECTOR */
@@ -362,7 +366,8 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 .sf-meta{flex:1;display:flex;align-items:center;justify-content:space-between;gap:12px}
 .sf-meta h4{font-size:16px;font-weight:700;color:#fff;margin:0}
 .sf-chevron{display:none;width:18px;height:18px;color:var(--muted);flex-shrink:0;transition:transform .3s}
-.sf-body{font-size:14px;color:var(--muted);line-height:1.7;padding:0 28px 24px 100px;margin:0}
+.sf-body{font-size:14px;color:var(--muted);line-height:1.7;padding:0 28px 22px 100px;margin:0}
+@media(min-width:881px){.sf-row{padding-bottom:4px}}
 /* mobile accordion */
 @media(max-width:880px){
   .sf-row{padding:18px 16px;cursor:pointer;gap:14px}
@@ -847,7 +852,9 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
   .contact-grid{grid-template-columns:1fr;gap:32px}
   .footer-grid{grid-template-columns:1fr 1fr;gap:30px}.footer .fb{grid-column:1/-1}
   html,body{overflow-x:clip}
-  body{padding-bottom:calc(68px + env(safe-area-inset-bottom))}
+  /* The sticky call/book bar measures 77px, so 68px left the last line of
+     the footer sitting under it at the very bottom of the page. */
+  body{padding-bottom:calc(80px + env(safe-area-inset-bottom))}
   .mobile-cta{display:flex}
   .hero-flow{display:none}
   /* premium mobile hero — content sits low over a clean dark band, image breathes up top */
@@ -960,7 +967,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
   .hero p{font-size:13px;margin-top:11px;padding:0 6px}
   .badge{font-size:11.5px;padding:5px 12px;margin-bottom:12px}
   .hero-cta{margin-top:18px;padding:0}
-  .sec{padding:56px 0}
+  .sec{padding:clamp(40px,9vw,56px) 0}
   .sec-title{font-size:clamp(22px,5.5vw,28px)}
   .car{padding:18px 10px 14px}
   .car .nm{font-size:13px}
