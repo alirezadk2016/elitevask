@@ -30,6 +30,50 @@ export const T = {
 
 export const FF = "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
 
+/* ── Surfaces ──────────────────────────────────────────────────────────────
+   Flat panels on a flat background read as unfinished. Every card gets a
+   faint top-down gradient and a hairline highlight along its top edge, which
+   is what separates "a div with a border" from a surface with depth. */
+export const surface = (accent = false) => ({
+  background: accent
+    ? `linear-gradient(180deg, rgba(55,210,120,.07) 0%, ${T.bg1} 60%)`
+    : `linear-gradient(180deg, rgba(255,255,255,.028) 0%, ${T.bg1} 55%)`,
+  border: `1px solid ${accent ? T.accentBorder : T.border}`,
+  borderRadius: 16,
+  boxShadow: "0 1px 0 rgba(255,255,255,.04) inset, 0 2px 10px rgba(0,0,0,.35)",
+});
+
+// Rows inside a surface: lighter, so the card still reads as the container.
+export const row = (accent) => ({
+  background: "rgba(255,255,255,.022)",
+  border: `1px solid ${T.border}`,
+  borderLeft: `3px solid ${accent || "transparent"}`,
+  borderRadius: 12,
+  transition: "background .15s, border-color .15s, transform .12s",
+});
+
+/* Package identity. The Guld package is the premium tier on the public site
+   and was rendering in the same blue as everything else — it now carries the
+   gold it is sold with, so the manager can read the day's mix at a glance. */
+export const PKG_TONE = {
+  guld: { fg: "#d4af37", dim: "rgba(212,175,55,.13)", border: "rgba(212,175,55,.42)" },
+  hele: { fg: "#4f8ef7", dim: "rgba(79,142,247,.13)", border: "rgba(79,142,247,.40)" },
+  udv:  { fg: "#46b0c9", dim: "rgba(70,176,201,.12)", border: "rgba(70,176,201,.38)" },
+  indv: { fg: "#9b8cf0", dim: "rgba(155,140,240,.13)", border: "rgba(155,140,240,.40)" },
+};
+export function pkgTone(b) {
+  const id = b?.pkgId || Object.keys(PKG_LABELS).find(k => PKG_LABELS[k] === b?.pkg);
+  return PKG_TONE[id] || PKG_TONE.hele;
+}
+
+// Shimmering placeholder — a bare "Indlæser…" makes the panel feel cheap.
+export const skeleton = (h = 14, w = "100%") => ({
+  height: h, width: w, borderRadius: 7,
+  background: "linear-gradient(90deg, rgba(255,255,255,.04) 25%, rgba(255,255,255,.09) 50%, rgba(255,255,255,.04) 75%)",
+  backgroundSize: "200% 100%",
+  animation: "evShimmer 1.3s ease-in-out infinite",
+});
+
 export const CAR_LABELS = { lille: "Lille bil", mellem: "Mellemstor bil", stor: "Stor bil / SUV", varebil: "Varebil" };
 export const PKG_LABELS = { hele: "Hele bilen", udv: "Udvendig", indv: "Indvendig", guld: "Guld pakke" };
 export const CAR_IDS = ["lille", "mellem", "stor", "varebil"];

@@ -40,6 +40,21 @@ export async function reserveSlot(key, value) {
   return !!r;
 }
 
+/* Reserve a slot, treating "already mine" as success.
+   Needed when moving a booking to an overlapping time: a plain SET NX would
+   collide with the booking's OWN existing lock and report the slot as taken. */
+export async function reserveOrOwn(kv, date, time, value, token) {
+  const key = slotKey(date, time);
+  const r = await kv.set(key, JSON.stringify(value), { nx: true, ex: BOOKING_TTL });
+  if (r) return 'reserved';
+  try {
+    const raw = await kv.get(key);
+    const v = typeof raw === 'string' ? JSON.parse(raw) : raw;
+    if (v && v.token === token) return 'owned';
+  } catch {}
+  return false;
+}
+
 /* Delete a slot key only if it belongs to `token`. Without the ownership
    check a rollback could delete the NEXT booking's slot and silently free an
    occupied hour. */

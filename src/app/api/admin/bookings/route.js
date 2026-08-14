@@ -4,6 +4,7 @@ import { cphEpoch } from '@/lib/cphTime';
 import {
   getKV, listBookings, slotKey, reserveSlot, releaseSlots, secureToken,
   computePrice, validateSlot, validExtraIds, CAR_LABELS, PKG_LABELS, BOOKING_TTL,
+  reserveOrOwn, delOwnedSlot,
 } from '@/lib/bookingStore';
 
 export async function GET(request) {
@@ -159,4 +160,161 @@ export async function POST(request) {
   }
 
   return Response.json({ ok: true, token, booking: { token, ...record }, emailed, emailError });
+}
+
+/* Move an existing booking to another date/time.
+ *
+ * Ordering is the whole safety story here. The new hours are reserved FIRST;
+ * only once every one of them is held do we rewrite the record and release the
+ * old hours. So:
+ *   - a clash on the new time leaves the booking exactly where it was
+ *   - a crash mid-move can at worst leave a few extra slots held (visible and
+ *     releasable), never a booking with no lock at all
+ * The reverse order would, on any failure, hand the customer's original hour
+ * to somebody else while the booking still points at it. */
+export async function PATCH(request) {
+  if (!process.env.ADMIN_SECRET) return Response.json({ error: 'not_configured' }, { status: 503 });
+  if (!checkBearer(request)) return Response.json({ error: 'unauthorized' }, { status: 401 });
+
+  let body;
+  try { body = await request.json(); } catch { return Response.json({ error: 'bad_json' }, { status: 400 }); }
+
+  const token = String(body.token || '');
+  const date  = String(body.date || '').trim().slice(0, 10);
+  const time  = String(body.time || '').trim().slice(0, 5);
+  const notify = body.notify === true;
+  if (!/^[a-f0-9]{64}$/.test(token)) return Response.json({ error: 'invalid_token' }, { status: 400 });
+
+  const kv = await getKV();
+  if (!kv) return Response.json({ error: 'store_unavailable', message: 'Databasen svarer ikke.' }, { status: 503 });
+
+  let booking;
+  try {
+    const raw = await kv.get(`booking:${token}`);
+    booking = typeof raw === 'string' ? JSON.parse(raw) : raw;
+  } catch { booking = null; }
+  if (!booking) return Response.json({ error: 'not_found', message: 'Bookingen findes ikke.' }, { status: 404 });
+  if (booking.status === 'cancelled') {
+    return Response.json({ error: 'cancelled', message: 'En aflyst booking kan ikke flyttes.' }, { status: 409 });
+  }
+  if (booking.date === date && booking.time === time) {
+    return Response.json({ ok: true, unchanged: true, booking: { token, ...booking } });
+  }
+
+  // The car type decides the duration, so a record without one cannot be moved
+  // safely — we would have to guess how many hours to hold.
+  const carId = booking.carId;
+  const v = await validateSlot({ date, time, carId });
+  if (!v.ok) {
+    const msg = v.error === 'invalid_car'
+      ? 'Denne booking mangler biltype og kan ikke flyttes automatisk. Opret en ny booking i stedet.'
+      : v.message;
+    return Response.json({ error: v.error, message: msg }, { status: 400 });
+  }
+  const { hours, slotTimes, startIdx, slotsNeeded } = v;
+
+  const from = { date: booking.date, time: booking.time, slots: Array.isArray(booking.slots) ? booking.slots : [] };
+  const wanted = [];
+  for (let i = 0; i < slotsNeeded; i++) wanted.push(slotTimes[startIdx + i]);
+
+  // 1. Take the new hours.
+  const newlyTaken = [];
+  for (const t of wanted) {
+    let got;
+    try {
+      got = await reserveOrOwn(kv, date, t, { name: booking.name || 'unknown', bookedAt: booking.bookedAt, token }, token);
+    } catch {
+      for (const r of newlyTaken) await delOwnedSlot(kv, date, r, token);
+      return Response.json({ error: 'store_failed', message: 'Databasefejl — bookingen blev IKKE flyttet.' }, { status: 503 });
+    }
+    if (!got) {
+      // Release only what THIS move newly grabbed; slots the booking already
+      // owned must survive, or we would strand it without a lock.
+      for (const r of newlyTaken) await delOwnedSlot(kv, date, r, token);
+      return Response.json({ error: 'slot_taken', message: `Kl. ${t} er optaget den dag. Vælg et andet tidspunkt.` }, { status: 409 });
+    }
+    if (got === 'reserved') newlyTaken.push(t);
+  }
+
+  // 2. Rewrite the record (now safely backed by the new locks).
+  const moved = {
+    ...booking,
+    date, time,
+    slots: wanted,
+    slotsNeeded,
+    durationMin: slotsNeeded * hours.slotMinutes,
+    slotMinutes: hours.slotMinutes,
+    cancelExpiresAt: new Date(cphEpoch(date, time) - 24 * 3600 * 1000).toISOString(),
+    movedAt: new Date().toISOString(),
+    movedFrom: [...(booking.movedFrom || []), { date: from.date, time: from.time }].slice(-10),
+  };
+  try {
+    await kv.set(`booking:${token}`, JSON.stringify(moved), { ex: BOOKING_TTL });
+  } catch {
+    for (const r of newlyTaken) await delOwnedSlot(kv, date, r, token);
+    return Response.json({ error: 'store_failed', message: 'Kunne ikke gemme flytningen — bookingen står uændret.' }, { status: 503 });
+  }
+
+  // 3. Only now let the old hours go. Same-day moves keep whatever overlaps.
+  const keep = new Set(date === from.date ? wanted : []);
+  const oldSlots = from.slots.length ? from.slots : null;
+  if (oldSlots) {
+    for (const t of oldSlots) if (!keep.has(t)) { try { await delOwnedSlot(kv, from.date, t, token); } catch {} }
+  } else {
+    // Legacy record with no slot list: sweep the old day by token, skipping
+    // anything the booking now legitimately holds.
+    try {
+      const keys = await kv.keys(`slot:${from.date}:*`);
+      for (const key of keys) {
+        const t = key.split(':').slice(2).join(':');
+        if (date === from.date && keep.has(t)) continue;
+        try {
+          const raw = await kv.get(key);
+          const val = typeof raw === 'string' ? JSON.parse(raw) : raw;
+          if (val && val.token === token) await kv.del(key);
+        } catch {}
+      }
+    } catch {}
+  }
+
+  // 4. Tell the customer, best-effort — the move is already committed.
+  let emailed = false;
+  if (notify && moved.email) {
+    try {
+      const transport = buildTransport();
+      if (!transport) throw new Error('no smtp');
+      const months = ['jan','feb','mar','apr','maj','jun','jul','aug','sep','okt','nov','dec'];
+      const nice = (d) => { const [, m, dd] = d.split('-'); return `${parseInt(dd)}. ${months[parseInt(m) - 1]}`; };
+      const L = moved.lang !== 'en';
+      await transport.sendMail({
+        from: `"Elite Vask" <${process.env.SMTP_USER || BOOKING_EMAIL}>`,
+        to: moved.email,
+        replyTo: CONTACT_EMAIL,
+        subject: L ? `Din tid er flyttet – ${nice(date)} kl. ${time}` : `Your appointment moved – ${nice(date)} at ${time}`,
+        html: emailShell({
+          lang: moved.lang,
+          title: L ? 'Din tid er flyttet' : 'Your appointment has moved',
+          preheader: `${nice(date)} ${L ? 'kl.' : 'at'} ${time}`,
+          body: `<p style="margin:0 0 18px;font-size:15px;color:#333;line-height:1.6">${L ? 'Hej' : 'Hi'} ${esc(moved.name || '')},</p>
+            <p style="margin:0 0 20px;font-size:15px;color:#333;line-height:1.6">${L
+              ? 'Vi har flyttet din tid som aftalt. Her er den nye aftale:'
+              : 'We have moved your appointment as agreed. Here are the new details:'}</p>
+            <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #eaefeb;border-radius:8px;overflow:hidden;margin-bottom:20px">
+              ${tr(L ? 'Tidligere' : 'Previously', `<span style="text-decoration:line-through;color:#999">${esc(nice(from.date))} ${L ? 'kl.' : 'at'} ${esc(from.time || '')}</span>`)}
+              ${tr(L ? 'Ny tid' : 'New time', `<strong>${esc(nice(date))} ${L ? 'kl.' : 'at'} ${esc(time)}</strong>`, true)}
+              ${tr(L ? 'Bil' : 'Car', esc(moved.car || '-'))}
+              ${tr(L ? 'Pakke' : 'Package', esc(moved.pkg || '-'), true)}
+            </table>
+            <p style="margin:0;font-size:14px;color:#555;line-height:1.6">${L
+              ? 'Passer det ikke? Ring til os på <a href="tel:+4524440321" style="color:#0d4a25;font-weight:600">+45 24 44 03 21</a>.'
+              : 'Doesn\'t suit you? Call us on <a href="tel:+4524440321" style="color:#0d4a25;font-weight:600">+45 24 44 03 21</a>.'}</p>`,
+        }),
+      });
+      emailed = true;
+    } catch (e) {
+      console.error('[admin/bookings] move email failed', e?.message);
+    }
+  }
+
+  return Response.json({ ok: true, moved: true, emailed, booking: { token, ...moved } });
 }

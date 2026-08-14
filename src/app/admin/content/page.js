@@ -1,10 +1,11 @@
 "use client";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { DEFAULT_ALBUM, DEFAULT_BEFORE_AFTER } from "@/lib/galleryData";
-import { DEFAULT_HOURS, normalizeHours, buildSlotTimes, toMin, ALLOWED_SLOT_MINUTES } from "@/lib/hours";
-import { T, FF } from "../ui";
+import { DEFAULT_HOURS, normalizeHours, buildSlotTimes, toMin, ALLOWED_SLOT_MINUTES, isClosedDay as isClosedDayAdmin } from "@/lib/hours";
+import { T, FF, surface, row, skeleton, pkgTone, PKG_TONE, PKG_LABELS as PKG_LABELS_ADMIN } from "../ui";
 import NewBookingModal from "../NewBookingModal";
 import CustomersTab from "../CustomersTab";
+import MoveBookingModal from "../MoveBookingModal";
 
 
 const DEFAULT_PRICES = {
@@ -131,6 +132,7 @@ export default function AdminPanel() {
   const [bookings, setBookings]           = useState([]);
   const [lastSync, setLastSync]           = useState(null);
   const [newBookingOpen, setNewBookingOpen] = useState(false);
+  const [movingBooking, setMovingBooking] = useState(null);
   const [remindState, setRemindState]     = useState(null); // {busy} | {sent,skipped,failed}
   const [bLoading, setBLoading]           = useState(false);
   const [bError, setBError]               = useState("");
@@ -249,13 +251,14 @@ export default function AdminPanel() {
       if (navGuard)            { setNavGuard(null); return; }
       if (previewItem)         { setPreviewItem(null); return; }
       if (selectedBooking)     { setSelectedBooking(null); return; }
+      if (movingBooking)       { setMovingBooking(null); return; }
       if (editingGallery)      { setEditingGallery(null); return; }
       if (editingExt)          { setEditingExt(null); return; }
       if (editingBA)           { setEditingBA(null); return; }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [authed, deleteConfirm, navGuard, previewItem, selectedBooking, editingGallery, editingExt, editingBA]);
+  }, [authed, deleteConfirm, navGuard, previewItem, selectedBooking, editingGallery, editingExt, editingBA, movingBooking]);
 
   // Lock background scroll while a full-screen overlay is open.
   useEffect(() => {
@@ -625,8 +628,14 @@ export default function AdminPanel() {
           if (hasUnsaved) { setNavGuard({ pendingTab: id }); return; }
           setTab(id); setMsg(null); setUrlInput(""); setCmsMsg(null); setExpandedFaqId(null); setFaqDrafts({}); setAddFaqOpen(false); setEditingExt(null); setEditingGallery(null);
         }}
-        style={{ display:"flex", alignItems:"center", gap:8, width:"100%", padding:"7px 9px", borderRadius:7, fontSize:13, fontWeight:active?600:400, color:active?T.accent:T.t3, background:active?T.accentDim:"transparent", border:"none", cursor:"pointer", fontFamily:FF, textAlign:"left", transition:"all .12s", marginBottom:1 }}>
-        <span style={{ opacity: active ? 1 : 0.7, display:"flex" }}>{icon}</span>
+        onMouseEnter={e => { if (!active) { e.currentTarget.style.background = "rgba(255,255,255,.04)"; e.currentTarget.style.color = T.t2; } }}
+        onMouseLeave={e => { if (!active) { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = T.t3; } }}
+        style={{ position:"relative", display:"flex", alignItems:"center", gap:9, width:"100%", padding:"8px 10px", borderRadius:8, fontSize:13, fontWeight:active?700:500, color:active?T.accent:T.t3,
+          background:active?"linear-gradient(90deg, rgba(55,210,120,.16), rgba(55,210,120,.05))":"transparent",
+          border:"none", cursor:"pointer", fontFamily:FF, textAlign:"left", transition:"background .14s, color .14s", marginBottom:2 }}>
+        {/* Active rail — a fill alone reads as a hover state, not a location. */}
+        <span style={{ position:"absolute", left:0, top:7, bottom:7, width:2.5, borderRadius:2, background:active?T.accent:"transparent", boxShadow:active?`0 0 8px ${T.accent}`:"none" }} />
+        <span style={{ opacity: active ? 1 : 0.65, display:"flex" }}>{icon}</span>
         <span style={{ flex:1 }}>{label}</span>
         {badge != null && <span style={{ fontSize:10, fontWeight:700, background:active?"rgba(55,210,120,.25)":"rgba(255,255,255,.06)", color:active?T.accent:T.t4, borderRadius:10, padding:"1px 6px", minWidth:16, textAlign:"center" }}>{badge}</span>}
       </button>
@@ -652,6 +661,15 @@ export default function AdminPanel() {
     dashboard: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>,
   };
 
+  // Small icons used by the dashboard tiles and quick actions.
+  const ICO = {
+    today: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>,
+    week:  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="3" y="4" width="18" height="17" rx="2.5"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>,
+    gauge: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M3 17a9 9 0 0118 0"/><path d="M12 17l4.5-4.5"/></svg>,
+    coin:  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="9"/><path d="M15 9.5A2.5 2.5 0 0012.5 8h-1a2.5 2.5 0 000 5h1a2.5 2.5 0 010 5h-1A2.5 2.5 0 019 15.5"/><path d="M12 6.5v11"/></svg>,
+    plus:  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>,
+  };
+
   // ── MAIN RENDER ────────────────────────────────────────────────────────────
   const hasPriceChanges = JSON.stringify(priceEdits) !== JSON.stringify(pricesData);
   const hoursDirty = JSON.stringify(hoursDraft) !== JSON.stringify(hours);
@@ -671,6 +689,9 @@ export default function AdminPanel() {
 
   return (
     <div style={{ minHeight:"100dvh", background:T.bg0, fontFamily:FF, color:T.t2 }}>
+      {/* Keyframes are the one thing inline styles cannot express. Scoped to
+          the admin page so the public stylesheet stays untouched. */}
+      <style>{`@keyframes evShimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}`}</style>
 
       {/* TOP BAR */}
       <div style={{ height:52, background:"rgba(8,17,10,.92)", backdropFilter:"blur(12px)", borderBottom:`1px solid ${T.border}`, display:"flex", alignItems:"center", padding:"0 20px", gap:12, position:"sticky", top:0, zIndex:100 }}>
@@ -787,6 +808,29 @@ export default function AdminPanel() {
             const parseKr = (p) => { const n = parseInt(String(p||"").replace(/[^\d]/g,""),10); return Number.isFinite(n)?n:0; };
             const revenue7 = todays.concat(week7).reduce((s,b)=>s+parseKr(b.price),0);
             const upcomingClosed = (hours.closedDates||[]).filter(d => d >= todayISO).slice(0,6);
+            // 30-day window vs the 30 before it, so the revenue tile says
+            // whether the month is actually going well.
+            const dayShift = (n) => new Intl.DateTimeFormat("sv-SE",{timeZone:"Europe/Copenhagen"}).format(new Date(Date.now()+n*86400000));
+            const d30 = dayShift(-30), d60 = dayShift(-60);
+            const krOf = (p) => { const n = parseInt(String(p||"").replace(/[^\d]/g,""),10); return Number.isFinite(n)?n:0; };
+            const sumIn = (from,to) => active.filter(b => b.date > from && b.date <= to).reduce((s,b)=>s+krOf(b.price),0);
+            const rev30 = sumIn(d30, todayISO), revPrev = sumIn(d60, d30);
+            const revDelta = revPrev ? Math.round(((rev30 - revPrev) / revPrev) * 100) : null;
+            // Package mix over the next 30 days — where the money comes from.
+            const mixSource = active.filter(b => b.date >= todayISO);
+            const mix = ["guld","hele","indv","udv"].map(id => ({
+              id, label: PKG_LABELS_ADMIN[id],
+              n: mixSource.filter(b => (b.pkgId || Object.keys(PKG_LABELS_ADMIN).find(k=>PKG_LABELS_ADMIN[k]===b.pkg)) === id).length,
+            })).filter(x => x.n > 0);
+            const mixTotal = mix.reduce((s,x)=>s+x.n,0) || 1;
+            const occupancy = (() => {
+              // How much of the next 7 open days is already sold.
+              const slotsPerDay = buildSlotTimes(hours).length;
+              const days = Array.from({length:7},(_,i)=>dayShift(i)).filter(d => !isClosedDayAdmin(hours, d));
+              if (!days.length || !slotsPerDay) return null;
+              const used = active.filter(b => days.includes(b.date)).reduce((s,b)=>s+(b.slotsNeeded || (b.slots||[]).length || 0),0);
+              return Math.min(100, Math.round((used / (days.length*slotsPerDay)) * 100));
+            })();
             const endTimeOf = (b) => {
               if (!b.time) return "";
               const [h,m] = b.time.split(":").map(Number);
@@ -795,24 +839,44 @@ export default function AdminPanel() {
               const e = h*60+(m||0)+dur;
               return `${String(Math.floor(e/60)).padStart(2,"0")}:${String(e%60).padStart(2,"0")}`;
             };
-            const stat = (label, value, accent) => (
-              <div style={{ flex:1, minWidth:130, background:T.bg1, border:`1px solid ${T.border}`, borderRadius:14, padding:"16px 18px" }}>
-                <div style={{ fontSize:24, fontWeight:800, color:accent?T.accent:T.t1, letterSpacing:"-.5px", fontVariantNumeric:"tabular-nums" }}>{value}</div>
-                <div style={{ fontSize:11.5, color:T.t3, fontWeight:600, marginTop:2 }}>{label}</div>
+            // A bare number says nothing about whether the week is good. Each
+            // tile carries its own icon and, where it means something, how it
+            // compares with the period before.
+            const stat = (label, value, icon, tone, delta) => (
+              <div style={{ ...surface(tone === "accent"), padding:"17px 19px", display:"flex", flexDirection:"column", gap:2, minWidth:0 }}>
+                <div style={{ display:"flex", alignItems:"center", gap:7, marginBottom:5 }}>
+                  <span style={{ display:"flex", color: tone === "gold" ? T.gold : tone === "accent" ? T.accent : T.t3, opacity:.9 }}>{icon}</span>
+                  <span style={{ fontSize:10.5, letterSpacing:.9, textTransform:"uppercase", color:T.t3, fontWeight:700 }}>{label}</span>
+                </div>
+                <div style={{ fontSize:27, lineHeight:1.05, fontWeight:800, letterSpacing:"-.8px", fontVariantNumeric:"tabular-nums",
+                  color: tone === "gold" ? T.gold : tone === "accent" ? T.accent : T.t1 }}>{value}</div>
+                {delta != null && (
+                  <div style={{ fontSize:11.5, fontWeight:600, marginTop:3, color: delta > 0 ? T.accent : delta < 0 ? T.amber : T.t4 }}>
+                    {delta > 0 ? "▲" : delta < 0 ? "▼" : "—"} {delta === 0 ? "uændret" : `${Math.abs(delta)}%`} <span style={{ color:T.t4, fontWeight:500 }}>vs. forrige 30 dage</span>
+                  </div>
+                )}
               </div>
             );
-            const bookingRow = (b, showDate) => (
+            const bookingRow = (b, showDate) => {
+              const tone = pkgTone(b);
+              return (
               <button key={b.token} onClick={() => { setSelectedBooking(b); setModalState("idle"); }}
-                style={{ display:"flex", alignItems:"center", gap:12, width:"100%", textAlign:"left", padding:"12px 16px", borderRadius:11, border:`1px solid ${T.border}`, background:T.bg1, cursor:"pointer", fontFamily:FF }}>
-                <div style={{ flexShrink:0, textAlign:"center", minWidth:60 }}>
-                  <div style={{ fontSize:14, fontWeight:800, color:T.accent, fontVariantNumeric:"tabular-nums" }}>{showDate ? fmtDate(b.date) : (b.time || "-")}</div>
+                onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,255,255,.05)"; e.currentTarget.style.transform = "translateX(2px)"; }}
+                onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,.022)"; e.currentTarget.style.transform = ""; }}
+                style={{ ...row(tone.fg), display:"flex", alignItems:"center", gap:13, width:"100%", textAlign:"left", padding:"12px 16px", cursor:"pointer", fontFamily:FF }}>
+                <div style={{ flexShrink:0, textAlign:"center", minWidth:62 }}>
+                  <div style={{ fontSize:14.5, fontWeight:800, color:T.t1, fontVariantNumeric:"tabular-nums", letterSpacing:"-.3px" }}>{showDate ? fmtDate(b.date) : (b.time || "-")}</div>
                   <div style={{ fontSize:11, color:T.t4, fontVariantNumeric:"tabular-nums" }}>{showDate ? `kl. ${b.time||"-"}` : `–${endTimeOf(b)}`}</div>
                 </div>
                 <div style={{ flex:1, minWidth:0 }}>
-                  <div style={{ fontSize:14, fontWeight:700, color:T.t1, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{b.name || "Ukendt"}</div>
-                  <div style={{ fontSize:12, color:T.t3, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{b.car || "-"} · {b.pkg || "-"}{b.addr ? ` · ${b.addr}${b.city ? ", "+b.city : ""}` : ""}</div>
+                  <div style={{ display:"flex", alignItems:"center", gap:7, marginBottom:2 }}>
+                    <span style={{ fontSize:14, fontWeight:700, color:T.t1, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{b.name || "Ukendt"}</span>
+                    <span style={{ flexShrink:0, fontSize:10, fontWeight:700, color:tone.fg, background:tone.dim, border:`1px solid ${tone.border}`, borderRadius:5, padding:"1px 6px", whiteSpace:"nowrap" }}>{b.pkg || "-"}</span>
+                    {b.source === "admin" && <span style={{ flexShrink:0, fontSize:9, fontWeight:800, color:T.t4, border:`1px solid ${T.border}`, borderRadius:4, padding:"0 4px" }}>TLF</span>}
+                  </div>
+                  <div style={{ fontSize:12, color:T.t3, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{b.car || "-"}{b.addr ? ` · ${b.addr}${b.city ? ", "+b.city : ""}` : ""}</div>
                 </div>
-                {!narrow && <span style={{ fontSize:13, fontWeight:700, color:T.accent, flexShrink:0 }}>{b.price || "-"}</span>}
+                {!narrow && <span style={{ fontSize:13.5, fontWeight:800, color:T.t2, flexShrink:0, fontVariantNumeric:"tabular-nums" }}>{b.price || "-"}</span>}
                 {b.phone && (
                   <a href={`tel:${b.phone}`} onClick={e => e.stopPropagation()}
                     style={{ display:"flex", alignItems:"center", justifyContent:"center", width:32, height:32, borderRadius:9, background:T.accentDim, border:`1px solid ${T.accentBorder}`, color:T.accent, textDecoration:"none", flexShrink:0 }}>
@@ -820,18 +884,26 @@ export default function AdminPanel() {
                   </a>
                 )}
               </button>
-            );
+              );
+            };
             return (
-              <div style={{ maxWidth:860 }}>
-                {bLoading && <div style={{ color:T.t3, fontSize:13, marginBottom:14 }}>Indlæser…</div>}
+              <div style={{ maxWidth:1180 }}>
+                {bLoading && bookings.length === 0 && (
+                  <div style={{ display:"grid", gridTemplateColumns:narrow?"1fr 1fr":"repeat(4,1fr)", gap:12, marginBottom:22 }}>
+                    {[0,1,2,3].map(i => <div key={i} style={{ ...surface(), padding:"17px 19px" }}><div style={skeleton(11,"55%")}/><div style={{...skeleton(24,"70%"), marginTop:10}}/></div>)}
+                  </div>
+                )}
 
                 {/* Stats */}
-                <div style={{ display:"flex", gap:10, flexWrap:"wrap", marginBottom:24 }}>
-                  {stat("I dag", todays.length, true)}
-                  {stat("Næste 7 dage", week7.length)}
-                  {stat("Aktive i alt", active.length)}
-                  {stat("Omsætning (7 dage, anslået)", revenue7 ? `${revenue7.toLocaleString("da-DK")} kr` : "–")}
+                <div style={{ display:"grid", gridTemplateColumns:narrow?"1fr 1fr":"repeat(4,1fr)", gap:12, marginBottom:22 }}>
+                  {stat("I dag", todays.length, ICO.today, "accent")}
+                  {stat("Næste 7 dage", week7.length, ICO.week)}
+                  {stat("Belægning 7 dage", occupancy == null ? "–" : `${occupancy}%`, ICO.gauge)}
+                  {stat("Omsætning 30 dage", rev30 ? `${rev30.toLocaleString("da-DK")} kr` : "–", ICO.coin, "gold", revDelta)}
                 </div>
+
+                <div style={{ display:"grid", gridTemplateColumns: narrow ? "1fr" : "minmax(0,1.65fr) minmax(0,1fr)", gap:18, alignItems:"start" }}>
+                <div style={{ minWidth:0 }}>
 
                 {/* Today */}
                 <p style={{ fontSize:10, letterSpacing:2, fontWeight:700, color:T.t3, textTransform:"uppercase", margin:"0 0 10px" }}>I dag · {hours.open}–{hours.close}</p>
@@ -902,13 +974,76 @@ export default function AdminPanel() {
                   );
                 })()}
 
-                {/* Upcoming closed dates */}
-                {upcomingClosed.length > 0 && (
-                  <div style={{ marginTop:14, background:"rgba(245,166,35,.06)", border:`1px solid rgba(245,166,35,.22)`, borderRadius:12, padding:"12px 16px" }}>
-                    <span style={{ fontSize:12, fontWeight:700, color:T.gold }}>Kommende lukkedatoer: </span>
-                    <span style={{ fontSize:12.5, color:T.t2 }}>{upcomingClosed.map(fmtDate).join(" · ")}</span>
+                </div>
+
+                {/* ── Right rail ── */}
+                <div style={{ display:"flex", flexDirection:"column", gap:14, minWidth:0 }}>
+
+                  {/* Package mix */}
+                  <div style={{ ...surface(), padding:"16px 18px" }}>
+                    <p style={{ fontSize:10, letterSpacing:1.6, fontWeight:700, color:T.t3, textTransform:"uppercase", margin:"0 0 13px" }}>Pakkefordeling · kommende</p>
+                    {mix.length === 0 ? (
+                      <p style={{ fontSize:12.5, color:T.t4, margin:0 }}>Ingen kommende bookinger.</p>
+                    ) : (
+                      <>
+                        <div style={{ display:"flex", height:8, borderRadius:5, overflow:"hidden", marginBottom:13, background:"rgba(255,255,255,.04)" }}>
+                          {mix.map(x => <div key={x.id} title={`${x.label}: ${x.n}`} style={{ width:`${(x.n/mixTotal)*100}%`, background:PKG_TONE[x.id].fg, opacity:.85 }} />)}
+                        </div>
+                        <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
+                          {mix.map(x => (
+                            <div key={x.id} style={{ display:"flex", alignItems:"center", gap:9 }}>
+                              <span style={{ width:8, height:8, borderRadius:3, background:PKG_TONE[x.id].fg, flexShrink:0 }} />
+                              <span style={{ flex:1, fontSize:12.5, color:T.t2 }}>{x.label}</span>
+                              <span style={{ fontSize:12.5, fontWeight:800, color:T.t1, fontVariantNumeric:"tabular-nums" }}>{x.n}</span>
+                              <span style={{ fontSize:11, color:T.t4, minWidth:32, textAlign:"right", fontVariantNumeric:"tabular-nums" }}>{Math.round((x.n/mixTotal)*100)}%</span>
+                            </div>
+                          ))}
+                        </div>
+                      </>
+                    )}
                   </div>
-                )}
+
+                  {/* Quick actions */}
+                  <div style={{ ...surface(), padding:"16px 18px" }}>
+                    <p style={{ fontSize:10, letterSpacing:1.6, fontWeight:700, color:T.t3, textTransform:"uppercase", margin:"0 0 12px" }}>Hurtige handlinger</p>
+                    <div style={{ display:"flex", flexDirection:"column", gap:7 }}>
+                      {[
+                        ["Opret booking", ICO.plus, () => setNewBookingOpen(true), true],
+                        ["Se hele kalenderen", ICO.week, () => setTab("bookings")],
+                        ["Kundekartotek", icons.customers, () => setTab("kunder")],
+                        ["Rediger åbningstider", icons.hours, () => setTab("hours")],
+                      ].map(([label, ico, fn, primary]) => (
+                        <button key={label} onClick={fn}
+                          onMouseEnter={e => { if (!primary) e.currentTarget.style.background = "rgba(255,255,255,.05)"; }}
+                          onMouseLeave={e => { if (!primary) e.currentTarget.style.background = "rgba(255,255,255,.022)"; }}
+                          style={{ display:"flex", alignItems:"center", gap:9, width:"100%", textAlign:"left", padding:"10px 12px", borderRadius:10, cursor:"pointer", fontFamily:FF, fontSize:13, fontWeight:primary?700:600, transition:"background .15s",
+                            background: primary ? T.accentDim : "rgba(255,255,255,.022)",
+                            border: `1px solid ${primary ? T.accentBorder : T.border}`,
+                            color: primary ? T.accent : T.t2 }}>
+                          <span style={{ display:"flex", opacity:.85 }}>{ico}</span>{label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Opening hours at a glance */}
+                  <div style={{ ...surface(), padding:"16px 18px" }}>
+                    <p style={{ fontSize:10, letterSpacing:1.6, fontWeight:700, color:T.t3, textTransform:"uppercase", margin:"0 0 11px" }}>Åbningstider</p>
+                    <div style={{ display:"flex", alignItems:"baseline", gap:8, marginBottom:10 }}>
+                      <span style={{ fontSize:21, fontWeight:800, color:T.t1, letterSpacing:"-.5px", fontVariantNumeric:"tabular-nums" }}>{hours.open}–{hours.close}</span>
+                      <span style={{ fontSize:11.5, color:T.t4 }}>{hours.slotMinutes} min. interval</span>
+                    </div>
+                    {upcomingClosed.length > 0 ? (
+                      <div style={{ background:"rgba(245,166,35,.07)", border:`1px solid rgba(245,166,35,.22)`, borderRadius:9, padding:"9px 11px" }}>
+                        <span style={{ fontSize:11, fontWeight:700, color:T.gold, display:"block", marginBottom:2 }}>Kommende lukkedage</span>
+                        <span style={{ fontSize:12, color:T.t2 }}>{upcomingClosed.map(fmtDate).join(" · ")}</span>
+                      </div>
+                    ) : (
+                      <p style={{ fontSize:12, color:T.t4, margin:0 }}>Ingen planlagte lukkedage.</p>
+                    )}
+                  </div>
+                </div>
+                </div>
               </div>
             );
           })()}
@@ -1308,11 +1443,17 @@ export default function AdminPanel() {
                                       const isPending   = b.status === "pending";
                                       const isCompleted = b.status === "completed";
 
-                                      // confirmed/completed = blue, cancelled = amber, pending = grey
-                                      const cardBg   = isCancelled ? T.amberDim  : isPending ? "rgba(255,255,255,.05)" : T.blueDim;
-                                      const cardBor  = isCancelled ? T.amberBorder : isPending ? "rgba(255,255,255,.12)" : T.blueBorder;
-                                      const cardLeft = isCancelled ? T.amber      : isPending ? T.t3                   : T.blue;
-                                      const cardText = isCancelled ? T.amber      : isPending ? T.t2                   : T.blue;
+                                      // Colour carries the package, so a day's
+                                      // mix is readable at a glance and the Guld
+                                      // package shows as gold like it is sold.
+                                      const tone = pkgTone(b);
+                                      // Cancelled is deliberately colourless now
+                                      // that gold means "Guld pakke" — a dead
+                                      // booking must not read as a premium one.
+                                      const cardBg   = isCancelled ? "rgba(255,255,255,.03)" : isPending ? "rgba(255,255,255,.05)" : tone.dim;
+                                      const cardBor  = isCancelled ? "rgba(255,255,255,.10)" : isPending ? "rgba(255,255,255,.12)" : tone.border;
+                                      const cardLeft = isCancelled ? T.t3                    : isPending ? T.t3                    : tone.fg;
+                                      const cardText = isCancelled ? T.t3                    : isPending ? T.t2                    : tone.fg;
 
                                       return (
                                         <div key={b.token}
@@ -2646,6 +2787,13 @@ export default function AdminPanel() {
               {modalState === "idle" && (
                 <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
                   {!cancelled && (
+                    <button onClick={() => { setMovingBooking(b); setSelectedBooking(null); }}
+                      style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:8, width:"100%", padding:"12px 0", background:T.accentDim, color:T.accent, border:`1px solid ${T.accentBorder}`, borderRadius:10, fontWeight:700, fontSize:14, cursor:"pointer", fontFamily:FF }}>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12h13"/><path d="m12 5 7 7-7 7"/></svg>
+                      Flyt til et andet tidspunkt
+                    </button>
+                  )}
+                  {!cancelled && (
                     <button onClick={() => setModalState("confirmCancel")}
                       style={{ width:"100%", padding:"12px 0", background:T.goldDim, color:T.gold, border:`1px solid ${T.goldBorder}`, borderRadius:10, fontWeight:700, fontSize:14, cursor:"pointer", fontFamily:FF }}>
                       Annuller booking
@@ -2712,6 +2860,24 @@ export default function AdminPanel() {
             setBookings(prev => [b, ...prev.filter(x => x.token !== b.token)]);
             loadBookings(secret, true);
             if (tab !== "bookings" && tab !== "oversigt") setTab("bookings");
+          }}
+        />
+      )}
+
+      {/* MOVE A BOOKING */}
+      {movingBooking && (
+        <MoveBookingModal
+          booking={movingBooking}
+          secret={secret}
+          hours={hours}
+          narrow={narrow}
+          addToast={addToast}
+          authFailed={authFailed}
+          onClose={() => setMovingBooking(null)}
+          onMoved={(b) => {
+            setMovingBooking(null);
+            setBookings(prev => prev.map(x => x.token === b.token ? b : x));
+            loadBookings(secret, true);
           }}
         />
       )}
