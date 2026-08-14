@@ -53,7 +53,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 .nav{position:sticky;top:0;z-index:50;background:rgba(11,19,16,.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
 .nav-inner{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:13px 24px;max-width:1140px;margin:0 auto}
 .logo{display:flex;align-items:center;gap:11px;flex-shrink:0}
-.logo-mark{width:42px;height:42px;border-radius:50%;background:#fff url('/logo.jpg') center/cover no-repeat;overflow:hidden;flex-shrink:0;border:1px solid var(--line)}
+.logo-mark{width:42px;height:42px;border-radius:50%;background:#fff url('/logo-96.webp') center/cover no-repeat;overflow:hidden;flex-shrink:0;border:1px solid var(--line)}
 .logo-mark img{width:100%;height:100%;object-fit:cover;display:block}
 .logo-text{line-height:1}
 .logo-text .a{font-weight:800;letter-spacing:3px;font-size:16px;color:#fff}
@@ -1212,7 +1212,7 @@ body:has(.ba-lb) .cookie-banner{display:none}
 .gal-back:hover{color:var(--green)}
 .gal-back svg{width:18px;height:18px}
 .gal-brand{display:inline-flex;align-items:center;gap:9px;font-size:15px;font-weight:800;letter-spacing:.4px;color:#fff}
-.gal-brand-mark{width:26px;height:26px;border-radius:50%;background:#fff url('/logo.jpg') center/cover no-repeat;border:1px solid var(--line)}
+.gal-brand-mark{width:26px;height:26px;border-radius:50%;background:#fff url('/logo-96.webp') center/cover no-repeat;border:1px solid var(--line)}
 .gal-book{display:inline-flex;align-items:center;background:var(--green);color:#062313;font-size:13.5px;font-weight:700;padding:9px 18px;border-radius:99px;transition:.2s}
 .gal-book:hover{background:#48e088;transform:translateY(-1px)}
 .gal-hero{max-width:760px;margin:0 auto;text-align:center;padding:64px 24px 36px}

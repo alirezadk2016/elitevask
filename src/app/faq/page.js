@@ -6,7 +6,7 @@ export const metadata = {
   openGraph: {
     // Next merges page metadata over the layout SHALLOWLY, so a page that
     // declares openGraph without images ships with no og:image at all.
-    images: [{ url: "/hero.jpg.png", width: 1672, height: 941, alt: "Elite Vask – mobil bil dampvask" }],
+    images: [{ url: "/og-cover.jpg", width: 1200, height: 630, alt: "Elite Vask – mobil bil dampvask" }],
     title: "FAQ – Elite Vask | Ofte stillede spørgsmål",
     description: "Svar på de mest stillede spørgsmål om Elite Vaskes mobile bil dampvask på Sjælland.",
     type: "website",
@@ -88,7 +88,7 @@ export default async function FaqPage() {
       <header style={{ borderBottom: "1px solid rgba(255,255,255,.07)", position: "sticky", top: 0, zIndex: 100, background: "rgba(11,19,16,.92)", backdropFilter: "blur(12px)" }}>
         <div style={{ maxWidth: 900, margin: "0 auto", padding: "0 20px", height: 62, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
           <Link href="/" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
-            <img src="/logo.jpg" alt="Elite Vask" style={{ width: 34, height: 34, borderRadius: 8, objectFit: "cover" }} />
+            <img src="/logo-96.webp" alt="Elite Vask" style={{ width: 34, height: 34, borderRadius: 8, objectFit: "cover" }} />
             <div style={{ lineHeight: 1.2 }}>
               <div style={{ fontSize: 13, fontWeight: 800, color: "#fff", letterSpacing: 1 }}>ELITE VASK</div>
               <div style={{ fontSize: 10, color: "#37d278", fontWeight: 600, letterSpacing: 0.5 }}>MOBIL BIL DAMPVASK</div>

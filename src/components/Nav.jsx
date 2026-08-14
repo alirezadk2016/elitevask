@@ -1,7 +1,7 @@
 const HTML = `<!-- NAV -->
 <nav class="nav" id="siteNav"><div class="nav-inner">
   <a href="#top" class="logo">
-    <span class="logo-mark"><img src="/logo.jpg" alt="Elite Vask logo"></span>
+    <span class="logo-mark"><picture><source type="image/webp" srcset="/logo-96.webp 96w, /logo-192.webp 192w" sizes="44px"><img src="/logo-96.png" width="96" height="96" alt="Elite Vask logo" decoding="async"></picture></span>
     <span class="logo-text"><span class="a">ELITE VASK</span><span class="b">MOBIL BIL DAMPVASK</span></span>
   </a>
   <div class="nav-links">

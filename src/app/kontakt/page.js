@@ -11,7 +11,7 @@ export const metadata = {
   openGraph: {
     // Next merges page metadata over the layout SHALLOWLY, so a page that
     // declares openGraph without images ships with no og:image at all.
-    images: [{ url: "/hero.jpg.png", width: 1672, height: 941, alt: "Elite Vask – mobil bil dampvask" }],
+    images: [{ url: "/og-cover.jpg", width: 1200, height: 630, alt: "Elite Vask – mobil bil dampvask" }],
     title: "Kontakt Elite Vask",
     description: "Ring, skriv eller book online. Mobil dampvask – vi kører til dig i hele Sjælland.",
     type: "website",

@@ -12,7 +12,7 @@ export const metadata = {
     locale: "da_DK",
     // Landscape hero: correct 1.91:1 card ratio. (steam-bmw.jpg is 1200x1600
     // portrait — declaring it as 1200x630 made previews render distorted.)
-    images: [{ url: "/hero.jpg.png", width: 1672, height: 941, alt: "Elite Vask – mobil bil dampvask" }],
+    images: [{ url: "/og-cover.jpg", width: 1200, height: 630, alt: "Elite Vask – mobil bil dampvask" }],
   },
 };
 

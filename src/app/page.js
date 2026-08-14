@@ -1,5 +1,4 @@
 import AnnouncementBar from "@/components/AnnouncementBar";
-import TrustBar from "@/components/TrustBar";
 import Nav from "@/components/Nav";
 import Hero from "@/components/Hero";
 import Pricing from "@/components/Pricing";
@@ -27,7 +26,6 @@ export default function Page() {
     <>
       <HomeJsonLd />
       <AnnouncementBar />
-      <TrustBar />
       <Nav />
       <span id="top"></span>
       <Hero />

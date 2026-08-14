@@ -45,7 +45,7 @@ export function articleLd({ title, description, path, datePublished, dateModifie
     mainEntityOfPage: `${SITE}${path}`,
     author: { "@type": "Organization", name: "Elite Vask", url: SITE },
     publisher: { "@id": BIZ_ID },
-    image: `${SITE}/hero.jpg.png`,
+    image: `${SITE}/og-cover.jpg`,
     datePublished,
     dateModified: dateModified || datePublished,
     inLanguage: "da-DK",

@@ -1,6 +1,10 @@
 const HTML = `<!-- HERO -->
 <section class="hero hero-img">
-  <img src="/hero.jpg.png" alt="Elite Vask medarbejder der dampvasker en sort bil – mobil bilvask på Sjælland" class="hero-bg-img" fetchpriority="high" decoding="async" />
+  <picture>
+    <source type="image/avif" sizes="100vw" srcset="/hero-640.avif 640w, /hero-960.avif 960w, /hero-1280.avif 1280w">
+    <source type="image/webp" sizes="100vw" srcset="/hero-640.webp 640w, /hero-960.webp 960w, /hero-1280.webp 1280w">
+    <img src="/hero-1280.jpg" srcset="/hero-640.jpg 640w, /hero-960.jpg 960w, /hero-1280.jpg 1280w" sizes="100vw" width="1672" height="941" alt="Elite Vask medarbejder der dampvasker en sort bil – mobil bilvask på Sjælland" class="hero-bg-img" fetchpriority="high" decoding="async" />
+  </picture>
   <div class="hero-overlay"></div>
   <div class="wrap hero-inner">
     <a href="https://www.google.com/maps?cid=14890071893602568107" target="_blank" rel="noopener" class="badge badge-google">

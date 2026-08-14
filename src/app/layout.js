@@ -31,13 +31,13 @@ export const metadata = {
     locale: "da_DK",
     url: "https://www.elite-vask.dk",
     siteName: "Elite Vask",
-    images: [{ url: "/hero.jpg.png", width: 1672, height: 941, alt: "Elite Vask – mobil bil dampvask" }],
+    images: [{ url: "/og-cover.jpg", width: 1200, height: 630, alt: "Elite Vask – mobil bil dampvask" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Elite Vask | Mobil Bil Dampvask på Sjælland",
     description: "Vi kører til dig og vasker din bil. Rent, effektivt og miljøvenligt.",
-    images: ["/hero.jpg.png"],
+    images: ["/og-cover.jpg"],
   },
 };
 
@@ -48,8 +48,8 @@ const JSONLD = [
   "@id":"https://www.elite-vask.dk/#business",
   "name":"Elite Vask",
   "url":"https://www.elite-vask.dk",
-  "image":"https://www.elite-vask.dk/hero.jpg.png",
-  "logo":"https://www.elite-vask.dk/logo.jpg",
+  "image":"https://www.elite-vask.dk/og-cover.jpg",
+  "logo":"https://www.elite-vask.dk/logo-192.png",
   "description":"Mobil bil dampvask på Sjælland. Rent, effektivt og miljøvenligt – vi kører til dig.",
   "telephone":"+4524440321",
   "email":"info@elite-vask.dk",
