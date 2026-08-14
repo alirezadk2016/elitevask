@@ -2,37 +2,10 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { DEFAULT_ALBUM, DEFAULT_BEFORE_AFTER } from "@/lib/galleryData";
 import { DEFAULT_HOURS, normalizeHours, buildSlotTimes, toMin, ALLOWED_SLOT_MINUTES } from "@/lib/hours";
+import { T, FF } from "../ui";
+import NewBookingModal from "../NewBookingModal";
+import CustomersTab from "../CustomersTab";
 
-const T = {
-  bg0:          "#08110a",
-  bg1:          "#0d1610",
-  bg2:          "#111e15",
-  accent:       "#37d278",
-  accentDim:    "rgba(55,210,120,.12)",
-  accentBorder: "rgba(55,210,120,.22)",
-  t1: "#f0f4f1",
-  t2: "#a8b8aa",
-  t3: "#5a6e5c",
-  t4: "#2e3e30",
-  danger:       "#e5534b",
-  dangerDim:    "rgba(229,83,75,.1)",
-  dangerBorder: "rgba(229,83,75,.25)",
-  gold:         "#d4af37",
-  goldDim:      "rgba(212,175,55,.12)",
-  goldBorder:   "rgba(212,175,55,.3)",
-  // booking status colors
-  blue:         "#4f8ef7",
-  blueDim:      "rgba(79,142,247,.13)",
-  blueBorder:   "rgba(79,142,247,.4)",
-  amber:        "#f5a623",
-  amberDim:     "rgba(245,166,35,.12)",
-  amberBorder:  "rgba(245,166,35,.38)",
-  border:       "rgba(255,255,255,.07)",
-  shadow:       "0 1px 3px rgba(0,0,0,.4), 0 4px 16px rgba(0,0,0,.3)",
-  shadowL:      "0 2px 8px rgba(0,0,0,.5), 0 8px 32px rgba(0,0,0,.4)",
-};
-
-const FF = "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
 
 const DEFAULT_PRICES = {
   lille:   { hele:800,  udv:500,  indv:600,  guld:2000 },
@@ -157,6 +130,8 @@ export default function AdminPanel() {
   // Bookings state
   const [bookings, setBookings]           = useState([]);
   const [lastSync, setLastSync]           = useState(null);
+  const [newBookingOpen, setNewBookingOpen] = useState(false);
+  const [remindState, setRemindState]     = useState(null); // {busy} | {sent,skipped,failed}
   const [bLoading, setBLoading]           = useState(false);
   const [bError, setBError]               = useState("");
   const [weekOffset, setWeekOffset]       = useState(0);
@@ -437,6 +412,17 @@ export default function AdminPanel() {
   // Data fetch on tab change: fetchContent is async and only sets state after
   // the request resolves, so the lint rule's cascading-render concern doesn't
   // apply here.
+  // The New-booking dialog quotes a price from the same data the website uses,
+  // so pull prices + extras once at login rather than only when those CMS tabs
+  // happen to be visited.
+  useEffect(() => {
+    if (!authed || !secret) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchContent("packages");
+    fetchContent("extras");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authed, secret]);
+
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     if (authed && (tab === "gallery" || tab === "videos")) fetchContent(tab);
@@ -662,6 +648,7 @@ export default function AdminPanel() {
     beforeafter: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="11" height="14" rx="2"/><rect x="11" y="5" width="11" height="14" rx="2"/><line x1="12" y1="3" x2="12" y2="21"/></svg>,
     refresh:  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 11-9-9c2.52 0 4.8.99 6.48 2.59L21 8"/><path d="M21 3v5h-5"/></svg>,
     hours:    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
+    customers: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>,
     dashboard: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>,
   };
 
@@ -736,6 +723,7 @@ export default function AdminPanel() {
             {sectionLabel("Navigation")}
             {navItem("oversigt", "Oversigt", icons.dashboard)}
             {navItem("bookings", "Bookinger", icons.bookings, activeBookings || undefined)}
+            {navItem("kunder", "Kunder", icons.customers)}
             {navItem("hours", "Åbningstider", icons.hours)}
             <div style={{ height:1, background:T.border, margin:"14px 4px" }}/>
             {sectionLabel("Indhold")}
@@ -752,7 +740,7 @@ export default function AdminPanel() {
           </aside>
         ) : (
           <div style={{ display:"flex", gap:8, padding:"16px 16px 0", overflowX:"auto" }}>
-            {[["oversigt","Oversigt",icons.dashboard],["bookings","Bookinger",icons.bookings],["hours","Åbningstider",icons.hours],["gallery","Galleri",icons.gallery],["videos","Videoer",icons.videos],["beforeafter","Før & efter",icons.beforeafter],["faq","FAQ",icons.faq],["priser","Priser",icons.priser],["extras","Ekstra",icons.extras]].map(([id,label,icon]) => (
+            {[["oversigt","Oversigt",icons.dashboard],["bookings","Bookinger",icons.bookings],["kunder","Kunder",icons.customers],["hours","Åbningstider",icons.hours],["gallery","Galleri",icons.gallery],["videos","Videoer",icons.videos],["beforeafter","Før & efter",icons.beforeafter],["faq","FAQ",icons.faq],["priser","Priser",icons.priser],["extras","Ekstra",icons.extras]].map(([id,label,icon]) => (
               <button key={id} onClick={() => {
                   if (tab === id) return; // never wipe edits on same-tab click
                   if (hasUnsaved) { setNavGuard({ pendingTab: id }); return; }
@@ -769,13 +757,23 @@ export default function AdminPanel() {
         <main style={{ padding: narrow ? "16px 12px" : "28px 28px", boxSizing:"border-box", minWidth:0, overflow:"hidden" }}>
 
           {/* Page title + badge */}
-          <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:28 }}>
+          <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:28, flexWrap:"wrap" }}>
             <h1 style={{ fontSize:22, fontWeight:800, color:T.t1, margin:0, letterSpacing:"-.3px" }}>
-              {tab === "oversigt" ? "Oversigt" : tab === "bookings" ? "Bookinger" : tab === "hours" ? "Åbningstider" : tab === "gallery" ? "Galleri" : tab === "videos" ? "Videoer" : tab === "beforeafter" ? "Før & efter" : tab === "faq" ? "FAQ" : tab === "priser" ? "Priser" : "Ekstra ydelser"}
+              {tab === "oversigt" ? "Oversigt" : tab === "bookings" ? "Bookinger" : tab === "kunder" ? "Kunder" : tab === "hours" ? "Åbningstider" : tab === "gallery" ? "Galleri" : tab === "videos" ? "Videoer" : tab === "beforeafter" ? "Før & efter" : tab === "faq" ? "FAQ" : tab === "priser" ? "Priser" : "Ekstra ydelser"}
             </h1>
             <span style={{ background:T.accentDim, color:T.accent, borderRadius:20, padding:"3px 12px", fontSize:12, fontWeight:700 }}>
-              {tab === "oversigt" ? new Intl.DateTimeFormat("da-DK",{ weekday:"long", day:"numeric", month:"long", timeZone:"Europe/Copenhagen" }).format(new Date()) : tab === "bookings" ? `${activeBookings} aktive` : tab === "hours" ? `${hours.open}–${hours.close}` : tab === "gallery" ? `${gallery.length} ${gallery.length===1?"billede":"billeder"}` : tab === "videos" ? `${videos.length} ${videos.length===1?"video":"videoer"}` : tab === "beforeafter" ? `${beforeAfter.length} ${beforeAfter.length===1?"par":"par"}` : tab === "faq" ? `${faqItems.length} spørgsmål` : tab === "priser" ? "Prismatrix" : `${extrasItems.length} ydelser`}
+              {tab === "oversigt" ? new Intl.DateTimeFormat("da-DK",{ weekday:"long", day:"numeric", month:"long", timeZone:"Europe/Copenhagen" }).format(new Date()) : tab === "bookings" ? `${activeBookings} aktive` : tab === "kunder" ? "Kundekartotek" : tab === "hours" ? `${hours.open}–${hours.close}` : tab === "gallery" ? `${gallery.length} ${gallery.length===1?"billede":"billeder"}` : tab === "videos" ? `${videos.length} ${videos.length===1?"video":"videoer"}` : tab === "beforeafter" ? `${beforeAfter.length} ${beforeAfter.length===1?"par":"par"}` : tab === "faq" ? `${faqItems.length} spørgsmål` : tab === "priser" ? "Prismatrix" : `${extrasItems.length} ydelser`}
             </span>
+            {(tab === "oversigt" || tab === "bookings") && (
+              <>
+                <div style={{ flex:1 }}/>
+                <button onClick={() => setNewBookingOpen(true)} title="Opret en booking for en kunde der ringer"
+                  style={{ display:"flex", alignItems:"center", gap:7, padding:"9px 16px", background:T.accent, color:T.bg0, border:"none", borderRadius:9, fontWeight:800, fontSize:13, cursor:"pointer", fontFamily:FF, whiteSpace:"nowrap", flexShrink:0 }}>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  {narrow ? "Ny" : "Ny booking"}
+                </button>
+              </>
+            )}
           </div>
 
           {/* ── OVERSIGT (dashboard) ── */}
@@ -860,6 +858,49 @@ export default function AdminPanel() {
                     Se alle {upcoming.length} kommende →
                   </button>
                 )}
+
+                {/* Reminders — customers are promised one in the privacy policy */}
+                {(() => {
+                  const tomorrow = new Intl.DateTimeFormat("sv-SE",{timeZone:"Europe/Copenhagen"}).format(new Date(Date.now()+86400000));
+                  const tomorrows = active.filter(b => b.date === tomorrow);
+                  const withMail  = tomorrows.filter(b => b.email).length;
+                  return (
+                    <div style={{ marginTop:14, background:T.bg1, border:`1px solid ${T.border}`, borderRadius:12, padding:"14px 16px", display:"flex", alignItems:"center", gap:12, flexWrap:"wrap" }}>
+                      <div style={{ width:32, height:32, borderRadius:9, background:T.blueDim, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={T.blue} strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+                      </div>
+                      <div style={{ flex:1, minWidth:170 }}>
+                        <p style={{ margin:0, fontSize:13, fontWeight:700, color:T.t1 }}>Påmindelser i morgen</p>
+                        <p style={{ margin:"2px 0 0", fontSize:11.5, color:T.t3 }}>
+                          {tomorrows.length === 0
+                            ? "Ingen bookinger i morgen."
+                            : `${withMail} af ${tomorrows.length} booking${tomorrows.length===1?"":"er"} får automatisk en e-mail kl. 19.`}
+                          {remindState && !remindState.busy && (
+                            <span style={{ color:remindState.failed ? T.danger : T.accent, fontWeight:700 }}>
+                              {" "}· {remindState.sent} sendt{remindState.skipped ? `, ${remindState.skipped} sendt tidligere` : ""}{remindState.failed ? `, ${remindState.failed} fejlede` : ""}
+                            </span>
+                          )}
+                        </p>
+                      </div>
+                      <button
+                        disabled={remindState?.busy}
+                        onClick={async () => {
+                          setRemindState({ busy:true });
+                          try {
+                            const r = await fetch("/api/cron/reminders", { method:"POST", headers:{ Authorization:`Bearer ${secret}` } });
+                            if (authFailed(r.status)) { setRemindState(null); return; }
+                            const d = await r.json().catch(() => ({}));
+                            if (!r.ok || d.error) { addToast("err", d.error === "smtp_unavailable" ? "E-mail er ikke konfigureret" : "Kunne ikke sende påmindelser"); setRemindState(null); return; }
+                            setRemindState({ sent:d.sent||0, skipped:d.skipped||0, failed:d.failed||0 });
+                            addToast(d.failed ? "err" : "ok", d.sent ? `${d.sent} påmindelse${d.sent===1?"":"r"} sendt` : "Ingen nye påmindelser at sende");
+                          } catch { addToast("err", "Netværksfejl"); setRemindState(null); }
+                        }}
+                        style={{ padding:"9px 15px", background:T.blueDim, border:`1px solid ${T.blueBorder}`, borderRadius:9, color:T.blue, fontSize:12.5, fontWeight:700, cursor:remindState?.busy?"wait":"pointer", fontFamily:FF, whiteSpace:"nowrap" }}>
+                        {remindState?.busy ? "Sender…" : "Send nu"}
+                      </button>
+                    </div>
+                  );
+                })()}
 
                 {/* Upcoming closed dates */}
                 {upcomingClosed.length > 0 && (
@@ -1286,6 +1327,9 @@ export default function AdminPanel() {
                                                 ? <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke={cardText} strokeWidth="3" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                                                 : <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke={cardText} strokeWidth="3" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>}
                                               <span style={{ fontSize:12, fontWeight:800, color:cardText, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap", flex:1 }}>{b.name || "Ukendt"}</span>
+                                              {b.source === "admin" && (
+                                                <span title="Oprettet manuelt" style={{ fontSize:8.5, fontWeight:800, letterSpacing:.4, color:cardText, opacity:.7, border:`1px solid ${cardBor}`, borderRadius:4, padding:"0 3px", flexShrink:0 }}>TLF</span>
+                                              )}
                                             </div>
                                             <div style={{ fontSize:10, color:cardText, opacity:.75, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{b.pkg || "-"}</div>
                                           </div>
@@ -1360,6 +1404,16 @@ export default function AdminPanel() {
           })()}
 
           {/* ── ÅBNINGSTIDER ── */}
+          {tab === "kunder" && (
+            <CustomersTab
+              secret={secret}
+              narrow={narrow}
+              addToast={addToast}
+              authFailed={authFailed}
+              onRefreshBookings={() => loadBookings(secret, true)}
+            />
+          )}
+
           {tab === "hours" && (() => {
             const WEEK = [[1,"Man"],[2,"Tir"],[3,"Ons"],[4,"Tor"],[5,"Fre"],[6,"Lør"],[0,"Søn"]];
             const todayISO = new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Copenhagen" }).format(new Date());
@@ -2639,6 +2693,28 @@ export default function AdminPanel() {
           </div>
         );
       })()}
+
+      {/* NEW BOOKING — manager takes a phone call */}
+      {newBookingOpen && (
+        <NewBookingModal
+          secret={secret}
+          hours={hours}
+          extrasItems={extrasItems}
+          prices={Object.keys(pricesData).length ? pricesData : DEFAULT_PRICES}
+          narrow={narrow}
+          addToast={addToast}
+          authFailed={authFailed}
+          onClose={() => setNewBookingOpen(false)}
+          onCreated={(b) => {
+            setNewBookingOpen(false);
+            // Show it instantly, then reconcile with the server so the
+            // calendar reflects whatever else changed in the meantime.
+            setBookings(prev => [b, ...prev.filter(x => x.token !== b.token)]);
+            loadBookings(secret, true);
+            if (tab !== "bookings" && tab !== "oversigt") setTab("bookings");
+          }}
+        />
+      )}
 
       {/* TOASTS */}
       {/* Toasts sit above the booking modal (z 300) by design, so on a phone
