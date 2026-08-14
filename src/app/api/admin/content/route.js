@@ -19,6 +19,16 @@ function authorized(req) {
 // from creating/overwriting arbitrary content:* keys.
 const CONTENT_TYPES = new Set(['gallery', 'videos', 'faq', 'extras', 'beforeafter']);
 
+// The public content route caches for 60s; bust it so a CMS edit shows on the
+// site immediately instead of a minute later.
+function revalidateContent(type) {
+  try {
+    revalidatePath('/api/site-content');
+    if (type === 'gallery' || type === 'beforeafter') revalidatePath('/galleri');
+    if (type === 'faq') revalidatePath('/faq');
+  } catch {}
+}
+
 // GET /api/admin/content?type=gallery|videos|faq|extras|packages
 export async function GET(req) {
   if (!authorized(req)) return Response.json({ error: 'unauthorized' }, { status: 401 });
@@ -228,7 +238,7 @@ export async function PUT(req) {
 // DELETE /api/admin/content
 export async function DELETE(req) {
   if (!authorized(req)) return Response.json({ error: 'unauthorized' }, { status: 401 });
-  const { type = 'gallery', id, blobUrl, blobUrls } = await req.json();
+  const { type = 'gallery', id, ids, blobUrl, blobUrls } = await req.json();
 
   if (type === 'packages') {
     await kv.del('content:prices');
@@ -246,8 +256,66 @@ export async function DELETE(req) {
 
   const key = `content:${type}`;
   const existing = await kv.get(key) || [];
+
+  // Bulk form: `ids` removes several items in one write. Doing it one request
+  // per item would interleave with the manager's other edits and could lose
+  // changes, since every write rewrites the whole array.
+  if (Array.isArray(ids) && ids.length) {
+    const drop = new Set(ids.map(String));
+    const removed = existing.filter(i => drop.has(String(i.id)));
+    // Free the storage behind anything that was uploaded rather than linked.
+    for (const it of removed) {
+      for (const u of [it.url, it.before, it.after]) {
+        if (u && it.source === 'upload') { try { await del(u); } catch {} }
+      }
+    }
+    await kv.set(key, existing.filter(i => !drop.has(String(i.id))));
+    revalidateContent(type);
+    return Response.json({ ok: true, deleted: removed.length });
+  }
+
   await kv.set(key, existing.filter(i => i.id !== id));
+  revalidateContent(type);
   return Response.json({ ok: true });
+}
+
+/* PATCH — reorder a collection, or move several items between albums.
+   The public site renders these arrays in stored order, so this is the only
+   way for the manager to decide what a visitor sees first. */
+export async function PATCH(req) {
+  if (!authorized(req)) return Response.json({ error: 'unauthorized' }, { status: 401 });
+  let body;
+  try { body = await req.json(); } catch { return Response.json({ error: 'bad_json' }, { status: 400 }); }
+  const { type, order, ids, album } = body;
+  if (!CONTENT_TYPES.has(type)) return Response.json({ error: 'invalid_type' }, { status: 400 });
+
+  const key = `content:${type}`;
+  const existing = await kv.get(key) || [];
+
+  if (Array.isArray(order)) {
+    // Rebuild from the given id order, then append anything the client did not
+    // mention — a stale tab must never silently drop items it hadn't loaded.
+    const byId = new Map(existing.map(i => [String(i.id), i]));
+    const next = [];
+    for (const id of order) {
+      const it = byId.get(String(id));
+      if (it) { next.push(it); byId.delete(String(id)); }
+    }
+    for (const it of existing) if (byId.has(String(it.id))) next.push(it);
+    await kv.set(key, next);
+    revalidateContent(type);
+    return Response.json({ ok: true, count: next.length });
+  }
+
+  if (Array.isArray(ids) && typeof album === 'string') {
+    const move = new Set(ids.map(String));
+    const cleaned = album.trim().slice(0, 60);
+    await kv.set(key, existing.map(i => move.has(String(i.id)) ? { ...i, album: cleaned } : i));
+    revalidateContent(type);
+    return Response.json({ ok: true, moved: move.size });
+  }
+
+  return Response.json({ error: 'invalid_request' }, { status: 400 });
 }
 
 function getEmbedUrl(url) {

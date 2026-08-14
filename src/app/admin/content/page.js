@@ -6,6 +6,7 @@ import { T, FF, surface, row, skeleton, pkgTone, PKG_TONE, PKG_LABELS as PKG_LAB
 import NewBookingModal from "../NewBookingModal";
 import CustomersTab from "../CustomersTab";
 import MoveBookingModal from "../MoveBookingModal";
+import { Toolbar, SearchBox, FilterChip, ToolButton, SelectionBar, ReorderButtons, EmptyState, persistOrder, moveInArray } from "../ContentToolbar";
 
 
 const DEFAULT_PRICES = {
@@ -133,6 +134,16 @@ export default function AdminPanel() {
   const [lastSync, setLastSync]           = useState(null);
   const [newBookingOpen, setNewBookingOpen] = useState(false);
   const [movingBooking, setMovingBooking] = useState(null);
+  // Gallery library: search, album filter and multi-select. With more than a
+  // handful of images the old bare grid had no way to find or batch anything.
+  const [uploadOpen, setUploadOpen]       = useState(false);
+  const [galQuery, setGalQuery]           = useState("");
+  const [galAlbum, setGalAlbum]           = useState("*");
+  const [galSelect, setGalSelect]         = useState(false);
+  const [faqQuery, setFaqQuery]           = useState("");
+  const [extQuery, setExtQuery]           = useState("");
+  const [galSel, setGalSel]               = useState(new Set());
+  const [reordering, setReordering]       = useState(false);
   const [remindState, setRemindState]     = useState(null); // {busy} | {sent,skipped,failed}
   const [bLoading, setBLoading]           = useState(false);
   const [bError, setBError]               = useState("");
@@ -670,6 +681,86 @@ export default function AdminPanel() {
     plus:  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>,
   };
 
+  const faqShown = (() => {
+    const q = faqQuery.trim().toLowerCase();
+    if (!q) return faqItems;
+    const txt = (v) => (typeof v === "string" ? v : `${v?.da || ""} ${v?.en || ""}`).toLowerCase();
+    return faqItems.filter(f => txt(f.q).includes(q) || txt(f.a).includes(q));
+  })();
+  const extShown = (() => {
+    const q = extQuery.trim().toLowerCase();
+    if (!q) return extrasItems;
+    const txt = (v) => (typeof v === "string" ? v : `${v?.da || ""} ${v?.en || ""}`).toLowerCase();
+    return extrasItems.filter(e => txt(e.name).includes(q) || txt(e.desc).includes(q));
+  })();
+
+  // ── Gallery library helpers ──
+  const galAlbums = [...new Set(gallery.map(g => g.album || "Enkelt"))].sort();
+  const galFiltered = gallery.filter(g => {
+    if (galAlbum !== "*" && (g.album || "Enkelt") !== galAlbum) return false;
+    const q = galQuery.trim().toLowerCase();
+    return !q || (g.caption || "").toLowerCase().includes(q) || (g.album || "").toLowerCase().includes(q);
+  });
+  const toggleGalSel = (id) => setGalSel(prev => {
+    const n = new Set(prev);
+    n.has(id) ? n.delete(id) : n.add(id);
+    return n;
+  });
+
+  async function bulkDeleteGallery() {
+    const ids = [...galSel];
+    if (!ids.length) return;
+    try {
+      const r = await fetch("/api/admin/content", {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${secret}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "gallery", ids }),
+      });
+      if (authFailed(r.status)) return;
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok || !d.ok) { addToast("err", "Sletning fejlede"); return; }
+      addToast("ok", `${d.deleted ?? ids.length} slettet`);
+      setGalSel(new Set()); setGalSelect(false);
+      fetchContent("gallery");
+    } catch { addToast("err", "Netværksfejl"); }
+  }
+
+  async function bulkAlbum(album) {
+    const ids = [...galSel];
+    if (!ids.length) return;
+    try {
+      const r = await fetch("/api/admin/content", {
+        method: "PATCH",
+        headers: { Authorization: `Bearer ${secret}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "gallery", ids, album }),
+      });
+      if (authFailed(r.status)) return;
+      if (!r.ok) { addToast("err", "Flytning fejlede"); return; }
+      addToast("ok", `${ids.length} flyttet til ${album}`);
+      setGalSel(new Set()); setGalSelect(false);
+      fetchContent("gallery");
+    } catch { addToast("err", "Netværksfejl"); }
+  }
+
+  /* Reorder within the FULL collection, not the filtered view: nudging an item
+     while a filter is on must move it past its real neighbour, otherwise the
+     order the visitor sees jumps unpredictably. */
+  async function reorder(type, list, setList, id, dir) {
+    if (reordering) return;
+    const from = list.findIndex(i => i.id === id);
+    const to = from + dir;
+    if (from < 0 || to < 0 || to >= list.length) return;
+    const next = moveInArray(list, from, to);
+    setList(next);                       // optimistic
+    setReordering(true);
+    try {
+      const r = await persistOrder(secret, type, next.map(i => i.id));
+      if (authFailed(r.status)) return;
+      if (!r.ok) { setList(list); addToast("err", "Rækkefølgen blev ikke gemt"); }
+    } catch { setList(list); addToast("err", "Netværksfejl"); }
+    finally { setReordering(false); }
+  }
+
   // ── MAIN RENDER ────────────────────────────────────────────────────────────
   const hasPriceChanges = JSON.stringify(priceEdits) !== JSON.stringify(pricesData);
   const hoursDirty = JSON.stringify(hoursDraft) !== JSON.stringify(hours);
@@ -691,7 +782,9 @@ export default function AdminPanel() {
     <div style={{ minHeight:"100dvh", background:T.bg0, fontFamily:FF, color:T.t2 }}>
       {/* Keyframes are the one thing inline styles cannot express. Scoped to
           the admin page so the public stylesheet stays untouched. */}
-      <style>{`@keyframes evShimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}`}</style>
+      <style>{`@keyframes evShimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+        .ev-thumb > span[data-fallback]{opacity:0}
+        .ev-thumb[data-broken="1"] > span[data-fallback]{opacity:1}`}</style>
 
       {/* TOP BAR */}
       <div style={{ height:52, background:"rgba(8,17,10,.92)", backdropFilter:"blur(12px)", borderBottom:`1px solid ${T.border}`, display:"flex", alignItems:"center", padding:"0 20px", gap:12, position:"sticky", top:0, zIndex:100 }}>
@@ -1737,8 +1830,18 @@ export default function AdminPanel() {
           {/* ── GALLERY ── */}
           {tab === "gallery" && (
             <>
-              <div style={{ background:T.bg1, border:`1px solid ${T.border}`, borderRadius:16, padding:24, marginBottom:32 }}>
-                <p style={{ fontSize:10, letterSpacing:2, fontWeight:700, color:T.t3, textTransform:"uppercase", margin:"0 0 16px" }}>Tilføj billede</p>
+              <div style={{ ...surface(uploadOpen), marginBottom:16, overflow:"hidden" }}>
+                <button type="button" onClick={() => setUploadOpen(o => !o)}
+                  style={{ width:"100%", display:"flex", alignItems:"center", gap:11, padding:"14px 18px", background:"transparent", border:"none", cursor:"pointer", fontFamily:FF, textAlign:"left" }}>
+                  <span style={{ width:26, height:26, borderRadius:7, background:uploadOpen?T.accent:T.accentDim, border:`1px solid ${T.accentBorder}`, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, transition:"background .15s" }}>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={uploadOpen?T.bg0:T.accent} strokeWidth="3" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  </span>
+                  <span style={{ flex:1, fontSize:14, fontWeight:700, color:T.t1 }}>Tilføj billede</span>
+                  <span style={{ fontSize:11.5, color:T.t4 }}>Upload eller URL</span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={T.t3} strokeWidth="2.5" strokeLinecap="round" style={{ transform:uploadOpen?"rotate(180deg)":"none", transition:"transform .2s" }}><polyline points="6 9 12 15 18 9"/></svg>
+                </button>
+                {uploadOpen && (
+                <div style={{ padding:"0 18px 18px", borderTop:`1px solid ${T.border}`, paddingTop:16 }}>
 
                 {/* Dropzone */}
                 <div
@@ -1790,11 +1893,49 @@ export default function AdminPanel() {
                   <option value="Enkelt">Enkelt billede</option>
                   <option value="Før & Efter">Før & Efter</option>
                 </select>
+                </div>
+                )}
               </div>
 
+              <Toolbar>
+                <SearchBox value={galQuery} onChange={setGalQuery} placeholder="Søg i billedtekster…" count={galFiltered.length} />
+                <FilterChip active={galAlbum === "*"} onClick={() => setGalAlbum("*")} count={gallery.length}>Alle</FilterChip>
+                {galAlbums.map(a => (
+                  <FilterChip key={a} active={galAlbum === a} onClick={() => setGalAlbum(a)} count={gallery.filter(g => (g.album||"Enkelt") === a).length}>{a}</FilterChip>
+                ))}
+                <div style={{ flex:1 }} />
+                <ToolButton onClick={() => { setGalSelect(v => !v); setGalSel(new Set()); }} tone={galSelect ? "accent" : undefined}>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  {galSelect ? "Færdig" : "Vælg flere"}
+                </ToolButton>
+              </Toolbar>
+
+              <SelectionBar
+                n={galSel.size} total={galFiltered.length}
+                onAll={() => setGalSel(new Set(galFiltered.map(i => i.id)))}
+                onNone={() => setGalSel(new Set())}>
+                <select value="" onChange={e => { if (e.target.value) bulkAlbum(e.target.value); }}
+                  style={{ padding:"8px 11px", borderRadius:8, border:`1px solid ${T.border}`, background:T.bg0, color:T.t2, fontSize:12.5, fontFamily:FF, cursor:"pointer", outline:"none" }}>
+                  <option value="">Flyt til album…</option>
+                  <option value="Enkelt">Enkelt billede</option>
+                  <option value="Før & Efter">Før &amp; Efter</option>
+                </select>
+                <ToolButton tone="danger" onClick={() => promptDelete(`Slet ${galSel.size} ${galSel.size===1?"billede":"billeder"} permanent?`, bulkDeleteGallery)}>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+                  Slet valgte
+                </ToolButton>
+              </SelectionBar>
+
+              {gallery.length > 0 && galFiltered.length === 0 && (
+                <EmptyState
+                  icon={<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>}
+                  title="Ingen billeder matcher"
+                  hint="Prøv en anden søgning eller vælg et andet album." />
+              )}
+
               {/* Unified gallery grid: default items + KV items */}
-              <div style={{ display:"grid", gridTemplateColumns:`repeat(auto-fill, minmax(${narrow?"160px":"220px"},1fr))`, gap:14 }}>
-                {DEFAULT_ALBUM.map(item => (
+              <div style={{ display:"grid", gridTemplateColumns:`repeat(auto-fill, minmax(${narrow?"150px":"215px"},1fr))`, gap:14 }}>
+                {galAlbum === "*" && !galQuery.trim() && DEFAULT_ALBUM.map(item => (
                   <div key={item.id} style={{ borderRadius:12, overflow:"hidden", background:T.bg1, border:`1px solid ${T.border}`, boxShadow:T.shadow, display:"flex", flexDirection:"column" }}>
                     <div style={{ position:"relative", overflow:"hidden" }}>
                       <img src={item.url} alt={item.caption||""} style={{ width:"100%", aspectRatio:"4/3", objectFit:"cover", display:"block" }} />
@@ -1807,17 +1948,46 @@ export default function AdminPanel() {
                     )}
                   </div>
                 ))}
-                {gallery.map(item => {
+                {galFiltered.map((item, gi) => {
                   const isEditingThis = editingGallery?.id === item.id;
+                  const picked = galSel.has(item.id);
                   return (
                     <div key={item.id}
-                      style={{ borderRadius:12, overflow:"hidden", background:T.bg1, border:`1px solid ${hoveredId===item.id?T.accentBorder:T.border}`, boxShadow:hoveredId===item.id?T.shadowL:T.shadow, transition:"border .2s, box-shadow .2s, transform .15s", transform:hoveredId===item.id?"translateY(-2px)":"none", display:"flex", flexDirection:"column" }}
+                      onClick={() => { if (galSelect) toggleGalSel(item.id); }}
+                      style={{ borderRadius:12, overflow:"hidden", background:T.bg1, border:`1px solid ${picked?T.accent:hoveredId===item.id?T.accentBorder:T.border}`, boxShadow:picked?`0 0 0 2px ${T.accentDim}`:hoveredId===item.id?T.shadowL:T.shadow, transition:"border .2s, box-shadow .2s, transform .15s", transform:hoveredId===item.id&&!galSelect?"translateY(-2px)":"none", display:"flex", flexDirection:"column", cursor:galSelect?"pointer":"default" }}
                       onMouseEnter={() => setHoveredId(item.id)}
                       onMouseLeave={() => setHoveredId(null)}
                     >
-                      <div style={{ position:"relative", overflow:"hidden" }}>
-                        <img src={item.url} alt={item.caption||""} style={{ width:"100%", aspectRatio:"4/3", objectFit:"cover", display:"block" }} />
-                        {!isEditingThis && (
+                      <div className="ev-thumb" style={{ position:"relative", overflow:"hidden", background:"rgba(255,255,255,.03)" }}>
+                        <img src={item.url} alt={item.caption||""} loading="lazy"
+                          onError={e => { e.currentTarget.style.visibility = "hidden"; e.currentTarget.parentElement.dataset.broken = "1"; }}
+                          style={{ width:"100%", aspectRatio:"4/3", objectFit:"cover", display:"block" }} />
+                        {/* A missing image used to render as raw alt text, which
+                            looked like a layout bug rather than a dead link. */}
+                        <span data-fallback style={{ position:"absolute", inset:0, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:6, color:T.t4, pointerEvents:"none", transition:"opacity .2s" }}>
+                          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"><rect x="3" y="3" width="18" height="18" rx="2.5"/><path d="M3 16l5-5 4 4 3-3 6 6"/><line x1="3" y1="3" x2="21" y2="21"/></svg>
+                          <span style={{ fontSize:10.5 }}>Billedet kunne ikke hentes</span>
+                        </span>
+
+                        {/* Multi-select tick */}
+                        {galSelect && (
+                          <span style={{ position:"absolute", top:8, left:8, width:22, height:22, borderRadius:6, display:"flex", alignItems:"center", justifyContent:"center", zIndex:3,
+                            background: picked ? T.accent : "rgba(0,0,0,.55)", border:`1px solid ${picked ? T.accent : "rgba(255,255,255,.35)"}` }}>
+                            {picked && <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={T.bg0} strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>}
+                          </span>
+                        )}
+
+                        {/* Order controls — the stored order is what visitors see */}
+                        {!galSelect && !isEditingThis && hoveredId === item.id && galAlbum === "*" && !galQuery.trim() && (
+                          <div style={{ position:"absolute", top:8, left:8, zIndex:3 }} onClick={e => e.stopPropagation()}>
+                            <ReorderButtons
+                              first={gi === 0} last={gi === galFiltered.length - 1}
+                              onUp={() => reorder("gallery", gallery, setGallery, item.id, -1)}
+                              onDown={() => reorder("gallery", gallery, setGallery, item.id, 1)} />
+                          </div>
+                        )}
+
+                        {!isEditingThis && !galSelect && (
                           <div style={{ position:"absolute", inset:0, background:"rgba(0,0,0,.55)", display:"flex", alignItems:"center", justifyContent:"center", gap:8, opacity:hoveredId===item.id?1:0, transition:".2s" }}>
                             <button onClick={() => setPreviewItem(item)}
                               style={{ width:36, height:36, borderRadius:"50%", background:"rgba(255,255,255,.12)", border:"1px solid rgba(255,255,255,.25)", color:"#fff", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center" }}>
@@ -1978,7 +2148,7 @@ export default function AdminPanel() {
 
               {beforeAfter.length > 0 ? (
                 <div style={{ display:"grid", gridTemplateColumns:`repeat(auto-fill, minmax(${narrow?"260px":"300px"},1fr))`, gap:14 }}>
-                  {beforeAfter.map(item => {
+                  {beforeAfter.map((item, bi) => {
                     const isEditingThis = editingBA?.id === item.id;
                     return (
                       <div key={item.id}
@@ -1987,6 +2157,14 @@ export default function AdminPanel() {
                         onMouseLeave={() => setHoveredId(null)}
                       >
                         <div style={{ display:"flex", gap:2, padding:8, position:"relative" }}>
+                          {hoveredId === item.id && (
+                            <div style={{ position:"absolute", top:12, right:12, zIndex:4 }}>
+                              <ReorderButtons
+                                first={bi === 0} last={bi === beforeAfter.length - 1}
+                                onUp={() => reorder("beforeafter", beforeAfter, setBeforeAfter, item.id, -1)}
+                                onDown={() => reorder("beforeafter", beforeAfter, setBeforeAfter, item.id, 1)} />
+                            </div>
+                          )}
                           <div style={{ flex:1, position:"relative" }}>
                             <span style={{ position:"absolute", top:6, left:6, fontSize:10, fontWeight:700, color:T.bg0, background:T.gold, borderRadius:4, padding:"2px 7px", zIndex:1 }}>Før</span>
                             <img src={item.before} alt="" style={{ width:"100%", height:104, objectFit:"cover", borderRadius:8, display:"block" }} />
@@ -2168,9 +2346,21 @@ export default function AdminPanel() {
                     <span>Kun {faqItems.length} spørgsmål gemt — offentlig side viser standarddata indtil du har gemt mindst 5. Klik <strong>Gem alle standarddata</strong> nedenfor for at udfylde.</span>
                   </div>
                 )}
+                {faqItems.length > 3 && (
+                  <Toolbar>
+                    <SearchBox value={faqQuery} onChange={setFaqQuery} placeholder="Søg i spørgsmål og svar…" count={faqShown.length} />
+                    <ToolButton onClick={() => setExpandedFaqId(null)} disabled={!expandedFaqId}>Fold sammen</ToolButton>
+                  </Toolbar>
+                )}
+                {faqItems.length > 0 && faqShown.length === 0 && (
+                  <EmptyState
+                    icon={<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>}
+                    title="Ingen spørgsmål matcher" hint="Prøv en anden søgning." />
+                )}
                 {faqItems.length > 0 ? (
                   <div style={{ display:"flex", flexDirection:"column", gap:5 }}>
-                    {faqItems.map((item, idx) => {
+                    {faqShown.map((item) => {
+                      const idx = faqItems.findIndex(f => f.id === item.id);
                       const isOpen = expandedFaqId === item.id;
                       const draft = getDraft(item);
                       const titleDa = item.q?.da || item.q || "(intet spørgsmål)";
@@ -2183,6 +2373,14 @@ export default function AdminPanel() {
                               <span style={{ flex:1, fontSize:14, fontWeight:isOpen?700:500, color:isOpen?T.t1:T.t2, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{titleDa}</span>
                               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={isOpen?T.accent:T.t4} strokeWidth="2.5" strokeLinecap="round" style={{ transform:isOpen?"rotate(180deg)":"none", transition:"transform .2s", flexShrink:0 }}><polyline points="6 9 12 15 18 9"/></svg>
                             </button>
+                            {!faqQuery.trim() && (
+                              <div style={{ display:"flex", alignItems:"center", paddingRight:6, flexShrink:0 }}>
+                                <ReorderButtons vertical
+                                  first={idx === 0} last={idx === faqItems.length - 1}
+                                  onUp={() => reorder("faq", faqItems, setFaqItems, item.id, -1)}
+                                  onDown={() => reorder("faq", faqItems, setFaqItems, item.id, 1)} />
+                              </div>
+                            )}
                             <button type="button" onClick={() => promptDelete("Slet dette FAQ-punkt? Handlingen kan ikke fortrydes.", () => deleteFaq(item.id))}
                               style={{ padding:"13px 14px", background:"transparent", border:"none", borderLeft:`1px solid ${T.border}`, cursor:"pointer", color:T.t4, display:"flex", alignItems:"center", flexShrink:0, transition:"color .15s" }}
                               onMouseEnter={e => e.currentTarget.style.color=T.danger}
@@ -2439,9 +2637,15 @@ export default function AdminPanel() {
                   </form>
                 </div>
 
+                {extrasItems.length > 3 && (
+                  <Toolbar>
+                    <SearchBox value={extQuery} onChange={setExtQuery} placeholder="Søg i ydelser…" count={extShown.length} />
+                  </Toolbar>
+                )}
                 {extrasItems.length > 0 && (
                   <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
-                    {extrasItems.map((item) => {
+                    {extShown.map((item) => {
+                      const exIdx = extrasItems.findIndex(e => e.id === item.id);
                       const isEditing = editingExt?.id === item.id;
                       // Support both nested {da,en} format (KV) and flat (legacy)
                       const nameDa = item.name?.da || item.name || "";
@@ -2493,6 +2697,12 @@ export default function AdminPanel() {
                                 {descDa && <p style={{ fontSize:12, color:T.t3, margin:0, lineHeight:1.5 }}>{descDa}</p>}
                               </div>
                               <div style={{ display:"flex", gap:6, flexShrink:0 }}>
+                                {!extQuery.trim() && (
+                                  <ReorderButtons vertical
+                                    first={exIdx === 0} last={exIdx === extrasItems.length - 1}
+                                    onUp={() => reorder("extras", extrasItems, setExtrasItems, item.id, -1)}
+                                    onDown={() => reorder("extras", extrasItems, setExtrasItems, item.id, 1)} />
+                                )}
                                 <button onClick={() => setEditingExt(withSnapshot({ id:item.id, nameDa, nameEn, descDa, descEn, price:item.price||"" }, EXT_KEYS))}
                                   style={{ padding:"6px 12px", background:T.accentDim, border:`1px solid ${T.accentBorder}`, borderRadius:6, color:T.accent, fontSize:12, fontWeight:600, cursor:"pointer", fontFamily:FF }}>Rediger</button>
                                 <button onClick={() => promptDelete("Slet denne ekstra ydelse?", () => deleteExtra(item.id))}
@@ -2589,9 +2799,15 @@ export default function AdminPanel() {
 
               {videos.length > 0 ? (
                 <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
-                  {videos.map(item => (
-                    <div key={item.id} style={{ background:T.bg1, border:`1px solid ${T.border}`, borderRadius:12, overflow:"hidden" }}>
+                  {videos.map((item, vi) => (
+                    <div key={item.id} style={{ ...surface(), borderRadius:12, overflow:"hidden" }}>
                       <div style={{ display:"flex", alignItems:"stretch" }}>
+                        <div style={{ display:"flex", flexDirection:"column", justifyContent:"center", padding:"0 8px", flexShrink:0 }}>
+                          <ReorderButtons vertical
+                            first={vi === 0} last={vi === videos.length - 1}
+                            onUp={() => reorder("videos", videos, setVideos, item.id, -1)}
+                            onDown={() => reorder("videos", videos, setVideos, item.id, 1)} />
+                        </div>
                         {item.thumbnail
                           ? <img src={item.thumbnail} alt="" style={{ width:160, height:90, objectFit:"cover", flexShrink:0 }} />
                           : <div style={{ width:160, height:90, background:T.bg0, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
