@@ -1317,3 +1317,30 @@ body:has(.ba-lb) .cookie-banner{display:none}
   .gal-section-head{gap:10px;margin-bottom:18px}
 }
 
+
+
+/* ── Customer review cards ────────────────────────────────────────────────
+   The section promised testimonials and showed none. Quotes are entered by
+   the manager in the admin panel (Anmeldelser) — real ones copied from Google
+   or Trustpilot, never generated. */
+.rev-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin:44px 0 8px}
+.rvc{margin:0;padding:26px 26px 22px;border-radius:18px;
+  background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.018));
+  border:1px solid var(--line);display:flex;flex-direction:column;gap:14px;
+  transition:border-color .2s,transform .2s}
+.rvc:hover{border-color:rgba(55,210,120,.28);transform:translateY(-3px)}
+.rvc-stars{display:flex;gap:3px}
+.rvc-text{margin:0;font-size:15.5px;line-height:1.65;color:var(--txt);flex:1;text-wrap:pretty}
+.rvc-text::before{content:'\201C'}
+.rvc-text::after{content:'\201D'}
+.rvc-foot{display:flex;align-items:center;gap:12px;padding-top:14px;border-top:1px solid var(--line)}
+.rvc-av{width:38px;height:38px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  background:var(--green-soft);border:1px solid rgba(55,210,120,.22);color:var(--green);font-size:13px;font-weight:800;letter-spacing:.3px}
+.rvc-who{display:flex;flex-direction:column;min-width:0}
+.rvc-name{font-size:14.5px;font-weight:700;color:#fff;line-height:1.3}
+.rvc-meta{font-size:12px;color:var(--muted)}
+@media(max-width:880px){
+  .rev-grid{grid-template-columns:1fr;gap:12px;margin:30px 0 6px}
+  .rvc{padding:20px 20px 18px}
+  .rvc-text{font-size:15px}
+}

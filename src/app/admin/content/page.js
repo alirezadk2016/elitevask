@@ -6,6 +6,7 @@ import { T, FF, surface, row, skeleton, pkgTone, PKG_TONE, PKG_LABELS as PKG_LAB
 import NewBookingModal from "../NewBookingModal";
 import CustomersTab from "../CustomersTab";
 import MoveBookingModal from "../MoveBookingModal";
+import ReviewsTab from "../ReviewsTab";
 import { Toolbar, SearchBox, FilterChip, ToolButton, SelectionBar, ReorderButtons, EmptyState, persistOrder, moveInArray } from "../ContentToolbar";
 
 
@@ -668,6 +669,7 @@ export default function AdminPanel() {
     beforeafter: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="11" height="14" rx="2"/><rect x="11" y="5" width="11" height="14" rx="2"/><line x1="12" y1="3" x2="12" y2="21"/></svg>,
     refresh:  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 11-9-9c2.52 0 4.8.99 6.48 2.59L21 8"/><path d="M21 3v5h-5"/></svg>,
     hours:    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
+    reviews: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2 15 9l7 .5-5.5 4.5L18 21l-6-3.8L6 21l1.5-7L2 9.5 9 9Z"/></svg>,
     customers: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>,
     dashboard: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>,
   };
@@ -846,6 +848,7 @@ export default function AdminPanel() {
             {navItem("beforeafter", "Før & efter", icons.beforeafter, beforeAfter.length || undefined)}
             <div style={{ height:1, background:T.border, margin:"14px 4px" }}/>
             {sectionLabel("CMS")}
+            {navItem("reviews", "Anmeldelser", icons.reviews)}
             {navItem("faq",    "FAQ",    icons.faq,    faqItems.length   || undefined)}
             {navItem("priser", "Priser", icons.priser)}
             {navItem("extras", "Ekstra", icons.extras, extrasItems.length || undefined)}
@@ -854,7 +857,7 @@ export default function AdminPanel() {
           </aside>
         ) : (
           <div style={{ display:"flex", gap:8, padding:"16px 16px 0", overflowX:"auto" }}>
-            {[["oversigt","Oversigt",icons.dashboard],["bookings","Bookinger",icons.bookings],["kunder","Kunder",icons.customers],["hours","Åbningstider",icons.hours],["gallery","Galleri",icons.gallery],["videos","Videoer",icons.videos],["beforeafter","Før & efter",icons.beforeafter],["faq","FAQ",icons.faq],["priser","Priser",icons.priser],["extras","Ekstra",icons.extras]].map(([id,label,icon]) => (
+            {[["oversigt","Oversigt",icons.dashboard],["bookings","Bookinger",icons.bookings],["kunder","Kunder",icons.customers],["hours","Åbningstider",icons.hours],["gallery","Galleri",icons.gallery],["videos","Videoer",icons.videos],["beforeafter","Før & efter",icons.beforeafter],["reviews","Anmeldelser",icons.reviews],["faq","FAQ",icons.faq],["priser","Priser",icons.priser],["extras","Ekstra",icons.extras]].map(([id,label,icon]) => (
               <button key={id} onClick={() => {
                   if (tab === id) return; // never wipe edits on same-tab click
                   if (hasUnsaved) { setNavGuard({ pendingTab: id }); return; }
@@ -873,10 +876,10 @@ export default function AdminPanel() {
           {/* Page title + badge */}
           <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:28, flexWrap:"wrap" }}>
             <h1 style={{ fontSize:22, fontWeight:800, color:T.t1, margin:0, letterSpacing:"-.3px" }}>
-              {tab === "oversigt" ? "Oversigt" : tab === "bookings" ? "Bookinger" : tab === "kunder" ? "Kunder" : tab === "hours" ? "Åbningstider" : tab === "gallery" ? "Galleri" : tab === "videos" ? "Videoer" : tab === "beforeafter" ? "Før & efter" : tab === "faq" ? "FAQ" : tab === "priser" ? "Priser" : "Ekstra ydelser"}
+              {tab === "oversigt" ? "Oversigt" : tab === "bookings" ? "Bookinger" : tab === "kunder" ? "Kunder" : tab === "reviews" ? "Anmeldelser" : tab === "hours" ? "Åbningstider" : tab === "gallery" ? "Galleri" : tab === "videos" ? "Videoer" : tab === "beforeafter" ? "Før & efter" : tab === "faq" ? "FAQ" : tab === "priser" ? "Priser" : "Ekstra ydelser"}
             </h1>
             <span style={{ background:T.accentDim, color:T.accent, borderRadius:20, padding:"3px 12px", fontSize:12, fontWeight:700 }}>
-              {tab === "oversigt" ? new Intl.DateTimeFormat("da-DK",{ weekday:"long", day:"numeric", month:"long", timeZone:"Europe/Copenhagen" }).format(new Date()) : tab === "bookings" ? `${activeBookings} aktive` : tab === "kunder" ? "Kundekartotek" : tab === "hours" ? `${hours.open}–${hours.close}` : tab === "gallery" ? `${gallery.length} ${gallery.length===1?"billede":"billeder"}` : tab === "videos" ? `${videos.length} ${videos.length===1?"video":"videoer"}` : tab === "beforeafter" ? `${beforeAfter.length} ${beforeAfter.length===1?"par":"par"}` : tab === "faq" ? `${faqItems.length} spørgsmål` : tab === "priser" ? "Prismatrix" : `${extrasItems.length} ydelser`}
+              {tab === "oversigt" ? new Intl.DateTimeFormat("da-DK",{ weekday:"long", day:"numeric", month:"long", timeZone:"Europe/Copenhagen" }).format(new Date()) : tab === "bookings" ? `${activeBookings} aktive` : tab === "kunder" ? "Kundekartotek" : tab === "reviews" ? "Kundecitater" : tab === "hours" ? `${hours.open}–${hours.close}` : tab === "gallery" ? `${gallery.length} ${gallery.length===1?"billede":"billeder"}` : tab === "videos" ? `${videos.length} ${videos.length===1?"video":"videoer"}` : tab === "beforeafter" ? `${beforeAfter.length} ${beforeAfter.length===1?"par":"par"}` : tab === "faq" ? `${faqItems.length} spørgsmål` : tab === "priser" ? "Prismatrix" : `${extrasItems.length} ydelser`}
             </span>
             {(tab === "oversigt" || tab === "bookings") && (
               <>
@@ -1646,6 +1649,10 @@ export default function AdminPanel() {
               authFailed={authFailed}
               onRefreshBookings={() => loadBookings(secret, true)}
             />
+          )}
+
+          {tab === "reviews" && (
+            <ReviewsTab secret={secret} narrow={narrow} addToast={addToast} authFailed={authFailed} />
           )}
 
           {tab === "hours" && (() => {

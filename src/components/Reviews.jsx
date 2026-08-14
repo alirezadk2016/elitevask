@@ -1,11 +1,36 @@
-const HTML = `<!-- REVIEWS -->
+import { getReviews, initials } from '@/lib/getReviews';
+
+function esc(v) {
+  return String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+const STAR = '<svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M12 2 15 9l7 .5-5.5 4.5L18 21l-6-3.8L6 21l1.5-7L2 9.5 9 9Z" fill="#FBBC05"/></svg>';
+
+function card(r) {
+  const n = Math.max(1, Math.min(5, Number(r.rating) || 5));
+  const src = r.source === 'trustpilot' ? 'Trustpilot' : r.source === 'facebook' ? 'Facebook' : 'Google';
+  return `<figure class="rvc">
+    <div class="rvc-stars" aria-label="${n} ud af 5 stjerner">${STAR.repeat(n)}</div>
+    <blockquote class="rvc-text">${esc(r.text)}</blockquote>
+    <figcaption class="rvc-foot">
+      <span class="rvc-av" aria-hidden="true">${esc(initials(r.name))}</span>
+      <span class="rvc-who">
+        <span class="rvc-name">${esc(r.name || 'Anonym')}</span>
+        <span class="rvc-meta">${esc([r.city, src].filter(Boolean).join(' · '))}</span>
+      </span>
+    </figcaption>
+  </figure>`;
+}
+
+const HEAD = `<!-- REVIEWS -->
 <section class="sec" id="anmeldelser"><div class="wrap">
   <div class="center">
     <div class="eyebrow" data-i18n="rev_eyebrow">Kundeanmeldelser</div>
     <h2 class="sec-title" data-i18n="rev_title">Det siger vores kunder</h2>
   </div>
+`;
 
-  <div class="rev-center-block">
+const TAILBLOCK = `
     <div class="rev-google-badge">
       <svg viewBox="0 0 24 24" width="36" height="36"><path fill="#4285F4" d="M22.5 12.2c0-.8-.1-1.5-.2-2.2H12v4.2h5.9a5 5 0 0 1-2.2 3.3v2.8h3.6c2.1-2 3.2-4.8 3.2-8.1Z"/><path fill="#34A853" d="M12 23c2.9 0 5.4-1 7.2-2.7l-3.6-2.8c-1 .7-2.3 1.1-3.6 1.1-2.8 0-5.1-1.9-6-4.4H2.3v2.8A11 11 0 0 0 12 23Z"/><path fill="#FBBC05" d="M6 14.2a6.6 6.6 0 0 1 0-4.2V7.2H2.3a11 11 0 0 0 0 9.8L6 14.2Z"/><path fill="#EA4335" d="M12 5.4c1.6 0 3 .5 4.1 1.6l3.1-3.1A11 11 0 0 0 2.3 7.2L6 10c.9-2.5 3.2-4.4 6-4.4Z"/></svg>
       <span class="rev-badge-label">Google</span>
@@ -44,7 +69,22 @@ const HTML = `<!-- REVIEWS -->
     </a>
   </div>
 
-</div></section>`;
-export default function Reviews() {
-  return <div dangerouslySetInnerHTML={{ __html: HTML }} />;
+</div></section>`
+
+export default async function Reviews() {
+  const list = await getReviews();
+
+  // Only claim a score the page can actually back up. With no reviews stored
+  // the section keeps its previous form rather than showing an empty shell.
+  const quotes = list.slice(0, 6);
+  const grid = quotes.length
+    ? `<div class="rev-grid">${quotes.map(card).join('')}</div>`
+    : '';
+
+  // The 5.0 in the badge below is Elite Vask's Google rating — an external
+  // claim. The quotes above are the stored ones. Deliberately not merged into
+  // a single "based on N reviews" line, which would imply the score is derived
+  // from the handful shown here.
+  const html = HEAD + grid + `<div class="rev-center-block">` + TAILBLOCK;
+  return <div dangerouslySetInnerHTML={{ __html: html }} />;
 }

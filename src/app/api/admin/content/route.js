@@ -17,7 +17,7 @@ function authorized(req) {
 
 // Only these content collections may be written – prevents a bogus ?type=
 // from creating/overwriting arbitrary content:* keys.
-const CONTENT_TYPES = new Set(['gallery', 'videos', 'faq', 'extras', 'beforeafter']);
+const CONTENT_TYPES = new Set(['gallery', 'videos', 'faq', 'extras', 'beforeafter', 'reviews']);
 
 // The public content route caches for 60s; bust it so a CMS edit shows on the
 // site immediately instead of a minute later.
@@ -26,6 +26,7 @@ function revalidateContent(type) {
     revalidatePath('/api/site-content');
     if (type === 'gallery' || type === 'beforeafter') revalidatePath('/galleri');
     if (type === 'faq') revalidatePath('/faq');
+    if (type === 'reviews') revalidateTag('reviews');
   } catch {}
 }
 
@@ -171,6 +172,27 @@ export async function POST(req) {
       return Response.json({ ok: true, item: newItem });
     }
 
+    // Customer review — a real quote the manager copies in from Google or
+    // Trustpilot. Bounded so a paste of an entire page cannot land in KV.
+    if (type === 'reviews') {
+      const { item: rv } = body;
+      const text = String(rv?.text ?? '').trim().slice(0, 900);
+      if (!text) return Response.json({ error: 'invalid_item' }, { status: 400 });
+      const rating = Math.max(1, Math.min(5, parseInt(rv?.rating, 10) || 5));
+      const src = ['google', 'trustpilot', 'facebook'].includes(rv?.source) ? rv.source : 'google';
+      const newItem = {
+        id: randomUUID(),
+        name: String(rv?.name ?? '').trim().slice(0, 80),
+        city: String(rv?.city ?? '').trim().slice(0, 60),
+        text, rating, source: src,
+        addedAt: new Date().toISOString(),
+      };
+      const existingRv = await kv.get('content:reviews') || [];
+      await kv.set('content:reviews', [newItem, ...existingRv]);
+      revalidateContent('reviews');
+      return Response.json({ ok: true, item: newItem });
+    }
+
     // Before/after via URLs
     if (type === 'beforeafter') {
       const { before, after, caption = '' } = body;
@@ -224,7 +246,7 @@ export async function PUT(req) {
   const body = await req.json();
   const { type, id, item: updated } = body;
 
-  if (!id || !updated || (type !== 'faq' && type !== 'extras' && type !== 'gallery' && type !== 'beforeafter')) {
+  if (!id || !updated || !['faq', 'extras', 'gallery', 'beforeafter', 'reviews'].includes(type)) {
     return Response.json({ error: 'invalid_request' }, { status: 400 });
   }
 
@@ -232,6 +254,9 @@ export async function PUT(req) {
   const existing = await kv.get(key) || [];
   const updated_list = existing.map(i => i.id === id ? { ...i, ...updated, id } : i);
   await kv.set(key, updated_list);
+  // Without this an edit sat behind the cached read for up to five minutes,
+  // so a manager fixing a typo saw no change and edited it again.
+  revalidateContent(type);
   return Response.json({ ok: true });
 }
 
