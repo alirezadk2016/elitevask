@@ -22,9 +22,10 @@ export default function GlobalError({ error, reset }) {
         <button onClick={() => reset()} style={{ background: "#37d278", color: "#062313", border: "none", borderRadius: 10, padding: "13px 26px", fontWeight: 700, fontSize: 14.5, cursor: "pointer", fontFamily: "inherit" }}>
           {da ? "Prøv igen" : "Try again"}
         </button>
-        <a href="/" style={{ display: "inline-flex", alignItems: "center", background: "rgba(255,255,255,.06)", border: "1px solid rgba(255,255,255,.14)", color: "#fff", borderRadius: 10, padding: "13px 22px", fontWeight: 600, fontSize: 14.5, textDecoration: "none" }}>
+        <button onClick={() => { window.location.href = "/"; }}
+          style={{ display: "inline-flex", alignItems: "center", background: "rgba(255,255,255,.06)", border: "1px solid rgba(255,255,255,.14)", color: "#fff", borderRadius: 10, padding: "13px 22px", fontWeight: 600, fontSize: 14.5, cursor: "pointer", fontFamily: "inherit" }}>
           {da ? "Til forsiden" : "Front page"}
-        </a>
+        </button>
         <a href="tel:+4524440321" style={{ display: "inline-flex", alignItems: "center", background: "rgba(255,255,255,.06)", border: "1px solid rgba(255,255,255,.14)", color: "#fff", borderRadius: 10, padding: "13px 22px", fontWeight: 600, fontSize: 14.5, textDecoration: "none" }}>
           +45 24 44 03 21
         </a>
