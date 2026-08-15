@@ -1,4 +1,5 @@
 import Link from "next/link";
+import DanishOnlyNotice from "@/components/DanishOnlyNotice";
 import JsonLd from "@/components/JsonLd";
 import RelatedLinks from "@/components/RelatedLinks";
 import { breadcrumbLd, SITE } from "@/lib/seo";
@@ -133,6 +134,8 @@ export default async function PriserPage() {
         <Link href="/" style={{ display: "inline-flex", alignItems: "center", gap: 6, color: "#37d278", fontSize: 14, fontWeight: 600, textDecoration: "none", marginBottom: 32, opacity: 0.9 }}>
           ← Tilbage til forsiden
         </Link>
+
+        <DanishOnlyNotice />
 
         <p style={{ fontSize: 12, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", color: "#37d278", marginBottom: 12 }}>
           Priser

@@ -8,11 +8,11 @@ const HTML = `<!-- LOCAL SEO -->
     <a href="/bilvask/koege" class="chip">Bilvask i Køge</a>
     <a href="/bilvask/naestved" class="chip">Bilvask i Næstved</a>
     <a href="/bilvask/ringsted" class="chip">Bilvask i Ringsted</a>
-    <a href="#kontakt" class="chip">Bilvask i Stevns Kommune</a>
-    <a href="#kontakt" class="chip">Bilvask i Faxe Kommune</a>
-    <a href="#kontakt" class="chip">Bilvask i Helsingør</a>
-    <a href="#kontakt" class="chip">Bilvask i Hillerød</a>
-    <a href="#kontakt" class="chip">Bilvask i Frederikssund</a>
+    <a href="/bilvask/stevns" class="chip">Bilvask i Stevns Kommune</a>
+    <a href="/bilvask/faxe" class="chip">Bilvask i Faxe Kommune</a>
+    <a href="/bilvask/helsingoer" class="chip">Bilvask i Helsingør</a>
+    <a href="/bilvask/hilleroed" class="chip">Bilvask i Hillerød</a>
+    <a href="/bilvask/frederikssund" class="chip">Bilvask i Frederikssund</a>
   </div>
 </div></section>`;
 export default function LocalSEO() {

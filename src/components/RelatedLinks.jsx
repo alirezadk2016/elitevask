@@ -18,6 +18,11 @@ export default function RelatedLinks() {
         <a href="/bilvask/koege" className="chip">Bilvask Køge</a>
         <a href="/bilvask/naestved" className="chip">Bilvask Næstved</a>
         <a href="/bilvask/ringsted" className="chip">Bilvask Ringsted</a>
+        <a href="/bilvask/helsingoer" className="chip">Bilvask Helsingør</a>
+        <a href="/bilvask/hilleroed" className="chip">Bilvask Hillerød</a>
+        <a href="/bilvask/frederikssund" className="chip">Bilvask Frederikssund</a>
+        <a href="/bilvask/stevns" className="chip">Bilvask Stevns</a>
+        <a href="/bilvask/faxe" className="chip">Bilvask Faxe</a>
       </div>
     </nav>
   );

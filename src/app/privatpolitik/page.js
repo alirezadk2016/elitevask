@@ -1,4 +1,5 @@
 import Link from "next/link";
+import DanishOnlyNotice from "@/components/DanishOnlyNotice";
 export const metadata = {
   title: "Privatlivspolitik – Elite Vask",
   description: "Læs Elite Vaskes privatlivspolitik og se, hvordan vi behandler dine personoplysninger.",
@@ -10,6 +11,7 @@ export default function Privatpolitik() {
     <div className="legal-page">
       <div className="legal-wrap">
         <Link href="/" className="legal-back">← Tilbage til forsiden</Link>
+        <DanishOnlyNotice />
         <h1>Privatlivspolitik</h1>
         <p className="legal-updated">Senest opdateret: 19. juni 2026</p>
 

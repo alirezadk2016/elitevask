@@ -1,4 +1,5 @@
 import Link from "next/link";
+import DanishOnlyNotice from "@/components/DanishOnlyNotice";
 export const metadata = {
   title: "Handelsbetingelser – Elite Vask",
   description: "Læs Elite Vaskes handelsbetingelser for mobil bil dampvask på Sjælland.",
@@ -10,6 +11,7 @@ export default function Handelsbetingelser() {
     <div className="legal-page">
       <div className="legal-wrap">
         <Link href="/" className="legal-back">← Tilbage til forsiden</Link>
+        <DanishOnlyNotice />
         <h1>Handelsbetingelser</h1>
         <p className="legal-updated">Senest opdateret: 19. juni 2026</p>
 

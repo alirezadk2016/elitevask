@@ -1,4 +1,5 @@
 import Link from "next/link";
+import DanishOnlyNotice from "@/components/DanishOnlyNotice";
 const GUIDES = [
   { href: "/guide/hvor-ofte", icon: "📅", title: "Hvor ofte bør man vaske sin bil?", desc: "Salt om vinteren, pollen om foråret, insekter om sommeren. Se den konkrete guide til vaskehyppighed efter årstid." },
   { href: "/guide/salt-og-lak", icon: "🧂", title: "Beskyt bilens lak mod vejsalt", desc: "Vejsalt er bilens største fjende i den danske vinter. Lær hvordan salt angriber lakken og hvad du gør ved det." },
@@ -33,6 +34,7 @@ export default function GuidePage() {
         <Link href="/#vaelg" className="gal-book">Book nu</Link>
       </header>
 
+      <div style={{ maxWidth: 900, margin: "16px auto 0", padding: "0 20px" }}><DanishOnlyNotice /></div>
       <section className="gal-hero">
         <div className="eyebrow">Bilpleje Guide</div>
         <h1 className="gal-hero-title">Råd &amp; viden om bilpleje</h1>

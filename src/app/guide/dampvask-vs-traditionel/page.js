@@ -1,4 +1,5 @@
 import Link from "next/link";
+import DanishOnlyNotice from "@/components/DanishOnlyNotice";
 import RelatedLinks from "@/components/RelatedLinks";
 import JsonLd from "@/components/JsonLd";
 import { breadcrumbLd, articleLd } from "@/lib/seo";
@@ -23,6 +24,7 @@ export default function DampvaskVsTraditionel() {
       <JsonLd items={[breadcrumbLd([{name:"Forside",path:"/"},{name:"Guide",path:"/guide"},{name:"Dampvask vs. traditionel bilvask: Hvad er forskellen?",path:"/guide/dampvask-vs-traditionel"}]),articleLd({title:"Dampvask vs. traditionel bilvask: Hvad er forskellen?",description:"Dampvask og traditionel bilvask har meget forskellige resultater. Se hvad forskningen viser om ridser, bakterier, vandforbrug og rengøringseffekt.",path:"/guide/dampvask-vs-traditionel",datePublished:"2026-06-19"})]} />
       <div className="legal-wrap">
         <Link href="/" className="legal-back">← Tilbage til forsiden</Link>
+        <DanishOnlyNotice />
 
         <div className="guide-eyebrow">Bilpleje Guide</div>
         <h1>Dampvask vs. traditionel bilvask: Hvad er forskellen?</h1>

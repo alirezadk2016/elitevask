@@ -1,7 +1,7 @@
 const HTML = `<!-- CAR SELECTOR + CALCULATOR -->
 <section class="sec selector" id="vaelg"><div class="wrap">
   <div class="center">
-    <div class="eyebrow" data-i18n="sel_eyebrow">Trin 1 af 2</div>
+    <div class="eyebrow" data-i18n="sel_eyebrow">Priser &amp; pakker</div>
     <h2 class="sec-title" data-i18n="sel_title">Find pris til din bil</h2>
     <p class="sec-sub" data-i18n="sel_sub">Vælg din biltype nedenfor og se prisen med det samme.</p>
   </div>

@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import DanishOnlyNotice from "@/components/DanishOnlyNotice";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { DEFAULT_BEFORE_AFTER, DEFAULT_ALBUM } from "@/lib/galleryData";
 
@@ -221,6 +222,7 @@ export default function GalleryClient() {
         <Link href="/" className="gal-brand"><span className="gal-brand-mark" />Elite Vask</Link>
         <Link href="/#vaelg" className="gal-book">Book nu</Link>
       </header>
+      <div style={{ maxWidth: 1100, margin: "14px auto 0", padding: "0 20px" }}><DanishOnlyNotice /></div>
 
       <section className="gal-hero">
         <div className="eyebrow">Galleri</div>

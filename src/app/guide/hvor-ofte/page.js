@@ -1,4 +1,5 @@
 import Link from "next/link";
+import DanishOnlyNotice from "@/components/DanishOnlyNotice";
 import RelatedLinks from "@/components/RelatedLinks";
 import JsonLd from "@/components/JsonLd";
 import { breadcrumbLd, articleLd } from "@/lib/seo";
@@ -23,6 +24,7 @@ export default function HvorOfte() {
       <JsonLd items={[breadcrumbLd([{name:"Forside",path:"/"},{name:"Guide",path:"/guide"},{name:"Hvor ofte bør man vaske sin bil?",path:"/guide/hvor-ofte"}]),articleLd({title:"Hvor ofte bør man vaske sin bil?",description:"Hvor tit skal bilen vaskes? Svaret afhænger af årstid, brug og parkeringsforhold. Her er en konkret guide til, hvornår det er nødvendigt.",path:"/guide/hvor-ofte",datePublished:"2026-06-01"})]} />
       <div className="legal-wrap">
         <Link href="/" className="legal-back">← Tilbage til forsiden</Link>
+        <DanishOnlyNotice />
 
         <div className="guide-eyebrow">Bilpleje Guide</div>
         <h1>Hvor ofte bør man vaske sin bil?</h1>

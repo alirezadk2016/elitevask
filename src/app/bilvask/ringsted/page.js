@@ -1,4 +1,5 @@
 import Link from "next/link";
+import DanishOnlyNotice from "@/components/DanishOnlyNotice";
 import RelatedLinks from "@/components/RelatedLinks";
 import JsonLd from "@/components/JsonLd";
 import { breadcrumbLd, cityServiceLd } from "@/lib/seo";
@@ -23,6 +24,7 @@ export default function BilvaskRingsted() {
       <JsonLd items={[breadcrumbLd([{name:"Forside",path:"/"},{name:"Mobil bilvask i Ringsted",path:"/bilvask/ringsted"}]),cityServiceLd({city:"Ringsted",path:"/bilvask/ringsted"})]} />
       <div className="legal-wrap">
         <Link href="/" className="legal-back">← Tilbage til forsiden</Link>
+        <DanishOnlyNotice />
 
         <div className="guide-eyebrow">Serviceområde</div>
         <h1>Mobil bilvask i Ringsted</h1>

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import DanishOnlyNotice from "@/components/DanishOnlyNotice";
 import RelatedLinks from "@/components/RelatedLinks";
 import JsonLd from "@/components/JsonLd";
 import { breadcrumbLd, SITE } from "@/lib/seo";
@@ -66,6 +67,7 @@ export default async function Kontakt() {
       />
       <div className="legal-wrap">
         <Link href="/" className="legal-back">← Tilbage til forsiden</Link>
+        <DanishOnlyNotice />
 
         <div className="guide-eyebrow">Kontakt</div>
         <h1>Kontakt Elite Vask</h1>

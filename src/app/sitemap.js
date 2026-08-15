@@ -21,5 +21,10 @@ export default function sitemap() {
     { url: `${SITE_URL}/bilvask/koege`, lastModified: new Date('2026-07-18'), changeFrequency: 'monthly', priority: 0.8 },
     { url: `${SITE_URL}/bilvask/naestved`, lastModified: new Date('2026-07-18'), changeFrequency: 'monthly', priority: 0.8 },
     { url: `${SITE_URL}/bilvask/ringsted`, lastModified: new Date('2026-07-18'), changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${SITE_URL}/bilvask/stevns`, lastModified: new Date('2026-08-15'), changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${SITE_URL}/bilvask/faxe`, lastModified: new Date('2026-08-15'), changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${SITE_URL}/bilvask/helsingoer`, lastModified: new Date('2026-08-15'), changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${SITE_URL}/bilvask/hilleroed`, lastModified: new Date('2026-08-15'), changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${SITE_URL}/bilvask/frederikssund`, lastModified: new Date('2026-08-15'), changeFrequency: 'monthly', priority: 0.8 },
   ];
 }

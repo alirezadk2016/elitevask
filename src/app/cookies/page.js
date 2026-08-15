@@ -1,4 +1,5 @@
 import Link from "next/link";
+import DanishOnlyNotice from "@/components/DanishOnlyNotice";
 export const metadata = {
   title: "Cookiepolitik – Elite Vask",
   description: "Læs Elite Vaskes cookiepolitik og se, hvilke cookies vi bruger på vores hjemmeside.",
@@ -10,6 +11,7 @@ export default function Cookies() {
     <div className="legal-page">
       <div className="legal-wrap">
         <Link href="/" className="legal-back">← Tilbage til forsiden</Link>
+        <DanishOnlyNotice />
         <h1>Cookiepolitik</h1>
         <p className="legal-updated">Senest opdateret: 19. juni 2026</p>
 
