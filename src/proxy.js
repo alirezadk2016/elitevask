@@ -42,6 +42,42 @@ function isRateLimited(ip) {
   return recent.length > MAX_HITS;
 }
 
+/* Cross-site write guard.
+ *
+ * Every state-changing API route except one carries its own isSameOrigin()
+ * check. The exception is /api/book — the most safety-critical file on the
+ * site, which is deliberately left untouched — so a third-party page could
+ * make a visitor's browser POST a real booking: slots blocked, confirmation
+ * emails sent, no interaction from the victim. Enforcing it here closes that
+ * without editing the route.
+ *
+ * The rule is deliberately narrow: reject only when an Origin/Referer is
+ * PRESENT and points somewhere else. A request with no Origin at all is
+ * passed through exactly as before, so nothing a real customer's browser or
+ * an in-app webview does can start failing. Browsers always send Origin on a
+ * cross-origin POST, which is the case this needs to catch.
+ */
+const WRITE_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
+const SITE_ORIGINS = [
+  'https://elite-vask.dk',
+  'https://www.elite-vask.dk',
+  'https://elitevask.vercel.app',
+];
+
+function isCrossSiteWrite(request) {
+  if (!WRITE_METHODS.has(request.method)) return false;
+  const origin = request.headers.get('origin');
+  const referer = request.headers.get('referer');
+  let check = origin;
+  if (!check && referer) { try { check = new URL(referer).origin; } catch { return false; } }
+  if (!check || check === 'null') return false; // absent → unchanged behaviour
+  if (SITE_ORIGINS.includes(check)) return false;
+  if (check === request.nextUrl.origin) return false;
+  const host = request.headers.get('host');
+  if (host && (check === `https://${host}` || check === `http://${host}`)) return false;
+  return true;
+}
+
 export function proxy(request) {
   const { pathname } = request.nextUrl;
   const ua = request.headers.get('user-agent') || '';
@@ -71,6 +107,13 @@ export function proxy(request) {
     return new NextResponse(null, { status: 403 });
   }
 
+  if (pathname.startsWith('/api/') && isCrossSiteWrite(request)) {
+    return new NextResponse(
+      JSON.stringify({ error: 'forbidden', message: 'Cross-site request blocked.' }),
+      { status: 403, headers: { 'Content-Type': 'application/json' } }
+    );
+  }
+
   // Global rate limit per IP (120 req/min)
   if (isRateLimited(ip)) {
     return new NextResponse(
@@ -97,6 +140,6 @@ export function proxy(request) {
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|manifest.webmanifest|logo.jpg|hero.jpg.png|.*\\.(?:png|jpg|jpeg|gif|svg|webp|ico|woff|woff2)).*)',
+    '/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|manifest.webmanifest|.*\\.(?:png|jpg|jpeg|gif|svg|webp|avif|ico|woff|woff2|mp4|webm)).*)',
   ],
 };

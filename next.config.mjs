@@ -2,7 +2,10 @@ const securityHeaders = [
   { key: 'X-DNS-Prefetch-Control', value: 'on' },
   { key: 'X-Frame-Options', value: 'DENY' },
   { key: 'X-Content-Type-Options', value: 'nosniff' },
-  { key: 'X-XSS-Protection', value: '1; mode=block' },
+  // Explicitly OFF. The legacy XSS auditor is removed from every current
+  // browser, and in the versions that still honour it '1; mode=block' has its
+  // own known side-channel bugs. The CSP below is the real protection.
+  { key: 'X-XSS-Protection', value: '0' },
   { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
   { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
   { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(), payment=(), usb=(), bluetooth=()' },
@@ -17,6 +20,9 @@ const securityHeaders = [
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' data: https://fonts.gstatic.com",
       "img-src 'self' data: blob: https:",
+      // Manager-uploaded clips live on Vercel Blob, not on our own origin;
+      // without this default-src 'self' would silently refuse to play them.
+      "media-src 'self' blob: https:",
       "connect-src 'self' https://api.dataforsyningen.dk https://*.upstash.io https://api.trustpilot.com https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com https://va.vercel-scripts.com",
       "frame-src 'none'",
       "frame-ancestors 'none'",

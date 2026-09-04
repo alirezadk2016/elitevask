@@ -10,7 +10,18 @@ function checkSecret(secret) {
   return diff === 0;
 }
 
+/* This endpoint deletes EVERY booking and EVERY slot lock in one call, and it
+   is not referenced anywhere in the app — it is a development reset that was
+   left reachable in production. One successful call destroys the business's
+   entire calendar with no undo, so in production it now stays shut unless the
+   operator deliberately sets ALLOW_DESTRUCTIVE_RESET=1 for the duration of a
+   reset. Locally (npm run dev) it behaves exactly as before. */
+function resetAllowed() {
+  return process.env.NODE_ENV !== 'production' || process.env.ALLOW_DESTRUCTIVE_RESET === '1';
+}
+
 export async function POST(request) {
+  if (!resetAllowed()) return Response.json({ error: 'disabled' }, { status: 404 });
   if (!isSameOrigin(request)) return Response.json({ error: 'forbidden' }, { status: 403 });
   const { secret } = await request.json().catch(() => ({}));
   if (!checkSecret(secret)) return Response.json({ error: 'forbidden' }, { status: 403 });

@@ -1,6 +1,7 @@
 import { randomBytes } from 'crypto';
 import { hashToken, makeSessionCookie, auditLog } from '@/lib/auth';
 import { isSameOrigin } from '@/lib/csrf';
+import { clientIp } from '@/lib/clientIp';
 
 const SESSION_TTL = 60 * 60 * 24 * 30;
 
@@ -43,7 +44,10 @@ export async function POST(request) {
     return Response.json({ error: 'invalid' }, { status: 400 });
   }
   const rawToken = body.token;
-  const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+  // Via clientIp(), not the leftmost x-forwarded-for entry: that one is
+  // client-settable, so every login in the audit log could be stamped with an
+  // address of the attacker's choosing.
+  const ip = clientIp(request);
   const ua = request.headers.get('user-agent') || '';
 
   if (!rawToken || typeof rawToken !== 'string' || rawToken.length !== 64) {

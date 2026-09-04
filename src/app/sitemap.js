@@ -2,29 +2,48 @@
 // (*.vercel.app) domain, regardless of NEXT_PUBLIC_SITE_URL.
 const SITE_URL = 'https://www.elite-vask.dk';
 
+/* lastModified must be a real date, not `new Date()`.
+ *
+ * This file is generated per request, so `new Date()` stamped every URL with
+ * the moment of the crawl — the sitemap claimed all 22 pages had just changed,
+ * every single time Google fetched it. Google's documented response to a
+ * lastmod it cannot trust is to ignore lastmod for the whole site, which cost
+ * us the one signal that makes a genuinely updated page get recrawled quickly.
+ *
+ * So each entry carries the date its content actually last changed. When you
+ * edit a page, bump its date here in the same commit. */
+const PAGES = [
+  ['',                                '2026-09-04', 'weekly',  1.0],
+  ['/priser',                         '2026-09-03', 'monthly', 0.8],
+  ['/galleri',                        '2026-09-03', 'weekly',  0.8],
+  ['/faq',                            '2026-09-03', 'monthly', 0.7],
+  ['/guide',                          '2026-09-03', 'monthly', 0.7],
+  ['/kontakt',                        '2026-09-03', 'yearly',  0.6],
+  ['/handelsbetingelser',             '2026-09-03', 'yearly',  0.4],
+  ['/privatpolitik',                  '2026-09-03', 'yearly',  0.4],
+  ['/cookies',                        '2026-09-03', 'yearly',  0.3],
+
+  ['/guide/hvor-ofte',                '2026-06-01', 'yearly',  0.7],
+  ['/guide/salt-og-lak',              '2026-06-01', 'yearly',  0.7],
+  ['/guide/dampvask-vs-traditionel',  '2026-06-19', 'yearly',  0.7],
+
+  ['/bilvask/koebenhavn',             '2026-07-18', 'monthly', 0.9],
+  ['/bilvask/roskilde',               '2026-07-18', 'monthly', 0.9],
+  ['/bilvask/koege',                  '2026-07-18', 'monthly', 0.9],
+  ['/bilvask/naestved',               '2026-07-18', 'monthly', 0.9],
+  ['/bilvask/ringsted',               '2026-07-18', 'monthly', 0.9],
+  ['/bilvask/stevns',                 '2026-08-15', 'monthly', 0.9],
+  ['/bilvask/faxe',                   '2026-08-15', 'monthly', 0.9],
+  ['/bilvask/helsingoer',             '2026-08-15', 'monthly', 0.9],
+  ['/bilvask/hilleroed',              '2026-08-15', 'monthly', 0.9],
+  ['/bilvask/frederikssund',          '2026-08-15', 'monthly', 0.9],
+];
+
 export default function sitemap() {
-  return [
-    { url: SITE_URL, lastModified: new Date(), changeFrequency: 'weekly', priority: 1 },
-    { url: `${SITE_URL}/galleri`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${SITE_URL}/kontakt`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.6 },
-    { url: `${SITE_URL}/guide`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7 },
-    { url: `${SITE_URL}/priser`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7 },
-    { url: `${SITE_URL}/faq`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },
-    { url: `${SITE_URL}/handelsbetingelser`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.4 },
-    { url: `${SITE_URL}/privatpolitik`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.4 },
-    { url: `${SITE_URL}/cookies`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.3 },
-    { url: `${SITE_URL}/guide/hvor-ofte`, lastModified: new Date('2026-06-01'), changeFrequency: 'monthly', priority: 0.7 },
-    { url: `${SITE_URL}/guide/salt-og-lak`, lastModified: new Date('2026-06-01'), changeFrequency: 'monthly', priority: 0.7 },
-    { url: `${SITE_URL}/guide/dampvask-vs-traditionel`, lastModified: new Date('2026-06-19'), changeFrequency: 'monthly', priority: 0.7 },
-    { url: `${SITE_URL}/bilvask/koebenhavn`, lastModified: new Date('2026-07-18'), changeFrequency: 'monthly', priority: 0.8 },
-    { url: `${SITE_URL}/bilvask/roskilde`, lastModified: new Date('2026-07-18'), changeFrequency: 'monthly', priority: 0.8 },
-    { url: `${SITE_URL}/bilvask/koege`, lastModified: new Date('2026-07-18'), changeFrequency: 'monthly', priority: 0.8 },
-    { url: `${SITE_URL}/bilvask/naestved`, lastModified: new Date('2026-07-18'), changeFrequency: 'monthly', priority: 0.8 },
-    { url: `${SITE_URL}/bilvask/ringsted`, lastModified: new Date('2026-07-18'), changeFrequency: 'monthly', priority: 0.8 },
-    { url: `${SITE_URL}/bilvask/stevns`, lastModified: new Date('2026-08-15'), changeFrequency: 'monthly', priority: 0.8 },
-    { url: `${SITE_URL}/bilvask/faxe`, lastModified: new Date('2026-08-15'), changeFrequency: 'monthly', priority: 0.8 },
-    { url: `${SITE_URL}/bilvask/helsingoer`, lastModified: new Date('2026-08-15'), changeFrequency: 'monthly', priority: 0.8 },
-    { url: `${SITE_URL}/bilvask/hilleroed`, lastModified: new Date('2026-08-15'), changeFrequency: 'monthly', priority: 0.8 },
-    { url: `${SITE_URL}/bilvask/frederikssund`, lastModified: new Date('2026-08-15'), changeFrequency: 'monthly', priority: 0.8 },
-  ];
+  return PAGES.map(([path, lastmod, changeFrequency, priority]) => ({
+    url: `${SITE_URL}${path}`,
+    lastModified: new Date(`${lastmod}T00:00:00Z`),
+    changeFrequency,
+    priority,
+  }));
 }

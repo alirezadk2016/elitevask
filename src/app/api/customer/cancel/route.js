@@ -1,5 +1,6 @@
 import { hashToken, getSession, auditLog } from '@/lib/auth';
 import { isSameOrigin } from '@/lib/csrf';
+import { clientIp } from '@/lib/clientIp';
 import { cphEpoch } from '@/lib/cphTime';
 import { buildTransport, emailShell, tr, esc, BOOKING_EMAIL, CONTACT_EMAIL } from '@/lib/mailer';
 
@@ -20,7 +21,9 @@ export async function POST(request) {
   if (!isSameOrigin(request)) {
     return Response.json({ error: 'forbidden' }, { status: 403 });
   }
-  const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+  // clientIp(), not the leftmost x-forwarded-for entry — that one is set by
+  // the client, so an 'unauthorized_cancel' entry could name any address.
+  const ip = clientIp(request);
 
   const kv = await getKV();
   if (!kv) return Response.json({ error: 'unavailable' }, { status: 503 });
