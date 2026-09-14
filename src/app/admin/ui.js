@@ -80,10 +80,15 @@ export const CAR_IDS = ["lille", "mellem", "stor", "varebil"];
 export const PKG_IDS = ["hele", "udv", "indv", "guld"];
 
 // Shared input styling — every field in the admin looks the same.
+/* fontSize 16, not 14. iOS Safari zooms the whole page in whenever a text
+   field with a font under 16px receives focus, and the manager then has to
+   pinch back out after every single entry. 16px is the threshold that stops
+   it; on desktop the difference is barely visible. */
 export const field = (extra = {}) => ({
   width: "100%", padding: "10px 12px", borderRadius: 9,
   border: `1px solid ${T.border}`, background: T.bg0, color: T.t1,
-  fontSize: 14, outline: "none", fontFamily: FF, boxSizing: "border-box",
+  fontSize: 16, outline: "none", fontFamily: FF, boxSizing: "border-box",
+  minHeight: 44,
   ...extra,
 });
 

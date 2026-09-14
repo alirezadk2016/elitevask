@@ -600,7 +600,7 @@ export default function AdminPanel() {
     <div style={{ minHeight:"100dvh", display:"flex", alignItems:"center", justifyContent:"center", background:T.bg0, fontFamily:FF, padding:16 }}>
       <div style={{ width:"100%", maxWidth:380 }}>
         <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:32, justifyContent:"center" }}>
-          <div style={{ width:32, height:32, background:T.accent, borderRadius:8, display:"flex", alignItems:"center", justifyContent:"center" }}>
+          <div style={{ width:40, height:40, background:T.accent, borderRadius:8, display:"flex", alignItems:"center", justifyContent:"center" }}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={T.bg0} strokeWidth="2.5" strokeLinecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
           </div>
           <span style={{ color:T.t1, fontWeight:800, fontSize:17, letterSpacing:"-.3px" }}>EliteVask <span style={{ color:T.t3, fontWeight:500 }}>Admin</span></span>
@@ -609,7 +609,7 @@ export default function AdminPanel() {
           <p style={{ color:T.t1, fontSize:20, fontWeight:800, margin:"0 0 4px", letterSpacing:"-.3px" }}>Log ind</p>
           <p style={{ color:T.t3, fontSize:13, margin:"0 0 24px" }}>Administrer bookinger og indhold</p>
           <form onSubmit={login}>
-            <input style={{ width:"100%", padding:"13px 16px", borderRadius:10, border:`1px solid ${T.border}`, background:T.bg0, color:T.t1, fontSize:15, boxSizing:"border-box", marginBottom:12, outline:"none", fontFamily:FF }}
+            <input style={{ width:"100%", padding:"13px 16px", borderRadius:10, border:`1px solid ${T.border}`, background:T.bg0, color:T.t1, fontSize:16, boxSizing:"border-box", marginBottom:12, outline:"none", fontFamily:FF }}
               type="password" placeholder="Adgangskode" value={secretInput}
               onChange={e => { setSecretInput(e.target.value); setLoginErr(""); }} autoFocus />
             <button disabled={loggingIn||!secretInput} style={{ width:"100%", padding:13, background:T.accent, color:T.bg0, border:"none", borderRadius:10, fontWeight:800, fontSize:15, cursor:(loggingIn||!secretInput)?"default":"pointer", opacity:(loggingIn||!secretInput)?.6:1, fontFamily:FF, display:"flex", alignItems:"center", justifyContent:"center", gap:8 }} type="submit">
@@ -807,13 +807,13 @@ export default function AdminPanel() {
         {(tab === "bookings" || tab === "oversigt") && (
           <button onClick={() => loadBookings(secret)} disabled={bLoading}
             title="Opdaterer automatisk hvert minut"
-            style={{ display:"flex", alignItems:"center", gap:6, padding:"7px 14px", background:T.accentDim, border:`1px solid ${T.accentBorder}`, borderRadius:8, color:T.accent, fontSize:12, fontWeight:600, cursor:"pointer", fontFamily:FF }}>
+            style={{ display:"flex", alignItems:"center", gap:6, padding:"7px 14px", minHeight:44, justifyContent:"center", background:T.accentDim, border:`1px solid ${T.accentBorder}`, borderRadius:8, color:T.accent, fontSize:12, fontWeight:600, cursor:"pointer", fontFamily:FF }}>
             {icons.refresh} {bLoading ? "…" : "Opdater"}
           </button>
         )}
         <button onClick={() => { if (hasUnsaved) { setNavGuard({ pendingTab: tab, logout: true }); } else logout(); }}
           title="Log ud"
-          style={{ display:"flex", alignItems:"center", gap:6, padding:"7px 12px", background:"transparent", border:`1px solid ${T.border}`, borderRadius:8, color:T.t3, fontSize:12, fontWeight:600, cursor:"pointer", fontFamily:FF }}
+          style={{ display:"flex", alignItems:"center", gap:6, padding:"7px 12px", minHeight:44, justifyContent:"center", background:"transparent", border:`1px solid ${T.border}`, borderRadius:8, color:T.t3, fontSize:12, fontWeight:600, cursor:"pointer", fontFamily:FF }}
           onMouseEnter={e=>{e.currentTarget.style.color=T.danger;e.currentTarget.style.borderColor=T.dangerBorder;}}
           onMouseLeave={e=>{e.currentTarget.style.color=T.t3;e.currentTarget.style.borderColor=T.border;}}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
@@ -863,7 +863,7 @@ export default function AdminPanel() {
                   if (hasUnsaved) { setNavGuard({ pendingTab: id }); return; }
                   setTab(id); setMsg(null); setUrlInput(""); setCmsMsg(null); setExpandedFaqId(null); setFaqDrafts({}); setAddFaqOpen(false); setEditingExt(null); setEditingGallery(null);
                 }}
-                style={{ display:"flex", alignItems:"center", gap:6, padding:"8px 16px", borderRadius:8, border:`1px solid ${tab===id?T.accentBorder:T.border}`, background:tab===id?T.accentDim:"transparent", color:tab===id?T.accent:T.t3, fontSize:13, fontWeight:600, cursor:"pointer", fontFamily:FF, whiteSpace:"nowrap" }}>
+                style={{ display:"flex", alignItems:"center", gap:6, padding:"8px 16px", minHeight:44, borderRadius:8, border:`1px solid ${tab===id?T.accentBorder:T.border}`, background:tab===id?T.accentDim:"transparent", color:tab===id?T.accent:T.t3, fontSize:13, fontWeight:600, cursor:"pointer", fontFamily:FF, whiteSpace:"nowrap" }}>
                 {icon}{label}
               </button>
             ))}
@@ -975,7 +975,7 @@ export default function AdminPanel() {
                 {!narrow && <span style={{ fontSize:13.5, fontWeight:800, color:T.t2, flexShrink:0, fontVariantNumeric:"tabular-nums" }}>{b.price || "-"}</span>}
                 {b.phone && (
                   <a href={`tel:${b.phone}`} onClick={e => e.stopPropagation()}
-                    style={{ display:"flex", alignItems:"center", justifyContent:"center", width:32, height:32, borderRadius:9, background:T.accentDim, border:`1px solid ${T.accentBorder}`, color:T.accent, textDecoration:"none", flexShrink:0 }}>
+                    style={{ display:"flex", alignItems:"center", justifyContent:"center", width:40, height:40, borderRadius:9, background:T.accentDim, border:`1px solid ${T.accentBorder}`, color:T.accent, textDecoration:"none", flexShrink:0 }}>
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.15 1.28 2 2 0 012.11 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
                   </a>
                 )}
@@ -1034,7 +1034,7 @@ export default function AdminPanel() {
                   const withMail  = tomorrows.filter(b => b.email).length;
                   return (
                     <div style={{ marginTop:14, background:T.bg1, border:`1px solid ${T.border}`, borderRadius:12, padding:"14px 16px", display:"flex", alignItems:"center", gap:12, flexWrap:"wrap" }}>
-                      <div style={{ width:32, height:32, borderRadius:9, background:T.blueDim, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+                      <div style={{ width:40, height:40, borderRadius:9, background:T.blueDim, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={T.blue} strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
                       </div>
                       <div style={{ flex:1, minWidth:170 }}>
@@ -1063,7 +1063,7 @@ export default function AdminPanel() {
                             addToast(d.failed ? "err" : "ok", d.sent ? `${d.sent} påmindelse${d.sent===1?"":"r"} sendt` : "Ingen nye påmindelser at sende");
                           } catch { addToast("err", "Netværksfejl"); setRemindState(null); }
                         }}
-                        style={{ padding:"9px 15px", background:T.blueDim, border:`1px solid ${T.blueBorder}`, borderRadius:9, color:T.blue, fontSize:12.5, fontWeight:700, cursor:remindState?.busy?"wait":"pointer", fontFamily:FF, whiteSpace:"nowrap" }}>
+                        style={{ padding:"9px 15px", minHeight:44, background:T.blueDim, border:`1px solid ${T.blueBorder}`, borderRadius:9, color:T.blue, fontSize:12.5, fontWeight:700, cursor:remindState?.busy?"wait":"pointer", fontFamily:FF, whiteSpace:"nowrap" }}>
                         {remindState?.busy ? "Sender…" : "Send nu"}
                       </button>
                     </div>
@@ -1295,7 +1295,7 @@ export default function AdminPanel() {
                     <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:14, flexWrap:"wrap" }}>
                       {[["kalender","Kalender"],["liste","Liste & søgning"]].map(([id,label]) => (
                         <button key={id} onClick={() => setBookingView(id)}
-                          style={{ padding:"8px 16px", borderRadius:9, border:`1px solid ${bookingView===id?T.accentBorder:T.border}`, background:bookingView===id?T.accentDim:"transparent", color:bookingView===id?T.accent:T.t3, fontSize:13, fontWeight:700, cursor:"pointer", fontFamily:FF }}>
+                          style={{ padding:"8px 16px", minHeight:44, borderRadius:9, border:`1px solid ${bookingView===id?T.accentBorder:T.border}`, background:bookingView===id?T.accentDim:"transparent", color:bookingView===id?T.accent:T.t3, fontSize:13, fontWeight:700, cursor:"pointer", fontFamily:FF }}>
                           {label}
                         </button>
                       ))}
@@ -1388,7 +1388,7 @@ export default function AdminPanel() {
                       {/* Prev / Today / Next */}
                       <div style={{ display:"flex", gap:4, flexShrink:0 }}>
                         <button onClick={() => setWeekOffset(w=>w-1)}
-                          style={{ width:32, height:32, display:"flex", alignItems:"center", justifyContent:"center", background:"rgba(255,255,255,.05)", color:T.t1, border:`1px solid rgba(255,255,255,.09)`, borderRadius:8, cursor:"pointer", fontFamily:FF }}>
+                          style={{ width:40, height:40, display:"flex", alignItems:"center", justifyContent:"center", background:"rgba(255,255,255,.05)", color:T.t1, border:`1px solid rgba(255,255,255,.09)`, borderRadius:8, cursor:"pointer", fontFamily:FF }}>
                           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
                         </button>
                         <button onClick={() => setWeekOffset(0)}
@@ -1396,7 +1396,7 @@ export default function AdminPanel() {
                           I dag
                         </button>
                         <button onClick={() => setWeekOffset(w=>w+1)}
-                          style={{ width:32, height:32, display:"flex", alignItems:"center", justifyContent:"center", background:"rgba(255,255,255,.05)", color:T.t1, border:`1px solid rgba(255,255,255,.09)`, borderRadius:8, cursor:"pointer", fontFamily:FF }}>
+                          style={{ width:40, height:40, display:"flex", alignItems:"center", justifyContent:"center", background:"rgba(255,255,255,.05)", color:T.t1, border:`1px solid rgba(255,255,255,.09)`, borderRadius:8, cursor:"pointer", fontFamily:FF }}>
                           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
                         </button>
                       </div>
@@ -1438,7 +1438,7 @@ export default function AdminPanel() {
                               <div key={i} ref={isToday ? todayColRef : null} style={{ flex:1, minWidth:COL_W, textAlign:"center", padding:"10px 6px 8px", background:isToday?"rgba(55,210,120,.06)":isWeekend?"rgba(255,255,255,.015)":"transparent", borderRight: i<6 ? `1px solid ${T.border}` : "none" }}>
                                 <div style={{ fontSize:10, fontWeight:600, color:isToday?T.accent:isWeekend?"rgba(255,255,255,.2)":T.t4, textTransform:"uppercase", letterSpacing:1, marginBottom:6 }}>{DAYS[i]}</div>
                                 {/* Date circle — filled for today */}
-                                <div style={{ display:"inline-flex", alignItems:"center", justifyContent:"center", width:32, height:32, borderRadius:"50%", background:isToday?T.accent:"transparent", marginBottom:4 }}>
+                                <div style={{ display:"inline-flex", alignItems:"center", justifyContent:"center", width:40, height:40, borderRadius:"50%", background:isToday?T.accent:"transparent", marginBottom:4 }}>
                                   <span style={{ fontSize:16, fontWeight:700, color:isToday?T.bg0:isWeekend?"rgba(255,255,255,.35)":T.t1, lineHeight:1 }}>{d.getDate()}</span>
                                 </div>
                                 {/* Today pulse dot + booking dots */}
@@ -1760,7 +1760,7 @@ export default function AdminPanel() {
                     <p style={{ color:T.t4, fontSize:12.5, margin:"0 0 14px", lineHeight:1.5 }}>Enkeltdage hvor I holder lukket – ferie, helligdage osv. Kunder kan ikke booke disse datoer.</p>
                     <div style={{ display:"flex", gap:8, alignItems:"center", flexWrap:"wrap", marginBottom: (hoursDraft.closedDates||[]).length ? 14 : 0 }}>
                       <input type="date" value={closedDateInput} min={todayISO} onChange={e=>setClosedDateInput(e.target.value)}
-                        style={{ background:T.bg0, border:`1px solid ${T.border}`, borderRadius:10, color:T.t1, fontSize:14, fontWeight:600, padding:"10px 12px", fontFamily:FF, colorScheme:"dark" }} />
+                        style={{ background:T.bg0, border:`1px solid ${T.border}`, borderRadius:10, color:T.t1, fontSize:16, fontWeight:600, padding:"10px 12px", minHeight:44, fontFamily:FF, colorScheme:"dark" }} />
                       <button disabled={!closedDateInput}
                         onClick={()=>{ if(!closedDateInput) return; setHoursDraft(h=>({ ...h, closedDates:[...new Set([...(h.closedDates||[]), closedDateInput])].sort() })); setClosedDateInput(""); }}
                         style={{ padding:"10px 18px", borderRadius:10, border:`1px solid ${closedDateInput?T.accentBorder:T.border}`, background:closedDateInput?T.accentDim:"transparent", color:closedDateInput?T.accent:T.t4, fontSize:13, fontWeight:700, cursor:closedDateInput?"pointer":"default", fontFamily:FF }}>
@@ -1888,13 +1888,13 @@ export default function AdminPanel() {
                 </div>
 
                 <div style={{ display:"flex", gap:8 }}>
-                  <input style={{ flex:1, padding:"11px 14px", borderRadius:8, border:`1px solid ${T.border}`, background:T.bg0, color:T.t1, fontSize:14, outline:"none", fontFamily:FF }} placeholder="https://…" value={urlInput} onChange={e => setUrlInput(e.target.value)} />
+                  <input style={{ flex:1, padding:"11px 14px", borderRadius:8, border:`1px solid ${T.border}`, background:T.bg0, color:T.t1, fontSize:16, outline:"none", fontFamily:FF }} placeholder="https://…" value={urlInput} onChange={e => setUrlInput(e.target.value)} />
                   <button onClick={() => addUrl("gallery")} disabled={cLoading||!urlInput.trim()}
                     style={{ padding:"11px 20px", background:T.accent, color:T.bg0, fontWeight:700, fontSize:13, borderRadius:8, border:"none", cursor:urlInput.trim()&&!cLoading?"pointer":"not-allowed", opacity:urlInput.trim()&&!cLoading?1:.4, whiteSpace:"nowrap", fontFamily:FF }}>
                     {cLoading ? "…" : "Tilføj"}
                   </button>
                 </div>
-                <input style={{ width:"100%", padding:"11px 14px", borderRadius:8, border:`1px solid ${T.border}`, background:T.bg0, color:T.t1, fontSize:14, outline:"none", fontFamily:FF, marginTop:8, boxSizing:"border-box" }} placeholder="Billedtekst (valgfri)" value={captionInput} onChange={e => setCaptionInput(e.target.value)} />
+                <input style={{ width:"100%", padding:"11px 14px", borderRadius:8, border:`1px solid ${T.border}`, background:T.bg0, color:T.t1, fontSize:16, outline:"none", fontFamily:FF, marginTop:8, boxSizing:"border-box" }} placeholder="Billedtekst (valgfri)" value={captionInput} onChange={e => setCaptionInput(e.target.value)} />
                 <select value={albumInput} onChange={e => setAlbumInput(e.target.value)}
                   style={{ width:"100%", padding:"11px 14px", borderRadius:8, border:`1px solid ${T.border}`, background:T.bg0, color:T.t1, fontSize:14, outline:"none", fontFamily:FF, marginTop:8, boxSizing:"border-box", cursor:"pointer" }}>
                   <option value="Enkelt">Enkelt billede</option>
@@ -2043,11 +2043,11 @@ export default function AdminPanel() {
                                   fetchContent("gallery");
                                 } catch { addToast("err", "Netværksfejl"); }
                               }}
-                              style={{ flex:1, padding:"7px 0", background:T.accent, color:T.bg0, border:"none", borderRadius:7, fontWeight:700, fontSize:12, cursor:"pointer", fontFamily:FF }}
+                              style={{ flex:1, padding:"7px 0", minHeight:40, background:T.accent, color:T.bg0, border:"none", borderRadius:7, fontWeight:700, fontSize:12, cursor:"pointer", fontFamily:FF }}
                             >Gem</button>
                             <button
                               onClick={() => setEditingGallery(null)}
-                              style={{ flex:1, padding:"7px 0", background:"rgba(255,255,255,.06)", color:T.t3, border:"none", borderRadius:7, fontWeight:600, fontSize:12, cursor:"pointer", fontFamily:FF }}
+                              style={{ flex:1, padding:"7px 0", minHeight:40, background:"rgba(255,255,255,.06)", color:T.t3, border:"none", borderRadius:7, fontWeight:600, fontSize:12, cursor:"pointer", fontFamily:FF }}
                             >Annuller</button>
                           </div>
                         </div>
@@ -2093,7 +2093,7 @@ export default function AdminPanel() {
                   </div>
                 </div>
 
-                <input style={{ width:"100%", padding:"11px 14px", borderRadius:8, border:`1px solid ${T.border}`, background:T.bg0, color:T.t1, fontSize:14, outline:"none", fontFamily:FF, marginTop:12, boxSizing:"border-box" }} placeholder="Billedtekst (valgfri)" value={baCaption} onChange={e => setBaCaption(e.target.value)} />
+                <input style={{ width:"100%", padding:"11px 14px", borderRadius:8, border:`1px solid ${T.border}`, background:T.bg0, color:T.t1, fontSize:16, outline:"none", fontFamily:FF, marginTop:12, boxSizing:"border-box" }} placeholder="Billedtekst (valgfri)" value={baCaption} onChange={e => setBaCaption(e.target.value)} />
 
                 <button onClick={uploadBeforeAfter} disabled={baLoading||!baBeforeFile||!baAfterFile}
                   style={{ width:"100%", marginTop:12, padding:"12px 0", background:T.accent, color:T.bg0, fontWeight:700, fontSize:14, borderRadius:8, border:"none", cursor:(baLoading||!baBeforeFile||!baAfterFile)?"not-allowed":"pointer", opacity:(baLoading||!baBeforeFile||!baAfterFile)?.4:1, fontFamily:FF }}>
@@ -2108,8 +2108,8 @@ export default function AdminPanel() {
                 </div>
 
                 <div style={{ display:"grid", gridTemplateColumns:narrow?"1fr":"1fr 1fr", gap:8 }}>
-                  <input style={{ width:"100%", padding:"11px 14px", borderRadius:8, border:`1px solid ${T.border}`, background:T.bg0, color:T.t1, fontSize:14, outline:"none", fontFamily:FF, boxSizing:"border-box" }} placeholder="Før-URL https://…" value={baBeforeUrl} onChange={e => setBaBeforeUrl(e.target.value)} />
-                  <input style={{ width:"100%", padding:"11px 14px", borderRadius:8, border:`1px solid ${T.border}`, background:T.bg0, color:T.t1, fontSize:14, outline:"none", fontFamily:FF, boxSizing:"border-box" }} placeholder="Efter-URL https://…" value={baAfterUrl} onChange={e => setBaAfterUrl(e.target.value)} />
+                  <input style={{ width:"100%", padding:"11px 14px", borderRadius:8, border:`1px solid ${T.border}`, background:T.bg0, color:T.t1, fontSize:16, outline:"none", fontFamily:FF, boxSizing:"border-box" }} placeholder="Før-URL https://…" value={baBeforeUrl} onChange={e => setBaBeforeUrl(e.target.value)} />
+                  <input style={{ width:"100%", padding:"11px 14px", borderRadius:8, border:`1px solid ${T.border}`, background:T.bg0, color:T.t1, fontSize:16, outline:"none", fontFamily:FF, boxSizing:"border-box" }} placeholder="Efter-URL https://…" value={baAfterUrl} onChange={e => setBaAfterUrl(e.target.value)} />
                 </div>
                 <button onClick={addBeforeAfterUrl} disabled={baLoading||!baBeforeUrl.trim()||!baAfterUrl.trim()}
                   style={{ width:"100%", marginTop:8, padding:"11px 0", background:T.accentDim, color:T.accent, fontWeight:700, fontSize:13, borderRadius:8, border:`1px solid ${T.accentBorder}`, cursor:(baLoading||!baBeforeUrl.trim()||!baAfterUrl.trim())?"not-allowed":"pointer", opacity:(baLoading||!baBeforeUrl.trim()||!baAfterUrl.trim())?.4:1, fontFamily:FF }}>
@@ -2204,9 +2204,9 @@ export default function AdminPanel() {
                             />
                             <div style={{ display:"flex", gap:6 }}>
                               <button onClick={() => saveBeforeAfterCaption(item.id)}
-                                style={{ flex:1, padding:"7px 0", background:T.accent, color:T.bg0, border:"none", borderRadius:7, fontWeight:700, fontSize:12, cursor:"pointer", fontFamily:FF }}>Gem</button>
+                                style={{ flex:1, padding:"7px 0", minHeight:40, background:T.accent, color:T.bg0, border:"none", borderRadius:7, fontWeight:700, fontSize:12, cursor:"pointer", fontFamily:FF }}>Gem</button>
                               <button onClick={() => setEditingBA(null)}
-                                style={{ flex:1, padding:"7px 0", background:"rgba(255,255,255,.06)", color:T.t3, border:"none", borderRadius:7, fontWeight:600, fontSize:12, cursor:"pointer", fontFamily:FF }}>Annuller</button>
+                                style={{ flex:1, padding:"7px 0", minHeight:40, background:"rgba(255,255,255,.06)", color:T.t3, border:"none", borderRadius:7, fontWeight:600, fontSize:12, cursor:"pointer", fontFamily:FF }}>Annuller</button>
                             </div>
                           </div>
                         ) : (
@@ -2440,7 +2440,7 @@ export default function AdminPanel() {
                           <span style={{ fontSize:11, fontWeight:700, color:T.t4, minWidth:22, flexShrink:0 }}>#{idx+1}</span>
                           <span style={{ flex:1, fontSize:14, color:T.t2, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{faq.q.da}</span>
                           <button type="button" onClick={async () => { const r = await fetch("/api/admin/content", { method:"POST", headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" }, body:JSON.stringify({ type:"faq", item:{ q:faq.q, a:faq.a } }) }); if (authFailed(r.status)) return; if (!r.ok) { addToast("err", "Kunne ikke gemme — prøv igen"); return; } addToast("ok", "Gemt"); fetchContent("faq"); }}
-                            style={{ padding:"5px 12px", background:T.accentDim, border:`1px solid ${T.accentBorder}`, borderRadius:7, color:T.accent, fontSize:12, fontWeight:700, cursor:"pointer", fontFamily:FF, whiteSpace:"nowrap", flexShrink:0 }}>+ Gem</button>
+                            style={{ padding:"5px 12px", minHeight:40, background:T.accentDim, border:`1px solid ${T.accentBorder}`, borderRadius:7, color:T.accent, fontSize:12, fontWeight:700, cursor:"pointer", fontFamily:FF, whiteSpace:"nowrap", flexShrink:0 }}>+ Gem</button>
                         </div>
                       ))}
                     </div>
@@ -2451,7 +2451,7 @@ export default function AdminPanel() {
                     <div style={{ marginBottom:12, background:"rgba(55,210,120,.06)", border:`1px solid ${T.accentBorder}`, borderRadius:10, padding:"12px 16px", display:"flex", alignItems:"center", justifyContent:"space-between", gap:12, flexWrap:"wrap" }}>
                       <span style={{ fontSize:13, color:T.accent, fontWeight:600 }}>Viser standarddata — gem enkeltvis eller alle på én gang</span>
                       <button onClick={seedAllFaq} disabled={cmsLoading}
-                        style={{ padding:"8px 18px", background:T.accent, color:T.bg0, border:"none", borderRadius:8, fontWeight:700, fontSize:13, cursor:cmsLoading?"not-allowed":"pointer", opacity:cmsLoading?.6:1, fontFamily:FF, whiteSpace:"nowrap" }}>
+                        style={{ padding:"8px 18px", minHeight:44, background:T.accent, color:T.bg0, border:"none", borderRadius:8, fontWeight:700, fontSize:13, cursor:cmsLoading?"not-allowed":"pointer", opacity:cmsLoading?.6:1, fontFamily:FF, whiteSpace:"nowrap" }}>
                         {cmsLoading ? "Gemmer…" : "Gem alle"}
                       </button>
                     </div>
@@ -2461,7 +2461,7 @@ export default function AdminPanel() {
                           <span style={{ fontSize:11, fontWeight:700, color:T.t4, minWidth:22, flexShrink:0 }}>#{idx+1}</span>
                           <span style={{ flex:1, fontSize:14, color:T.t2, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{faq.q.da}</span>
                           <button onClick={async () => { const r = await fetch("/api/admin/content", { method:"POST", headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" }, body:JSON.stringify({ type:"faq", item:{ q:faq.q, a:faq.a } }) }); if (authFailed(r.status)) return; if (!r.ok) { addToast("err", "Kunne ikke gemme — prøv igen"); return; } addToast("ok", "Gemt"); fetchContent("faq"); }}
-                            style={{ padding:"5px 12px", background:T.accentDim, border:`1px solid ${T.accentBorder}`, borderRadius:7, color:T.accent, fontSize:12, fontWeight:700, cursor:"pointer", fontFamily:FF, whiteSpace:"nowrap", flexShrink:0 }}>+ Gem</button>
+                            style={{ padding:"5px 12px", minHeight:40, background:T.accentDim, border:`1px solid ${T.accentBorder}`, borderRadius:7, color:T.accent, fontSize:12, fontWeight:700, cursor:"pointer", fontFamily:FF, whiteSpace:"nowrap", flexShrink:0 }}>+ Gem</button>
                         </div>
                       ))}
                     </div>
@@ -2523,11 +2523,11 @@ export default function AdminPanel() {
                   <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:20 }}>
                     <p style={{ fontSize:10, letterSpacing:2, fontWeight:700, color:T.t3, textTransform:"uppercase", margin:0 }}>Prismatrix (kr.)</p>
                     <button onClick={savePrices} disabled={cmsLoading||!hasChanges}
-                      style={{ padding:"9px 20px", background:hasChanges&&!cmsLoading?T.accent:"rgba(55,210,120,.2)", color:T.bg0, border:"none", borderRadius:8, fontWeight:700, fontSize:13, cursor:hasChanges&&!cmsLoading?"pointer":"not-allowed", opacity:hasChanges&&!cmsLoading?1:.5, fontFamily:FF }}>
+                      style={{ padding:"9px 20px", minHeight:44, background:hasChanges&&!cmsLoading?T.accent:"rgba(55,210,120,.2)", color:T.bg0, border:"none", borderRadius:8, fontWeight:700, fontSize:13, cursor:hasChanges&&!cmsLoading?"pointer":"not-allowed", opacity:hasChanges&&!cmsLoading?1:.5, fontFamily:FF }}>
                       {cmsLoading ? "Gemmer…" : "Gem priser"}
                     </button>
                   </div>
-                  <table style={{ width:"100%", borderCollapse:"collapse", minWidth:400 }}>
+                  <table style={{ width:"100%", borderCollapse:"collapse", minWidth:470 }}>
                     <thead>
                       <tr>
                         <th style={{ textAlign:"left", padding:"8px 10px", fontSize:11, color:T.t4, fontWeight:700, letterSpacing:.5, textTransform:"uppercase", borderBottom:`1px solid ${T.border}` }}>Biltype</th>
@@ -2543,13 +2543,13 @@ export default function AdminPanel() {
                           {PKGS.map(pkgId => {
                             const val = (priceEdits[carId]||{})[pkgId] ?? ""; // ?? keeps a typed 0 visible
                             return (
-                              <td key={pkgId} style={{ padding:"8px 6px", borderBottom:`1px solid rgba(255,255,255,.04)` }}>
+                              <td key={pkgId} style={{ padding:"8px 3px", borderBottom:`1px solid rgba(255,255,255,.04)` }}>
                                 <input
                                   type="number" min="0" step="1"
                                   value={val}
                                   onChange={e => setPrice(carId, pkgId, e.target.value)}
                                   placeholder="–"
-                                  style={{ width:"100%", padding:"8px 10px", borderRadius:7, border:`1px solid ${T.border}`, background:T.bg0, color:T.accent, fontSize:14, fontWeight:700, outline:"none", fontFamily:FF, textAlign:"center", boxSizing:"border-box" }}
+                                  style={{ width:"100%", padding:"8px 2px", minHeight:44, borderRadius:7, border:`1px solid ${T.border}`, background:T.bg0, color:T.accent, fontSize:16, fontWeight:700, outline:"none", fontFamily:FF, textAlign:"center", boxSizing:"border-box" }}
                                 />
                               </td>
                             );
@@ -2609,7 +2609,7 @@ export default function AdminPanel() {
                 fetchContent("extras");
               } catch { addToast("err", "Netværksfejl"); }
             }
-            const inp = (val, onChange, ph) => <input value={val} onChange={e=>onChange(e.target.value)} placeholder={ph} style={{ width:"100%", padding:"10px 13px", borderRadius:8, border:`1px solid ${T.border}`, background:T.bg0, color:T.t1, fontSize:13, outline:"none", fontFamily:FF, boxSizing:"border-box" }} />;
+            const inp = (val, onChange, ph) => <input value={val} onChange={e=>onChange(e.target.value)} placeholder={ph} style={{ width:"100%", padding:"10px 13px", borderRadius:8, border:`1px solid ${T.border}`, background:T.bg0, color:T.t1, fontSize:16, outline:"none", fontFamily:FF, boxSizing:"border-box" }} />;
             return (
               <>
                 <div style={{ background:T.bg1, border:`1px solid ${T.border}`, borderRadius:16, padding:24, marginBottom:28 }}>
@@ -2635,7 +2635,7 @@ export default function AdminPanel() {
                     </div>
                     <div>
                       <p style={{ fontSize:11, color:T.t4, margin:"0 0 4px", fontWeight:600 }}>Pris (kr.)</p>
-                      <input type="number" min="0" step="1" value={extNewPrice} onChange={e=>setExtNewPrice(e.target.value)} placeholder="f.eks. 299" style={{ padding:"10px 13px", borderRadius:8, border:`1px solid ${T.border}`, background:T.bg0, color:T.accent, fontSize:14, fontWeight:700, outline:"none", fontFamily:FF, width:160 }} />
+                      <input type="number" min="0" step="1" value={extNewPrice} onChange={e=>setExtNewPrice(e.target.value)} placeholder="f.eks. 299" style={{ padding:"10px 13px", borderRadius:8, border:`1px solid ${T.border}`, background:T.bg0, color:T.accent, fontSize:16, fontWeight:700, outline:"none", fontFamily:FF, width:160 }} />
                     </div>
                     <button type="submit" disabled={cmsLoading||!extNewNameDa.trim()}
                       style={{ padding:"11px 0", background:T.accent, color:T.bg0, fontWeight:700, fontSize:14, borderRadius:8, border:"none", cursor:(cmsLoading||!extNewNameDa.trim())?"not-allowed":"pointer", opacity:(cmsLoading||!extNewNameDa.trim())?.4:1, fontFamily:FF }}>
@@ -2684,7 +2684,7 @@ export default function AdminPanel() {
                               </div>
                               <div>
                                 <p style={{ fontSize:11, color:T.t4, margin:"0 0 4px", fontWeight:600 }}>Pris (kr.)</p>
-                                <input type="number" min="0" step="1" value={draft.price||""} onChange={e=>setEditingExt(d=>({...d,price:e.target.value}))} style={{ padding:"10px 13px", borderRadius:8, border:`1px solid ${T.border}`, background:T.bg0, color:T.accent, fontSize:14, fontWeight:700, outline:"none", fontFamily:FF, width:160 }} />
+                                <input type="number" min="0" step="1" value={draft.price||""} onChange={e=>setEditingExt(d=>({...d,price:e.target.value}))} style={{ padding:"10px 13px", borderRadius:8, border:`1px solid ${T.border}`, background:T.bg0, color:T.accent, fontSize:16, fontWeight:700, outline:"none", fontFamily:FF, width:160 }} />
                               </div>
                               <div style={{ display:"flex", gap:8 }}>
                                 <button onClick={() => saveExtra(draft)} disabled={cmsLoading}
@@ -2748,7 +2748,7 @@ export default function AdminPanel() {
                       <div style={{ marginBottom:16, background:"rgba(55,210,120,.06)", border:`1px solid ${T.accentBorder}`, borderRadius:10, padding:"12px 16px", display:"flex", alignItems:"center", justifyContent:"space-between", gap:12, flexWrap:"wrap" }}>
                         <span style={{ fontSize:13, color:T.accent, fontWeight:600 }}>Viser standardydelser — klik &apos;Gem alle&apos; for at gøre dem redigerbare</span>
                         <button onClick={seedAllExtras} disabled={cmsLoading}
-                          style={{ padding:"8px 18px", background:T.accent, color:T.bg0, border:"none", borderRadius:8, fontWeight:700, fontSize:13, cursor:cmsLoading?"not-allowed":"pointer", opacity:cmsLoading?.6:1, fontFamily:FF, whiteSpace:"nowrap" }}>
+                          style={{ padding:"8px 18px", minHeight:44, background:T.accent, color:T.bg0, border:"none", borderRadius:8, fontWeight:700, fontSize:13, cursor:cmsLoading?"not-allowed":"pointer", opacity:cmsLoading?.6:1, fontFamily:FF, whiteSpace:"nowrap" }}>
                           {cmsLoading ? "Gemmer…" : "Gem alle standarddata"}
                         </button>
                       </div>
@@ -2772,7 +2772,7 @@ export default function AdminPanel() {
                                 });
                                 fetchContent("extras");
                               }}
-                              style={{ padding:"6px 14px", background:T.accentDim, border:`1px solid ${T.accentBorder}`, borderRadius:7, color:T.accent, fontSize:12, fontWeight:700, cursor:"pointer", fontFamily:FF, whiteSpace:"nowrap", flexShrink:0 }}
+                              style={{ padding:"6px 14px", minHeight:40, background:T.accentDim, border:`1px solid ${T.accentBorder}`, borderRadius:7, color:T.accent, fontSize:12, fontWeight:700, cursor:"pointer", fontFamily:FF, whiteSpace:"nowrap", flexShrink:0 }}
                             >+ Tilføj</button>
                           </div>
                         ))}
@@ -2789,8 +2789,8 @@ export default function AdminPanel() {
             <>
               <div style={{ background:T.bg1, border:`1px solid ${T.border}`, borderRadius:16, padding:24, marginBottom:32 }}>
                 <p style={{ fontSize:10, letterSpacing:2, fontWeight:700, color:T.t3, textTransform:"uppercase", margin:"0 0 16px" }}>Tilføj video</p>
-                <input style={{ width:"100%", padding:"11px 14px", borderRadius:8, border:`1px solid ${T.border}`, background:T.bg0, color:T.t1, fontSize:14, outline:"none", fontFamily:FF, boxSizing:"border-box", marginBottom:8 }} placeholder="YouTube eller Vimeo URL" value={urlInput} onChange={e => setUrlInput(e.target.value)} />
-                <input style={{ width:"100%", padding:"11px 14px", borderRadius:8, border:`1px solid ${T.border}`, background:T.bg0, color:T.t1, fontSize:14, outline:"none", fontFamily:FF, boxSizing:"border-box", marginBottom:12 }} placeholder="Titel (valgfri)" value={captionInput} onChange={e => setCaptionInput(e.target.value)} />
+                <input style={{ width:"100%", padding:"11px 14px", borderRadius:8, border:`1px solid ${T.border}`, background:T.bg0, color:T.t1, fontSize:16, outline:"none", fontFamily:FF, boxSizing:"border-box", marginBottom:8 }} placeholder="YouTube eller Vimeo URL" value={urlInput} onChange={e => setUrlInput(e.target.value)} />
+                <input style={{ width:"100%", padding:"11px 14px", borderRadius:8, border:`1px solid ${T.border}`, background:T.bg0, color:T.t1, fontSize:16, outline:"none", fontFamily:FF, boxSizing:"border-box", marginBottom:12 }} placeholder="Titel (valgfri)" value={captionInput} onChange={e => setCaptionInput(e.target.value)} />
                 <button onClick={() => addUrl("videos")} disabled={cLoading||!urlInput.trim()}
                   style={{ width:"100%", padding:12, background:T.accent, color:T.bg0, fontWeight:700, fontSize:14, borderRadius:8, border:"none", cursor:urlInput.trim()&&!cLoading?"pointer":"not-allowed", opacity:urlInput.trim()&&!cLoading?1:.4, fontFamily:FF }}>
                   {cLoading ? "Tilføjer…" : "Tilføj video"}
