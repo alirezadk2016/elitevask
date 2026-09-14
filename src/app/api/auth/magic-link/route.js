@@ -19,13 +19,21 @@ async function getKV() {
   } catch { return null; }
 }
 
+/* Returns 'ok' | 'limited' | 'down'.
+ *
+ * Three states, not two. A KV error still fails closed — the request is
+ * refused, because a blind limiter must not become an open email relay — but
+ * it is NOT the same thing as the caller having sent too many requests, and it
+ * used to be reported as such. During an Upstash outage a customer trying to
+ * log in was told "too many requests, try again in an hour", so they waited an
+ * hour instead of picking up the phone. */
 async function checkRL(kv, key, max, window) {
-  if (!kv) return true;
+  if (!kv) return 'ok';
   try {
     const count = await kv.incr(key);
     if (count === 1) await kv.expire(key, window);
-    return count <= max;
-  } catch { return false; } // fail closed: a KV error must not disable email-bomb protection
+    return count <= max ? 'ok' : 'limited';
+  } catch { return 'down'; }
 }
 
 export async function POST(request) {
@@ -54,9 +62,15 @@ export async function POST(request) {
     return Response.json({ error: 'unavailable', message: 'Login er midlertidigt utilgængeligt. Prøv igen om lidt.' }, { status: 503 });
   }
 
-  const emailOk = await checkRL(kv, `rl:magic:email:${hashToken(email)}`, 3, 3600);
-  const ipOk    = await checkRL(kv, `rl:magic:ip:${ip}`, 8, 3600);
-  if (!emailOk || !ipOk) {
+  const emailRL = await checkRL(kv, `rl:magic:email:${hashToken(email)}`, 3, 3600);
+  const ipRL    = await checkRL(kv, `rl:magic:ip:${ip}`, 8, 3600);
+  if (emailRL === 'down' || ipRL === 'down') {
+    // Storage is unreachable: say so, and give them the phone number. Telling
+    // them to wait an hour would be a lie and would cost us the booking.
+    await auditLog(kv, 'magic_link_store_down', { emailHash: hashToken(email), ip });
+    return Response.json({ error: 'unavailable', message: 'Login er midlertidigt utilgængeligt. Prøv igen om lidt, eller ring til os på +45 24 44 03 21.' }, { status: 503 });
+  }
+  if (emailRL === 'limited' || ipRL === 'limited') {
     await auditLog(kv, 'magic_link_rate_limited', { emailHash: hashToken(email), ip });
     return Response.json({ error: 'rate_limit', message: 'For mange anmodninger. Prøv igen om en time.' }, { status: 429 });
   }
