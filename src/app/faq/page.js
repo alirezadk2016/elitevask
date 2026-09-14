@@ -1,6 +1,8 @@
 import { DEFAULT_FAQ_BILINGUAL } from "@/lib/faqData";
 import FaqClient from "./FaqClient";
 
+import { jsonLdString } from "@/lib/jsonLd";
+
 export const metadata = {
   title: "FAQ – Elite Vask | Ofte stillede spørgsmål om mobil dampvask",
   description: "Svar på de mest stillede spørgsmål om Elite Vaskes mobile bil dampvask på Sjælland. Priser, behandlingstid, sikkerhed, elbiler, aftaler og meget mere.",
@@ -64,7 +66,7 @@ export default async function FaqPage() {
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdString(jsonLd) }} />
       <FaqClient items={faqItems} />
     </>
   );

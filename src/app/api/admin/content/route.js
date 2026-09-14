@@ -195,8 +195,10 @@ export async function POST(req) {
 
     // Before/after via URLs
     if (type === 'beforeafter') {
-      const { before, after, caption = '' } = body;
-      if (!before || !after) return Response.json({ error: 'need_two_urls' }, { status: 400 });
+      const { caption = '' } = body;
+      const before = safeMediaUrl(body.before);
+      const after = safeMediaUrl(body.after);
+      if (!before || !after) return Response.json({ error: 'need_two_urls', message: 'Begge felter skal være gyldige http(s)-billedlinks.' }, { status: 400 });
       const baItem = { id: randomUUID(), before, after, caption, source: 'url', uploadedAt: new Date().toISOString() };
       const existingBa = await kv.get('content:beforeafter') || [];
       await kv.set('content:beforeafter', [baItem, ...existingBa]);
@@ -207,13 +209,15 @@ export async function POST(req) {
     if (!CONTENT_TYPES.has(type)) {
       return Response.json({ error: 'invalid_type' }, { status: 400 });
     }
-    const { url, caption = '', title = '', album = '' } = body;
-    if (!url) return Response.json({ error: 'no_url' }, { status: 400 });
+    const { caption = '', title = '', album = '' } = body;
+    const url = safeMediaUrl(body.url);
+    if (!url) return Response.json({ error: 'no_url', message: 'Indsæt et gyldigt http(s)-link.' }, { status: 400 });
 
     if (type === 'videos') {
-      const isYT = /youtube\.com|youtu\.be/.test(url);
-      const isVimeo = /vimeo\.com/.test(url);
-      if (!isYT && !isVimeo) {
+      // Host must match, AND an id must actually be extractable — otherwise
+      // getEmbedUrl() falls back to returning the raw URL and we would store
+      // an arbitrary link as if it were a YouTube embed.
+      if (!videoHost(url) || getEmbedUrl(url) === url) {
         return Response.json({ error: 'unsupported_video', message: 'Kun YouTube- og Vimeo-links understøttes.' }, { status: 400 });
       }
     }
@@ -341,6 +345,30 @@ export async function PATCH(req) {
   }
 
   return Response.json({ error: 'invalid_request' }, { status: 400 });
+}
+
+/* Media URLs are stored verbatim and later rendered as <img src> / embeds, so
+   they must be real http(s) links. Nothing validated them before: a typo'd or
+   pasted "javascript:", "data:" or "file:" value went straight into KV and out
+   to every visitor. Returns the trimmed URL, or null if it is not usable. */
+function safeMediaUrl(raw) {
+  const v = String(raw ?? '').trim();
+  if (!v || v.length > 2048) return null;
+  let u;
+  try { u = new URL(v); } catch { return null; }
+  if (u.protocol !== 'https:' && u.protocol !== 'http:') return null;
+  return u.toString();
+}
+
+/* Host check by parsed hostname, not a substring match. The old test was
+   /youtube\.com|youtu\.be/ against the whole URL, so
+   "https://evil.example/?ref=youtube.com" was accepted as a YouTube video. */
+const VIDEO_HOSTS = new Set([
+  'youtube.com', 'www.youtube.com', 'm.youtube.com', 'youtu.be',
+  'vimeo.com', 'www.vimeo.com', 'player.vimeo.com',
+]);
+function videoHost(url) {
+  try { return VIDEO_HOSTS.has(new URL(url).hostname.toLowerCase()); } catch { return false; }
 }
 
 function getEmbedUrl(url) {

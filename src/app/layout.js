@@ -4,6 +4,7 @@ import "./globals.css";
 import CookieConsent from "./components/CookieConsent";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
 import { getHours, openingHoursSpec } from "@/lib/getHours";
+import { jsonLdString } from "@/lib/jsonLd";
 import TrustpilotInvite from "@/components/TrustpilotInvite";
 
 const manrope = Manrope({
@@ -89,7 +90,7 @@ export default async function RootLayout({ children }) {
           <script
             key={i}
             type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: JSON.stringify(obj) }}
+            dangerouslySetInnerHTML={{ __html: jsonLdString(obj) }}
           />
         ))}
       </head>
