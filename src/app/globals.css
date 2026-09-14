@@ -556,10 +556,14 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 .footer .foot-loc svg{color:var(--green);flex-shrink:0}
 .footer .cvr{font-size:13px;color:var(--muted-2);margin-top:10px}
 .footer h5{font-size:13px;font-weight:700;color:#fff;margin-bottom:14px}
-.footer .col a{display:block;font-size:13.5px;color:var(--muted);margin-bottom:9px;transition:color .15s}
+/* 44px minimum row height. These stacked footer links were 22px tall with
+   9px between them, so on a phone the phone number, the e-mail link and the
+   FAQ link sat within one fingertip of each other. Padding grows the touch
+   row, not the text, so the footer looks the same on desktop. */
+.footer .col a{display:flex;align-items:center;min-height:44px;font-size:13.5px;color:var(--muted);transition:color .15s}
 .footer .col a:hover{color:var(--green)}
 .footer-bottom{border-top:1px solid var(--line);padding:20px 0 24px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-size:12.5px;color:var(--muted-2)}
-.foot-legal a{color:var(--muted-2);text-decoration:none}.foot-legal a:hover{color:var(--green)}
+.foot-legal a{display:inline-block;padding:11px 4px;color:var(--muted-2);text-decoration:none}.foot-legal a:hover{color:var(--green)}
 .mak-credit{display:flex;align-items:center;justify-content:center;gap:14px;padding:20px 0 6px;text-decoration:none;transition:opacity .25s}
 .mak-credit:hover{opacity:.6}
 .mak-line{flex:1;max-width:60px;height:1px;background:linear-gradient(90deg,transparent,rgba(55,210,120,.2))}
@@ -896,7 +900,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
   .ann-text{font-size:12.5px;flex-wrap:nowrap}
   .ann-text .ann-sep,.ann-text .ann-sub{display:none}
   .ann-tp-cta,.ann-tp-word{display:none}
-  .ann-tp{padding:2px 6px}
+  .ann-tp{padding:7px 8px}  /* was 2px: a 19px-tall link is far too small to tap */
   .ann-inner{gap:8px}
   .btn-lg{padding:13px 24px;font-size:15px}
   .tb-hide-mobile{display:none}
@@ -918,7 +922,11 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
   .pkg-tabs-wrap{position:relative;padding:12px 16px 6px}
   .pkg-tabs-wrap::after{display:none}
   .pkg-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0;overflow:visible}
-  .pkg-tab{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:99px;padding:11px 10px;font-size:12.5px;font-weight:700;color:rgba(255,255,255,.5);cursor:pointer;white-space:nowrap;text-align:center;font-family:inherit;transition:all .18s;min-width:0}
+  /* 48px minimum touch height. These four tabs pick the package the customer
+     is about to pay for, and at 41px they were under the WCAG 2.5.8 / Google
+     tap-target minimum — the easiest place on the phone to mis-tap and order
+     the wrong wash. Growing them vertically only; the 2x2 grid is unchanged. */
+  .pkg-tab{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:99px;padding:11px 10px;min-height:48px;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:700;color:rgba(255,255,255,.5);cursor:pointer;white-space:nowrap;text-align:center;font-family:inherit;transition:all .18s;min-width:0}
   .pkg-tab.on{background:var(--green);color:#052010;border-color:var(--green);box-shadow:0 3px 12px rgba(55,210,120,.28)}
   /* Chips: compact single row on mobile */
   .calc-head-chips{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
@@ -1004,22 +1012,22 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 .chatbot.chat-dragging{transition:none!important}
 .chatbot.chat-dragging .chat-toggle{transform:scale(1.08);cursor:grabbing;opacity:1;box-shadow:0 16px 44px rgba(0,0,0,.55)}
 .chat-toggle{touch-action:none}
-.chat-mini-btn{position:fixed;bottom:32px;right:32px;z-index:150;width:38px;height:38px;border-radius:50%;background:rgba(15,30,20,.7);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(55,210,120,.25);box-shadow:0 6px 24px rgba(0,0,0,.35),inset 0 1px 0 rgba(55,210,120,.1);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--green);opacity:0;pointer-events:none;transform:scale(.6);transition:opacity .28s,transform .28s cubic-bezier(.34,1.4,.64,1);outline:none}
+.chat-mini-btn{position:fixed;bottom:32px;right:32px;z-index:150;width:44px;height:44px;border-radius:50%;background:rgba(15,30,20,.7);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(55,210,120,.25);box-shadow:0 6px 24px rgba(0,0,0,.35),inset 0 1px 0 rgba(55,210,120,.1);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--green);opacity:0;pointer-events:none;transform:scale(.6);transition:opacity .28s,transform .28s cubic-bezier(.34,1.4,.64,1);outline:none}
 .chat-mini-btn.vis{opacity:1;pointer-events:auto;transform:scale(1)}
 .chat-mini-btn:hover{background:rgba(20,45,28,.85);border-color:rgba(55,210,120,.5);transform:scale(1.1)}
 @media(max-width:880px){.chat-mini-btn{bottom:calc(82px + env(safe-area-inset-bottom));right:16px}}
 @media(max-width:520px){.chat-mini-btn{bottom:calc(98px + env(safe-area-inset-bottom))}}
 
 /* SCROLL TO TOP */
-.scroll-top{position:fixed;bottom:32px;left:32px;z-index:140;width:40px;height:40px;touch-action:none;border-radius:50%;background:rgba(15,30,20,.65);backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);border:1px solid rgba(55,210,120,.28);box-shadow:0 8px 32px rgba(0,0,0,.4),0 0 0 1px rgba(55,210,120,.08),inset 0 1px 0 rgba(55,210,120,.15);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--green);opacity:0;pointer-events:none;transform:translateY(12px) scale(.85);transition:opacity .3s,transform .3s cubic-bezier(.34,1.4,.64,1),background .18s,box-shadow .18s;outline:none}
+.scroll-top{position:fixed;bottom:32px;left:32px;z-index:140;width:44px;height:44px;touch-action:none;border-radius:50%;background:rgba(15,30,20,.65);backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);border:1px solid rgba(55,210,120,.28);box-shadow:0 8px 32px rgba(0,0,0,.4),0 0 0 1px rgba(55,210,120,.08),inset 0 1px 0 rgba(55,210,120,.15);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--green);opacity:0;pointer-events:none;transform:translateY(12px) scale(.85);transition:opacity .3s,transform .3s cubic-bezier(.34,1.4,.64,1),background .18s,box-shadow .18s;outline:none}
 .scroll-top.vis{opacity:1;pointer-events:auto;transform:none}
 .scroll-top:hover{background:rgba(20,45,28,.8);border-color:rgba(55,210,120,.55);color:#fff;transform:translateY(-3px);box-shadow:0 14px 44px rgba(0,0,0,.45),0 0 0 1px rgba(55,210,120,.2),0 0 20px rgba(55,210,120,.12),inset 0 1px 0 rgba(55,210,120,.2)}
 .scroll-top svg{display:block;transition:transform .2s}
 .scroll-top:hover svg{transform:translateY(-1px)}
 .scroll-top.sc-dragging{transition:none;opacity:1;cursor:grabbing}
 .scroll-top.sc-dismissed{display:none}
-@media(max-width:880px){.scroll-top{bottom:calc(82px + env(safe-area-inset-bottom));left:16px;width:38px;height:38px}}
-@media(max-width:520px){.scroll-top{bottom:calc(98px + env(safe-area-inset-bottom));left:12px;width:36px;height:36px}}
+@media(max-width:880px){.scroll-top{bottom:calc(82px + env(safe-area-inset-bottom));left:16px}}  /* size stays 44px: it was shrunk to 38 on phones, where touch accuracy is worst */
+@media(max-width:520px){.scroll-top{bottom:calc(98px + env(safe-area-inset-bottom));left:12px}}  /* was 36px — under the 44px touch minimum */
 
 /* LEGAL PAGES */
 .legal-page{min-height:100vh;min-height:100dvh;background:var(--bg);padding:60px 0 100px}
@@ -1106,7 +1114,7 @@ body:has(.ba-lb) .cookie-banner{display:none}
 .cookie-banner-text{font-size:14px;color:var(--muted);margin:0;flex:1;min-width:200px}
 .cookie-banner-link{color:var(--green);text-decoration:underline}
 .cookie-banner-actions{display:flex;gap:10px;flex-shrink:0}
-.cookie-btn{border:none;border-radius:var(--r-sm);padding:9px 20px;font-size:14px;font-weight:600;cursor:pointer;transition:opacity .15s}
+.cookie-btn{border:none;border-radius:var(--r-sm);padding:9px 20px;min-height:44px;font-size:14px;font-weight:600;cursor:pointer;transition:opacity .15s}
 .cookie-btn-accept{background:var(--green);color:#000}
 .cookie-btn-decline{background:var(--surface-2);color:var(--muted);border:1px solid var(--line-2)}
 .cookie-btn:hover{opacity:.85}
