@@ -7,7 +7,7 @@ import { getHours, hoursDisplay } from "@/lib/getHours";
 
 export const metadata = {
   title: "Kontakt Elite Vask – Mobil bilvask på Sjælland",
-  description: "Kontakt Elite Vask om mobil dampvask, priser og booking. Ring +45 24 44 03 21, skriv til info@elite-vask.dk, eller book online. Vi kører til dig i hele Sjælland.",
+  description: "Kontakt Elite Vask om mobil dampvask, priser og booking. Ring +45 24 44 03 21, skriv til info@elite-vask.dk, eller book online. Vi kører ud i hele Sjælland.",
   alternates: { canonical: "/kontakt" },
   openGraph: {
     // Next merges page metadata over the layout SHALLOWLY, so a page that
@@ -115,6 +115,41 @@ export default async function Kontakt() {
             <span><span className="lab">CVR</span><br /><span className="val">46392264</span></span>
           </div>
         </div>
+
+        {/* The page was 121 words: a phone number, an address block and links.
+            Nothing told a visitor whether we actually drive to them, which is
+            the one question a contact page for a mobile service has to answer —
+            and it is what a local search is looking for too. */}
+        <h2 style={{ fontSize: 22, fontWeight: 800, color: "#fff", margin: "40px 0 14px" }}>
+          Hvor kører vi hen?
+        </h2>
+        <p style={{ color: "var(--muted)", fontSize: 15.5, lineHeight: 1.75, marginBottom: 14 }}>
+          Vi er en mobil bilplejevirksomhed – der er ingen vaskehal at køre hen til.
+          Vi pakker udstyret i bilen og møder dig der hvor bilen holder: hjemme i
+          indkørslen, på parkeringspladsen ved arbejdet eller foran kontoret. Vi
+          medbringer selv vand og strøm, så du skal ikke stille noget til rådighed.
+        </p>
+        <p style={{ color: "var(--muted)", fontSize: 15.5, lineHeight: 1.75, marginBottom: 14 }}>
+          Vi dækker Sjælland med postnumre fra 1000 til 4799 – blandt andet
+          København, Roskilde, Køge, Næstved, Ringsted, Helsingør, Hillerød,
+          Frederikssund samt Stevns og Faxe Kommune. Bor du i udkanten af området,
+          så ring alligevel: vi siger det ærligt, hvis turen ikke kan lade sig gøre.
+        </p>
+        <h2 style={{ fontSize: 22, fontWeight: 800, color: "#fff", margin: "32px 0 14px" }}>
+          Hvad sker der, når du har skrevet?
+        </h2>
+        <p style={{ color: "var(--muted)", fontSize: 15.5, lineHeight: 1.75, marginBottom: 14 }}>
+          Booker du online, får du en bekræftelse på e-mail med det samme, og en
+          påmindelse dagen før. Skriver eller ringer du i stedet, vender vi tilbage
+          hurtigst muligt inden for åbningstiden. Du kan altid ændre eller aflyse
+          din tid via linket i bekræftelsen – senest 24 timer før.
+        </p>
+        <p style={{ color: "var(--muted)", fontSize: 15.5, lineHeight: 1.75, marginBottom: 8 }}>
+          Har du spørgsmål til pris eller pakke inden du booker, er du velkommen til
+          at ringe på <a href="tel:+4524440321" style={{ color: "var(--green)" }}>+45 24 44 03 21</a>.
+          Vi giver hellere et realistisk bud i telefonen end en overraskelse på dagen.
+        </p>
+
         <RelatedLinks />
       </div>
     </div>

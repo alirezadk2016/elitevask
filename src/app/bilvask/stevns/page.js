@@ -5,7 +5,7 @@ import JsonLd from "@/components/JsonLd";
 import { breadcrumbLd, cityServiceLd } from "@/lib/seo";
 import { getHours, hoursDisplay } from "@/lib/getHours";
 export const metadata = {
-  title: 'Mobil bilvask i Stevns Kommune – Elite Vask dampvask til din dør',
+  title: 'Mobil bilvask i Stevns Kommune – dampvask til din dør',
   description: 'Professionel mobil dampvask i Stevns Kommune – Store Heddinge, Strøby Egede, Hårlev og Rødvig. Vi kører til dig, gratis kørsel, betal efter vask.',
   alternates: { canonical: "/bilvask/stevns" },
   openGraph: {

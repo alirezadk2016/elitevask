@@ -555,7 +555,10 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 .footer .foot-loc{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);margin-top:14px}
 .footer .foot-loc svg{color:var(--green);flex-shrink:0}
 .footer .cvr{font-size:13px;color:var(--muted-2);margin-top:10px}
-.footer h5{font-size:13px;font-weight:700;color:#fff;margin-bottom:14px}
+/* h3, not h5: the footer column headings follow an h2, and jumping two
+   levels breaks the document outline for screen readers and crawlers.
+   The visual size is unchanged. */
+.footer h3{font-size:13px;font-weight:700;color:#fff;margin-bottom:14px}
 /* 44px minimum row height. These stacked footer links were 22px tall with
    9px between them, so on a phone the phone number, the e-mail link and the
    FAQ link sat within one fingertip of each other. Padding grows the touch

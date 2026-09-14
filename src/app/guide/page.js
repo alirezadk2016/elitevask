@@ -7,7 +7,7 @@ const GUIDES = [
 ];
 
 export const metadata = {
-  title: "Bilpleje Guide | Elite Vask – råd om mobil bilvask & bilpleje",
+  title: "Bilpleje-guide – råd om mobil bilvask | Elite Vask",
   description: "Bilpleje Guide fra Elite Vask: hvor ofte du bør vaske bilen, beskyttelse mod vejsalt og dampvask vs. traditionel bilvask. Ekspertråd om mobil bilpleje.",
   alternates: { canonical: "/guide" },
   openGraph: {
@@ -41,7 +41,31 @@ export default function GuidePage() {
         <p className="gal-hero-sub">Praktiske guides til at holde din bil ren, beskyttet og smuk – fra eksperterne i mobil dampvask på Sjælland.</p>
       </section>
 
+      {/* The hub page carried 129 words: three cards and nothing else. A page
+          that only links onward gives a reader no reason to stay and gives a
+          crawler almost nothing to rank. This intro says what the guides are
+          for and who they are written by. */}
       <section className="gal-section">
+        <div style={{ maxWidth: 780, margin: "0 auto 40px", padding: "0 4px" }}>
+          <p className="guide-lead" style={{ marginBottom: 18 }}>
+            Vi vasker biler på Sjælland hver uge – og de samme spørgsmål går igen.
+            Hvor tit skal bilen egentlig vaskes? Hvad gør vejsaltet ved lakken hen
+            over vinteren? Og er dampvask bare en dyrere måde at gøre det samme på?
+          </p>
+          <p style={{ color: "var(--muted)", fontSize: 15.5, lineHeight: 1.75, marginBottom: 16 }}>
+            Guiderne herunder er vores svar, skrevet ud fra det vi ser på bilerne i
+            praksis. De handler om bilpleje i det danske klima: salt og slud fra
+            november til marts, pollen og insekter om foråret og sommeren, og fugt
+            i kabinen året rundt. Du kan bruge dem, uanset om du vasker selv eller
+            får os til det.
+          </p>
+          <p style={{ color: "var(--muted)", fontSize: 15.5, lineHeight: 1.75, margin: 0 }}>
+            Er du i tvivl om hvor du skal starte, så læs <a href="/guide/hvor-ofte" style={{ color: "var(--green)" }}>hvor ofte du bør vaske bilen</a>.
+            Kører du meget om vinteren, er <a href="/guide/salt-og-lak" style={{ color: "var(--green)" }}>guiden om vejsalt og lak</a> den vigtigste.
+            Og vil du vide hvorfor vi bruger damp frem for spuleslange, forklarer vi
+            forskellen i <a href="/guide/dampvask-vs-traditionel" style={{ color: "var(--green)" }}>dampvask vs. traditionel bilvask</a>.
+          </p>
+        </div>
         <div className="guide-index-grid">
           {GUIDES.map((g) => (
             <a key={g.href} href={g.href} className="guide-index-card">

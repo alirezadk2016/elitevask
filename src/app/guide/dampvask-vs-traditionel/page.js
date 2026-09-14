@@ -4,7 +4,7 @@ import RelatedLinks from "@/components/RelatedLinks";
 import JsonLd from "@/components/JsonLd";
 import { breadcrumbLd, articleLd } from "@/lib/seo";
 export const metadata = {
-  title: "Dampvask vs. traditionel bilvask: Hvad er forskellen? – Elite Vask Guide",
+  title: "Dampvask vs. traditionel bilvask – hvad er forskellen?",
   description: "Dampvask og traditionel bilvask har meget forskellige resultater. Se hvad forskningen viser om ridser, bakterier, vandforbrug og rengøringseffekt.",
   alternates: { canonical: "/guide/dampvask-vs-traditionel" },
   openGraph: {
