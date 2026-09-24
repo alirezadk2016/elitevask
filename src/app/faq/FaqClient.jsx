@@ -46,7 +46,7 @@ export default function FaqClient({ items }) {
   const t = T[lang];
 
   return (
-    <main style={{ background: "var(--bg0,#0b1310)", color: "var(--txt,#e9f1ec)", minHeight: "100vh", fontFamily: "Manrope, system-ui, sans-serif" }}>
+    <div style={{ background: "var(--bg0,#0b1310)", color: "var(--txt,#e9f1ec)", minHeight: "100vh", fontFamily: "Manrope, system-ui, sans-serif" }}>
       {/* ── HEADER ── */}
       <header style={{ borderBottom: "1px solid rgba(255,255,255,.07)", position: "sticky", top: 0, zIndex: 100, background: "rgba(11,19,16,.92)", backdropFilter: "blur(12px)" }}>
         <div style={{ maxWidth: 900, margin: "0 auto", padding: "0 20px", height: 62, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
@@ -129,6 +129,6 @@ export default function FaqClient({ items }) {
           </Link>
         </div>
       </div>
-    </main>
+    </div>
   );
 }

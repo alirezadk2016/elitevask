@@ -93,7 +93,7 @@ export default function PortalPage() {
         </div>
       </header>
 
-      <main className="portal-main">
+      <div className="portal-main">
         <div className="portal-wrap">
           <div className="portal-welcome">
             <h1>Mine bookings</h1>
@@ -140,7 +140,7 @@ export default function PortalPage() {
             </section>
           )}
         </div>
-      </main>
+      </div>
     </div>
   );
 }

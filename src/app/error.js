@@ -8,7 +8,7 @@ export default function GlobalError({ error, reset }) {
   const lang = useLang();
   const da = lang !== "en";
   return (
-    <main style={{ minHeight: "100dvh", background: "#0b1310", color: "#e9f1ec", fontFamily: "Manrope, system-ui, sans-serif", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "40px 24px", textAlign: "center" }}>
+    <div style={{ minHeight: "100dvh", background: "#0b1310", color: "#e9f1ec", fontFamily: "Manrope, system-ui, sans-serif", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "40px 24px", textAlign: "center" }}>
       <p style={{ fontSize: 46, margin: "0 0 14px" }} aria-hidden="true">⚠️</p>
       <h1 style={{ fontSize: "clamp(22px,4vw,30px)", fontWeight: 800, letterSpacing: -0.7, color: "#fff", margin: "0 0 12px" }}>
         {da ? "Noget gik galt" : "Something went wrong"}
@@ -30,6 +30,6 @@ export default function GlobalError({ error, reset }) {
           +45 24 44 03 21
         </a>
       </div>
-    </main>
+    </div>
   );
 }

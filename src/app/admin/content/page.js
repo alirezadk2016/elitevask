@@ -871,7 +871,7 @@ export default function AdminPanel() {
         )}
 
         {/* MAIN CONTENT */}
-        <main style={{ padding: narrow ? "16px 12px" : "28px 28px", boxSizing:"border-box", minWidth:0, overflow:"hidden" }}>
+        <div style={{ padding: narrow ? "16px 12px" : "28px 28px", boxSizing:"border-box", minWidth:0, overflow:"hidden" }}>
 
           {/* Page title + badge */}
           <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:28, flexWrap:"wrap" }}>
@@ -2851,7 +2851,7 @@ export default function AdminPanel() {
               )}
             </>
           )}
-        </main>
+        </div>
       </div>
 
       {/* BOOKING DETAIL MODAL */}
