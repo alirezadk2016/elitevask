@@ -37,6 +37,16 @@ const securityHeaders = [
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  /* The site serves every picture as a plain <img> from /public — there is not
+     a single next/image import anywhere in src/. But /_next/image was still
+     mounted and reachable, which is pure attack surface for no benefit: it is
+     the endpoint behind GHSA-2xp9-vwfh-vxw4, the unauthenticated RCE that Next
+     16.0.0-16.3.2 had when handed an AVIF, and this site does serve AVIF hero
+     images. The dependency is patched now; turning the optimizer off as well
+     means the next optimizer CVE cannot reach us at all.
+     If a next/image is ever added, remove this line first — with it set, the
+     component still renders but serves the original file unoptimized. */
+  images: { unoptimized: true },
   async headers() {
     return [
       { source: '/(.*)', headers: securityHeaders },
