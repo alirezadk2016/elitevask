@@ -47,13 +47,30 @@ async function run(request, { dryRun = false } = {}) {
   const now = Date.now();
   const all = await listBookings();
 
+  /* Tomorrow in Copenhagen. Needed by the filter below as well as by the
+     wording further down, so it is computed once, here. */
+  const tomorrowISO = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Copenhagen' })
+    .format(new Date(now + 86400000));
+
   const due = all.filter((b) => {
     if (b.status === 'cancelled') return false;
     if (!b.email || !b.date || !b.time) return false;
     const start = cphEpoch(b.date, b.time);
     if (!Number.isFinite(start)) return false;
     const hoursOut = (start - now) / 3600000;
-    return hoursOut > REMIND_MIN_H && hoursOut <= REMIND_WITHIN_H;
+    if (hoursOut <= REMIND_MIN_H) return false;
+    /* The hour window alone was not enough to keep the promise the site makes
+       ("en påmindelse dagen før").
+       Vercel evaluates "0 18 * * *" in UTC, so this runs at 20:00 Copenhagen
+       in summer but 19:00 in winter. With closing at 22:00, tomorrow's last
+       slot is 26.0h out in summer — exactly on the <= 26 boundary — and 27.0h
+       out in winter, which fell straight through. That booking then got no
+       reminder until the following evening's run caught it 3 hours before the
+       appointment, which is not the day before.
+       So: anything genuinely happening tomorrow qualifies, whatever the clock
+       says. The hour window still covers same-day appointments. Sending twice
+       is not a risk — the reminded:<token> flag below is what dedupes. */
+    return hoursOut <= REMIND_WITHIN_H || b.date === tomorrowISO;
   });
 
   if (dryRun) return { dryRun: true, due: due.length, tokens: due.map(b => b.token) };
@@ -65,9 +82,6 @@ async function run(request, { dryRun = false } = {}) {
   const reqUrl = new URL(request.url);
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_BASE_URL || `${reqUrl.protocol}//${reqUrl.host}`;
   const months = ['jan','feb','mar','apr','maj','jun','jul','aug','sep','okt','nov','dec'];
-
-  const tomorrowISO = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Copenhagen' })
-    .format(new Date(now + 86400000));
 
   let sent = 0, skipped = 0, failed = 0;
   for (const b of due) {
