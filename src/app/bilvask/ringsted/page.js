@@ -84,9 +84,9 @@ export default function BilvaskRingsted() {
         <p><strong>Tilbyder I erhvervsaftaler?</strong><br/>
         Ja, kontakt os på info@elite-vask.dk for et skræddersyet tilbud til din virksomhed.</p>
 
-        <div style={{marginTop:'2rem',padding:'1.5rem',background:'#f0faf4',borderRadius:'12px',textAlign:'center'}}>
-          <p style={{margin:'0 0 1rem',fontWeight:700,fontSize:'1.1rem'}}>Book mobil bilvask i Ringsted i dag</p>
-          <Link href="/#vaelg" className="btn btn-green" style={{display:'inline-block',padding:'0.75rem 2rem',borderRadius:'8px',background:'#22c55e',color:'#fff',textDecoration:'none',fontWeight:700}}>Se priser og book nu</Link>
+        <div className="guide-cta-box">
+          <p style={{margin:'0 0 1rem',fontWeight:700,fontSize:'1.1rem',color:'#fff'}}>Book mobil bilvask i Ringsted i dag</p>
+          <Link href="/#vaelg" className="btn btn-green guide-cta-btn">Se priser og book nu</Link>
         </div>
         <RelatedLinks />
       </div>

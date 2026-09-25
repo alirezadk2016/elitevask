@@ -1,7 +1,11 @@
 :root{
   --bg:#0b1310;--bg-2:#101c16;--surface:#15211b;--surface-2:#1b2a22;
   --line:rgba(255,255,255,.08);--line-2:rgba(255,255,255,.14);
-  --txt:#e9f1ec;--muted:#94a89c;--muted-2:#6f857a;
+  /* --muted-2 lightened from #6f857a: it carries 11.5px text (car-card
+     examples, contact-list labels) and at that size it measured 3.79:1 on
+     the car cards and 4.20:1 on the contact list, both under the 4.5:1 AA
+     minimum for small text. Now 4.59:1 and 5.08:1. */
+  --txt:#e9f1ec;--muted:#94a89c;--muted-2:#7b9487;
   --green:#37d278;--green-2:#22a35a;--green-deep:#0f5a30;--green-soft:rgba(55,210,120,.12);
   --gold:#d4af37;--gold-soft:rgba(212,175,55,.13);--gold-line:rgba(212,175,55,.4);
   --r:14px;--r-sm:10px;
@@ -587,7 +591,10 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 .mak-credit .mak-line:last-child{background:linear-gradient(90deg,rgba(55,210,120,.2),transparent)}
 .mak-badge{display:inline-flex;align-items:center;gap:7px;border:1px solid rgba(255,255,255,.07);border-radius:30px;padding:5px 14px 5px 10px;background:rgba(255,255,255,.02)}
 .mak-badge svg{width:13px;height:13px;color:rgba(55,210,120,.5)}
-.mak-label{font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.2);font-weight:500}
+/* 20% white measured 1.84:1 at 10px — the credit was there but effectively
+   unreadable. #6f857a keeps it quiet against the footer while clearing the
+   4.5:1 minimum (4.76:1). */
+.mak-label{font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:#6f857a;font-weight:500}
 .mak-sig{font-size:12px;font-weight:800;letter-spacing:.3em;text-transform:uppercase;background:linear-gradient(90deg,rgba(55,210,120,.6),rgba(255,255,255,.5));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 
 /* STICKY MOBILE CTA */

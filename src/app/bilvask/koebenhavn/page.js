@@ -98,9 +98,9 @@ export default async function BilvaskKoebenhavn() {
         <p><strong>Hvad hvis der ikke er parkering ved min adresse?</strong><br/>
         Kontakt os, så finder vi en løsning. Vi er vant til at arbejde i tæt byliv.</p>
 
-        <div style={{marginTop:'2rem',padding:'1.5rem',background:'#f0faf4',borderRadius:'12px',textAlign:'center'}}>
-          <p style={{margin:'0 0 1rem',fontWeight:700,fontSize:'1.1rem'}}>Klar til en skinnende ren bil i København?</p>
-          <Link href="/#vaelg" className="btn btn-green" style={{display:'inline-block',padding:'0.75rem 2rem',borderRadius:'8px',background:'#22c55e',color:'#fff',textDecoration:'none',fontWeight:700}}>Se priser og book nu</Link>
+        <div className="guide-cta-box">
+          <p style={{margin:'0 0 1rem',fontWeight:700,fontSize:'1.1rem',color:'#fff'}}>Klar til en skinnende ren bil i København?</p>
+          <Link href="/#vaelg" className="btn btn-green guide-cta-btn">Se priser og book nu</Link>
         </div>
         <RelatedLinks />
       </div>
