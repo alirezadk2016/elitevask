@@ -6,14 +6,14 @@ import { breadcrumbLd, SITE } from "@/lib/seo";
 
 export const metadata = {
   title: "Priser – Elite Vask | Mobil bil dampvask på Sjælland",
-  description: "Se priser på mobil bil dampvask fra Elite Vask. Udvendig vask fra 500 kr, hel bil fra 800 kr, Guld pakke fra 2.000 kr. Gratis kørsel på Sjælland.",
+  description: "Se priser på mobil bil dampvask fra Elite Vask. Udvendig vask fra 500 kr, Hele bilen fra 800 kr, Guld pakke fra 2.000 kr. Gratis kørsel på Sjælland.",
   alternates: { canonical: "/priser" },
   openGraph: {
     // Next merges page metadata over the layout SHALLOWLY, so a page that
     // declares openGraph without images ships with no og:image at all.
     images: [{ url: "/og-cover.jpg", width: 1200, height: 630, alt: "Elite Vask – mobil bil dampvask" }],
     title: "Priser – Elite Vask | Mobil bil dampvask på Sjælland",
-    description: "Se priser på mobil bil dampvask. Udvendig fra 500 kr, hel bil fra 800 kr, Guld pakke fra 2.000 kr. Gratis kørsel på Sjælland.",
+    description: "Se priser på mobil bil dampvask. Udvendig fra 500 kr, Hele bilen fra 800 kr, Guld pakke fra 2.000 kr. Gratis kørsel på Sjælland.",
     type: "website",
     locale: "da_DK",
     url: "/priser",

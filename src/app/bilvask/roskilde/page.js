@@ -55,7 +55,7 @@ export default async function BilvaskRoskilde() {
         <h2>Pakker og priser i Roskilde</h2>
         <ul>
           <li><strong>Udvendig vask</strong> – karosseri, fælge, dæk og ruder. Fra 500 kr.</li>
-          <li><strong>Hel bil (ind & ud)</strong> – komplet rens indvendigt og udvendigt. Fra 800 kr.</li>
+          <li><strong>Hele bilen (ind & ud)</strong> – komplet rens indvendigt og udvendigt. Fra 800 kr.</li>
           <li><strong>Guld pakke</strong> – motorrens, lakforsegling og fuld dybdebehandling. Fra 2.000 kr.</li>
         </ul>
         <p>Du betaler kun når du er tilfreds. Ingen forudbetaling.</p>

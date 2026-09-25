@@ -19,7 +19,7 @@ export const DEFAULT_FAQ_BILINGUAL = [
     a: { da: "Let regn er sjældent et problem – vi kan vaske under overdækning, i carporte eller i garager. Ved kraftigt regn kontakter vi dig dagen inden og tilbyder at ombooke til nærmeste ledige tid helt uden gebyr.",
       en: "Light rain is rarely a problem – we can wash under cover, in carports or garages. In heavy rain we contact you the day before and offer to rebook to the nearest available time at no charge." } },
   { q: { da: "Hvad koster mobil bilvask?", en: "What does mobile car washing cost?" },
-    a: { da: "Prisen afhænger af biltype og pakke: Udvendig vask fra 500 kr · Hel bil (ind & ud) fra 800 kr · Guld pakke (inkl. motorrens + lakforsegling) fra 2.000 kr. Kørsel til din adresse på Sjælland er gratis.",
+    a: { da: "Prisen afhænger af biltype og pakke: Udvendig vask fra 500 kr · Hele bilen (ind & ud) fra 800 kr · Guld pakke (inkl. motorrens + lakforsegling) fra 2.000 kr. Kørsel til din adresse på Sjælland er gratis.",
       en: "The price depends on car type and package: Exterior wash from 500 kr · Full car (inside & out) from 800 kr · Gold package (incl. engine clean + paint sealant) from 2,000 kr. Travel to your address on Zealand is free." } },
   { q: { da: "Kommer I til min adresse?", en: "Do you come to my address?" },
     a: { da: "Ja – det er hele idéen! Vi er 100% mobile og kører ud til dig, uanset om du er hjemme, på arbejdet eller i sommerhuset. Du behøver slet ikke flytte dig. Vi medbringer alt udstyr.",

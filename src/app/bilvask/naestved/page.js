@@ -57,7 +57,7 @@ export default function BilvaskNaestved() {
         <h2>Pakker og priser</h2>
         <ul>
           <li><strong>Udvendig vask</strong> – karosseri, fælge, dæk og ruder. Fra 500 kr.</li>
-          <li><strong>Hel bil (ind & ud)</strong> – komplet indvendig og udvendig behandling. Fra 800 kr.</li>
+          <li><strong>Hele bilen (ind & ud)</strong> – komplet indvendig og udvendig behandling. Fra 800 kr.</li>
           <li><strong>Guld pakke</strong> – alt inklusiv: motorrens, lakforsegling og dybdebehandling. Fra 2.000 kr.</li>
         </ul>
         <p>

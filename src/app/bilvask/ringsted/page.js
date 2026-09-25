@@ -59,7 +59,7 @@ export default function BilvaskRingsted() {
         <h2>Vores pakker og priser i Ringsted</h2>
         <ul>
           <li><strong>Udvendig vask</strong> – karosseri, fælge, dæk, ruder. Fra 500 kr.</li>
-          <li><strong>Hel bil (ind & ud)</strong> – komplet behandling. Fra 800 kr.</li>
+          <li><strong>Hele bilen (ind & ud)</strong> – komplet behandling. Fra 800 kr.</li>
           <li><strong>Guld pakke</strong> – inkl. motorrens og lakforsegling. Fra 2.000 kr.</li>
         </ul>
         <p>

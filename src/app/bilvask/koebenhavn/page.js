@@ -56,7 +56,7 @@ export default async function BilvaskKoebenhavn() {
         <p>Vi tilbyder tre pakker tilpasset dit behov:</p>
         <ul>
           <li><strong>Udvendig vask</strong> – dampvask af karosseri, fælge, dæk og ruder. Fra 500 kr.</li>
-          <li><strong>Hel bil (ind & ud)</strong> – komplet behandling indvendigt og udvendigt. Fra 800 kr.</li>
+          <li><strong>Hele bilen (ind & ud)</strong> – komplet behandling indvendigt og udvendigt. Fra 800 kr.</li>
           <li><strong>Guld pakke</strong> – alt inklusiv: motorrens, lakforsegling og dybdebehandling. Fra 2.000 kr.</li>
         </ul>
         <p>

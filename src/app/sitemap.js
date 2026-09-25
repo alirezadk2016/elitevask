@@ -13,10 +13,10 @@ const SITE_URL = 'https://www.elite-vask.dk';
  * So each entry carries the date its content actually last changed. When you
  * edit a page, bump its date here in the same commit. */
 const PAGES = [
-  ['',                                '2026-09-14', 'weekly',  1.0],
-  ['/priser',                         '2026-09-03', 'monthly', 0.8],
+  ['',                                '2026-09-25', 'weekly',  1.0],
+  ['/priser',                         '2026-09-25', 'monthly', 0.8],
   ['/galleri',                        '2026-09-14', 'weekly',  0.8],
-  ['/faq',                            '2026-09-03', 'monthly', 0.7],
+  ['/faq',                            '2026-09-25', 'monthly', 0.7],
   ['/guide',                          '2026-09-14', 'monthly', 0.7],
   ['/kontakt',                        '2026-09-14', 'yearly',  0.6],
   ['/handelsbetingelser',             '2026-09-03', 'yearly',  0.4],
@@ -27,16 +27,16 @@ const PAGES = [
   ['/guide/salt-og-lak',              '2026-06-01', 'yearly',  0.7],
   ['/guide/dampvask-vs-traditionel',  '2026-09-14', 'yearly',  0.7],
 
-  ['/bilvask/koebenhavn',             '2026-07-18', 'monthly', 0.9],
-  ['/bilvask/roskilde',               '2026-07-18', 'monthly', 0.9],
-  ['/bilvask/koege',                  '2026-07-18', 'monthly', 0.9],
-  ['/bilvask/naestved',               '2026-07-18', 'monthly', 0.9],
-  ['/bilvask/ringsted',               '2026-07-18', 'monthly', 0.9],
-  ['/bilvask/stevns',                 '2026-09-14', 'monthly', 0.9],
-  ['/bilvask/faxe',                   '2026-09-14', 'monthly', 0.9],
-  ['/bilvask/helsingoer',             '2026-08-15', 'monthly', 0.9],
-  ['/bilvask/hilleroed',              '2026-08-15', 'monthly', 0.9],
-  ['/bilvask/frederikssund',          '2026-09-14', 'monthly', 0.9],
+  ['/bilvask/koebenhavn',             '2026-09-25', 'monthly', 0.9],
+  ['/bilvask/roskilde',               '2026-09-25', 'monthly', 0.9],
+  ['/bilvask/koege',                  '2026-09-25', 'monthly', 0.9],
+  ['/bilvask/naestved',               '2026-09-25', 'monthly', 0.9],
+  ['/bilvask/ringsted',               '2026-09-25', 'monthly', 0.9],
+  ['/bilvask/stevns',                 '2026-09-25', 'monthly', 0.9],
+  ['/bilvask/faxe',                   '2026-09-25', 'monthly', 0.9],
+  ['/bilvask/helsingoer',             '2026-09-25', 'monthly', 0.9],
+  ['/bilvask/hilleroed',              '2026-09-25', 'monthly', 0.9],
+  ['/bilvask/frederikssund',          '2026-09-25', 'monthly', 0.9],
 ];
 
 export default function sitemap() {
