@@ -1658,7 +1658,7 @@ export default function AdminPanel() {
           {tab === "hours" && (() => {
             const WEEK = [[1,"Man"],[2,"Tir"],[3,"Ons"],[4,"Tor"],[5,"Fre"],[6,"Lør"],[0,"Søn"]];
             const todayISO = new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Copenhagen" }).format(new Date());
-            const CAR_LABELS = [["lille","Lille bil",120],["mellem","Mellem bil",180],["stor","Stor bil / SUV",240],["varebil","Varebil",180]];
+            const CAR_LABELS = [["lille","Lille bil",120],["mellem","Mellemstor bil",180],["stor","Stor bil / SUV",240],["varebil","Varebil",180]];
             const SM = hoursDraft.slotMinutes || 30;
             const openM = toMin(hoursDraft.open), closeM = toMin(hoursDraft.close);
             // Need at least one whole slot; a sub-slot window would be silently

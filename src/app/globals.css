@@ -55,7 +55,11 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 .logo{display:flex;align-items:center;gap:11px;flex-shrink:0}
 .logo-mark{width:42px;height:42px;border-radius:50%;background:#fff url('/logo-96.webp') center/cover no-repeat;overflow:hidden;flex-shrink:0;border:1px solid var(--line)}
 .logo-mark img{width:100%;height:100%;object-fit:cover;display:block}
-.logo-text{line-height:1}
+/* Stacked lockup. Both spans were inline, so the name and the tagline ran
+   together on one line and the header read "ELITE VASKMOBIL BIL DAMPVASK" —
+   the margin-top on .b below was dead, because margins do nothing vertically
+   on an inline box. */
+.logo-text{line-height:1;display:flex;flex-direction:column;justify-content:center}
 .logo-text .a{font-weight:800;letter-spacing:3px;font-size:16px;color:#fff}
 .logo-text .b{font-size:8.5px;letter-spacing:2.3px;color:var(--green);font-weight:600;margin-top:2px}
 .nav-links{display:flex;gap:24px;align-items:center}
@@ -151,8 +155,18 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 .eyebrow{font-size:11.5px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:var(--green);margin-bottom:18px;display:inline-flex;align-items:center;gap:10px}
 .eyebrow::before{content:'';display:inline-block;width:22px;height:2px;background:linear-gradient(90deg,var(--green),rgba(55,210,120,.3));border-radius:2px;flex-shrink:0}
 .center .eyebrow{justify-content:center}
-.sec-title{font-size:clamp(29px,4.4vw,50px);font-weight:800;letter-spacing:-1.6px;color:#fff;line-height:1.06;text-wrap:balance;max-width:16ch}
-.center .sec-title{margin-left:auto;margin-right:auto}
+/* max-width:16ch keeps headlines to a readable measure, but it also makes the
+   heading's BOX narrower than its container — so text-align:center on the
+   parent centres the text inside that narrow box while the box itself stays
+   flush left. Centring used to come from ".center .sec-title", which meant any
+   section whose author forgot the .center wrapper silently rendered its
+   heading off to the left. Two did: "Sådan virker det i praksis" sat 324px
+   left of its own eyebrow, and "Mobil bilvask i hele Sjælland" 276px.
+   Auto margins belong on .sec-title itself so centring is the default; the one
+   place that genuinely wants a left-aligned head opts out below. */
+.sec-title{font-size:clamp(29px,4.4vw,50px);font-weight:800;letter-spacing:-1.6px;color:#fff;line-height:1.06;text-wrap:balance;max-width:16ch;margin-inline:auto}
+/* Gallery section heads are deliberately left-aligned, with a count beside them. */
+.gal-section-head .sec-title{margin-inline:0}
 .sec-sub{font-size:clamp(15px,1.25vw,18px);line-height:1.62;color:var(--muted);margin-top:16px;max-width:54ch;text-wrap:pretty}
 .center{text-align:center}.center .sec-sub{margin-left:auto;margin-right:auto}
 
