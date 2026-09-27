@@ -95,11 +95,12 @@ export default async function RootLayout({ children }) {
         ))}
       </head>
       <body>
+        <a href="#indhold" className="skip-link">Spring til indhold</a>
         {/* Screen-reader users navigate by landmark. Without a <main> there was
             no way to jump past the nav to the content on any page. Nothing in
             the CSS or in siteInit.js selects body's direct children, so the
             wrapper is inert for layout. */}
-        <main>{children}</main>
+        <main id="indhold" tabIndex={-1}>{children}</main>
         <CookieConsent />
         <Analytics />
         <GoogleAnalytics />

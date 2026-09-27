@@ -1376,3 +1376,14 @@ body:has(.ba-lb) .cookie-banner{display:none}
   .rvc{padding:20px 20px 18px}
   .rvc-text{font-size:15px}
 }
+
+/* The city chips were the one tab stop with no visible focus indicator. */
+.chip:focus-visible{outline:2px solid var(--green);outline-offset:3px}
+/* Skip link: first tab stop on every page, invisible until focused, so a
+   keyboard user can jump past the navigation instead of tabbing through it. */
+.skip-link{position:absolute;left:12px;top:-60px;z-index:1000;background:var(--green);color:#052010;
+  font-weight:700;padding:10px 16px;border-radius:8px;text-decoration:none;transition:top .15s}
+.skip-link:focus{top:12px}
+
+/* the skip link focuses <main> programmatically; no ring around the whole page */
+main:focus{outline:none}
