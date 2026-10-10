@@ -21,7 +21,7 @@ const HTML = `<!-- GUIDE DROPDOWN -->
       <a href="/guide/dampvask-vs-traditionel" class="guide-card">
         <div class="guide-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3c-1 1.5 1 3 0 4.5S7 10 8 11M12 3c-1 1.5 1 3 0 4.5S11 10 12 11M16 3c-1 1.5 1 3 0 4.5S15 10 16 11"/><path d="M4 15h16l-1.5 5h-13z"/></svg></div>
         <h3>Dampvask vs. traditionel bilvask</h3>
-        <p>1–3 liter vand vs. 200 liter. Ingen ridser, bakteriedrab ved 145°C. Se den fulde sammenligning.</p>
+        <p>1–3 liter vand mod ca. 140 liter i en vaskehal. Ingen ridser, bakteriedrab ved 145°C. Se den fulde sammenligning.</p>
         <span class="guide-card-read">Læs guide →</span>
       </a>
     </div>

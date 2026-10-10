@@ -1,3 +1,4 @@
+import { lastModified } from "@/lib/pageDates";
 const HTML = `<!-- FOOTER -->
 <footer class="footer"><div class="wrap">
   <div class="footer-grid">
@@ -10,7 +11,7 @@ const HTML = `<!-- FOOTER -->
     <div class="col"><h3 data-i18n="foot_s1">Service</h3><a href="#vaelg" data-i18n="foot_l1">Vælg bil & priser</a><a href="#arbejde" data-i18n="foot_l2">Vores arbejde</a><a href="#anmeldelser" data-i18n="foot_l3">Anmeldelser</a><a href="/#om-os">Om Elite Vask</a><a href="/faq">FAQ</a></div>
     <div class="col"><h3 data-i18n="foot_s2">Kontakt</h3><a href="tel:+4524440321">+45 24 44 03 21</a><a href="mailto:info@elite-vask.dk">info@elite-vask.dk</a><a href="https://instagram.com/elitevasksjaelland">@elitevasksjaelland</a><a href="https://www.facebook.com/share/14ciFraNT4M/">Facebook</a></div>
   </div>
-  <div class="footer-bottom"><span>Rent • Effektivt • Miljøvenligt</span><span class="foot-legal"><a href="/handelsbetingelser" rel="terms-of-service">Handelsbetingelser</a> · <a href="/privatpolitik" rel="privacy-policy">Privatpolitik</a> · <a href="/cookies">Cookies</a></span></div>
+  <div class="footer-bottom"><span>Rent • Effektivt • Miljøvenligt</span><span class="foot-byline">Udgivet af Elite Vask · Opdateret __UPDATED__</span><span class="foot-legal"><a href="/handelsbetingelser" rel="terms-of-service">Handelsbetingelser</a> · <a href="/privatpolitik" rel="privacy-policy">Privatpolitik</a> · <a href="/cookies">Cookies</a></span></div>
   <a href="https://www.makvandi.dk/" target="_blank" rel="noopener" class="mak-credit">
     <span class="mak-line"></span>
     <span class="mak-badge">
@@ -21,6 +22,13 @@ const HTML = `<!-- FOOTER -->
     <span class="mak-line"></span>
   </a>
 </div></footer>`;
+/* Visible byline + machine-readable update date (the same date the sitemap and
+   the WebPage schema use). Answer engines read provenance and freshness from
+   the page itself, not only from JSON-LD. */
+const MONTHS = ["januar","februar","marts","april","maj","juni","juli","august","september","oktober","november","december"];
 export default function Footer() {
-  return <div dangerouslySetInnerHTML={{ __html: HTML }} />;
+  const iso = lastModified("/") || "2026-10-10";
+  const [y, m, d] = iso.split("-").map(Number);
+  const html = HTML.replace("__UPDATED__", `<time datetime="${iso}">${d}. ${MONTHS[m - 1]} ${y}</time>`);
+  return <div dangerouslySetInnerHTML={{ __html: html }} />;
 }

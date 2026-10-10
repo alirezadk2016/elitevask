@@ -24,7 +24,7 @@ const HTML = `<!-- WHY -->
             <svg class="sf-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
         </div>
-        <p class="sf-body" data-i18n="steam_f1p">Dampvask løsner snavs termisk uden børster og aggressive kemikalier – og reducerer dermed synligheden af overfladisk snavs og belægninger. Resultatet er en renere, friskere overflade uden de ridser, som roterende børster i tunnelvaske typisk efterlader.</p>
+        <p class="sf-body" data-i18n="steam_f1p">Damp løsner snavs ved høj temperatur uden mekanisk kontakt. Det betyder, at lakken forbliver intakt – der er ingen roterende børster eller højtryk, der kan efterlade mærker.</p>
       </div>
 
       <div class="steam-fact sf-item">
@@ -35,7 +35,7 @@ const HTML = `<!-- WHY -->
             <svg class="sf-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
         </div>
-        <p class="sf-body" data-i18n="steam_f2p">Damp renser ikke bare overfladen — den trænger ind og løsner snavs fra dybden. Resultatet er en levende, skinnende glans som fremhæver bilens originale farve og får den til at fremstå som ny.</p>
+        <p class="sf-body" data-i18n="steam_f2p">Når overfladebelægninger og indgroet snavs er fjernet, kommer bilens originalfarve tydeligere frem. Du behøver ikke voks for at se forskel – renlighed er nok.</p>
       </div>
 
       <div class="steam-fact sf-item">
@@ -46,10 +46,16 @@ const HTML = `<!-- WHY -->
             <svg class="sf-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
         </div>
-        <p class="sf-body" data-i18n="steam_f3p">Højtryk og aggressive kemikalier påfører lakken usynlige mikroskopiske ridser ved hvert vask. Dampvask renser intenst og skånsomt uden kemikalier — og beskytter dermed din bils lak og værdi på lang sigt.</p>
+        <p class="sf-body" data-i18n="steam_f3p">En dampvask bruger 1–3 liter vand. Til sammenligning afleder en typisk vaskehal omkring 140 liter spildevand pr. bil – vand med rester af tungmetaller, olie og vaskemidler.</p>
       </div>
 
     </div>
+    <figure class="steam-cite">
+      <blockquote cite="https://www2.mst.dk/udgiv/publikationer/2004/87-7614-047-4/html/helepubl.htm">
+        <p>»En typisk vaskehal afleder omkring 140 liter spildevand pr. bil.« Spildevandet indeholder ifølge rapporten en række tungmetaller og miljøfremmede stoffer.</p>
+      </blockquote>
+      <figcaption><span data-i18n="steam_src">Kilde</span>: <a href="https://www2.mst.dk/udgiv/publikationer/2004/87-7614-047-4/html/helepubl.htm" target="_blank" rel="noopener noreferrer">Miljøstyrelsen, Miljøprojekt nr. 876 – Bilvask (2004)</a></figcaption>
+    </figure>
   </div>
 
 </div></section>`;

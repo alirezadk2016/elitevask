@@ -2,11 +2,11 @@
  * sitemap's <lastmod> and the pages' schema.org dateModified, so the two can
  * never disagree. When you edit a page, bump its date here. */
 export const PAGES = [
-  ['',                                '2026-10-10', 'weekly',  1.0],
+  ['',                                '2026-10-11', 'weekly',  1.0],
   ['/priser',                         '2026-10-10', 'monthly', 0.8],
-  ['/galleri',                        '2026-10-10', 'weekly',  0.8],
+  ['/galleri',                        '2026-10-11', 'weekly',  0.8],
   ['/faq',                            '2026-10-10', 'monthly', 0.7],
-  ['/guide',                          '2026-10-10', 'monthly', 0.7],
+  ['/guide',                          '2026-10-11', 'monthly', 0.7],
   ['/kontakt',                        '2026-09-14', 'yearly',  0.6],
   ['/handelsbetingelser',             '2026-09-03', 'yearly',  0.4],
   ['/privatpolitik',                  '2026-09-03', 'yearly',  0.4],
@@ -14,7 +14,7 @@ export const PAGES = [
 
   ['/guide/hvor-ofte',                '2026-06-01', 'yearly',  0.7],
   ['/guide/salt-og-lak',              '2026-06-01', 'yearly',  0.7],
-  ['/guide/dampvask-vs-traditionel',  '2026-09-14', 'yearly',  0.7],
+  ['/guide/dampvask-vs-traditionel',  '2026-10-11', 'yearly',  0.7],
 
   ['/bilvask/koebenhavn',             '2026-09-25', 'monthly', 0.9],
   ['/bilvask/roskilde',               '2026-09-25', 'monthly', 0.9],

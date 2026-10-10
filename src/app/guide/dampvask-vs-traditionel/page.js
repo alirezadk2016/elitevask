@@ -36,7 +36,7 @@ export default function DampvaskVsTraditionel() {
 
         <h2>Vandforbrug: en enorm forskel</h2>
         <p>
-          Et af de mest målbare forskelle er vandforbruget. En professionel dampvask bruger typisk <strong>1–3 liter vand</strong> pr. behandling. En automatvask i en tunnelvask bruger <strong>50–200 liter</strong>, mens håndvask med haveslange let løber op i <strong>100–300 liter</strong>.
+          Et af de mest målbare forskelle er vandforbruget. En professionel dampvask bruger typisk <strong>1–3 liter vand</strong> pr. behandling. En automatvask i en tunnelvask bruger <strong>50–200 liter</strong>, mens håndvask med haveslange let løber op i <strong>100–300 liter</strong>. Miljøstyrelsen angiver, at <em>»en typisk vaskehal afleder omkring 140 liter spildevand pr. bil«</em>, og at spildevandet indeholder tungmetaller og miljøfremmede stoffer (<a href="https://www2.mst.dk/udgiv/publikationer/2004/87-7614-047-4/html/helepubl.htm" target="_blank" rel="noopener noreferrer">Miljøprojekt nr. 876, 2004</a>).
         </p>
         <p>
           Dampvasken opnår det lavere vandforbrug ved at omdanne vand til højtryksdamp, som mekanisk løsner snavs og fedt uden behov for store mængder skyllevand. Det er ikke blot miljøvenligt – det er også mere skånsomt mod overflader, der ellers risikerer at blive udsat for mineralaflejringer fra hårdt vand.

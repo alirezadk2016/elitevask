@@ -38,8 +38,8 @@ export default function GalleriPage() {
         <p style={{ color: "var(--muted)", fontSize: 15.5, lineHeight: 1.75, marginBottom: 14 }}>
           De fleste af de indvendige billeder er sæder, måtter og loft behandlet med
           damp ved omkring 145 °C. Damp løsner snavs og fedt uden skrappe kemikalier,
-          og fordi der bruges 1–3 liter vand mod cirka 200 liter ved en almindelig
-          vask, kan det gøres hvor bilen holder – uden afløb og uden vandpyt.
+          og fordi der bruges 1–3 liter vand mod omkring 140 liter i en typisk vaskehal (Miljøstyrelsen),
+          kan det gøres hvor bilen holder – uden afløb og uden vandpyt.
         </p>
         <p style={{ color: "var(--muted)", fontSize: 15.5, lineHeight: 1.75, margin: 0 }}>
           Udvendigt handler det mest om at fjerne vejsalt, insekter og trafikfilm
