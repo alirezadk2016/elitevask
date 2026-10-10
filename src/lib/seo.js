@@ -1,3 +1,4 @@
+import { lastModified } from './pageDates';
 // Structured-data (JSON-LD) helpers — keep one canonical domain + business id.
 export const SITE = "https://www.elite-vask.dk";
 const BIZ_ID = `${SITE}/#business`;
@@ -49,5 +50,24 @@ export function articleLd({ title, description, path, datePublished, dateModifie
     datePublished,
     dateModified: dateModified || datePublished,
     inLanguage: "da-DK",
+  };
+}
+
+/* WebPage node with machine-readable freshness. AI search engines weight
+   recency and provenance; without dateModified the page reads as undated. */
+export function webPageLd({ path, name, description, datePublished = "2026-06-17" }) {
+  const mod = lastModified(path) || datePublished;
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "@id": `${SITE}${path === "/" ? "/" : path}#webpage`,
+    url: `${SITE}${path === "/" ? "/" : path}`,
+    name, description, inLanguage: "da-DK",
+    isPartOf: { "@id": `${SITE}/#website` },
+    about: { "@id": BIZ_ID },
+    publisher: { "@id": BIZ_ID },
+    author: { "@id": BIZ_ID },
+    datePublished,
+    dateModified: mod,
   };
 }

@@ -1429,3 +1429,7 @@ main:focus{outline:none}
 /* the round logo itself reads "Elite Vask", so on phones the text beside it
    only competes with the DK/UK toggle for space */
 @media(max-width:420px){.faq-logo-text{display:none}}
+
+/* Steps and the promise grid are real <ol>/<ul> now (machine-readable lists);
+   strip the browser list styling so they look exactly as before. */
+ol.steps,ul.why-grid{list-style:none;padding:0;margin-left:0;margin-right:0}

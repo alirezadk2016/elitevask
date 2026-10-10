@@ -6,7 +6,7 @@ const HTML = `<!-- CAR SELECTOR + CALCULATOR -->
     <p class="sec-sub" data-i18n="sel_sub">Vælg din biltype nedenfor og se prisen med det samme.</p>
   </div>
 
-  <div class="car-grid" id="carGrid"></div>
+  <div class="car-grid" id="carGrid">__CARS__</div>
 
   <div class="calc" id="calc">
     <div class="calc-head">
@@ -33,6 +33,47 @@ const HTML = `<!-- CAR SELECTOR + CALCULATOR -->
     <div class="note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><span data-i18n="calc_note">Priserne er vejledende og inkl. moms. Endelig pris bekræftes ved booking.</span></div>
   </div>
 </div></section>`;
-export default function Pricing() {
-  return <div dangerouslySetInnerHTML={{ __html: HTML }} />;
+/* The car cards used to exist only after siteInit.js ran: the server sent an
+   empty #carGrid, so crawlers and AI engines that don't execute JS saw no
+   prices on the homepage at all, and visitors saw an empty grid until the
+   script loaded. renderCars() empties the grid before drawing, so this server
+   copy is simply replaced — same markup, same KV-backed prices. */
+const CARS = [
+  { id: "lille", label: "Lille bil", ex: "Aygo, Up!, i10" },
+  { id: "mellem", label: "Mellemstor bil", ex: "Golf, Focus, i20" },
+  { id: "stor", label: "Stor bil / SUV", ex: "Passat, SUV, stationcar" },
+  { id: "varebil", label: "Varebil", ex: "Transit, Caddy, Berlingo" },
+];
+const DEFAULT_PRICES = {
+  lille: { hele: 800, udv: 500, indv: 600 }, mellem: { hele: 950, udv: 550, indv: 700 },
+  stor: { hele: 1100, udv: 650, indv: 850 }, varebil: { hele: 1400, udv: 750, indv: 750 },
+};
+async function fromPrices() {
+  let m = DEFAULT_PRICES;
+  try {
+    const { kv } = await import("@vercel/kv");
+    const raw = await kv.get("content:prices");
+    const p = typeof raw === "string" ? JSON.parse(raw) : raw;
+    if (p && typeof p === "object") {
+      m = {};
+      for (const id of Object.keys(DEFAULT_PRICES)) {
+        m[id] = { ...DEFAULT_PRICES[id] };
+        for (const k of ["hele", "udv", "indv"]) { const n = Number(p[id]?.[k]); if (Number.isFinite(n) && n > 0) m[id][k] = n; }
+      }
+    }
+  } catch {}
+  const out = {};
+  for (const id of Object.keys(m)) out[id] = Math.min(m[id].udv, m[id].indv, m[id].hele);
+  return out;
+}
+const kr = (n) => `${n.toLocaleString("da-DK")} kr`;
+const CHECK = '<span class="car-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>';
+
+export default async function Pricing() {
+  const from = await fromPrices();
+  const cards = CARS.map((c) =>
+    `<div class="car" data-id="${c.id}">${CHECK}<div class="car-stage"><img class="car-photo" src="/cars/${c.id}.webp" alt="${c.label}" loading="lazy" decoding="async"></div>` +
+    `<div class="nm">${c.label}</div><div class="ex">${c.ex}</div><div class="car-price"><span class="car-price-from">Fra</span> ${kr(from[c.id])}</div></div>`
+  ).join("");
+  return <div dangerouslySetInnerHTML={{ __html: HTML.replace("__CARS__", cards) }} />;
 }

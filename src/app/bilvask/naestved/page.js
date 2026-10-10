@@ -2,7 +2,7 @@ import Link from "next/link";
 import DanishOnlyNotice from "@/components/DanishOnlyNotice";
 import RelatedLinks from "@/components/RelatedLinks";
 import JsonLd from "@/components/JsonLd";
-import { breadcrumbLd, cityServiceLd } from "@/lib/seo";
+import { breadcrumbLd, cityServiceLd, webPageLd } from "@/lib/seo";
 export const metadata = {
   title: "Mobil bilvask i Næstved – Elite Vask dampvask til din dør",
   description: "Professionel mobil dampvask i Næstved og omegn. Vi kører til din adresse – gratis kørsel, betal efter vask. Book online eller ring til os.",
@@ -21,7 +21,7 @@ export const metadata = {
 export default function BilvaskNaestved() {
   return (
     <div className="legal-page">
-      <JsonLd items={[breadcrumbLd([{name:"Forside",path:"/"},{name:"Mobil bilvask i Næstved",path:"/bilvask/naestved"}]),cityServiceLd({city:"Næstved",path:"/bilvask/naestved"})]} />
+      <JsonLd items={[breadcrumbLd([{name:"Forside",path:"/"},{name:"Mobil bilvask i Næstved",path:"/bilvask/naestved"}]),cityServiceLd({city:"Næstved",path:"/bilvask/naestved"}),webPageLd({path:"/bilvask/naestved",name:"Mobil bilvask i Næstved – Elite Vask",description:"Mobil bil dampvask i Næstved. Vi kører til din adresse."})]} />
       <div className="legal-wrap">
         <Link href="/" className="legal-back">← Tilbage til forsiden</Link>
         <DanishOnlyNotice />

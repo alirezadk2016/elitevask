@@ -1,4 +1,5 @@
 import JsonLd from "@/components/JsonLd";
+import { webPageLd } from "@/lib/seo";
 
 // Built-in price floor/ceiling, overridden by the admin-managed KV matrix so
 // the structured data can never advertise prices the site no longer charges.
@@ -77,5 +78,10 @@ export default async function HomeJsonLd() {
       ? { ...o, offers: { ...o.offers, lowPrice: String(low), highPrice: String(high) } }
       : o,
   );
+  items.push(webPageLd({
+    path: "/",
+    name: "Elite Vask – mobil bil dampvask på Sjælland",
+    description: "Mobil bil dampvask på Sjælland. Vi kører til din adresse – priser fra 500 kr, book online.",
+  }));
   return <JsonLd items={items} />;
 }

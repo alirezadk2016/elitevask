@@ -2,7 +2,7 @@ import Link from "next/link";
 import DanishOnlyNotice from "@/components/DanishOnlyNotice";
 import RelatedLinks from "@/components/RelatedLinks";
 import JsonLd from "@/components/JsonLd";
-import { breadcrumbLd, cityServiceLd } from "@/lib/seo";
+import { breadcrumbLd, cityServiceLd, webPageLd } from "@/lib/seo";
 import { getHours, hoursDisplay } from "@/lib/getHours";
 export const metadata = {
   title: 'Mobil bilvask i Helsingør – Elite Vask dampvask til din dør',
@@ -23,7 +23,7 @@ export default async function BilvaskHelsingoer() {
   const hd = hoursDisplay(await getHours(), "da");
   return (
     <div className="legal-page">
-      <JsonLd items={[breadcrumbLd([{name:"Forside",path:"/"},{name:'Mobil bilvask i Helsingør',path:"/bilvask/helsingoer"}]),cityServiceLd({city:'Helsingør',path:"/bilvask/helsingoer"})]} />
+      <JsonLd items={[breadcrumbLd([{name:"Forside",path:"/"},{name:'Mobil bilvask i Helsingør',path:"/bilvask/helsingoer"}]),cityServiceLd({city:'Helsingør',path:"/bilvask/helsingoer"}),webPageLd({path:"/bilvask/helsingoer",name:"Mobil bilvask i Helsingør – Elite Vask",description:"Mobil bil dampvask i Helsingør. Vi kører til din adresse."})]} />
       <div className="legal-wrap">
         <Link href="/" className="legal-back">← Tilbage til forsiden</Link>
         <DanishOnlyNotice />

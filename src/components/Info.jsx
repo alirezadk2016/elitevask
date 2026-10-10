@@ -1,5 +1,5 @@
 const HTML = `<!-- INFO -->
-<section class="sec info"><div class="wrap">
+<section class="sec info" id="om-os"><div class="wrap">
   <div class="center"><div class="eyebrow" data-i18n="info_eyebrow">Om Elite Vask</div><h2 class="sec-title" data-i18n="info_title">Hvem er Elite Vask?</h2><p class="sec-sub" data-i18n="info_sub">Et lokalt firma med speciale i mobil dampvask. Vi kører ud i hele Sjælland med professionelt udstyr – og du betaler først, når bilen er ren.</p></div>
   <div class="info-grid">
     <div class="info-card info-card-why" id="whyCard" role="button" tabindex="0" aria-expanded="false" aria-controls="whyBody" onclick="toggleWhyCard()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleWhyCard()}">
