@@ -1441,3 +1441,18 @@ ol.steps,ul.why-grid{list-style:none;padding:0;margin-left:0;margin-right:0}
 .steam-cite figcaption{font-size:12.5px;color:var(--muted)}
 .steam-cite a{color:var(--green)}
 .foot-byline{color:var(--muted-2);font-size:12px}
+ul.why-items,ul.ex-grid{list-style:none;padding-left:0;margin-left:0;margin-right:0}
+ul.ex-grid{padding:0}
+/* list elements carry a default 1em block margin the old <div>s did not */
+ol.steps,ul.why-grid,ul.ex-grid{margin-bottom:0}
+ul.why-items{margin-top:0;margin-bottom:0}
+
+.steam-table-wrap{margin-top:28px;overflow-x:auto}
+.steam-table{width:100%;border-collapse:collapse;font-size:14.5px;min-width:420px}
+.steam-table caption{text-align:left;font-size:13px;color:var(--muted);padding:0 0 10px}
+.steam-table th,.steam-table td{padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.07);text-align:left;vertical-align:top}
+.steam-table thead th{font-size:12.5px;color:var(--muted);font-weight:600}
+.steam-table thead th:nth-child(2){color:var(--green)}
+.steam-table tbody th{color:#fff;font-weight:600;width:30%}
+.steam-table td:nth-child(2){color:var(--txt);font-weight:600}
+.steam-table td:nth-child(3){color:var(--muted)}

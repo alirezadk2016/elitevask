@@ -3,7 +3,7 @@ const HTML = `<!-- CAR SELECTOR + CALCULATOR -->
   <div class="center">
     <div class="eyebrow" data-i18n="sel_eyebrow">Priser &amp; pakker</div>
     <h2 class="sec-title" data-i18n="sel_title">Find pris til din bil</h2>
-    <p class="sec-sub" data-i18n="sel_sub">Vælg din biltype nedenfor og se prisen med det samme.</p>
+    <p class="sec-sub" data-i18n="sel_sub">Prisen afhænger af to ting: bilens størrelse og den pakke, du vælger. Vælg din biltype nedenfor, så ser du prisen med det samme – kørsel er altid gratis.</p>
   </div>
 
   <div class="car-grid" id="carGrid">__CARS__</div>

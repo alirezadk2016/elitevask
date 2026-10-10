@@ -12,7 +12,7 @@ const HTML = `<!-- WHY -->
     <div class="steam-science-head">
       <div class="eyebrow" data-i18n="steam_eyebrow">Hvad er dampvask?</div>
       <h3 class="sec-title" data-i18n="steam_title">Sådan virker det i praksis</h3>
-      <p class="sec-sub" data-i18n="steam_sub">Damp ved høj temperatur løsner snavs fra overfladen uden børster og hårde kemikalier – skånsomt mod lakken, effektivt mod urenheder.</p>
+      <p class="sec-sub" data-i18n="steam_sub">Dampvask er en rengøringsmetode, hvor damp ved høj temperatur løsner snavs fra lakken og kabinen – uden børster, højtryk eller hårde kemikalier.</p>
     </div>
     <div class="steam-facts">
 
@@ -50,11 +50,23 @@ const HTML = `<!-- WHY -->
       </div>
 
     </div>
+    <div class="steam-table-wrap">
+      <table class="steam-table">
+        <caption>Dampvask hos dig sammenlignet med en vaskehal</caption>
+        <thead><tr><th scope="col"></th><th scope="col">Elite Vask dampvask</th><th scope="col">Typisk vaskehal</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Vand pr. bil</th><td>1–3 liter</td><td>ca. 140 liter spildevand*</td></tr>
+          <tr><th scope="row">Børster og højtryk</th><td>Nej</td><td>Ofte</td></tr>
+          <tr><th scope="row">Kemikalier</th><td>Ingen skrappe kemikalier</td><td>Vaskemidler i spildevandet*</td></tr>
+          <tr><th scope="row">Hvor</th><td>Der hvor bilen holder</td><td>Du kører derhen</td></tr>
+        </tbody>
+      </table>
+    </div>
     <figure class="steam-cite">
       <blockquote cite="https://www2.mst.dk/udgiv/publikationer/2004/87-7614-047-4/html/helepubl.htm">
         <p>»En typisk vaskehal afleder omkring 140 liter spildevand pr. bil.« Spildevandet indeholder ifølge rapporten en række tungmetaller og miljøfremmede stoffer.</p>
       </blockquote>
-      <figcaption><span data-i18n="steam_src">Kilde</span>: <a href="https://www2.mst.dk/udgiv/publikationer/2004/87-7614-047-4/html/helepubl.htm" target="_blank" rel="noopener noreferrer">Miljøstyrelsen, Miljøprojekt nr. 876 – Bilvask (2004)</a></figcaption>
+      <figcaption>* <span data-i18n="steam_src">Kilde</span>: <a href="https://www2.mst.dk/udgiv/publikationer/2004/87-7614-047-4/html/helepubl.htm" target="_blank" rel="noopener noreferrer">Miljøstyrelsen, Miljøprojekt nr. 876 – Bilvask (2004)</a></figcaption>
     </figure>
   </div>
 

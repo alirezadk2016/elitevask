@@ -1,6 +1,6 @@
 const HTML = `<!-- INFO -->
 <section class="sec info" id="om-os"><div class="wrap">
-  <div class="center"><div class="eyebrow" data-i18n="info_eyebrow">Om Elite Vask</div><h2 class="sec-title" data-i18n="info_title">Hvem er Elite Vask?</h2><p class="sec-sub" data-i18n="info_sub">Et lokalt firma med speciale i mobil dampvask. Vi kører ud i hele Sjælland med professionelt udstyr – og du betaler først, når bilen er ren.</p></div>
+  <div class="center"><div class="eyebrow" data-i18n="info_eyebrow">Om Elite Vask</div><h2 class="sec-title" data-i18n="info_title">Hvem er Elite Vask?</h2><p class="sec-sub" data-i18n="info_sub">Elite Vask er et lokalt firma med speciale i mobil dampvask. Vi kører ud i hele Sjælland med professionelt udstyr – og du betaler først, når bilen er ren.</p></div>
   <div class="info-grid">
     <div class="info-card info-card-why" id="whyCard" role="button" tabindex="0" aria-expanded="false" aria-controls="whyBody" onclick="toggleWhyCard()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleWhyCard()}">
       <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div>
@@ -10,15 +10,15 @@ const HTML = `<!-- INFO -->
       </div>
       <p class="why-teaser" data-i18n="info1p">Premium mobil bilvask — vi sætter standarden. Klik for at læse mere.</p>
       <div class="why-body" id="whyBody">
-        <div class="why-items">
-          <div class="why-item"><span class="why-emoji">🚗</span><div><strong data-i18n="why_i1t">Vi kommer direkte til dig</strong><p data-i18n="why_i1p">Ingen ventetid i vaskehal. Vi møder op til din adresse i hele Sjælland — til tiden, klar til at levere.</p></div></div>
-          <div class="why-item"><span class="why-emoji">✨</span><div><strong data-i18n="why_i2t">Håndværksmæssig præcision</strong><p data-i18n="why_i2p">Hver bil behandles individuelt med fuld opmærksomhed og professionel teknik. Vi giver aldrig køb på kvaliteten.</p></div></div>
-          <div class="why-item"><span class="why-emoji">🌱</span><div><strong data-i18n="why_i3t">Bæredygtig damprensning</strong><p data-i18n="why_i3p">Vores damp-teknologi bruger op til 90 % mindre vand end konventionelle bilvaske — skånsomt for naturen, hårdt mod snavs.</p></div></div>
-          <div class="why-item"><span class="why-emoji">🛡️</span><div><strong data-i18n="why_i4t">Skåner lakken — altid</strong><p data-i18n="why_i4p">Vi anvender udelukkende professionelle, pH-neutrale produkter som beskytter og bevarer bilens overflade.</p></div></div>
-          <div class="why-item"><span class="why-emoji">💎</span><div><strong data-i18n="why_i5t">Dybdeglans & perfektion</strong><p data-i18n="why_i5p">Dampen penetrerer overfladen, fjerner indgroet snavs og fremhæver bilens naturlige glans — fra hjul til tag.</p></div></div>
-          <div class="why-item"><span class="why-emoji">⭐</span><div><strong data-i18n="why_i6t">Betal kun når du er tilfreds</strong><p data-i18n="why_i6p">Ingen forudbetaling. Vi fakturerer udelukkende efter afsluttet arbejde og din fulde tilfredshed.</p></div></div>
-          <div class="why-item"><span class="why-emoji">🤝</span><div><strong data-i18n="why_i7t">Service i verdensklasse</strong><p data-i18n="why_i7p">Vi tilstræber at overgå dine forventninger ved hvert besøg — fra første kontakt til det afsluttende håndtryk.</p></div></div>
-        </div>
+        <ul class="why-items">
+          <li class="why-item"><span class="why-emoji">🚗</span><div><strong data-i18n="why_i1t">Vi kommer direkte til dig</strong><p data-i18n="why_i1p">Ingen ventetid i vaskehal. Vi møder op til din adresse i hele Sjælland — til tiden, klar til at levere.</p></div></li>
+          <li class="why-item"><span class="why-emoji">✨</span><div><strong data-i18n="why_i2t">Håndværksmæssig præcision</strong><p data-i18n="why_i2p">Hver bil behandles individuelt med fuld opmærksomhed og professionel teknik. Vi giver aldrig køb på kvaliteten.</p></div></li>
+          <li class="why-item"><span class="why-emoji">🌱</span><div><strong data-i18n="why_i3t">Bæredygtig damprensning</strong><p data-i18n="why_i3p">Vores damp-teknologi bruger op til 90 % mindre vand end konventionelle bilvaske — skånsomt for naturen, hårdt mod snavs.</p></div></li>
+          <li class="why-item"><span class="why-emoji">🛡️</span><div><strong data-i18n="why_i4t">Skåner lakken — altid</strong><p data-i18n="why_i4p">Vi anvender udelukkende professionelle, pH-neutrale produkter som beskytter og bevarer bilens overflade.</p></div></li>
+          <li class="why-item"><span class="why-emoji">💎</span><div><strong data-i18n="why_i5t">Dybdeglans & perfektion</strong><p data-i18n="why_i5p">Dampen penetrerer overfladen, fjerner indgroet snavs og fremhæver bilens naturlige glans — fra hjul til tag.</p></div></li>
+          <li class="why-item"><span class="why-emoji">⭐</span><div><strong data-i18n="why_i6t">Betal kun når du er tilfreds</strong><p data-i18n="why_i6p">Ingen forudbetaling. Vi fakturerer udelukkende efter afsluttet arbejde og din fulde tilfredshed.</p></div></li>
+          <li class="why-item"><span class="why-emoji">🤝</span><div><strong data-i18n="why_i7t">Service i verdensklasse</strong><p data-i18n="why_i7p">Vi tilstræber at overgå dine forventninger ved hvert besøg — fra første kontakt til det afsluttende håndtryk.</p></div></li>
+        </ul>
       </div>
     </div>
     <div class="info-card"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6"/><path d="m20 4-8.5 8.5"/><path d="M9 4H4v16h16v-5"/></svg></div><h3 data-i18n="info2t">Vores udstyr</h3><p data-i18n="info2p">Vi arbejder med <strong>Optima Steamer XD2</strong> – en professionel damprenser med kontinuerlig damp, høj temperatur og minimalt vandforbrug. Perfekt til skånsom og effektiv bilvask.</p><div class="eq-specs"><span>☁️ Kontinuerlig damp</span><span>🌡️ Op til 180°C</span><span>💧 Minimalt vand</span><span>⚡ Professionel kraft</span></div></div>

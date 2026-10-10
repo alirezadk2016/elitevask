@@ -2,6 +2,7 @@ const HTML = `<!-- LOCAL SEO -->
 <section class="sec sec-tight local"><div class="wrap">
   <div class="eyebrow" data-i18n="local_eyebrow">Serviceområde</div>
   <h2 class="sec-title" data-i18n="local_title">Mobil bilvask i hele Sjælland</h2>
+  <p class="sec-sub" data-i18n="local_sub">Elite Vask kører ud i hele Sjælland – alle postnumre fra 1000 til 4799 – og kørslen er altid gratis. Vælg din by for lokale detaljer.</p>
   <div class="local-chips">
     <a href="/bilvask/koebenhavn" class="chip">Bilvask i København</a>
     <a href="/bilvask/roskilde" class="chip">Bilvask i Roskilde</a>
