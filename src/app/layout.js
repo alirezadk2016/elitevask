@@ -18,6 +18,10 @@ export const viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
+  // Paints the mobile browser bar in the site's own dark green-black instead
+  // of a white strip above a dark page.
+  themeColor: "#0b1310",
+  colorScheme: "dark",
 };
 
 export const metadata = {

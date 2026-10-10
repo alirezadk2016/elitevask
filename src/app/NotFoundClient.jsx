@@ -15,7 +15,7 @@ export default function NotFoundClient() {
         <span style={{ fontSize: 15, fontWeight: 800, color: "#fff", letterSpacing: 1 }}>ELITE VASK</span>
       </Link>
 
-      <p style={{ fontSize: 72, fontWeight: 800, letterSpacing: -3, lineHeight: 1, margin: "0 0 10px", color: "rgba(55,210,120,.35)" }}>404</p>
+      <p style={{ fontSize: 72, fontWeight: 800, letterSpacing: -3, lineHeight: 1, margin: "0 0 10px", color: "rgba(55,210,120,.6)" }} aria-hidden="true">404</p>
       <h1 style={{ fontSize: "clamp(22px,4vw,32px)", fontWeight: 800, letterSpacing: -0.8, color: "#fff", margin: "0 0 12px" }}>
         {da ? "Siden findes ikke" : "Page not found"}
       </h1>

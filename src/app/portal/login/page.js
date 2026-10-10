@@ -48,7 +48,7 @@ function LoginContent() {
     <div className="portal-auth-page">
       <div className="portal-auth-card">
         <Link href="/" className="portal-auth-logo">
-          <span className="portal-auth-logo-mark">EV</span>
+          <span className="portal-auth-logo-mark" style={{ background: "none", padding: 0, overflow: "hidden" }}><img src="/logo-96.webp" width="36" height="36" alt="" style={{ width: 36, height: 36, borderRadius: "50%", objectFit: "cover", display: "block" }} /></span>
           <span className="portal-auth-logo-text">Elite Vask</span>
         </Link>
 

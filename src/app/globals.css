@@ -1056,7 +1056,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 /* LEGAL PAGES */
 .legal-page{min-height:100vh;min-height:100dvh;background:var(--bg);padding:60px 0 100px}
 .legal-wrap{max-width:780px;margin:0 auto;padding:0 24px}
-.legal-back{display:inline-flex;align-items:center;gap:6px;color:var(--green);font-size:14px;font-weight:600;text-decoration:none;margin-bottom:40px;opacity:.85;transition:opacity .2s}
+.legal-back{display:inline-flex;align-items:center;gap:6px;min-height:44px;color:var(--green);font-size:14px;font-weight:600;text-decoration:none;margin-bottom:40px;opacity:.85;transition:opacity .2s}
 .legal-back:hover{opacity:1}
 .legal-wrap h1{font-size:clamp(28px,5vw,40px);font-weight:800;color:var(--txt);margin-bottom:6px;letter-spacing:-1px}
 .legal-updated{color:var(--muted);font-size:13px;margin-bottom:40px;border-bottom:1px solid var(--line);padding-bottom:24px}
@@ -1095,7 +1095,10 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 .guide-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:0}
 .guide-card{display:flex;flex-direction:column;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:var(--r);padding:22px 20px;text-decoration:none;transition:border-color .18s,transform .16s,box-shadow .16s}
 .guide-card:hover{border-color:rgba(55,210,120,.35);transform:translateY(-3px);box-shadow:0 10px 30px rgba(55,210,120,.08)}
-.guide-card-icon{font-size:26px;margin-bottom:12px}
+/* Line icons in the site's green tile, replacing emoji that rendered
+   differently per OS — the calendar one literally read "July 17". */
+.guide-card-icon{width:48px;height:48px;border-radius:12px;background:rgba(55,210,120,.1);border:1px solid rgba(55,210,120,.2);color:var(--green);display:flex;align-items:center;justify-content:center;margin-bottom:14px}
+.guide-card-icon svg{width:24px;height:24px}
 .guide-card h3{font-size:15px;font-weight:700;color:#fff;margin-bottom:8px;line-height:1.3}
 .guide-card p{font-size:13px;color:var(--muted);line-height:1.6;flex:1}
 .guide-card-read{display:inline-block;margin-top:14px;font-size:12.5px;font-weight:700;color:var(--green)}
@@ -1155,7 +1158,7 @@ body:has(.ba-lb) .cookie-banner{display:none}
 .portal-auth-form{display:flex;flex-direction:column;gap:16px}
 .portal-field{display:flex;flex-direction:column;gap:6px}
 .portal-field label{font-size:13px;font-weight:600;color:var(--txt)}
-.portal-field input{background:var(--surface-2);border:1px solid var(--line-2);border-radius:var(--r-sm);padding:12px 14px;font-size:15px;color:var(--txt);font-family:inherit;transition:border-color .15s}
+.portal-field input{background:var(--surface-2);border:1px solid var(--line-2);border-radius:var(--r-sm);padding:12px 14px;font-size:16px;color:var(--txt);font-family:inherit;transition:border-color .15s}
 .portal-field input:focus{outline:none;border-color:var(--green)}
 .portal-field input::placeholder{color:var(--muted-2)}
 .portal-btn-primary{background:var(--green);color:#062313;border:none;border-radius:var(--r-sm);padding:14px 20px;font-size:15px;font-weight:700;cursor:pointer;transition:background .15s;font-family:inherit;text-decoration:none;display:inline-block;text-align:center}
@@ -1260,10 +1263,10 @@ body:has(.ba-lb) .cookie-banner{display:none}
 
 .gal-page{min-height:100vh;min-height:100dvh;background:radial-gradient(120% 60% at 50% 0%,rgba(212,175,55,.05),transparent 50%),var(--bg);color:var(--txt)}
 .gal-topbar{position:sticky;top:0;z-index:40;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 28px;background:rgba(11,19,16,.82);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
-.gal-back{display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:var(--muted);transition:color .2s}
+.gal-back{display:inline-flex;align-items:center;gap:8px;min-height:44px;font-size:14px;font-weight:600;color:var(--muted);transition:color .2s}
 .gal-back:hover{color:var(--green)}
 .gal-back svg{width:18px;height:18px}
-.gal-brand{display:inline-flex;align-items:center;gap:9px;font-size:15px;font-weight:800;letter-spacing:.4px;color:#fff}
+.gal-brand{display:inline-flex;align-items:center;gap:9px;min-height:44px;font-size:15px;font-weight:800;letter-spacing:.4px;color:#fff}
 .gal-brand-mark{width:26px;height:26px;border-radius:50%;background:#fff url('/logo-96.webp') center/cover no-repeat;border:1px solid var(--line)}
 .gal-book{display:inline-flex;align-items:center;background:var(--green);color:#062313;font-size:13.5px;font-weight:700;padding:9px 18px;border-radius:99px;transition:.2s}
 .gal-book:hover{background:#48e088;transform:translateY(-1px)}
@@ -1302,7 +1305,7 @@ body:has(.ba-lb) .cookie-banner{display:none}
 /* caption overlay (doesn't block dragging) */
 .ba-thumb-livecap{position:absolute;left:0;right:0;bottom:0;padding:24px 12px 9px;font-size:10.5px;font-weight:500;letter-spacing:.4px;color:rgba(255,255,255,.62);background:linear-gradient(to top,rgba(4,10,6,.72) 0%,rgba(4,10,6,.28) 55%,transparent 100%);z-index:2;margin:0;pointer-events:none}
 /* small expand-to-fullscreen button */
-.ba-thumb-expand{position:absolute;bottom:8px;right:8px;z-index:5;width:30px;height:30px;border-radius:8px;background:rgba(3,9,5,.5);border:1px solid rgba(255,255,255,.16);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(4px);transition:background .2s,border-color .2s,transform .2s;opacity:0}
+.ba-thumb-expand{position:absolute;bottom:8px;right:8px;z-index:5;width:40px;height:40px;border-radius:8px;background:rgba(3,9,5,.5);border:1px solid rgba(255,255,255,.16);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(4px);transition:background .2s,border-color .2s,transform .2s;opacity:0}
 .ba-thumb-live:hover .ba-thumb-expand{opacity:1}
 .ba-thumb-expand:hover{background:rgba(212,175,55,.22);border-color:rgba(212,175,55,.5);transform:scale(1.08)}
 @media(hover:none){.ba-thumb-expand{opacity:1}}
@@ -1334,7 +1337,7 @@ body:has(.ba-lb) .cookie-banner{display:none}
 @media(max-width:860px){.guide-index-grid{grid-template-columns:repeat(2,1fr)}}
 .guide-index-card{display:flex;flex-direction:column;background:linear-gradient(180deg,var(--surface-2),var(--bg-2));border:1px solid var(--line);border-radius:18px;padding:30px 26px;transition:transform .3s cubic-bezier(.22,1,.36,1),border-color .25s ease,box-shadow .35s ease}
 .guide-index-card:hover{transform:translateY(-5px);border-color:rgba(212,175,55,.4);box-shadow:0 22px 56px rgba(0,0,0,.45),0 0 0 1px rgba(212,175,55,.1)}
-.guide-index-card .guide-card-icon{font-size:34px;margin-bottom:16px}
+.guide-index-card .guide-card-icon{width:52px;height:52px;margin-bottom:16px}
 .guide-index-card h2{font-size:19px;font-weight:800;color:#fff;line-height:1.3;letter-spacing:-.3px}
 .guide-index-card p{font-size:14px;color:var(--muted);margin-top:10px;line-height:1.6;flex:1}
 .guide-index-card .guide-card-read{margin-top:18px;font-size:13.5px;font-weight:700;color:var(--green)}
@@ -1387,3 +1390,42 @@ body:has(.ba-lb) .cookie-banner{display:none}
 
 /* the skip link focuses <main> programmatically; no ring around the whole page */
 main:focus{outline:none}
+
+/* /priser: stacked cards on phones, table from 601px up */
+.price-cards{display:none}
+@media(max-width:600px){
+  .price-table-wrap{display:none}
+  .price-cards{display:grid;gap:12px;margin-bottom:32px}
+  .price-card{background:#15211b;border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:16px}
+  .price-card-head{display:flex;flex-direction:column;gap:2px;margin-bottom:12px}
+  .price-card-car{font-size:16px;font-weight:800;color:#fff}
+  .price-card-ex{font-size:12.5px;color:var(--muted-2)}
+  .price-card-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0}
+  .price-card-grid>div{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:10px 12px}
+  .price-card-grid dt{font-size:12px;color:var(--muted);margin-bottom:2px}
+  .price-card-grid dd{margin:0;font-size:17px;font-weight:800;color:var(--green)}
+  .price-card-grid .is-hele{border-color:rgba(55,210,120,.3)}
+  .price-card-grid .is-guld{border-color:rgba(212,175,55,.3)}
+  .price-card-grid .is-guld dt,.price-card-grid .is-guld dd{color:#d4af37}
+}
+
+/* /galleri grid tiles reuse the full-size slider, whose FØR/EFTER labels
+   (11px + 11px padding) and 42px knob were sized for a hero-width image. On a
+   ~180px phone tile the two labels covered half the photo and the caption ran
+   under the expand button. Same compact treatment the homepage cards use. */
+.ba-thumb-live .ba-lab{font-size:9.5px;padding:3px 8px;top:10px;letter-spacing:.8px}
+.ba-thumb-live .ba-lab.l{left:10px}.ba-thumb-live .ba-lab.r{right:10px}
+.ba-thumb-live .ba-knob{width:34px;height:34px}
+.ba-thumb-live .ba-knob svg{width:17px;height:17px}
+.ba-thumb-livecap{padding-right:56px}
+@media(max-width:520px){
+  .ba-thumb-live .ba-lab{font-size:8.5px;padding:2px 6px;top:7px;letter-spacing:.6px}
+  .ba-thumb-live .ba-lab.l{left:7px}.ba-thumb-live .ba-lab.r{right:7px}
+  .ba-thumb-live .ba-knob{width:30px;height:30px}
+}
+
+/* /faq header: on phones the logo, DK/UK, phone and Book nu share 390px; the
+   tagline wrapped the lockup to four lines. Keep the name, drop the tagline. */
+/* the round logo itself reads "Elite Vask", so on phones the text beside it
+   only competes with the DK/UK toggle for space */
+@media(max-width:420px){.faq-logo-text{display:none}}

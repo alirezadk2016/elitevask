@@ -83,7 +83,7 @@ export default function PortalPage() {
       <header className="portal-header">
         <div className="portal-header-inner">
           <Link href="/" className="portal-logo">
-            <span className="portal-logo-mark">EV</span>
+            <span className="portal-logo-mark" style={{ background: "none", padding: 0, overflow: "hidden" }}><img src="/logo-96.webp" width="36" height="36" alt="" style={{ width: 36, height: 36, borderRadius: "50%", objectFit: "cover", display: "block" }} /></span>
             <span>Elite Vask</span>
           </Link>
           <div className="portal-header-right">

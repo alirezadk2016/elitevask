@@ -131,7 +131,7 @@ export default async function PriserPage() {
         ]}
       />
       <div style={{ maxWidth: 900, margin: "0 auto", padding: "48px 24px 80px" }}>
-        <Link href="/" style={{ display: "inline-flex", alignItems: "center", gap: 6, color: "#37d278", fontSize: 14, fontWeight: 600, textDecoration: "none", marginBottom: 32, opacity: 0.9 }}>
+        <Link href="/" style={{ display: "inline-flex", alignItems: "center", gap: 6, minHeight: 44, color: "#37d278", fontSize: 14, fontWeight: 600, textDecoration: "none", marginBottom: 32, opacity: 0.9 }}>
           ← Tilbage til forsiden
         </Link>
 
@@ -148,7 +148,29 @@ export default async function PriserPage() {
           Vælg den pakke der passer til din bil og dine behov. <strong style={{ color: "#fff" }}>Kørsel er gratis</strong> til hele Sjælland.
         </p>
 
-        <div style={{ overflowX: "auto", marginBottom: 40, borderRadius: 14, border: "1px solid rgba(255,255,255,.07)" }}>
+        {/* Phones get one card per car type instead of the table. At 390px the
+            table scrolled sideways and cut off "Hele bilen" and "Guld pakke" —
+            the most-booked package and the most expensive one — leaving a
+            clipped "8" as the only hint they existed. Only one of the two
+            layouts is ever displayed, so assistive tech never reads it twice. */}
+        <div className="price-cards">
+          {prices.map((row) => (
+            <div key={row.id} className="price-card">
+              <div className="price-card-head">
+                <span className="price-card-car">{row.car}</span>
+                <span className="price-card-ex">{row.ex}</span>
+              </div>
+              <dl className="price-card-grid">
+                <div><dt>Udvendig</dt><dd>{fmtKr(row.udv)}</dd></div>
+                <div><dt>Indvendig</dt><dd>{fmtKr(row.indv)}</dd></div>
+                <div className="is-hele"><dt>Hele bilen</dt><dd>{fmtKr(row.hele)}</dd></div>
+                <div className="is-guld"><dt>Guld pakke</dt><dd>{fmtKr(row.guld)}</dd></div>
+              </dl>
+            </div>
+          ))}
+        </div>
+
+        <div className="price-table-wrap" style={{ overflowX: "auto", marginBottom: 40, borderRadius: 14, border: "1px solid rgba(255,255,255,.07)" }}>
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14, minWidth: 480 }}>
             <thead>
               <tr style={{ borderBottom: "2px solid rgba(55,210,120,.25)" }}>
@@ -164,7 +186,7 @@ export default async function PriserPage() {
                 <tr key={i} style={{ borderBottom: "1px solid rgba(255,255,255,.07)", background: i % 2 === 0 ? "rgba(255,255,255,.02)" : "transparent" }}>
                   <td style={{ padding: "14px 16px" }}>
                     <span style={{ display: "block", fontWeight: 700, color: "#fff" }}>{row.car}</span>
-                    <span style={{ fontSize: 12, color: "#6f857a" }}>{row.ex}</span>
+                    <span style={{ fontSize: 12, color: "var(--muted-2)" }}>{row.ex}</span>
                   </td>
                   <td style={{ textAlign: "right", padding: "14px 16px", color: "#37d278", fontWeight: 700 }}>{fmtKr(row.udv)}</td>
                   <td style={{ textAlign: "right", padding: "14px 16px", color: "#37d278", fontWeight: 700 }}>{fmtKr(row.indv)}</td>

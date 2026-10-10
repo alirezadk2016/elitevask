@@ -12,7 +12,7 @@ export default function LangToggle() {
       aria-label={aria}
       aria-pressed={lang === v}
       style={{
-        display: "flex", alignItems: "center", gap: 5, padding: "5px 9px",
+        display: "flex", alignItems: "center", gap: 5, padding: "5px 9px", minHeight: 32,
         borderRadius: 99, border: "none", cursor: "pointer", lineHeight: 1,
         fontSize: 11, fontWeight: 700, fontFamily: "inherit",
         background: lang === v ? "rgba(55,210,120,.16)" : "transparent",

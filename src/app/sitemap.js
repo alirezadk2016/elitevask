@@ -13,11 +13,11 @@ const SITE_URL = 'https://www.elite-vask.dk';
  * So each entry carries the date its content actually last changed. When you
  * edit a page, bump its date here in the same commit. */
 const PAGES = [
-  ['',                                '2026-09-27', 'weekly',  1.0],
-  ['/priser',                         '2026-09-25', 'monthly', 0.8],
-  ['/galleri',                        '2026-09-14', 'weekly',  0.8],
-  ['/faq',                            '2026-09-25', 'monthly', 0.7],
-  ['/guide',                          '2026-09-14', 'monthly', 0.7],
+  ['',                                '2026-10-10', 'weekly',  1.0],
+  ['/priser',                         '2026-10-10', 'monthly', 0.8],
+  ['/galleri',                        '2026-10-10', 'weekly',  0.8],
+  ['/faq',                            '2026-10-10', 'monthly', 0.7],
+  ['/guide',                          '2026-10-10', 'monthly', 0.7],
   ['/kontakt',                        '2026-09-14', 'yearly',  0.6],
   ['/handelsbetingelser',             '2026-09-03', 'yearly',  0.4],
   ['/privatpolitik',                  '2026-09-03', 'yearly',  0.4],
