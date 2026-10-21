@@ -4,6 +4,7 @@
 export const PAGES = [
   ['',                                '2026-10-21', 'weekly',  1.0],
   ['/priser',                         '2026-10-21', 'monthly', 0.8],
+  ['/klargoering-af-bil',             '2026-10-21', 'monthly', 0.8],
   ['/galleri',                        '2026-10-21', 'weekly',  0.8],
   ['/faq',                            '2026-10-21', 'monthly', 0.7],
   ['/guide',                          '2026-10-21', 'monthly', 0.7],

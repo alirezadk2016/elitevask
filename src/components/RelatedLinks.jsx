@@ -35,6 +35,7 @@ export default function RelatedLinks({ city }) {
         <a href="/priser" className="chip">{city ? (en ? "Mobile car wash prices" : "Priser på mobil bilvask") : (en ? "Prices" : "Priser")}</a>
         <a href="/faq" className="chip">{city ? (en ? "Questions about steam washing" : "Spørgsmål om dampvask") : "FAQ"}</a>
         <a href="/guide" className="chip">{en ? "Car care guide" : "Bilpleje guide"}</a>
+        <a href="/klargoering-af-bil" className="chip">{en ? "Car preparation for sale" : "Klargøring af bil"}</a>
         {!city && <a href="/galleri" className="chip">{en ? "Gallery" : "Galleri"}</a>}
         {!city && <a href="/kontakt" className="chip">{en ? "Contact" : "Kontakt"}</a>}
         {near.map((c) => (

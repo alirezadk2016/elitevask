@@ -77,7 +77,7 @@ export default async function BilvaskKoege() {
         <p><strong>Koster det noget at I kører til Køge?</strong><br/>
         Nej, kørsel til Køge og hele kommunen er gratis.</p>
         <p><strong>Vasker I leasingbiler inden aflevering?</strong><br/>
-        Ja, vi klargør leasingbiler til aflevering med et professionelt resultat.</p>
+        Ja, vi klargør leasingbiler til aflevering med et professionelt resultat. Læs mere om <a href="/klargoering-af-bil">klargøring af bil til salg</a>.</p>
         <p><strong>Kan I komme i weekenden?</strong><br/>
         {hd.weekendOpen
           ? <>Ja, vi arbejder {hd.text}.</>
@@ -134,7 +134,7 @@ export default async function BilvaskKoege() {
         <p><strong>Does it cost anything for you to drive to Køge?</strong><br/>
         No, travel to Køge and the whole municipality is free.</p>
         <p><strong>Do you wash lease cars before they are returned?</strong><br/>
-        Yes, we prepare lease cars for return with a professional result.</p>
+        Yes, we prepare lease cars for return with a professional result. Read more about <a href="/klargoering-af-bil">preparing a car for sale</a>.</p>
         <p><strong>Can you come at the weekend?</strong><br/>
         {hdEn.weekendOpen
           ? <>Yes, we work {hdEn.text}.</>

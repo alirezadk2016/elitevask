@@ -60,6 +60,7 @@ Aktuelle priser: https://www.elite-vask.dk/priser
 ## Sider
 - [Forside og booking](https://www.elite-vask.dk/): vælg biltype, se pris og book en tid
 - [Priser](https://www.elite-vask.dk/priser): fuld prisliste og hvad hver pakke indeholder
+- [Klargøring af bil til salg](https://www.elite-vask.dk/klargoering-af-bil): grundig dampvask ind og ud før salg, fremvisning eller leasingaflevering
 - [FAQ](https://www.elite-vask.dk/faq): ofte stillede spørgsmål om dampvask, vejr, elbiler og tid
 - [Galleri](https://www.elite-vask.dk/galleri): før- og efterbilleder fra rigtige opgaver
 - [Kontakt](https://www.elite-vask.dk/kontakt): telefon, e-mail og serviceområde
