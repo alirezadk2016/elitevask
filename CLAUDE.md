@@ -52,7 +52,7 @@ All styles are in `src/app/globals.css` using plain CSS variables (`--green`, `-
 | `content:faq` | array | `{id, q:{da,en}, a:{da,en}}` |
 | `content:extras` | array | `{id, name:{da,en}, desc:{da,en}, price}` |
 | `content:prices` | object | `{lille:{hele,udv,indv,guld}, mellem:{...}, stor:{...}, varebil:{...}}` |
-| `content:hours` | object | `{open:"15:30", close:"22:00", slotMinutes:30, closedDays:[]}` — manager-editable booking hours (admin → Åbningstider); helpers in `src/lib/hours.js` |
+| `content:hours` | object | `{slotMinutes:30, closedDates:[], days:[7× {closed, open, close}] (0=Sun..6=Sat), open, close, closedDays}` — per-weekday booking hours (admin → Åbningstider). `open`/`close` are the union of open days (shared slot grid used by `/api/book`); a day's slots = `buildSlotTimes(hours, date)`. Helpers in `src/lib/hours.js` |
 | `session:<hash>` | object | customer portal sessions |
 
 ### Package and car type IDs

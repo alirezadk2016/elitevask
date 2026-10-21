@@ -20,7 +20,7 @@ export default function MoveBookingModal({ booking, secret, hours, narrow, onClo
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState("");
 
-  const slotTimes = useMemo(() => buildSlotTimes(hours), [hours]);
+  const slotTimes = useMemo(() => buildSlotTimes(hours, date || undefined), [hours, date]);
   const need      = carSlotCount(hours, booking.carId);
   const today     = todayISO();
   const nowMin    = cphMinutesNow();

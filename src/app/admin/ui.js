@@ -9,8 +9,8 @@ export const T = {
   accentBorder: "rgba(55,210,120,.22)",
   t1: "#f0f4f1",
   t2: "#a8b8aa",
-  t3: "#5a6e5c",
-  t4: "#2e3e30",
+  t3: "#879b8b", // secondary text — ≥4.5:1 on bg1 (was #5a6e5c, ~2.9:1)
+  t4: "#5f7363", // hints/placeholders — ~3.3:1 (was #2e3e30, ~1.5:1, unreadable)
   danger:       "#e5534b",
   dangerDim:    "rgba(229,83,75,.1)",
   dangerBorder: "rgba(229,83,75,.25)",

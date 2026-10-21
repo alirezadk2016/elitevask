@@ -74,7 +74,7 @@ export default async function OmOs() {
               <tr><th scope="row">Navn</th><td>Elite Vask</td></tr>
               <tr><th scope="row">CVR</th><td>46392264</td></tr>
               <tr><th scope="row">Område</th><td>Hele Sjælland (postnr. 1000–4799)</td></tr>
-              <tr><th scope="row">Åbningstider</th><td>{hd.days} {hd.time}, eller efter aftale</td></tr>
+              <tr><th scope="row">Åbningstider</th><td>{hd.text.charAt(0).toUpperCase() + hd.text.slice(1)}, eller efter aftale</td></tr>
               <tr><th scope="row">Udstyr</th><td>Optima Steamer XD2 – professionel damprenser med kontinuerlig damp</td></tr>
               <tr><th scope="row">Betaling</th><td>MobilePay, bankoverførsel eller kontant – efter vasken</td></tr>
               <tr><th scope="row">Kontakt</th><td><a href="tel:+4524440321" style={{ color: "var(--green)", display: "inline-flex", alignItems: "center", minHeight: 44 }}>+45 24 44 03 21</a> · <a href="mailto:info@elite-vask.dk" style={{ color: "var(--green)", display: "inline-flex", alignItems: "center", minHeight: 44 }}>info@elite-vask.dk</a></td></tr>

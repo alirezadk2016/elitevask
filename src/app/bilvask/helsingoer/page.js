@@ -73,8 +73,8 @@ export default async function BilvaskHelsingoer() {
         Saltfilmen matterer lak og krom over tid og fremskynder rust ved kanter og samlinger. Dampvask opløser og fjerner filmen uden at slide på overfladen.</p>
         <p><strong>Kan I komme i weekenden?</strong><br/>
         {hd.weekendOpen
-          ? <>Ja, vi arbejder {hd.days.toLowerCase()} kl. {hd.time.replace(" – ", "–")}.</>
-          : <>Vi har desværre lukket i weekenden, men vi arbejder {hd.days.toLowerCase()} kl. {hd.time.replace(" – ", "–")} – ring til os, så finder vi en tid.</>}</p>
+          ? <>Ja, vi arbejder {hd.text}.</>
+          : <>Vi har desværre lukket i weekenden, men vi arbejder {hd.text} – ring til os, så finder vi en tid.</>}</p>
 
         <div className="guide-cta-box">
           <p style={{margin:'0 0 1rem',fontWeight:700,fontSize:'1.1rem',color:'#fff'}}>Book mobil bilvask i Helsingør i dag</p>
@@ -123,8 +123,8 @@ export default async function BilvaskHelsingoer() {
         Over time the salt film dulls paint and chrome and accelerates rust at edges and joints. Steam washing dissolves and removes the film without wearing the surface.</p>
         <p><strong>Can you come at the weekend?</strong><br/>
         {hdEn.weekendOpen
-          ? <>Yes, we work {hdEn.days.toLowerCase()}, {hdEn.time.replace(" – ", "–")}.</>
-          : <>Unfortunately we are closed at weekends, but we work {hdEn.days.toLowerCase()}, {hdEn.time.replace(" – ", "–")} – call us and we will find a time.</>}</p>
+          ? <>Yes, we work {hdEn.text}.</>
+          : <>Unfortunately we are closed at weekends, but we work {hdEn.text} – call us and we will find a time.</>}</p>
 
         <div className="guide-cta-box">
           <p style={{margin:'0 0 1rem',fontWeight:700,fontSize:'1.1rem',color:'#fff'}}>Book a mobile car wash in Helsingør today</p>

@@ -1,5 +1,5 @@
 import { randomBytes } from 'crypto';
-import { buildSlotTimes, carSlotCount, isClosedDay, normalizeHours, DEFAULT_HOURS } from '@/lib/hours';
+import { buildSlotTimes, carSlotCount, isClosedDay, normalizeHours, DEFAULT_HOURS, windowFor } from '@/lib/hours';
 
 /* Shared booking primitives for the ADMIN and CRON routes.
  *
@@ -208,19 +208,20 @@ export function toMinutes(t) { return parseInt(t.slice(0, 2), 10) * 60 + parseIn
    entered time can never land outside the grid the calendar draws. */
 export async function validateSlot({ date, time, carId }) {
   const hours = await loadHours();
-  const slotTimes = buildSlotTimes(hours);
+  const slotTimes = buildSlotTimes(hours, date); // that weekday's own window
   const bad = (error, message) => ({ ok: false, error, message, hours });
 
   if (!['lille', 'mellem', 'stor', 'varebil'].includes(carId)) return bad('invalid_car', 'Vælg en biltype.');
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date || '')) return bad('invalid_slot', 'Ugyldig dato.');
-  if (!slotTimes.includes(time)) return bad('invalid_slot', `Tidspunktet passer ikke i tidsplanen (${hours.open}–${hours.close}, ${hours.slotMinutes} min.).`);
+  if (isClosedDay(hours, date)) return bad('closed_day', 'Der er lukket den valgte dag — åbn dagen under Åbningstider først.');
+  if (!slotTimes.includes(time)) { const w = windowFor(hours, date) || hours; return bad('invalid_slot', `Tidspunktet passer ikke i tidsplanen (${w.open}–${w.close}, ${hours.slotMinutes} min.).`); }
   if (isClosedDay(hours, date)) return bad('closed_day', 'Der er lukket den valgte dag — åbn dagen under Åbningstider først.');
 
   const slotsNeeded = carSlotCount(hours, carId);
   const startIdx = slotTimes.indexOf(time);
   if (startIdx + slotsNeeded > slotTimes.length) {
     const hrs = +(slotsNeeded * hours.slotMinutes / 60).toFixed(1);
-    return bad('slot_range', `Denne biltype tager ${hrs} timer og kan ikke nå at blive færdig inden ${hours.close}.`);
+    return bad('slot_range', `Denne biltype tager ${hrs} timer og kan ikke nå at blive færdig inden ${(windowFor(hours, date) || hours).close}.`);
   }
   const now = cphNow();
   if (date < now.date || (date === now.date && toMinutes(time) <= now.minutes)) {

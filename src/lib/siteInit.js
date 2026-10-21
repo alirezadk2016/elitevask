@@ -1,5 +1,5 @@
 // Auto-extracted from original elitevask.html — runs once on mount.
-import { DEFAULT_HOURS, buildSlotTimes, carSlotCount, isClosedDay } from './hours';
+import { DEFAULT_HOURS, buildSlotTimes, carSlotCount, isClosedDay, normalizeHours, hoursSummary } from './hours';
 export function initSite(overrides){overrides=overrides||{};
 // Document/window-level listeners below accumulate on every init (React
 // StrictMode runs effects twice in dev; client-side navigation back to the
@@ -105,7 +105,7 @@ if(overrides.prices){CARS.forEach(function(c){if(overrides.prices[c.id])Object.a
 if(overrides.extras&&overrides.extras.length)EXTRAS=sanitizeDeep(overrides.extras);
 // Manager-configurable opening hours (admin → Åbningstider). Drives the
 // booking slot grid + duration. Falls back to the default window.
-var HOURS=overrides.hours||DEFAULT_HOURS;
+var HOURS=normalizeHours(overrides.hours||DEFAULT_HOURS);
 // Days-open summary for the contact card, reflecting closedDays + language.
 function hoursDaysLabel(langOverride){
   var da=(langOverride||LANG)!=='en';var closed=HOURS.closedDays||[];
@@ -121,8 +121,9 @@ function hoursDaysLabel(langOverride){
 // time + days always match what the booking grid offers (run on each lang switch).
 function applyHoursDisplay(){
   try{
-    var ht=document.querySelector('.cl-item-hours .htime');if(ht)ht.textContent=HOURS.open+' – '+HOURS.close;
-    var hd=document.querySelector('.cl-item-hours .hday');if(hd){hd.textContent=hoursDaysLabel();hd.removeAttribute('data-i18n');}
+    var sum=hoursSummary(HOURS,LANG);var one=/^(alle dage|every day) (kl\. )?/i.test(sum);
+    var ht=document.querySelector('.cl-item-hours .htime');if(ht)ht.textContent=one?HOURS.open+' – '+HOURS.close:sum.charAt(0).toUpperCase()+sum.slice(1);
+    var hd=document.querySelector('.cl-item-hours .hday');if(hd){hd.textContent=one?hoursDaysLabel():(LANG==='da'?'Åbningstider':'Opening hours');hd.removeAttribute('data-i18n');}
   }catch(e){}
 }
 var REVIEWS=[];
@@ -733,7 +734,7 @@ function renderSlotGrid(grid,booked,date){
     var oh=document.querySelector('.slot-dur-hint');if(oh)oh.remove();
     return;
   }
-  var SLOTS=buildSlotTimes(HOURS);
+  var SLOTS=buildSlotTimes(HOURS,date); // that weekday's own window
   var need=carSlotCount(HOURS,wiz.car?wiz.car.id:'');
   var visible=SLOTS.filter(function(s){return !isPastSlot(date,s);});
   if(visible.length===0){
@@ -968,7 +969,7 @@ function submitBooking(cb){
        ans:['Du kan ringe til os på <a href="tel:+4524440321"><strong>+45 24 44 03 21</strong></a> eller skrive til <a href="mailto:info@elite-vask.dk">info@elite-vask.dk</a> 📩'],
        follow:['Book nu','Åbningstider']},
       {keys:['åbningstid','åbent','hvornår','åbnings','weekend','hverdage'],
-       ans:['Vi holder åbent <strong>'+hoursDaysLabel('da').toLowerCase()+' kl. '+HOURS.open+'–'+HOURS.close+'</strong> – eller efter aftale. Online booking er tilgængelig hele døgnet 🕗'],
+       ans:['Vi holder åbent <strong>'+hoursSummary(HOURS,'da')+'</strong> – eller efter aftale. Online booking er tilgængelig hele døgnet 🕗'],
        follow:['Book nu','Kontakt']},
       {keys:['garanti','tilfreds','klage','refund','utilfreds'],
        ans:['Vi tilbyder <strong>tilfredshedsgaranti</strong> – er du ikke tilfreds, finder vi en løsning 💚 Din tilfredshed er vores prioritet.'],
@@ -1038,7 +1039,7 @@ function submitBooking(cb){
        ans:['You can call us at <a href="tel:+4524440321"><strong>+45 24 44 03 21</strong></a> or email <a href="mailto:info@elite-vask.dk">info@elite-vask.dk</a> 📩'],
        follow:['Book now','Opening hours']},
       {keys:['hours','open','when','weekend','weekday'],
-       ans:['We are open <strong>'+hoursDaysLabel('en').toLowerCase()+' '+HOURS.open+'–'+HOURS.close+'</strong> – or by arrangement. Online booking is available 24/7 🕗'],
+       ans:['We are open <strong>'+hoursSummary(HOURS,'en')+'</strong> – or by arrangement. Online booking is available 24/7 🕗'],
        follow:['Book now','Contact']},
       {keys:['guarantee','not happy','complaint','refund'],
        ans:['We offer a <strong>satisfaction guarantee</strong> – if you\'re not happy, we\'ll find a solution 💚 Your satisfaction is our priority.'],

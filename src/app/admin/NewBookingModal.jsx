@@ -32,7 +32,7 @@ export default function NewBookingModal({ secret, hours, extrasItems, prices, na
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState("");
 
-  const slotTimes  = useMemo(() => buildSlotTimes(hours), [hours]);
+  const slotTimes  = useMemo(() => buildSlotTimes(hours, date || undefined), [hours, date]);
   const need       = carSlotCount(hours, carId);
   const dayClosed  = date ? isClosedDay(hours, date) : false;
   const today      = todayISO();

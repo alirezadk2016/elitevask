@@ -73,8 +73,8 @@ export default async function BilvaskFaxe() {
         Ja. Kraftig tilsmudsning kan kræve lidt ekstra tid, som vi aftaler på forhånd – men det er præcis den slags opgaver, dampen er bedst til.</p>
         <p><strong>Kan I komme i weekenden?</strong><br/>
         {hd.weekendOpen
-          ? <>Ja, vi arbejder {hd.days.toLowerCase()} kl. {hd.time.replace(" – ", "–")}.</>
-          : <>Vi har desværre lukket i weekenden, men vi arbejder {hd.days.toLowerCase()} kl. {hd.time.replace(" – ", "–")} – ring til os, så finder vi en tid.</>}</p>
+          ? <>Ja, vi arbejder {hd.text}.</>
+          : <>Vi har desværre lukket i weekenden, men vi arbejder {hd.text} – ring til os, så finder vi en tid.</>}</p>
 
         <div className="guide-cta-box">
           <p style={{margin:'0 0 1rem',fontWeight:700,fontSize:'1.1rem',color:'#fff'}}>Book mobil bilvask i Faxe i dag</p>
@@ -123,8 +123,8 @@ export default async function BilvaskFaxe() {
         Yes. Heavy soiling may require a little extra time, which we agree in advance – but this is exactly the kind of job steam is best at.</p>
         <p><strong>Can you come at the weekend?</strong><br/>
         {hdEn.weekendOpen
-          ? <>Yes, we work {hdEn.days.toLowerCase()}, {hdEn.time.replace(" – ", "–")}.</>
-          : <>Unfortunately we are closed at weekends, but we work {hdEn.days.toLowerCase()}, {hdEn.time.replace(" – ", "–")} – call us and we will find a time.</>}</p>
+          ? <>Yes, we work {hdEn.text}.</>
+          : <>Unfortunately we are closed at weekends, but we work {hdEn.text} – call us and we will find a time.</>}</p>
 
         <div className="guide-cta-box">
           <p style={{margin:'0 0 1rem',fontWeight:700,fontSize:'1.1rem',color:'#fff'}}>Book a mobile car wash in Faxe today</p>

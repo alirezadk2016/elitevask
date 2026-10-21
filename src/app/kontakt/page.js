@@ -93,7 +93,7 @@ export default async function Kontakt() {
             <span className="cl-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" /></svg></span>
             <span><span className="lab">Åbningstider</span>
               <div className="hours-grid">
-                <div className="hrow"><span className="hday">{hd.days}</span><span className="htime">{hd.time}</span></div>
+                {hd.rows.map(([d, tm]) => <div className="hrow" key={d}><span className="hday">{d}</span><span className="htime">{tm}</span></div>)}
                 <div className="hrow hrow-note"><span>eller efter aftale</span></div>
               </div>
             </span>

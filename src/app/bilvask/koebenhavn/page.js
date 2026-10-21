@@ -84,7 +84,7 @@ export default async function BilvaskKoebenhavn() {
         <CityProcess city="København" />
 
         <p>
-          Du kan også ringe til os på <a href="tel:+4524440321">+45 24 44 03 21</a> – vi er klar til at hjælpe {hd.days.toLowerCase()} kl. {hd.time.replace(" – ", "–")}.
+          Du kan også ringe til os på <a href="tel:+4524440321">+45 24 44 03 21</a> – vi er klar til at hjælpe {hd.text}.
         </p>
 
         <h2>Elbiler og leasingbiler i København</h2>
@@ -158,7 +158,7 @@ export default async function BilvaskKoebenhavn() {
         <CityProcess city="København" cityEn="Copenhagen" />
 
         <p>
-          You can also call us on <a href="tel:+4524440321">+45 24 44 03 21</a> – we are ready to help {hdEn.days.toLowerCase()}, {hdEn.time.replace(" – ", "–")}.
+          You can also call us on <a href="tel:+4524440321">+45 24 44 03 21</a> – we are ready to help {hdEn.text}.
         </p>
 
         <h2>Electric cars and lease cars in Copenhagen</h2>

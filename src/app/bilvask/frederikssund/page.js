@@ -73,8 +73,8 @@ export default async function BilvaskFrederikssund() {
         Fra ca. 2 timer for en lille bil (udvendig) til 4 timer for en stor bil med Guld pakken. Du får et præcist estimat, når du booker.</p>
         <p><strong>Kan I komme i weekenden?</strong><br/>
         {hd.weekendOpen
-          ? <>Ja, vi arbejder {hd.days.toLowerCase()} kl. {hd.time.replace(" – ", "–")}.</>
-          : <>Vi har desværre lukket i weekenden, men vi arbejder {hd.days.toLowerCase()} kl. {hd.time.replace(" – ", "–")} – ring til os, så finder vi en tid.</>}</p>
+          ? <>Ja, vi arbejder {hd.text}.</>
+          : <>Vi har desværre lukket i weekenden, men vi arbejder {hd.text} – ring til os, så finder vi en tid.</>}</p>
 
         <div className="guide-cta-box">
           <p style={{margin:'0 0 1rem',fontWeight:700,fontSize:'1.1rem',color:'#fff'}}>Book mobil bilvask i Frederikssund i dag</p>
@@ -123,8 +123,8 @@ export default async function BilvaskFrederikssund() {
         From approx. 2 hours for a small car (exterior) to 4 hours for a large car with the Gold package. You get a precise estimate when you book.</p>
         <p><strong>Can you come at the weekend?</strong><br/>
         {hdEn.weekendOpen
-          ? <>Yes, we work {hdEn.days.toLowerCase()}, {hdEn.time.replace(" – ", "–")}.</>
-          : <>Unfortunately we are closed at weekends, but we work {hdEn.days.toLowerCase()}, {hdEn.time.replace(" – ", "–")} – call us and we will find a time.</>}</p>
+          ? <>Yes, we work {hdEn.text}.</>
+          : <>Unfortunately we are closed at weekends, but we work {hdEn.text} – call us and we will find a time.</>}</p>
 
         <div className="guide-cta-box">
           <p style={{margin:'0 0 1rem',fontWeight:700,fontSize:'1.1rem',color:'#fff'}}>Book a mobile car wash in Frederikssund today</p>

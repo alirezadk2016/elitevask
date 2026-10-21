@@ -1,6 +1,6 @@
 import { unstable_cache } from 'next/cache';
 import { kv } from '@vercel/kv';
-import { normalizeHours, DEFAULT_HOURS } from './hours';
+import { normalizeHours, DEFAULT_HOURS, hoursSummary } from './hours';
 
 // Server-side, cached read of the manager-editable opening hours. Tagged
 // 'hours' so the admin save can revalidate it instantly; otherwise refreshes
@@ -42,20 +42,31 @@ export function hoursDisplay(hours, lang = 'da') {
   }
   // Saturday = 6, Sunday = 0
   const weekendOpen = !closed.includes(6) && !closed.includes(0);
-  return { time, days, weekendOpen, open: h.open, close: h.close };
+  // Per-weekday schedule: `text` is the sentence-ready summary
+  // ("alle dage kl. 15:30–22:00" / "man–fre kl. 15:30–22:00, lør kl. 10:00–16:00"),
+  // `rows` the contact-card lines. `days`/`time` describe the shared window and
+  // stay for older callers.
+  const text = hoursSummary(h, lang);
+  const rows = text.split(', ').map((part) => {
+    const m = part.match(/^(.*?)\s+(?:kl\.\s+)?(\d\d:\d\d–\d\d:\d\d)$/);
+    const lab = m ? m[1] : part;
+    return [lab.charAt(0).toUpperCase() + lab.slice(1), m ? m[2].replace('–', ' – ') : ''];
+  });
+  return { time, days, text, rows, weekendOpen, open: h.open, close: h.close };
 }
 
-// schema.org openingHoursSpecification for the open weekdays only.
+// schema.org openingHoursSpecification: one entry per distinct window.
 export function openingHoursSpec(hours) {
   const h = normalizeHours(hours);
-  const closed = new Set(h.closedDays || []);
-  const openDays = DAY_SCHEMA.filter((_, i) => !closed.has(i));
-  if (!openDays.length) return [];
-  const close = h.close === '24:00' ? '23:59' : h.close;
-  return [{
-    '@type': 'OpeningHoursSpecification',
-    dayOfWeek: openDays,
-    opens: h.open,
-    closes: close,
-  }];
+  const groups = new Map();
+  h.days.forEach((d, i) => {
+    if (d.closed) return;
+    const key = `${d.open}|${d.close}`;
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(DAY_SCHEMA[i]);
+  });
+  return [...groups.entries()].map(([key, dayOfWeek]) => {
+    const [opens, close] = key.split('|');
+    return { '@type': 'OpeningHoursSpecification', dayOfWeek, opens, closes: close === '24:00' ? '23:59' : close };
+  });
 }

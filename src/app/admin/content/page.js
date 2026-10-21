@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { DEFAULT_ALBUM, DEFAULT_BEFORE_AFTER } from "@/lib/galleryData";
-import { DEFAULT_HOURS, normalizeHours, buildSlotTimes, toMin, ALLOWED_SLOT_MINUTES, isClosedDay as isClosedDayAdmin } from "@/lib/hours";
+import { DEFAULT_HOURS, normalizeHours, buildSlotTimes, toMin, ALLOWED_SLOT_MINUTES, isClosedDay as isClosedDayAdmin, hoursSummary, windowFor } from "@/lib/hours";
 import { T, FF, surface, row, skeleton, pkgTone, PKG_TONE, PKG_LABELS as PKG_LABELS_ADMIN } from "../ui";
 import NewBookingModal from "../NewBookingModal";
 import CustomersTab from "../CustomersTab";
@@ -199,6 +199,7 @@ export default function AdminPanel() {
   // Opening hours (manager-editable). `hours` = saved value, `hoursDraft` = edits.
   const [hours, setHours]                 = useState(DEFAULT_HOURS);
   const [hoursDraft, setHoursDraft]       = useState(DEFAULT_HOURS);
+  const [hoursPreviewDay, setHoursPreviewDay] = useState(6);
   const [hoursLoading, setHoursLoading]   = useState(false);
   const [hoursSaving, setHoursSaving]     = useState(false);
   const [hoursIsDefault, setHoursIsDefault] = useState(true);
@@ -879,7 +880,7 @@ export default function AdminPanel() {
               {tab === "oversigt" ? "Oversigt" : tab === "bookings" ? "Bookinger" : tab === "kunder" ? "Kunder" : tab === "reviews" ? "Anmeldelser" : tab === "hours" ? "Åbningstider" : tab === "gallery" ? "Galleri" : tab === "videos" ? "Videoer" : tab === "beforeafter" ? "Før & efter" : tab === "faq" ? "FAQ" : tab === "priser" ? "Priser" : "Ekstra ydelser"}
             </h1>
             <span style={{ background:T.accentDim, color:T.accent, borderRadius:20, padding:"3px 12px", fontSize:12, fontWeight:700 }}>
-              {tab === "oversigt" ? new Intl.DateTimeFormat("da-DK",{ weekday:"long", day:"numeric", month:"long", timeZone:"Europe/Copenhagen" }).format(new Date()) : tab === "bookings" ? `${activeBookings} aktive` : tab === "kunder" ? "Kundekartotek" : tab === "reviews" ? "Kundecitater" : tab === "hours" ? `${hours.open}–${hours.close}` : tab === "gallery" ? `${gallery.length} ${gallery.length===1?"billede":"billeder"}` : tab === "videos" ? `${videos.length} ${videos.length===1?"video":"videoer"}` : tab === "beforeafter" ? `${beforeAfter.length} ${beforeAfter.length===1?"par":"par"}` : tab === "faq" ? `${faqItems.length} spørgsmål` : tab === "priser" ? "Prismatrix" : `${extrasItems.length} ydelser`}
+              {tab === "oversigt" ? new Intl.DateTimeFormat("da-DK",{ weekday:"long", day:"numeric", month:"long", timeZone:"Europe/Copenhagen" }).format(new Date()) : tab === "bookings" ? `${activeBookings} aktive` : tab === "kunder" ? "Kundekartotek" : tab === "reviews" ? "Kundecitater" : tab === "hours" ? hoursSummary(hours, "da") : tab === "gallery" ? `${gallery.length} ${gallery.length===1?"billede":"billeder"}` : tab === "videos" ? `${videos.length} ${videos.length===1?"video":"videoer"}` : tab === "beforeafter" ? `${beforeAfter.length} ${beforeAfter.length===1?"par":"par"}` : tab === "faq" ? `${faqItems.length} spørgsmål` : tab === "priser" ? "Prismatrix" : `${extrasItems.length} ydelser`}
             </span>
             {(tab === "oversigt" || tab === "bookings") && (
               <>
@@ -921,11 +922,12 @@ export default function AdminPanel() {
             const mixTotal = mix.reduce((s,x)=>s+x.n,0) || 1;
             const occupancy = (() => {
               // How much of the next 7 open days is already sold.
-              const slotsPerDay = buildSlotTimes(hours).length;
+              // Each day has its own window, so capacity is summed per day.
               const days = Array.from({length:7},(_,i)=>dayShift(i)).filter(d => !isClosedDayAdmin(hours, d));
-              if (!days.length || !slotsPerDay) return null;
+              const capacity = days.reduce((s, d) => s + buildSlotTimes(hours, d).length, 0);
+              if (!days.length || !capacity) return null;
               const used = active.filter(b => days.includes(b.date)).reduce((s,b)=>s+(b.slotsNeeded || (b.slots||[]).length || 0),0);
-              return Math.min(100, Math.round((used / (days.length*slotsPerDay)) * 100));
+              return Math.min(100, Math.round((used / capacity) * 100));
             })();
             const endTimeOf = (b) => {
               if (!b.time) return "";
@@ -1002,7 +1004,7 @@ export default function AdminPanel() {
                 <div style={{ minWidth:0 }}>
 
                 {/* Today */}
-                <p style={{ fontSize:10, letterSpacing:2, fontWeight:700, color:T.t3, textTransform:"uppercase", margin:"0 0 10px" }}>I dag · {hours.open}–{hours.close}</p>
+                <p style={{ fontSize:10, letterSpacing:2, fontWeight:700, color:T.t3, textTransform:"uppercase", margin:"0 0 10px" }}>I dag · {(() => { const iso = new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Copenhagen" }).format(new Date()); const w = isClosedDayAdmin(hours, iso) ? null : windowFor(hours, iso); return w ? `${w.open}–${w.close}` : "Lukket"; })()}</p>
                 {todays.length === 0 ? (
                   <div style={{ textAlign:"center", color:T.t4, padding:"26px 0", fontSize:13.5, background:T.bg1, border:`1px dashed ${T.border}`, borderRadius:12, marginBottom:24 }}>
                     Ingen bookinger i dag.
@@ -1128,6 +1130,17 @@ export default function AdminPanel() {
                     <div style={{ display:"flex", alignItems:"baseline", gap:8, marginBottom:10 }}>
                       <span style={{ fontSize:21, fontWeight:800, color:T.t1, letterSpacing:"-.5px", fontVariantNumeric:"tabular-nums" }}>{hours.open}–{hours.close}</span>
                       <span style={{ fontSize:11.5, color:T.t4 }}>{hours.slotMinutes} min. interval</span>
+                    </div>
+                    <div style={{ display:"grid", gridTemplateColumns:"repeat(7,1fr)", gap:4, marginBottom:10 }}>
+                      {[1,2,3,4,5,6,0].map(i => {
+                        const d = (hours.days || [])[i] || { closed:true };
+                        return (
+                          <div key={i} title={d.closed ? "Lukket" : `${d.open}–${d.close}`} style={{ textAlign:"center", padding:"6px 0", borderRadius:7, background: d.closed ? "rgba(255,255,255,.03)" : T.accentDim, border:`1px solid ${d.closed ? T.border : T.accentBorder}` }}>
+                            <div style={{ fontSize:10, fontWeight:700, color: d.closed ? T.t4 : T.accent }}>{["Søn","Man","Tir","Ons","Tor","Fre","Lør"][i]}</div>
+                            <div style={{ fontSize:9.5, color: d.closed ? T.t4 : T.t2, fontVariantNumeric:"tabular-nums" }}>{d.closed ? "Lukket" : d.open}</div>
+                          </div>
+                        );
+                      })}
                     </div>
                     {upcomingClosed.length > 0 ? (
                       <div style={{ background:"rgba(245,166,35,.07)", border:`1px solid rgba(245,166,35,.22)`, borderRadius:9, padding:"9px 11px" }}>
@@ -1433,13 +1446,19 @@ export default function AdminPanel() {
                             const iso = toISO(d);
                             const isToday = iso === todayISO;
                             const dayBookings = bookings.filter(b => b.date === iso && b.status !== "cancelled");
-                            const isWeekend = i >= 5;
+                            // Greyed out only when the day is actually closed — Saturday
+                            // and Sunday are normal working days when they are open.
+                            const isWeekend = isClosedDayAdmin(hours, iso);
+                            const hdrWin = windowFor(hours, iso);
                             return (
                               <div key={i} ref={isToday ? todayColRef : null} style={{ flex:1, minWidth:COL_W, textAlign:"center", padding:"10px 6px 8px", background:isToday?"rgba(55,210,120,.06)":isWeekend?"rgba(255,255,255,.015)":"transparent", borderRight: i<6 ? `1px solid ${T.border}` : "none" }}>
                                 <div style={{ fontSize:10, fontWeight:600, color:isToday?T.accent:isWeekend?"rgba(255,255,255,.2)":T.t4, textTransform:"uppercase", letterSpacing:1, marginBottom:6 }}>{DAYS[i]}</div>
                                 {/* Date circle — filled for today */}
                                 <div style={{ display:"inline-flex", alignItems:"center", justifyContent:"center", width:40, height:40, borderRadius:"50%", background:isToday?T.accent:"transparent", marginBottom:4 }}>
                                   <span style={{ fontSize:16, fontWeight:700, color:isToday?T.bg0:isWeekend?"rgba(255,255,255,.35)":T.t1, lineHeight:1 }}>{d.getDate()}</span>
+                                </div>
+                                <div style={{ fontSize:9.5, fontWeight:600, color:isWeekend?T.danger:T.t4, fontVariantNumeric:"tabular-nums", letterSpacing:.2 }}>
+                                  {isWeekend || !hdrWin ? "Lukket" : `${hdrWin.open}–${hdrWin.close}`}
                                 </div>
                                 {/* Today pulse dot + booking dots */}
                                 <div style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:3, marginTop:3, minHeight:10 }}>
@@ -1499,7 +1518,8 @@ export default function AdminPanel() {
                                 const iso = toISO(d);
                                 const isToday = iso === todayISO;
                                 const isPastCell = iso < todayISO || (iso === todayISO && row.min + SLOT_MIN <= nowMinutes);
-                                const isClosedCell = (hours.closedDates || []).includes(iso) || (hours.closedDays || []).includes(d.getDay());
+                                const dayWin = windowFor(hours, iso);
+                                const isClosedCell = (hours.closedDates || []).includes(iso) || !dayWin || row.min < toMin(dayWin.open) || row.min + SLOT_MIN > toMin(dayWin.close);
                                 const cellBg = isClosedCell ? "rgba(245,166,35,.05)" : isPastCell ? "rgba(0,0,0,.12)" : (isToday ? "rgba(55,210,120,.025)" : "transparent");
                                 // A booking belongs to the row its start falls IN (floor to the
                                 // grid), so a start that isn't on a grid multiple still renders
@@ -1660,21 +1680,31 @@ export default function AdminPanel() {
             const todayISO = new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Copenhagen" }).format(new Date());
             const CAR_LABELS = [["lille","Lille bil",120],["mellem","Mellemstor bil",180],["stor","Stor bil / SUV",240],["varebil","Varebil",180]];
             const SM = hoursDraft.slotMinutes || 30;
-            const openM = toMin(hoursDraft.open), closeM = toMin(hoursDraft.close);
-            // Need at least one whole slot; a sub-slot window would be silently
-            // widened on save, so block it in the UI too.
-            const tooShort = !(closeM - openM >= SM);
-            const allClosed = (hoursDraft.closedDays || []).length >= 7;
+            // Per-weekday schedule (0=Sun..6=Sat). Every edit goes through
+            // normalizeHours so the draft always has the shape the API stores.
+            const DAYS = (hoursDraft.days && hoursDraft.days.length === 7) ? hoursDraft.days : normalizeHours(hoursDraft).days;
+            const DAY_LONG = ["Søndag","Mandag","Tirsdag","Onsdag","Torsdag","Fredag","Lørdag"];
+            const dayBad = (d) => !d.closed && !(toMin(d.close) - toMin(d.open) >= SM);
+            const tooShort = DAYS.some(dayBad);
+            const allClosed = DAYS.every(d => d.closed);
             const invalid = tooShort || allClosed;
-            const preview = tooShort ? [] : buildSlotTimes(hoursDraft);
-            // Car types that no longer fit inside the configured window.
-            const unfit = tooShort ? [] : CAR_LABELS.filter(([, , dur]) => Math.round(dur / SM) > preview.length);
-            const setDraft = (patch) => setHoursDraft(d => ({ ...d, ...patch }));
-            const toggleDay = (d) => setHoursDraft(h => {
-              const set = new Set(h.closedDays || []);
-              if (set.has(d)) set.delete(d); else set.add(d);
-              return { ...h, closedDays: [...set].sort((a,b)=>a-b) };
+            const setDays = (fn) => setHoursDraft(h => {
+              const cur = (h.days && h.days.length === 7) ? h.days : normalizeHours(h).days;
+              return normalizeHours({ ...h, days: fn(cur.map(d => ({ ...d }))) });
             });
+            const setDay = (i, patch) => setDays(ds => { ds[i] = { ...ds[i], ...patch }; return ds; });
+            const copyTo = (from, targets) => setDays(ds => { targets.forEach(i => { ds[i] = { ...ds[from] }; }); return ds; });
+            const pd = DAYS[hoursPreviewDay];
+            // A real calendar date for the chosen weekday, so the preview uses
+            // exactly the grid the booking form shows for that day.
+            const sampleISO = (() => { const d = new Date(); d.setDate(d.getDate() + ((hoursPreviewDay - d.getDay() + 7) % 7)); return new Intl.DateTimeFormat("sv-SE").format(d); })();
+            const preview = dayBad(pd) ? [] : buildSlotTimes(hoursDraft, sampleISO);
+            const unfit = (pd.closed || dayBad(pd)) ? [] : CAR_LABELS.filter(([, , dur]) => Math.round(dur / SM) > preview.length);
+            const setDraft = (patch) => setHoursDraft(d => normalizeHours({ ...d, ...patch }));
+            const openCount = DAYS.filter(d => !d.closed).length;
+            // 24-hour picker (15-min steps) — identical in every browser/locale,
+            // unlike <input type="time"> which shows 12-hour AM/PM in some.
+            const TIME_OPTS = Array.from({ length: 77 }, (_, k) => { const m = 5 * 60 + k * 15; return `${String(Math.floor(m/60)).padStart(2,"0")}:${String(m%60).padStart(2,"0")}`; });
             const card = (children, extra) => (
               <div style={{ background:T.bg1, border:`1px solid ${T.border}`, borderRadius:16, padding:24, marginBottom:20, ...extra }}>{children}</div>
             );
@@ -1692,23 +1722,72 @@ export default function AdminPanel() {
                   bookingkalenderen og kontaktsiden inden for ca. et minut.
                 </p>
 
-                {/* Åbningstid */}
+                {/* Ugeskema — hver dag sin egen åbningstid */}
                 {card(
                   <>
-                    {lbl("Åbningstid")}
-                    <p style={{ color:T.t4, fontSize:12.5, margin:"0 0 16px", lineHeight:1.5 }}>Første og sidste tidspunkt bilen kan påbegyndes. Alle behandlinger afsluttes senest ved lukketid.</p>
-                    <div style={{ display:"flex", gap:24, flexWrap:"wrap", alignItems:"flex-end" }}>
+                    <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", gap:12, flexWrap:"wrap", marginBottom:16 }}>
                       <div>
-                        <p style={{ fontSize:12, color:T.t3, fontWeight:600, margin:"0 0 6px" }}>Åbner</p>
-                        <input type="time" step={timeStep} value={hoursDraft.open} onChange={e=>setDraft({ open:e.target.value })} style={inputStyle} />
+                        {lbl("Ugeskema")}
+                        <p style={{ color:T.t4, fontSize:12.5, margin:0, lineHeight:1.5, maxWidth:440 }}>Sæt åbningstid for hver ugedag – også lørdag og søndag. Første og sidste tidspunkt en vask kan påbegyndes; alle behandlinger afsluttes senest ved lukketid.</p>
                       </div>
-                      <div style={{ color:T.t4, fontSize:22, fontWeight:700, paddingBottom:12 }}>→</div>
-                      <div>
-                        <p style={{ fontSize:12, color:T.t3, fontWeight:600, margin:"0 0 6px" }}>Lukker</p>
-                        <input type="time" step={timeStep} value={hoursDraft.close} onChange={e=>setDraft({ close:e.target.value })} style={{ ...inputStyle, borderColor: tooShort ? T.dangerBorder : T.border }} />
+                      <div style={{ display:"flex", gap:6, flexWrap:"wrap" }}>
+                        {[["Hverdage = mandag", () => copyTo(1, [2,3,4,5])], ["Weekend = lørdag", () => copyTo(6, [0])], ["Alle = mandag", () => copyTo(1, [0,2,3,4,5,6])]].map(([t, fn]) => (
+                          <button key={t} type="button" onClick={fn}
+                            style={{ padding:"8px 12px", minHeight:36, borderRadius:9, border:`1px solid ${T.border}`, background:"transparent", color:T.t2, fontSize:12, fontWeight:600, cursor:"pointer", fontFamily:FF, whiteSpace:"nowrap" }}>
+                            {t}
+                          </button>
+                        ))}
                       </div>
                     </div>
-                    {tooShort && <p style={{ color:T.danger, fontSize:12.5, margin:"14px 0 0", fontWeight:600 }}>Lukketid skal være mindst {SM} min efter åbningstid.</p>}
+                    <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
+                      {[1,2,3,4,5,6,0].map(i => {
+                        const d = DAYS[i];
+                        const bad = dayBad(d);
+                        const wknd = i === 0 || i === 6;
+                        const isToday = new Date().getDay() === i;
+                        const tIn = { background:T.bg0, border:`1px solid ${bad ? T.dangerBorder : T.border}`, borderRadius:10, color:T.t1, fontSize:15, fontWeight:700, padding:"9px 10px", minHeight:42, fontFamily:FF, width:118, fontVariantNumeric:"tabular-nums", colorScheme:"dark", cursor:"pointer" };
+                        return (
+                          <div key={i} style={{ display:"flex", alignItems:"center", gap:12, flexWrap:"wrap", padding:"10px 12px", borderRadius:12, border:`1px solid ${d.closed ? T.border : wknd ? T.accentBorder : T.border}`, background: d.closed ? "transparent" : wknd ? T.accentDim : T.bg0, opacity: d.closed ? .72 : 1 }}>
+                            <button type="button" role="switch" aria-checked={!d.closed} aria-label={`${DAY_LONG[i]} ${d.closed ? "lukket" : "åben"}`}
+                              onClick={() => setDay(i, { closed: !d.closed })}
+                              style={{ width:44, height:26, borderRadius:99, border:"none", background: d.closed ? "rgba(255,255,255,.12)" : T.accent, position:"relative", cursor:"pointer", flexShrink:0, transition:"background .2s" }}>
+                              <span style={{ position:"absolute", top:3, left: d.closed ? 3 : 21, width:20, height:20, borderRadius:"50%", background:"#fff", transition:"left .2s", boxShadow:"0 1px 3px rgba(0,0,0,.4)" }} />
+                            </button>
+                            <div style={{ width:96, flexShrink:0 }}>
+                              <div style={{ fontSize:14, fontWeight:700, color:T.t1 }}>{DAY_LONG[i]}</div>
+                              <div style={{ fontSize:11, color: d.closed ? T.danger : T.t4, fontWeight:600 }}>{d.closed ? "Lukket" : isToday ? "I dag" : wknd ? "Weekend" : "Hverdag"}</div>
+                            </div>
+                            {d.closed ? (
+                              <span style={{ color:T.t4, fontSize:13 }}>Ingen online booking denne dag</span>
+                            ) : (
+                              <div style={{ display:"flex", alignItems:"center", gap:8, flexWrap:"wrap" }}>
+                                <select aria-label={`${DAY_LONG[i]} åbner`} value={d.open} onChange={e => setDay(i, { open: e.target.value })} style={tIn}>
+                                  {TIME_OPTS.includes(d.open) ? null : <option value={d.open}>{d.open}</option>}
+                                  {TIME_OPTS.filter(t => t !== "24:00").map(t => <option key={t} value={t}>{t}</option>)}
+                                </select>
+                                <span style={{ color:T.t4, fontWeight:700 }}>–</span>
+                                <select aria-label={`${DAY_LONG[i]} lukker`} value={d.close} onChange={e => setDay(i, { close: e.target.value })} style={tIn}>
+                                  {TIME_OPTS.includes(d.close) ? null : <option value={d.close}>{d.close}</option>}
+                                  {TIME_OPTS.filter(t => t > d.open).map(t => <option key={t} value={t}>{t === "24:00" ? "24:00 (midnat)" : t}</option>)}
+                                </select>
+                                <span style={{ color: bad ? T.danger : T.t3, fontSize:12, fontWeight:600, fontVariantNumeric:"tabular-nums" }}>
+                                  {bad ? `Mindst ${SM} min` : (() => { const m = toMin(d.close) - toMin(d.open); return `${Math.floor(m/60)} t${m%60 ? ` ${m%60} min` : ""}`; })()}
+                                </span>
+                              </div>
+                            )}
+                            <button type="button" onClick={() => setHoursPreviewDay(i)} aria-label={`Vis tider for ${DAY_LONG[i]}`}
+                              style={{ marginLeft:"auto", padding:"6px 10px", minHeight:32, borderRadius:8, border:`1px solid ${hoursPreviewDay===i ? T.accentBorder : T.border}`, background: hoursPreviewDay===i ? T.accentDim : "transparent", color: hoursPreviewDay===i ? T.accent : T.t3, fontSize:11.5, fontWeight:700, cursor:"pointer", fontFamily:FF }}>
+                              Vis tider
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <p style={{ color: allClosed || tooShort ? T.danger : T.t4, fontSize:12, margin:"12px 0 0", fontWeight: allClosed || tooShort ? 600 : 400 }}>
+                      {allClosed ? "⚠️ Alle dage er lukket – kunder kan slet ikke booke. Åbn mindst én dag."
+                        : tooShort ? `⚠️ En åben dag har under ${SM} minutters åbningstid – ret den markerede dag.`
+                        : `Åbent ${openCount} ${openCount === 1 ? "dag" : "dage"} om ugen · ${hoursSummary(hoursDraft, "da")}`}
+                    </p>
                   </>
                 )}
 
@@ -1728,28 +1807,6 @@ export default function AdminPanel() {
                         );
                       })}
                     </div>
-                  </>
-                )}
-
-                {/* Lukkedage */}
-                {card(
-                  <>
-                    {lbl("Lukkedage")}
-                    <p style={{ color:T.t4, fontSize:12.5, margin:"0 0 14px", lineHeight:1.5 }}>Marker de ugedage hvor I holder lukket. Kunder kan ikke booke disse dage.</p>
-                    <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
-                      {WEEK.map(([d,label]) => {
-                        const closed = (hoursDraft.closedDays || []).includes(d);
-                        return (
-                          <button key={d} onClick={()=>toggleDay(d)}
-                            style={{ width:60, padding:"10px 0", borderRadius:10, border:`1px solid ${closed?T.dangerBorder:T.border}`, background:closed?T.dangerDim:"transparent", color:closed?T.danger:T.t2, fontSize:13, fontWeight:700, cursor:"pointer", fontFamily:FF, textAlign:"center" }}>
-                            {label}
-                          </button>
-                        );
-                      })}
-                    </div>
-                    <p style={{ color: allClosed ? T.danger : T.t4, fontSize:12, margin:"12px 0 0", fontWeight: allClosed ? 600 : 400 }}>
-                      {allClosed ? "⚠️ Alle dage er markeret lukket – kunder kan slet ikke booke. Åbn mindst én dag." : (hoursDraft.closedDays || []).length === 0 ? "Åbent alle ugens dage." : `Lukket: ${WEEK.filter(([d])=>hoursDraft.closedDays.includes(d)).map(([,l])=>l).join(", ")}.`}
-                    </p>
                   </>
                 )}
 
@@ -1790,13 +1847,15 @@ export default function AdminPanel() {
                 {/* Preview */}
                 {card(
                   <>
-                    {lbl("Forhåndsvisning")}
-                    {tooShort ? (
+                    {lbl(`Forhåndsvisning · ${DAY_LONG[hoursPreviewDay]}`)}
+                    {pd.closed ? (
+                      <p style={{ color:T.t4, fontSize:13, margin:"10px 0 0" }}>{DAY_LONG[hoursPreviewDay]} er lukket – kunder kan ikke booke den dag.</p>
+                    ) : dayBad(pd) ? (
                       <p style={{ color:T.t4, fontSize:13, margin:"10px 0 0" }}>Ret åbningstiden for at se tiderne.</p>
                     ) : (
                       <>
                         <p style={{ color:T.t2, fontSize:13.5, margin:"6px 0 14px", lineHeight:1.6 }}>
-                          <strong style={{ color:T.accent }}>{preview.length}</strong> starttider pr. dag · {hoursDraft.open}–{hoursDraft.close} · hver {hoursDraft.slotMinutes} min
+                          <strong style={{ color:T.accent }}>{preview.length}</strong> starttider · {pd.open}–{pd.close} · hver {hoursDraft.slotMinutes} min
                         </p>
                         <div style={{ display:"flex", flexWrap:"wrap", gap:6 }}>
                           {preview.map(t => (
@@ -1827,7 +1886,7 @@ export default function AdminPanel() {
                     </button>
                   )}
                   <span style={{ color:T.t4, fontSize:12.5 }}>
-                    {hoursDirty ? "Ugemte ændringer" : hoursIsDefault ? "Bruger standard (15:30–22:00)" : "Gemt"}
+                    {hoursDirty ? "Ugemte ændringer" : hoursIsDefault ? "Bruger standard (alle dage 15:30–22:00)" : "Gemt"}
                   </span>
                 </div>
               </div>

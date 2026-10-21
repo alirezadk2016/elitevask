@@ -1,4 +1,5 @@
 import { getHours } from "@/lib/getHours";
+import { hoursSummary } from "@/lib/hours";
 
 /* llms.txt — a plain-text summary for AI assistants and answer engines
    (https://llmstxt.org). Every fact here is one the site already states;
@@ -25,14 +26,13 @@ async function prices() {
   return m;
 }
 
-const DAYS = ["søndag", "mandag", "tirsdag", "onsdag", "torsdag", "fredag", "lørdag"];
 
 export async function GET() {
   let hoursLine = "Alle dage 15:30–22:00, eller efter aftale.";
   try {
     const h = await getHours();
-    const closed = (h.closedDays || []).map((d) => DAYS[d]).filter(Boolean);
-    hoursLine = `${closed.length ? "Alle dage undtagen " + closed.join(", ") : "Alle dage"} ${h.open}–${h.close}, eller efter aftale.`;
+    const s = hoursSummary(h, "da");
+    hoursLine = `${s.charAt(0).toUpperCase() + s.slice(1)}, eller efter aftale.`;
   } catch {}
   const P = await prices();
   const rows = CARS.map(([id, label]) => `| ${label} | ${kr(P[id].udv)} | ${kr(P[id].indv)} | ${kr(P[id].hele)} | ${kr(P[id].guld)} |`).join("\n");
