@@ -12,7 +12,7 @@ export default function Handelsbetingelser() {
       <div className="legal-wrap">
         <Link href="/" className="legal-back">← Tilbage til forsiden</Link>
         <DanishOnlyNotice />
-        <h1>Handelsbetingelser</h1>
+        <h1 id="terms">Handelsbetingelser</h1>
         <p className="legal-updated">Senest opdateret: 19. juni 2026</p>
 
         <h2>1. Virksomhedsoplysninger</h2>

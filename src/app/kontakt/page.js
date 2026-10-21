@@ -70,7 +70,7 @@ export default async function Kontakt() {
         <DanishOnlyNotice />
 
         <div className="guide-eyebrow">Kontakt</div>
-        <h1>Kontakt Elite Vask</h1>
+        <h1 id="contact">Kontakt Elite Vask</h1>
         <p className="guide-lead">
           Har du spørgsmål om mobil dampvask, priser eller booking? Vi sidder klar til at hjælpe – ring, skriv eller book online. Vi kører til dig i hele Sjælland, og kørsel er altid gratis.
         </p>

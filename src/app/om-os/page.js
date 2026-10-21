@@ -49,7 +49,7 @@ export default async function OmOs() {
         <DanishOnlyNotice />
 
         <div className="guide-eyebrow">Om os</div>
-        <h1>Om Elite Vask</h1>
+        <h1 id="about">Om Elite Vask</h1>
         <p className="guide-lead">
           Elite Vask er et lokalt firma med speciale i mobil dampvask. Vi kører ud i hele Sjælland med
           professionelt udstyr, damprenser bilen der hvor den holder – og du betaler først, når bilen er ren.

@@ -1456,3 +1456,4 @@ ul.why-items{margin-top:0;margin-bottom:0}
 .steam-table tbody th{color:#fff;font-weight:600;width:30%}
 .steam-table td:nth-child(2){color:var(--txt);font-weight:600}
 .steam-table td:nth-child(3){color:var(--muted)}
+h1[id]{scroll-margin-top:90px}

@@ -98,6 +98,8 @@ export default async function RootLayout({ children }) {
   return (
     <html lang="da" className={manrope.variable}>
       <head>
+        <link rel="privacy-policy" href="https://www.elite-vask.dk/privatpolitik" />
+        <link rel="terms-of-service" href="https://www.elite-vask.dk/handelsbetingelser" />
         <meta name="trustpilot-one-time-domain-verification-id" content="3c40dbdd-ba69-4e5f-94e9-55aa98bd97b7" />
         {jsonLd.map((obj, i) => (
           <script
