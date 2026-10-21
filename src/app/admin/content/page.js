@@ -365,6 +365,8 @@ export default function AdminPanel() {
         loadHours(secretInput);
       } else if (r.status === 401 || r.status === 403) {
         setLoginErr("Forkert adgangskode");
+      } else if (r.status === 429) {
+        setLoginErr("For mange forkerte forsøg — login er spærret i 15 minutter af sikkerhedshensyn.");
       } else {
         setLoginErr("Serverfejl — prøv igen om lidt.");
       }

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { clientIp } from '@/lib/clientIp';
+import { checkBearer } from '@/lib/adminAuth';
 
 const BLOCKED_UA_PATTERNS = [
   /sqlmap/i, /nikto/i, /nmap/i, /masscan/i, /zgrab/i,
@@ -78,7 +79,52 @@ function isCrossSiteWrite(request) {
   return true;
 }
 
-export function proxy(request) {
+/* Admin brute-force lockout.
+ *
+ * The whole admin panel sits behind one shared secret, so guessing it must be
+ * slow. Every /api/admin* request that carries an Authorization header with
+ * the WRONG secret counts as a failed attempt for that IP (KV-backed, so it is
+ * global across serverless instances). After ADMIN_MAX_FAILS within the
+ * window the IP is refused outright for the rest of the window — even with the
+ * right secret, otherwise the lockout would just be an oracle. A correct
+ * secret never adds to the counter. If KV is unreachable the check is skipped
+ * (fail-open) so the owner can never be locked out by an outage.
+ */
+const ADMIN_MAX_FAILS = 10;
+const ADMIN_WINDOW_S = 15 * 60;
+let lockKv = null;
+async function getLockKv() {
+  if (lockKv) return lockKv;
+  const url = process.env.KV_REST_API_URL || process.env.STORAGE_KV_REST_API_URL;
+  const token = process.env.KV_REST_API_TOKEN || process.env.STORAGE_KV_REST_API_TOKEN;
+  if (!url || !token) return null;
+  const { Redis } = await import('@upstash/redis');
+  lockKv = new Redis({ url, token });
+  return lockKv;
+}
+async function adminLockout(request, ip) {
+  const auth = request.headers.get('authorization');
+  if (!auth) return null; // no credentials → the route itself answers 401
+  try {
+    const kv = await getLockKv();
+    if (!kv) return null;
+    const key = `admlock:${ip}`;
+    const fails = Number(await kv.get(key)) || 0;
+    const tooMany = () => new NextResponse(
+      JSON.stringify({ error: 'locked', message: 'For mange forkerte login-forsøg. Prøv igen om 15 minutter.' }),
+      { status: 429, headers: { 'Content-Type': 'application/json', 'Retry-After': String(ADMIN_WINDOW_S) } }
+    );
+    if (fails >= ADMIN_MAX_FAILS) return tooMany();
+    if (!checkBearer(request)) {
+      const n = await kv.incr(key);
+      if (n === 1) await kv.expire(key, ADMIN_WINDOW_S);
+      if (n >= ADMIN_MAX_FAILS) return tooMany();
+    }
+  } catch {}
+  return null;
+}
+
+export async function proxy(request) {
   const { pathname } = request.nextUrl;
   const ua = request.headers.get('user-agent') || '';
   const ip = clientIp(request);
@@ -120,6 +166,11 @@ export function proxy(request) {
       JSON.stringify({ error: 'rate_limit', message: 'Too many requests' }),
       { status: 429, headers: { 'Content-Type': 'application/json', 'Retry-After': '60' } }
     );
+  }
+
+  if (pathname.startsWith('/api/admin')) {
+    const locked = await adminLockout(request, ip);
+    if (locked) return locked;
   }
 
   // Portal auth guard
