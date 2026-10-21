@@ -4,7 +4,7 @@ import RelatedLinks from "@/components/RelatedLinks";
 import JsonLd from "@/components/JsonLd";
 import { breadcrumbLd, articleLd } from "@/lib/seo";
 export const metadata = {
-  title: "Hvor ofte bør man vaske sin bil? – Elite Vask Guide",
+  title: "Hvor ofte bør man vaske sin bil? Råd efter årstid | Elite Vask",
   description: "Hvor tit skal bilen vaskes? Svaret afhænger af årstid, brug og parkeringsforhold. Her er en konkret guide til, hvornår det er nødvendigt.",
   alternates: { canonical: "/guide/hvor-ofte" },
   openGraph: {

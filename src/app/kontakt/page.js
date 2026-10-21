@@ -6,8 +6,8 @@ import { breadcrumbLd, SITE } from "@/lib/seo";
 import { getHours, hoursDisplay } from "@/lib/getHours";
 
 export const metadata = {
-  title: "Kontakt Elite Vask – Mobil bilvask på Sjælland",
-  description: "Kontakt Elite Vask om mobil dampvask, priser og booking. Ring +45 24 44 03 21, skriv til info@elite-vask.dk, eller book online. Vi kører ud i hele Sjælland.",
+  title: "Kontakt Elite Vask – ring, skriv eller book mobil bilvask",
+  description: "Kontakt Elite Vask om priser og booking af mobil dampvask. Ring +45 24 44 03 21, skriv til info@elite-vask.dk eller book online direkte.",
   alternates: { canonical: "/kontakt" },
   openGraph: {
     // Next merges page metadata over the layout SHALLOWLY, so a page that

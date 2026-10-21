@@ -11,7 +11,7 @@ import LangToggle from "@/components/LangToggle";
 const T = {
   da: {
     eyebrow: "Spørgsmål & svar",
-    title: "Ofte stillede spørgsmål",
+    title: "Ofte stillede spørgsmål om mobil dampvask",
     lead: "Her finder du svar på alt om Elite Vaskes mobile bil dampvask på Sjælland — priser, behandlingstid, sikkerhed og meget mere.",
     ctaEyebrow: "Klar til en ren bil?",
     ctaTitle: "Book din dampvask i dag",
@@ -23,7 +23,7 @@ const T = {
   },
   en: {
     eyebrow: "Questions & answers",
-    title: "Frequently asked questions",
+    title: "Frequently asked questions about mobile steam car wash",
     lead: "Answers to everything about Elite Vask's mobile car steam wash on Zealand — prices, duration, safety and much more.",
     ctaEyebrow: "Ready for a clean car?",
     ctaTitle: "Book your steam wash today",

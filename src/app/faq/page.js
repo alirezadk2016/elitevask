@@ -4,8 +4,8 @@ import FaqClient from "./FaqClient";
 import { jsonLdString } from "@/lib/jsonLd";
 
 export const metadata = {
-  title: "FAQ – Elite Vask | Ofte stillede spørgsmål om mobil dampvask",
-  description: "Svar på de mest stillede spørgsmål om Elite Vaskes mobile bil dampvask på Sjælland. Priser, behandlingstid, sikkerhed, elbiler, aftaler og meget mere.",
+  title: "Spørgsmål om mobil bilvask og dampvask – svar | Elite Vask",
+  description: "Svar på de oftest stillede spørgsmål om mobil dampvask på Sjælland: priser, behandlingstid, sikkerhed, elbiler og booking. Find dit svar her.",
   alternates: { canonical: "/faq" },
   openGraph: {
     // Next merges page metadata over the layout SHALLOWLY, so a page that

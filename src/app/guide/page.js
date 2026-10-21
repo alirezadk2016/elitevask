@@ -7,7 +7,7 @@ const GUIDES = [
 ];
 
 export const metadata = {
-  title: "Bilpleje-guide – råd om mobil bilvask | Elite Vask",
+  title: "Bilpleje-guide: råd om bilvask, vejsalt og dampvask | Elite Vask",
   description: "Bilpleje Guide fra Elite Vask: hvor ofte du bør vaske bilen, beskyttelse mod vejsalt og dampvask vs. traditionel bilvask. Ekspertråd om mobil bilpleje.",
   alternates: { canonical: "/guide" },
   openGraph: {
@@ -37,7 +37,7 @@ export default function GuidePage() {
       <div style={{ maxWidth: 900, margin: "16px auto 0", padding: "0 20px" }}><DanishOnlyNotice /></div>
       <section className="gal-hero">
         <div className="eyebrow">Bilpleje Guide</div>
-        <h1 className="gal-hero-title">Råd &amp; viden om bilpleje</h1>
+        <h1 className="gal-hero-title">Bilpleje-guide: råd &amp; viden om bilvask</h1>
         <p className="gal-hero-sub">Praktiske guides til at holde din bil ren, beskyttet og smuk – fra eksperterne i mobil dampvask på Sjælland.</p>
       </section>
 

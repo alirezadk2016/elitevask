@@ -1,28 +1,42 @@
 import Link from "next/link";
 // Internal-links block for the standalone pages (city/guide/kontakt/legal),
-// which otherwise only link back to the homepage. Improves crawlability,
-// link equity distribution and on-page navigation. Plain links, no JS.
-export default function RelatedLinks() {
+// which otherwise only link back to the homepage.
+//
+// Few links, to related pages, in varied words: a block of 16 identical chips
+// on every page split each page's value thin and told search engines nothing
+// about which pages belong together. A city page now links to the core pages
+// and its geographic neighbours only; the hub pages (priser, kontakt) still
+// list every city, because there the list is the structure itself.
+const CITIES = {
+  koebenhavn:    ["København",     ["roskilde", "koege", "hilleroed", "helsingoer"]],
+  roskilde:      ["Roskilde",      ["koebenhavn", "koege", "ringsted", "frederikssund"]],
+  koege:         ["Køge",          ["stevns", "roskilde", "ringsted", "koebenhavn"]],
+  naestved:      ["Næstved",       ["ringsted", "faxe", "stevns"]],
+  ringsted:      ["Ringsted",      ["roskilde", "koege", "naestved", "faxe"]],
+  helsingoer:    ["Helsingør",     ["hilleroed", "koebenhavn"]],
+  hilleroed:     ["Hillerød",      ["helsingoer", "frederikssund", "koebenhavn"]],
+  frederikssund: ["Frederikssund", ["hilleroed", "roskilde"]],
+  stevns:        ["Stevns",        ["koege", "faxe", "naestved"]],
+  faxe:          ["Faxe",          ["stevns", "naestved", "ringsted", "koege"]],
+};
+
+export default function RelatedLinks({ city }) {
+  const near = city && CITIES[city] ? CITIES[city][1] : Object.keys(CITIES);
   return (
     <nav aria-label="Relaterede sider" className="related-links">
-      <h2 className="related-links-title">Udforsk Elite Vask</h2>
+      <h2 className="related-links-title">{city ? "Se også" : "Udforsk Elite Vask"}</h2>
       <div className="local-chips" style={{ justifyContent: "flex-start" }}>
         <Link href="/" className="chip">Forside</Link>
-        <a href="/priser" className="chip">Priser</a>
-        <a href="/galleri" className="chip">Galleri</a>
-        <a href="/kontakt" className="chip">Kontakt</a>
-        <a href="/faq" className="chip">FAQ</a>
+        <a href="/priser" className="chip">{city ? "Priser på mobil bilvask" : "Priser"}</a>
+        <a href="/faq" className="chip">{city ? "Spørgsmål om dampvask" : "FAQ"}</a>
         <a href="/guide" className="chip">Bilpleje guide</a>
-        <a href="/bilvask/koebenhavn" className="chip">Bilvask København</a>
-        <a href="/bilvask/roskilde" className="chip">Bilvask Roskilde</a>
-        <a href="/bilvask/koege" className="chip">Bilvask Køge</a>
-        <a href="/bilvask/naestved" className="chip">Bilvask Næstved</a>
-        <a href="/bilvask/ringsted" className="chip">Bilvask Ringsted</a>
-        <a href="/bilvask/helsingoer" className="chip">Bilvask Helsingør</a>
-        <a href="/bilvask/hilleroed" className="chip">Bilvask Hillerød</a>
-        <a href="/bilvask/frederikssund" className="chip">Bilvask Frederikssund</a>
-        <a href="/bilvask/stevns" className="chip">Bilvask Stevns</a>
-        <a href="/bilvask/faxe" className="chip">Bilvask Faxe</a>
+        {!city && <a href="/galleri" className="chip">Galleri</a>}
+        {!city && <a href="/kontakt" className="chip">Kontakt</a>}
+        {near.map((c) => (
+          <a key={c} href={`/bilvask/${c}`} className="chip">
+            {city ? `Mobil bilvask i ${CITIES[c][0]}` : `Bilvask ${CITIES[c][0]}`}
+          </a>
+        ))}
       </div>
     </nav>
   );

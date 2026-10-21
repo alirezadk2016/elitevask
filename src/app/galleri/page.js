@@ -1,8 +1,8 @@
 import GalleryClient from "@/components/GalleryClient";
 
 export const metadata = {
-  title: "Galleri – før & efter | Elite Vask mobil bilpleje",
-  description: "Se vores arbejde: før & efter af professionel mobil bilvask og bilpleje på Sjælland. Ægte resultater fra bilvask hjemme hos kunden.",
+  title: "Før og efter bilvask – billeder af vores dampvask | Elite Vask",
+  description: "Før og efter billeder af mobil dampvask på Sjælland. Se ægte resultater, indvendigt og udvendigt, fra bilvask hjemme hos vores kunder.",
   alternates: { canonical: "/galleri" },
   openGraph: {
     title: "Galleri – før & efter | Elite Vask",

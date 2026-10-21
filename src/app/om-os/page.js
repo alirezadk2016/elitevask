@@ -6,7 +6,7 @@ import { breadcrumbLd, webPageLd, SITE } from "@/lib/seo";
 import { getHours, hoursDisplay } from "@/lib/getHours";
 
 export const metadata = {
-  title: "Om Elite Vask – mobil dampvask på Sjælland",
+  title: "Om Elite Vask – mobil bil dampvask i hele Sjælland",
   description: "Elite Vask er et lokalt firma med speciale i mobil dampvask. Vi kører ud i hele Sjælland med professionelt udstyr, og du betaler først, når bilen er ren.",
   alternates: { canonical: "/om-os" },
   openGraph: {

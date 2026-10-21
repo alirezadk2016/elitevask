@@ -4,7 +4,7 @@ import RelatedLinks from "@/components/RelatedLinks";
 import JsonLd from "@/components/JsonLd";
 import { breadcrumbLd, cityServiceLd, webPageLd } from "@/lib/seo";
 export const metadata = {
-  title: "Mobil bilvask i Næstved – Elite Vask dampvask til din dør",
+  title: "Mobil bilvask i Næstved – dampvask ved din dør | Elite Vask",
   description: "Professionel mobil dampvask i Næstved og omegn. Vi kører til din adresse – gratis kørsel, betal efter vask. Book online eller ring til os.",
   alternates: { canonical: "/bilvask/naestved" },
   openGraph: {
@@ -92,7 +92,7 @@ export default function BilvaskNaestved() {
           <p style={{margin:'0 0 1rem',fontWeight:700,fontSize:'1.1rem',color:'#fff'}}>Book mobil bilvask i Næstved i dag</p>
           <Link href="/#vaelg" className="btn btn-green guide-cta-btn">Se priser og book nu</Link>
         </div>
-        <RelatedLinks />
+        <RelatedLinks city="naestved" />
       </div>
     </div>
   );

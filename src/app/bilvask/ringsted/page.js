@@ -4,7 +4,7 @@ import RelatedLinks from "@/components/RelatedLinks";
 import JsonLd from "@/components/JsonLd";
 import { breadcrumbLd, cityServiceLd, webPageLd } from "@/lib/seo";
 export const metadata = {
-  title: "Mobil bilvask i Ringsted – Elite Vask dampvask til din dør",
+  title: "Mobil bilvask i Ringsted – dampvask ved din dør | Elite Vask",
   description: "Professionel mobil dampvask i Ringsted. Vi kører til din adresse – gratis kørsel, betal efter vask. Skånsom dampvask uden ridser. Book online.",
   alternates: { canonical: "/bilvask/ringsted" },
   openGraph: {
@@ -88,7 +88,7 @@ export default function BilvaskRingsted() {
           <p style={{margin:'0 0 1rem',fontWeight:700,fontSize:'1.1rem',color:'#fff'}}>Book mobil bilvask i Ringsted i dag</p>
           <Link href="/#vaelg" className="btn btn-green guide-cta-btn">Se priser og book nu</Link>
         </div>
-        <RelatedLinks />
+        <RelatedLinks city="ringsted" />
       </div>
     </div>
   );

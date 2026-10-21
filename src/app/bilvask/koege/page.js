@@ -5,8 +5,8 @@ import JsonLd from "@/components/JsonLd";
 import { breadcrumbLd, cityServiceLd, webPageLd } from "@/lib/seo";
 import { getHours, hoursDisplay } from "@/lib/getHours";
 export const metadata = {
-  title: "Mobil bilvask i Køge – Elite Vask dampvask til din dør",
-  description: "Professionel mobil dampvask i Køge og omegn. Vi kører til dig – gratis kørsel, betal efter vask. Dampvask af bil uden ridser og med minimal miljøpåvirkning.",
+  title: "Mobil bilvask i Køge – dampvask ved din dør | Elite Vask",
+  description: "Mobil dampvask i Køge og omegn. Vi kører til dig – gratis kørsel, betal efter vask. Skånsom dampvask uden ridser og med minimal miljøpåvirkning.",
   alternates: { canonical: "/bilvask/koege" },
   openGraph: {
     // Next merges page metadata over the layout SHALLOWLY, so a page that
@@ -81,7 +81,7 @@ export default async function BilvaskKoege() {
           <p style={{margin:'0 0 1rem',fontWeight:700,fontSize:'1.1rem',color:'#fff'}}>Book mobil bilvask i Køge i dag</p>
           <Link href="/#vaelg" className="btn btn-green guide-cta-btn">Se priser og book nu</Link>
         </div>
-        <RelatedLinks />
+        <RelatedLinks city="koege" />
       </div>
     </div>
   );

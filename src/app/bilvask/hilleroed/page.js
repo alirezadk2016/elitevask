@@ -5,7 +5,7 @@ import JsonLd from "@/components/JsonLd";
 import { breadcrumbLd, cityServiceLd, webPageLd } from "@/lib/seo";
 import { getHours, hoursDisplay } from "@/lib/getHours";
 export const metadata = {
-  title: 'Mobil bilvask i Hillerød – Elite Vask dampvask til din dør',
+  title: 'Mobil bilvask i Hillerød – dampvask ved din dør | Elite Vask',
   description: 'Professionel mobil dampvask i Hillerød og omegn. Vi kører til din adresse eller arbejdsplads – gratis kørsel, betal først når bilen er ren.',
   alternates: { canonical: "/bilvask/hilleroed" },
   openGraph: {
@@ -74,7 +74,7 @@ export default async function BilvaskHilleroed() {
           <p style={{margin:'0 0 1rem',fontWeight:700,fontSize:'1.1rem',color:'#fff'}}>Book mobil bilvask i Hillerød i dag</p>
           <Link href="/#vaelg" className="btn btn-green guide-cta-btn">Se priser og book nu</Link>
         </div>
-        <RelatedLinks />
+        <RelatedLinks city="hilleroed" />
       </div>
     </div>
   );

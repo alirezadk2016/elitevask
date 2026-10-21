@@ -226,7 +226,7 @@ export default function GalleryClient() {
 
       <section className="gal-hero">
         <div className="eyebrow">Galleri</div>
-        <h1 className="gal-hero-title">Vores arbejde — før &amp; efter</h1>
+        <h1 className="gal-hero-title">Før &amp; efter bilvask — vores arbejde</h1>
         <p className="gal-hero-sub">Ægte resultater fra professionel mobil bilpleje på Sjælland. Klik på et billede for at åbne sammenligningen i fuld størrelse.</p>
       </section>
 

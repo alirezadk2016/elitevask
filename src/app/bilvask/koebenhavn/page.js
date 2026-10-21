@@ -5,7 +5,7 @@ import JsonLd from "@/components/JsonLd";
 import { breadcrumbLd, cityServiceLd, webPageLd } from "@/lib/seo";
 import { getHours, hoursDisplay } from "@/lib/getHours";
 export const metadata = {
-  title: "Mobil bilvask i København – Elite Vask dampvask til din dør",
+  title: "Mobil bilvask i København – dampvask ved din dør | Elite Vask",
   description: "Professionel mobil dampvask i København. Vi kører til din adresse i hele Storkøbenhavn – ingen ventetid, ingen kø. Book online i dag.",
   alternates: { canonical: "/bilvask/koebenhavn" },
   openGraph: {
@@ -102,7 +102,7 @@ export default async function BilvaskKoebenhavn() {
           <p style={{margin:'0 0 1rem',fontWeight:700,fontSize:'1.1rem',color:'#fff'}}>Klar til en skinnende ren bil i København?</p>
           <Link href="/#vaelg" className="btn btn-green guide-cta-btn">Se priser og book nu</Link>
         </div>
-        <RelatedLinks />
+        <RelatedLinks city="koebenhavn" />
       </div>
     </div>
   );
