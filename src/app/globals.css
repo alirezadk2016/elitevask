@@ -37,7 +37,7 @@
 .rev-tp-stars svg{display:block;height:16px;width:auto}
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth}
-body{font-family:'Manrope',system-ui,sans-serif;background:var(--bg);color:var(--txt);line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+body{font-family:'Manrope',system-ui,sans-serif;background:var(--bg);color:var(--txt);line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden;overflow-x:clip}
 a{color:inherit;text-decoration:none}
 img{max-width:100%;display:block}
 .wrap{max-width:1140px;margin:0 auto;padding:0 24px}
@@ -1457,3 +1457,97 @@ ul.why-items{margin-top:0;margin-bottom:0}
 .steam-table td:nth-child(2){color:var(--txt);font-weight:600}
 .steam-table td:nth-child(3){color:var(--muted)}
 h1[id]{scroll-margin-top:90px}
+
+/* Desktop: the header stays on screen as frosted glass while scrolling, so
+   call/book/contact are always one click away (phones have the bottom bar).
+   The wrapper is what sticks — the <nav> alone was trapped inside it. */
+@media(min-width:881px){
+  .nav-wrap{position:sticky;top:0;z-index:70}
+  .nav-wrap .nav{position:relative;transition:background .3s ease,box-shadow .3s ease,border-color .3s ease}
+  .nav-wrap .nav .nav-inner{transition:padding .3s ease}
+  .nav-wrap.scrolled .nav{background:rgba(11,19,16,.55);-webkit-backdrop-filter:blur(20px) saturate(170%);backdrop-filter:blur(20px) saturate(170%);border-bottom-color:rgba(255,255,255,.08);box-shadow:0 10px 30px -12px rgba(0,0,0,.55),inset 0 -1px 0 rgba(55,210,120,.12)}
+  .nav-wrap.scrolled .nav .nav-inner{padding-top:9px;padding-bottom:9px}
+}
+@media(min-width:881px) and (prefers-reduced-motion:reduce){.nav-wrap .nav,.nav-wrap .nav .nav-inner{transition:none}}
+@media(min-width:881px){html{scroll-padding-top:84px}}
+
+/* ================= CHAT — luxury concierge (overrides the original theme) =================
+   One brand green on deep glass; the gold cartoon robot, emoji chips and gold user bubbles
+   are gone. Class names are unchanged, so the chat logic in siteInit.js is untouched. */
+#chatbot{--cg:#37d278;--cg2:#1fa85a;--cglass:rgba(9,17,13,.82);--cline:rgba(255,255,255,.08)}
+#chatbot .chat-toggle{width:60px;height:60px;opacity:1;color:#04170c;border:0;
+  background:radial-gradient(circle at 30% 25%,#6cf0a4 0%,#37d278 38%,#169a50 100%);
+  box-shadow:0 14px 34px -8px rgba(55,210,120,.55),0 4px 14px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.45),inset 0 -6px 14px rgba(0,0,0,.18)}
+#chatbot .chat-toggle::before{content:'';position:absolute;inset:-6px;border-radius:50%;border:1px solid rgba(55,210,120,.35);animation:chatHalo 2.8s ease-out infinite;pointer-events:none}
+@keyframes chatHalo{0%{transform:scale(.92);opacity:.9}80%,100%{transform:scale(1.25);opacity:0}}
+#chatbot .chat-toggle:hover{transform:translateY(-2px) scale(1.04);box-shadow:0 18px 40px -8px rgba(55,210,120,.65),0 6px 18px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.5)}
+#chatbot .chat-toggle-dot{position:absolute;top:3px;right:3px;width:12px;height:12px;border-radius:50%;background:#fff;border:2.5px solid #1fa85a;box-shadow:0 0 0 2px rgba(11,19,16,.9)}
+.chat-open #chatbot .chat-toggle::before{animation:none;opacity:0}
+
+#chatbot .chat-window{width:380px;border-radius:24px;overflow:hidden;background:var(--cglass);
+  -webkit-backdrop-filter:blur(26px) saturate(160%);backdrop-filter:blur(26px) saturate(160%);
+  border:1px solid var(--cline);
+  box-shadow:0 40px 90px -20px rgba(0,0,0,.75),0 0 0 1px rgba(55,210,120,.06),inset 0 1px 0 rgba(255,255,255,.06)}
+#chatbot .chat-window::before{height:1px;background:linear-gradient(90deg,transparent,rgba(55,210,120,.7) 50%,transparent)}
+#chatbot .chat-window.opening::after{background:radial-gradient(ellipse 70% 40% at 50% 0%,rgba(55,210,120,.12) 0%,transparent 70%)}
+
+#chatbot .chat-header{background:linear-gradient(180deg,rgba(55,210,120,.10),rgba(55,210,120,0));padding:16px 16px 14px 18px;gap:10px}
+#chatbot .chat-header::after{background:linear-gradient(90deg,transparent,rgba(255,255,255,.1),transparent)}
+#chatbot .chat-header-info{flex:1;min-width:0}
+#chatbot .chat-avatar{width:44px;height:44px;background:#fff;overflow:visible;box-shadow:0 0 0 2px rgba(55,210,120,.55),0 6px 18px rgba(0,0,0,.4)}
+#chatbot .chat-avatar img{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block}
+#chatbot .chat-av-online{background:var(--cg);border-color:#0b1310;bottom:0;right:0}
+#chatbot .chat-name{font-size:15.5px;font-weight:800;letter-spacing:.2px;background:none;-webkit-text-fill-color:#fff;color:#fff}
+#chatbot .chat-status{font-size:11.5px;color:rgba(233,241,236,.6);letter-spacing:.2px}
+#chatbot .chat-status::before{background:var(--cg);box-shadow:0 0 8px rgba(55,210,120,.8)}
+#chatbot .chat-call,#chatbot .chat-close{width:36px;height:36px;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;
+  background:rgba(255,255,255,.05);border:1px solid var(--cline);color:rgba(233,241,236,.8);transition:background .2s,color .2s,border-color .2s}
+#chatbot .chat-call{color:var(--cg)}
+#chatbot .chat-call:hover{background:rgba(55,210,120,.14);border-color:rgba(55,210,120,.4)}
+#chatbot .chat-close:hover{background:rgba(255,255,255,.1);color:#fff;border-color:rgba(255,255,255,.18)}
+
+#chatbot .chat-messages{padding:18px 16px 10px;max-height:340px;scrollbar-color:rgba(255,255,255,.12) transparent}
+#chatbot .chat-mini-av{width:26px;height:26px;background:#fff;overflow:hidden;box-shadow:0 0 0 1.5px rgba(55,210,120,.45)}
+#chatbot .chat-mini-av img{width:100%;height:100%;object-fit:cover;display:block}
+#chatbot .chat-msg{font-size:13.5px;line-height:1.6;padding:11px 15px}
+#chatbot .chat-msg.bot{background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.07);border-left:1px solid rgba(255,255,255,.07);border-radius:6px 18px 18px 18px;color:#e9f1ec}
+#chatbot .chat-msg.user{background:linear-gradient(135deg,#3fdc82 0%,#1fa85a 100%);color:#04170c;font-weight:600;border-radius:18px 18px 6px 18px;box-shadow:0 8px 22px -8px rgba(55,210,120,.55)}
+#chatbot .chat-msg a{color:var(--cg);text-decoration:none;border-bottom:1px solid rgba(55,210,120,.45)}
+#chatbot .chat-msg a:hover{border-bottom-color:var(--cg)}
+#chatbot .chat-msg.user a{color:#04170c;border-bottom-color:rgba(4,23,12,.4)}
+#chatbot .chat-typing{background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.07);border-radius:6px 18px 18px 18px;margin-left:33px}
+#chatbot .chat-typing::after{background:linear-gradient(110deg,transparent 30%,rgba(55,210,120,.10) 50%,transparent 70%)}
+#chatbot .chat-typing span{width:7px;height:7px;background:var(--cg);box-shadow:0 0 8px rgba(55,210,120,.6)}
+
+#chatbot .chat-quick{padding:6px 16px 14px;gap:7px}
+#chatbot .chat-chip,#chatbot .follow-chip{background:rgba(255,255,255,.035);border:1px solid rgba(55,210,120,.28);color:#d9f7e6;border-radius:999px;
+  padding:7px 14px;font-size:12.5px;font-weight:600;letter-spacing:.1px;cursor:pointer;font-family:inherit;transition:background .2s,border-color .2s,color .2s,transform .2s}
+#chatbot .chat-chip:hover,#chatbot .follow-chip:hover{background:rgba(55,210,120,.14);border-color:rgba(55,210,120,.6);color:#fff;transform:translateY(-1px)}
+
+#chatbot .chat-input-row{padding:12px 14px 10px;border-top:1px solid var(--cline);background:rgba(0,0,0,.18)}
+#chatbot .chat-input-row input{background:rgba(255,255,255,.05);border:1px solid var(--cline);border-radius:14px;padding:12px 15px}
+#chatbot .chat-input-row input:focus{border-color:rgba(55,210,120,.55);background:rgba(255,255,255,.07);box-shadow:0 0 0 3px rgba(55,210,120,.12)}
+#chatbot .chat-send-btn{width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,#3fdc82,#1fa85a)!important;color:#04170c!important;box-shadow:0 8px 20px -8px rgba(55,210,120,.6)}
+#chatbot .chat-send-btn:disabled{opacity:1;background:rgba(255,255,255,.06)!important;color:rgba(233,241,236,.35)!important;box-shadow:none}
+#chatbot .chat-send-btn:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 10px 24px -8px rgba(55,210,120,.75)}
+#chatbot .chat-foot{padding:0 16px 12px;font-size:10.5px;letter-spacing:.3px;color:rgba(233,241,236,.38);text-align:center;background:rgba(0,0,0,.18)}
+
+/* intro: the logo instead of the robot, green instead of gold */
+#chatbot .chat-intro{background:radial-gradient(circle at 50% 38%,#0b2416 0%,#050d09 72%)}
+#chatbot .intro-halo{background:radial-gradient(circle,rgba(55,210,120,.30) 0%,rgba(55,210,120,.08) 42%,transparent 70%)}
+#chatbot .intro-ring{border-color:rgba(55,210,120,.55);border-radius:50%}
+#chatbot .intro-bot{width:112px;height:112px;border-radius:50%;background:#fff;box-shadow:0 22px 52px rgba(0,0,0,.62),0 0 0 2px rgba(55,210,120,.5),0 0 42px rgba(55,210,120,.2)}
+#chatbot .intro-bot img{width:100%;height:100%;object-fit:cover;display:block}
+#chatbot .intro-spark{background:radial-gradient(circle,#b8ffd6,#37d278);box-shadow:0 0 8px rgba(55,210,120,.85)}
+#chatbot .intro-label{background:none;-webkit-text-fill-color:#e9f1ec;color:#e9f1ec;letter-spacing:4px}
+#chatbot .intro-loadbar{background:linear-gradient(90deg,transparent,#37d278,transparent)}
+
+@media(max-width:880px){
+  #chatbot .chat-toggle{width:54px;height:54px}
+  #chatbot .chat-window{width:auto;border-radius:22px}
+  #chatbot .chat-messages{max-height:none}
+}
+@media(prefers-reduced-motion:reduce){#chatbot .chat-toggle::before{animation:none}}
+#chatbot .chat-send-btn{padding:0!important;flex-shrink:0}
+#chatbot .chat-send-btn svg{width:19px;height:19px;flex-shrink:0;margin-left:-2px}
+#chatbot .chat-send-btn:disabled{color:rgba(233,241,236,.55)!important}

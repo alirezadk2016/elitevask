@@ -46,5 +46,5 @@ const HTML = `<!-- NAV -->
   <span class="mgs-label">Se anmeldelser</span>
 </a>`;
 export default function Nav() {
-  return <div dangerouslySetInnerHTML={{ __html: HTML }} />;
+  return <div className="nav-wrap" id="navWrap" dangerouslySetInnerHTML={{ __html: HTML }} />;
 }
