@@ -59,6 +59,9 @@ All styles are in `src/app/globals.css` using plain CSS variables (`--green`, `-
 - **Packages**: `hele`, `udv`, `indv`, `guld` — do NOT use basis/komplet/premium/deluxe
 - **Car types**: `lille`, `mellem`, `stor`, `varebil`
 
+### Language default (owner rule — always keep)
+Danish is ALWAYS the default language. Every visitor (and every crawler) gets Danish unless they themselves click the UK toggle; that choice is stored in `localStorage["lang"]` (read by `siteInit.js` and `src/lib/useLang.js`). Never auto-switch language from `navigator.language`, `Accept-Language` or IP/geo. English text is client-side only (`data-i18n` keys / `<Bi>`); server HTML stays Danish.
+
 ### FAQ/Extras nested format
 Always save and read in nested bilingual format: `{da: "...", en: "..."}`. The admin UI uses flat draft fields (`qDa`, `qEn`, `aDa`, `aEn`) internally then saves nested.
 
