@@ -1,0 +1,23 @@
+keyword,intent,primary_url,role,status,volume,source,notes
+mobil bilvask,commercial,/,primary,live,unknown,,home H1 + title
+bilvask,commercial,/,secondary,live,unknown,,too broad for one page; home + city pages
+bilvask sjælland,commercial-local,/,secondary,live,unknown,,
+dampvask bil,commercial,/,secondary,live,unknown,,
+bilvask hjemme / bilvask ved døren,commercial,/,secondary,live,unknown,,"same intent as mobil bilvask (rule 4)"
+bilvask i nærheden,commercial-local,/bilvask/<by>,secondary,live,unknown,,"answered by city pages + LocalBusiness schema; needs Google Business Profile"
+bilvask pris,commercial,/priser,primary,live,unknown,,title + H2 'Spørgsmål om pris på bilvask'
+hvad koster en bilvask,commercial-question,/priser,secondary,live,unknown,,H3 answer
+hvad koster indvendig rengøring af bil,commercial-question,/priser,secondary,live,unknown,competitor pattern (handyhand),H3 answer from live prices
+vask af bil indvendigt og udvendigt,commercial,/priser,secondary,live,unknown,competitor pattern (handyhand),H3 answer
+rens af sæder / fjernelse af dyrehår,commercial,/priser,secondary,live,unknown,competitor pattern (handyhand),H3 answer from extras
+billig bilvask,commercial,/priser,secondary,live,unknown,,"honest answer: a vaskehal is cheaper per wash; we never claim 'billigst'"
+indvendig rengøring bil,commercial,/priser,candidate,to check,unknown,,"own page only if page one shows dedicated service pages (rule 1)"
+lakforsegling bil,commercial,/priser,candidate,to check,unknown,,
+motorrens,commercial,/priser,candidate,to check,unknown,,
+dampvask elbil,commercial,/faq,candidate,to check,unknown,,
+klargøring af bil til salg,commercial,—,candidate,to check,unknown,competitor pattern (handyhand),only if Elite Vask offers it as a package
+mobil bilvask <by>,commercial-local,/bilvask/<by>,primary,live,unknown,,one per city page
+hvor ofte vaske bil,informational,/guide/hvor-ofte,primary,live,unknown,,
+vejsalt lak,informational,/guide/salt-og-lak,primary,live,unknown,,
+dampvask vs vaskehal,informational,/guide/dampvask-vs-traditionel,primary,live,unknown,,
+før og efter bilvask,navigational/trust,/galleri,primary,live,unknown,,

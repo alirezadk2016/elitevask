@@ -5,14 +5,14 @@ import RelatedLinks from "@/components/RelatedLinks";
 import { breadcrumbLd, SITE } from "@/lib/seo";
 
 export const metadata = {
-  title: "Priser på mobil bilvask – se prisen for din bil | Elite Vask",
-  description: "Se priser på mobil bil dampvask fra Elite Vask. Udvendig vask fra 500 kr, Hele bilen fra 800 kr, Guld pakke fra 2.000 kr. Gratis kørsel på Sjælland.",
+  title: "Bilvask pris – hvad koster mobil bilvask? | Elite Vask",
+  description: "Hvad koster bilvask? Udvendig fra 500 kr., indvendig rengøring fra 600 kr. og hele bilen fra 800 kr. – inkl. gratis kørsel på Sjælland. Se din pris.",
   alternates: { canonical: "/priser" },
   openGraph: {
     // Next merges page metadata over the layout SHALLOWLY, so a page that
     // declares openGraph without images ships with no og:image at all.
     images: [{ url: "/og-cover.jpg", width: 1200, height: 630, alt: "Elite Vask – mobil bil dampvask" }],
-    title: "Priser på mobil bilvask – se prisen for din bil | Elite Vask",
+    title: "Bilvask pris – hvad koster mobil bilvask? | Elite Vask",
     description: "Se priser på mobil bil dampvask. Udvendig fra 500 kr, Hele bilen fra 800 kr, Guld pakke fra 2.000 kr. Gratis kørsel på Sjælland.",
     type: "website",
     locale: "da_DK",
@@ -119,6 +119,43 @@ export default async function PriserPage() {
     },
   };
 
+  // Price questions, answered from the live price list. These are the
+  // phrasings Danes actually type ("hvad koster indvendig rengøring af bil",
+  // "vask af bil indvendigt og udvendigt", "billig bilvask") — Mak rules 4/5.
+  const min = (k) => Math.min(...prices.map((r) => r[k]));
+  const extra = (re) => extras.find((e) => re.test(e.name) && e.price > 0);
+  const seat = extra(/sæde(?!.*barn)/i) || extra(/sæde/i);
+  const hair = extra(/hår/i);
+  const QA = [
+    {
+      q: "Hvad koster en bilvask?",
+      a: `Hos Elite Vask koster en udvendig bilvask fra ${fmtKr(min("udv"))}, indvendig rengøring fra ${fmtKr(min("indv"))} og hele bilen – indvendigt og udvendigt – fra ${fmtKr(min("hele"))}. Kørslen er gratis på hele Sjælland, og du betaler først, når bilen er ren.`,
+    },
+    {
+      q: "Hvad koster indvendig rengøring af bil?",
+      a: `Indvendig rengøring koster fra ${fmtKr(min("indv"))}. ${prices.map((r) => `${r.car}: ${fmtKr(r.indv)}`).join(", ")}.`,
+    },
+    {
+      q: "Hvad koster vask af bil indvendigt og udvendigt?",
+      a: `Pakken Hele bilen (ind og ud) koster fra ${fmtKr(min("hele"))}. ${prices.map((r) => `${r.car}: ${fmtKr(r.hele)}`).join(", ")}.`,
+    },
+    ...(seat || hair
+      ? [{
+          q: "Hvad koster rens af sæder og fjernelse af dyrehår?",
+          a: [seat && `${seat.name} koster ${fmtKr(seat.price)}`, hair && `${seat ? hair.name.charAt(0).toLowerCase() + hair.name.slice(1) : hair.name} koster ${fmtKr(hair.price)}`].filter(Boolean).join(", og ") + " som tilvalg til din pakke.",
+        }]
+      : []),
+    {
+      q: "Er mobil bilvask billig?",
+      a: "En automatisk vaskehal er som regel billigere pr. vask, men så skal du selv køre derhen og vente. Hos os er kørslen gratis, du ser prisen online, før du booker, og du betaler først bagefter. Vi bruger damp i stedet for børster, så der kommer ingen vaskeridser i lakken.",
+    },
+  ];
+  const faqLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: QA.map(({ q, a }) => ({ "@type": "Question", name: q, acceptedAnswer: { "@type": "Answer", text: a } })),
+  };
+
   return (
     <div style={{ background: "#0b1310", color: "#e9f1ec", minHeight: "100dvh", fontFamily: "Manrope, system-ui, sans-serif" }}>
       <JsonLd
@@ -128,6 +165,7 @@ export default async function PriserPage() {
             { name: "Priser", path: "/priser" },
           ]),
           offersLd,
+          faqLd,
         ]}
       />
       <div style={{ maxWidth: 900, margin: "0 auto", padding: "48px 24px 80px" }}>
@@ -241,6 +279,16 @@ export default async function PriserPage() {
             </div>
           </div>
         )}
+
+        <div style={{ marginBottom: 48 }}>
+          <h2 style={{ fontSize: 22, fontWeight: 800, color: "#fff", marginBottom: 16 }}>Spørgsmål om pris på bilvask</h2>
+          {QA.map(({ q, a }) => (
+            <div key={q} style={{ marginBottom: 18 }}>
+              <h3 style={{ fontSize: 16.5, fontWeight: 700, color: "#fff", marginBottom: 6 }}>{q}</h3>
+              <p style={{ fontSize: 15, color: "#94a89c", lineHeight: 1.7, margin: 0 }}>{a}</p>
+            </div>
+          ))}
+        </div>
 
         <div style={{ display: "flex", gap: 14, flexWrap: "wrap", marginBottom: 56 }}>
           <Link href="/#vaelg" style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "#37d278", color: "#062313", borderRadius: 10, padding: "13px 26px", fontWeight: 700, fontSize: 15, textDecoration: "none" }}>
