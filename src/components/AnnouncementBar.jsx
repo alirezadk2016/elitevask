@@ -1,3 +1,5 @@
+import { getSettings } from "@/lib/getSettings";
+import { applySettings, DEFAULT_SETTINGS } from "@/lib/settings";
 const HTML = `<!-- ANNOUNCEMENT BAR -->
 <div class="ann-bar">
   <div class="ann-inner">
@@ -25,6 +27,11 @@ const HTML = `<!-- ANNOUNCEMENT BAR -->
     </a>
   </div>
 </div>`;
-export default function AnnouncementBar() {
-  return <div dangerouslySetInnerHTML={{ __html: HTML }} />;
+export default async function AnnouncementBar() {
+  const s = await getSettings();
+  const esc = (t) => String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;");
+  const html = HTML
+    .replace(`>${DEFAULT_SETTINGS.annMain.da}<`, `>${esc(s.annMain.da)}<`)
+    .replace(`>${DEFAULT_SETTINGS.annSub.da}<`, `>${esc(s.annSub.da)}<`);
+  return <div dangerouslySetInnerHTML={{ __html: applySettings(html, s) }} />;
 }

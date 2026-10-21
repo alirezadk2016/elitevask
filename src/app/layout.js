@@ -7,6 +7,9 @@ import { getHours, openingHoursSpec } from "@/lib/getHours";
 import { jsonLdString } from "@/lib/jsonLd";
 import TrustpilotInvite from "@/components/TrustpilotInvite";
 import Bi from "@/components/Bi";
+import SettingsSync from "@/components/SettingsSync";
+import { getSettings } from "@/lib/getSettings";
+import { applySettings } from "@/lib/settings";
 
 const manrope = Manrope({
   subsets: ["latin"],
@@ -90,12 +93,13 @@ const JSONLD = [
 export default async function RootLayout({ children }) {
   // Reflect the manager-configured opening hours in the business JSON-LD so
   // Google never advertises stale hours after an admin change.
-  const hours = await getHours();
-  const jsonLd = JSONLD.map((obj) =>
+  const [hours, settings] = await Promise.all([getHours(), getSettings()]);
+  // Contact details in the structured data follow admin → Indstillinger too.
+  const jsonLd = JSON.parse(applySettings(JSON.stringify(JSONLD.map((obj) =>
     obj["@id"] === "https://www.elite-vask.dk/#business"
       ? { ...obj, openingHoursSpecification: openingHoursSpec(hours) }
       : obj,
-  );
+  )), settings));
   return (
     <html lang="da" className={manrope.variable}>
       <head>
@@ -118,6 +122,7 @@ export default async function RootLayout({ children }) {
             wrapper is inert for layout. */}
         <main id="indhold" tabIndex={-1}>{children}</main>
         <CookieConsent />
+        <SettingsSync settings={settings} />
         <Analytics />
         <GoogleAnalytics />
         <TrustpilotInvite />

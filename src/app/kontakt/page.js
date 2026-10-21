@@ -4,6 +4,8 @@ import RelatedLinks from "@/components/RelatedLinks";
 import JsonLd from "@/components/JsonLd";
 import { breadcrumbLd, SITE } from "@/lib/seo";
 import { getHours, hoursDisplay } from "@/lib/getHours";
+import { getSettings } from "@/lib/getSettings";
+import { phoneTel } from "@/lib/settings";
 
 export const metadata = {
   title: "Kontakt Elite Vask – ring, skriv eller book mobil bilvask",
@@ -54,6 +56,8 @@ const contactPageLd = {
 
 export default async function Kontakt() {
   const hd = hoursDisplay(await getHours(), "da");
+  const st = await getSettings();
+  const tel = phoneTel(st.phone);
   return (
     <div className="legal-page">
       <JsonLd
@@ -77,17 +81,17 @@ export default async function Kontakt() {
 
         <div className="contact-cta" style={{ margin: "8px 0 36px" }}>
           <Link href="/#vaelg" className="btn btn-green btn-lg">Se priser &amp; book nu</Link>
-          <a href="tel:+4524440321" className="btn btn-ghost btn-lg">Ring til os</a>
+          <a href={`tel:${tel}`} className="btn btn-ghost btn-lg">Ring til os</a>
         </div>
 
         <div className="contact-list">
-          <a href="tel:+4524440321" className="cl-item">
+          <a href={`tel:${tel}`} className="cl-item">
             <span className="cl-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92Z" /></svg></span>
-            <span><span className="lab">Telefon</span><br /><span className="val">+45 24 44 03 21</span></span>
+            <span><span className="lab">Telefon</span><br /><span className="val">{st.phone}</span></span>
           </a>
-          <a href="mailto:info@elite-vask.dk" className="cl-item">
+          <a href={`mailto:${st.email}`} className="cl-item">
             <span className="cl-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"><rect x="2" y="4" width="20" height="16" rx="2" /><path d="m22 7-10 5L2 7" /></svg></span>
-            <span><span className="lab">E-mail</span><br /><span className="val">info@elite-vask.dk</span></span>
+            <span><span className="lab">E-mail</span><br /><span className="val">{st.email}</span></span>
           </a>
           <div className="cl-item cl-item-hours">
             <span className="cl-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" /></svg></span>
@@ -146,7 +150,7 @@ export default async function Kontakt() {
         </p>
         <p style={{ color: "var(--muted)", fontSize: 15.5, lineHeight: 1.75, marginBottom: 8 }}>
           Har du spørgsmål til pris eller pakke inden du booker, er du velkommen til
-          at ringe på <a href="tel:+4524440321" style={{ color: "var(--green)" }}>+45 24 44 03 21</a>.
+          at ringe på <a href={`tel:${tel}`} style={{ color: "var(--green)" }}>{st.phone}</a>.
           Vi giver hellere et realistisk bud i telefonen end en overraskelse på dagen.
         </p>
 

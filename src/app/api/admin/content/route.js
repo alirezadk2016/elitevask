@@ -2,6 +2,7 @@ import { createHash, timingSafeEqual, randomUUID } from 'crypto';
 import { kv } from '@vercel/kv';
 import { put, del } from '@vercel/blob';
 import { normalizeHours, DEFAULT_HOURS } from '@/lib/hours';
+import { normalizeSettings } from '@/lib/settings';
 import { revalidatePath, revalidateTag } from 'next/cache';
 
 const AUTH = process.env.ADMIN_SECRET;
@@ -37,6 +38,10 @@ export async function GET(req) {
   if (type === 'packages') {
     const prices = await kv.get('content:prices') || {};
     return Response.json({ prices });
+  }
+  if (type === 'settings') {
+    const stored = await kv.get('content:settings');
+    return Response.json({ settings: normalizeSettings(stored), isDefault: !stored });
   }
   if (type === 'hours') {
     const stored = await kv.get('content:hours');
@@ -129,6 +134,14 @@ export async function POST(req) {
       }
       await kv.set('content:prices', clean);
       return Response.json({ ok: true, prices: clean });
+    }
+
+    // Company settings (phone, e-mail, social, announcement bar).
+    if (type === 'settings') {
+      const clean = normalizeSettings(body.settings);
+      await kv.set('content:settings', clean);
+      try { revalidatePath('/', 'layout'); revalidatePath('/api/site-content'); revalidateTag('settings'); } catch {}
+      return Response.json({ ok: true, settings: clean });
     }
 
     // Opening hours: validate + store the whole config (single object).

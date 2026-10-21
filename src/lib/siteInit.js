@@ -1,5 +1,6 @@
 // Auto-extracted from original elitevask.html — runs once on mount.
 import { DEFAULT_HOURS, buildSlotTimes, carSlotCount, isClosedDay, normalizeHours, hoursSummary } from './hours';
+import { normalizeSettings } from './settings';
 export function initSite(overrides){overrides=overrides||{};
 // Document/window-level listeners below accumulate on every init (React
 // StrictMode runs effects twice in dev; client-side navigation back to the
@@ -106,6 +107,9 @@ if(overrides.extras&&overrides.extras.length)EXTRAS=sanitizeDeep(overrides.extra
 // Manager-configurable opening hours (admin → Åbningstider). Drives the
 // booking slot grid + duration. Falls back to the default window.
 var HOURS=normalizeHours(overrides.hours||DEFAULT_HOURS);
+// Manager-editable company settings (admin → Indstillinger).
+var SETTINGS=normalizeSettings(overrides.settings);
+// (The DOM swap of phone/e-mail lives in components/SettingsSync.jsx, site-wide.)
 // Days-open summary for the contact card, reflecting closedDays + language.
 function hoursDaysLabel(langOverride){
   var da=(langOverride||LANG)!=='en';var closed=HOURS.closedDays||[];
@@ -277,6 +281,8 @@ function renderFaq(){
   }
 }
 /* ====== I18N APPLY ====== */
+// Announcement bar text is manager-editable (Indstillinger).
+I18N.da.ann_main=SETTINGS.annMain.da;I18N.da.ann_sub=SETTINGS.annSub.da;I18N.en.ann_main=SETTINGS.annMain.en;I18N.en.ann_sub=SETTINGS.annSub.en;
 function applyLang(){
   document.documentElement.lang=LANG;
   document.querySelectorAll('[data-i18n]').forEach(function(e){var k=e.getAttribute('data-i18n');if(I18N[LANG][k]!==undefined)e.textContent=I18N[LANG][k];});

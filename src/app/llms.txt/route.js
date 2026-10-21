@@ -1,5 +1,7 @@
 import { getHours } from "@/lib/getHours";
 import { hoursSummary } from "@/lib/hours";
+import { getSettings } from "@/lib/getSettings";
+import { applySettings } from "@/lib/settings";
 
 /* llms.txt — a plain-text summary for AI assistants and answer engines
    (https://llmstxt.org). Every fact here is one the site already states;
@@ -74,5 +76,5 @@ Aktuelle priser: https://www.elite-vask.dk/priser
 - [Handelsbetingelser](https://www.elite-vask.dk/handelsbetingelser)
 - [Privatlivspolitik](https://www.elite-vask.dk/privatpolitik)
 `;
-  return new Response(body, { headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "public, max-age=3600" } });
+  return new Response(applySettings(body, await getSettings()), { headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "public, max-age=3600" } });
 }

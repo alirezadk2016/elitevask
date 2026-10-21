@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { DEFAULT_ALBUM, DEFAULT_BEFORE_AFTER } from "@/lib/galleryData";
+import { DEFAULT_SETTINGS, normalizeSettings } from "@/lib/settings";
 import { DEFAULT_HOURS, normalizeHours, buildSlotTimes, toMin, ALLOWED_SLOT_MINUTES, isClosedDay as isClosedDayAdmin, hoursSummary, windowFor } from "@/lib/hours";
 import { T, FF, surface, row, skeleton, pkgTone, PKG_TONE, PKG_LABELS as PKG_LABELS_ADMIN } from "../ui";
 import NewBookingModal from "../NewBookingModal";
@@ -201,6 +202,10 @@ export default function AdminPanel() {
   const [hoursDraft, setHoursDraft]       = useState(DEFAULT_HOURS);
   const [hoursPreviewDay, setHoursPreviewDay] = useState(6);
   const [moreOpen, setMoreOpen] = useState(false);
+  const [siteSettings, setSiteSettings] = useState(DEFAULT_SETTINGS);
+  const [settingsDraft, setSettingsDraft] = useState(DEFAULT_SETTINGS);
+  const [settingsSaving, setSettingsSaving] = useState(false);
+  const [settingsLoaded, setSettingsLoaded] = useState(false);
   const [hoursLoading, setHoursLoading]   = useState(false);
   const [hoursSaving, setHoursSaving]     = useState(false);
   const [hoursIsDefault, setHoursIsDefault] = useState(true);
@@ -447,6 +452,12 @@ export default function AdminPanel() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     if (authed && (tab === "gallery" || tab === "videos")) fetchContent(tab);
     if (authed && tab === "faq")      fetchContent("faq");
+    if (authed && tab === "settings" && !settingsLoaded) {
+      fetch("/api/admin/content?type=settings", { headers:{ Authorization:`Bearer ${secret}` } })
+        .then(r => r.ok ? r.json() : null)
+        .then(d => { if (d) { const v = normalizeSettings(d.settings); setSiteSettings(v); setSettingsDraft(v); setSettingsLoaded(true); } })
+        .catch(() => {});
+    }
     if (authed && tab === "extras")   fetchContent("extras");
     if (authed && tab === "priser")   fetchContent("packages");
     if (authed && tab === "beforeafter") fetchContent("beforeafter");
@@ -673,6 +684,7 @@ export default function AdminPanel() {
     extras:   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>,
     beforeafter: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="11" height="14" rx="2"/><rect x="11" y="5" width="11" height="14" rx="2"/><line x1="12" y1="3" x2="12" y2="21"/></svg>,
     refresh:  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 11-9-9c2.52 0 4.8.99 6.48 2.59L21 8"/><path d="M21 3v5h-5"/></svg>,
+    settings: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg>,
     hours:    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
     reviews: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2 15 9l7 .5-5.5 4.5L18 21l-6-3.8L6 21l1.5-7L2 9.5 9 9Z"/></svg>,
     customers: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>,
@@ -781,7 +793,8 @@ export default function AdminPanel() {
     return (d.qDa||"") !== (item.q?.da||item.q||"") || (d.qEn||"") !== (item.q?.en||item.qEn||"")
         || (d.aDa||"") !== (item.a?.da||item.a||"") || (d.aEn||"") !== (item.a?.en||item.aEn||"");
   });
-  const hasUnsaved = faqDirty || hasPriceChanges || editorDirty(editingExt, EXT_KEYS)
+  const settingsDirty = JSON.stringify(settingsDraft) !== JSON.stringify(siteSettings);
+  const hasUnsaved = settingsDirty || faqDirty || hasPriceChanges || editorDirty(editingExt, EXT_KEYS)
     || editorDirty(editingGallery, GAL_KEYS) || editorDirty(editingBA, BA_KEYS) || hoursDirty;
   unsavedRef.current = hasUnsaved;
 
@@ -846,6 +859,7 @@ export default function AdminPanel() {
             {navItem("bookings", "Bookinger", icons.bookings, activeBookings || undefined)}
             {navItem("kunder", "Kunder", icons.customers)}
             {navItem("hours", "Åbningstider", icons.hours)}
+            {navItem("settings", "Indstillinger", icons.settings)}
             <div style={{ height:1, background:T.border, margin:"14px 4px" }}/>
             {sectionLabel("Indhold")}
             {navItem("gallery", "Galleri", icons.gallery, gallery.length || undefined)}
@@ -871,7 +885,7 @@ export default function AdminPanel() {
             setTab(id); setMsg(null); setUrlInput(""); setCmsMsg(null); setExpandedFaqId(null); setFaqDrafts({}); setAddFaqOpen(false); setEditingExt(null); setEditingGallery(null);
           };
           const MAIN = [["oversigt","Oversigt",icons.dashboard],["bookings","Bookinger",icons.bookings],["kunder","Kunder",icons.customers],["hours","Tider",icons.hours]];
-          const MORE = [["gallery","Galleri",icons.gallery],["videos","Videoer",icons.videos],["beforeafter","Før & efter",icons.beforeafter],["reviews","Anmeldelser",icons.reviews],["faq","FAQ",icons.faq],["priser","Priser",icons.priser],["extras","Ekstra",icons.extras]];
+          const MORE = [["gallery","Galleri",icons.gallery],["videos","Videoer",icons.videos],["beforeafter","Før & efter",icons.beforeafter],["reviews","Anmeldelser",icons.reviews],["faq","FAQ",icons.faq],["priser","Priser",icons.priser],["extras","Ekstra",icons.extras],["settings","Indstillinger",icons.settings]];
           const inMore = MORE.some(([id]) => id === tab);
           const tabBtn = (id, label, icon, on, onClick) => (
             <button key={id} type="button" onClick={onClick} aria-current={on ? "page" : undefined}
@@ -911,10 +925,10 @@ export default function AdminPanel() {
           {/* Page title + badge */}
           <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:28, flexWrap:"wrap" }}>
             <h1 style={{ fontSize:22, fontWeight:800, color:T.t1, margin:0, letterSpacing:"-.3px" }}>
-              {tab === "oversigt" ? "Oversigt" : tab === "bookings" ? "Bookinger" : tab === "kunder" ? "Kunder" : tab === "reviews" ? "Anmeldelser" : tab === "hours" ? "Åbningstider" : tab === "gallery" ? "Galleri" : tab === "videos" ? "Videoer" : tab === "beforeafter" ? "Før & efter" : tab === "faq" ? "FAQ" : tab === "priser" ? "Priser" : "Ekstra ydelser"}
+              {tab === "oversigt" ? "Oversigt" : tab === "bookings" ? "Bookinger" : tab === "kunder" ? "Kunder" : tab === "reviews" ? "Anmeldelser" : tab === "hours" ? "Åbningstider" : tab === "settings" ? "Indstillinger" : tab === "gallery" ? "Galleri" : tab === "videos" ? "Videoer" : tab === "beforeafter" ? "Før & efter" : tab === "faq" ? "FAQ" : tab === "priser" ? "Priser" : "Ekstra ydelser"}
             </h1>
             <span style={{ background:T.accentDim, color:T.accent, borderRadius:20, padding:"3px 12px", fontSize:12, fontWeight:700 }}>
-              {tab === "oversigt" ? new Intl.DateTimeFormat("da-DK",{ weekday:"long", day:"numeric", month:"long", timeZone:"Europe/Copenhagen" }).format(new Date()) : tab === "bookings" ? `${activeBookings} aktive` : tab === "kunder" ? "Kundekartotek" : tab === "reviews" ? "Kundecitater" : tab === "hours" ? hoursSummary(hours, "da") : tab === "gallery" ? `${gallery.length + DEFAULT_ALBUM.length} billeder på siden` : tab === "videos" ? `${videos.length} ${videos.length===1?"video":"videoer"}` : tab === "beforeafter" ? `${beforeAfter.length + DEFAULT_BEFORE_AFTER.length} par på siden` : tab === "faq" ? (faqItems.length ? `${faqItems.length} spørgsmål` : `${DEFAULT_FAQ.length} standardspørgsmål`) : tab === "priser" ? "Prismatrix" : (extrasItems.length ? `${extrasItems.length} ydelser` : `${DEFAULT_EXTRAS.length} standardydelser`)}
+              {tab === "oversigt" ? new Intl.DateTimeFormat("da-DK",{ weekday:"long", day:"numeric", month:"long", timeZone:"Europe/Copenhagen" }).format(new Date()) : tab === "bookings" ? `${activeBookings} aktive` : tab === "kunder" ? "Kundekartotek" : tab === "reviews" ? "Kundecitater" : tab === "hours" ? hoursSummary(hours, "da") : tab === "settings" ? (settingsDirty ? "Ugemte ændringer" : "Kontakt & tekster") : tab === "gallery" ? `${gallery.length + DEFAULT_ALBUM.length} billeder på siden` : tab === "videos" ? `${videos.length} ${videos.length===1?"video":"videoer"}` : tab === "beforeafter" ? `${beforeAfter.length + DEFAULT_BEFORE_AFTER.length} par på siden` : tab === "faq" ? (faqItems.length ? `${faqItems.length} spørgsmål` : `${DEFAULT_FAQ.length} standardspørgsmål`) : tab === "priser" ? "Prismatrix" : (extrasItems.length ? `${extrasItems.length} ydelser` : `${DEFAULT_EXTRAS.length} standardydelser`)}
             </span>
             {(tab === "oversigt" || tab === "bookings") && (
               <>
@@ -2042,6 +2056,104 @@ export default function AdminPanel() {
                   <span style={{ color:T.t4, fontSize:12.5 }}>
                     {hoursDirty ? "Ugemte ændringer" : hoursIsDefault ? "Bruger standard (alle dage 15:30–22:00)" : "Gemt"}
                   </span>
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* ── INDSTILLINGER (firma) ── */}
+          {tab === "settings" && (() => {
+            const d = settingsDraft;
+            const set = (patch) => setSettingsDraft(v => ({ ...v, ...patch }));
+            const setBi = (k, lang, val) => setSettingsDraft(v => ({ ...v, [k]: { ...v[k], [lang]: val } }));
+            const norm = normalizeSettings(d);
+            // Fields the server would silently fall back on — flag them in the UI.
+            const bad = {
+              phone: d.phone.trim() !== "" && norm.phone !== d.phone.trim(),
+              email: d.email.trim() !== "" && norm.email !== d.email.trim().toLowerCase(),
+              instagram: d.instagram.trim() !== "" && norm.instagram !== d.instagram.replace(/^@/, "").trim(),
+              facebook: d.facebook.trim() !== "" && norm.facebook !== d.facebook.trim(),
+            };
+            const anyBad = Object.values(bad).some(Boolean);
+            async function save() {
+              if (settingsSaving || anyBad) return;
+              setSettingsSaving(true);
+              try {
+                const r = await fetch("/api/admin/content", { method:"POST", headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" }, body: JSON.stringify({ type:"settings", settings: d }) });
+                if (r.ok) { const j = await r.json(); const v = normalizeSettings(j.settings); setSiteSettings(v); setSettingsDraft(v); addToast("ok", "Indstillinger gemt – siden opdateres inden for et minut"); }
+                else if (r.status === 401 || r.status === 403) { try { sessionStorage.removeItem("adm"); } catch {} setAuthed(false); setSecret(""); setLoginErr("Session udløbet – log ind igen."); }
+                else addToast("err", "Kunne ikke gemme — prøv igen");
+              } catch { addToast("err", "Netværksfejl — prøv igen"); }
+              finally { setSettingsSaving(false); }
+            }
+            const box = { background:T.bg1, border:`1px solid ${T.border}`, borderRadius:16, padding:24, marginBottom:20 };
+            const lab = (t, hint) => (<><p style={{ fontSize:10, letterSpacing:2, fontWeight:700, color:T.t3, textTransform:"uppercase", margin:"0 0 4px" }}>{t}</p>{hint && <p style={{ color:T.t4, fontSize:12.5, margin:"0 0 14px", lineHeight:1.5 }}>{hint}</p>}</>);
+            const inp = (isBad) => ({ width:"100%", boxSizing:"border-box", background:T.bg0, border:`1px solid ${isBad ? T.dangerBorder : T.border}`, borderRadius:10, color:T.t1, fontSize:16, fontWeight:600, padding:"12px 14px", minHeight:46, fontFamily:FF });
+            const field = (label, key, ph, help) => (
+              <label style={{ display:"block", marginBottom:14 }}>
+                <span style={{ display:"block", fontSize:12.5, color:T.t2, fontWeight:600, marginBottom:6 }}>{label}</span>
+                <input value={d[key]} placeholder={ph} onChange={e => set({ [key]: e.target.value })} style={inp(bad[key])} />
+                {bad[key] ? <span style={{ display:"block", color:T.danger, fontSize:12, marginTop:5, fontWeight:600 }}>{help}</span> : null}
+              </label>
+            );
+            return (
+              <div style={{ maxWidth:760 }}>
+                <p style={{ color:T.t3, fontSize:13.5, lineHeight:1.6, margin:"0 0 22px", maxWidth:640 }}>
+                  Kontaktoplysninger og tekster, der vises på hele hjemmesiden – topbanner, menu, kontaktsiden, footer, chat og Google-data. Ændringer slår igennem inden for ca. et minut.
+                </p>
+
+                <div style={box}>
+                  {lab("Kontakt", "Vises overalt på siden, i chatten og i Googles virksomhedsdata.")}
+                  <div style={{ display:"grid", gridTemplateColumns: narrow ? "1fr" : "1fr 1fr", gap:"0 16px" }}>
+                    {field("Telefon", "phone", "+45 12 34 56 78", "Ugyldigt telefonnummer – brug fx +45 12 34 56 78")}
+                    {field("E-mail", "email", "info@firma.dk", "Ugyldig e-mailadresse")}
+                  </div>
+                </div>
+
+                <div style={box}>
+                  {lab("Sociale medier")}
+                  <div style={{ display:"grid", gridTemplateColumns: narrow ? "1fr" : "1fr 1fr", gap:"0 16px" }}>
+                    {field("Instagram-brugernavn", "instagram", "elitevasksjaelland", "Kun bogstaver, tal, punktum og _ (uden @)")}
+                    {field("Facebook-link", "facebook", "https://www.facebook.com/…", "Skal være et https://facebook.com/…-link")}
+                  </div>
+                </div>
+
+                <div style={box}>
+                  {lab("Topbanner", "Den grønne linje øverst på forsiden. Kort og konkret virker bedst (maks. 90 tegn).")}
+                  {[["annMain","Hovedtekst"],["annSub","Undertekst"]].map(([k, l]) => (
+                    <div key={k} style={{ display:"grid", gridTemplateColumns: narrow ? "1fr" : "1fr 1fr", gap:"0 16px" }}>
+                      <label style={{ display:"block", marginBottom:14 }}>
+                        <span style={{ display:"block", fontSize:12.5, color:T.t2, fontWeight:600, marginBottom:6 }}>{l} · dansk</span>
+                        <input maxLength={90} value={d[k].da} onChange={e => setBi(k, "da", e.target.value)} style={inp(false)} />
+                      </label>
+                      <label style={{ display:"block", marginBottom:14 }}>
+                        <span style={{ display:"block", fontSize:12.5, color:T.t2, fontWeight:600, marginBottom:6 }}>{l} · engelsk</span>
+                        <input maxLength={90} value={d[k].en} onChange={e => setBi(k, "en", e.target.value)} style={inp(false)} />
+                      </label>
+                    </div>
+                  ))}
+                  <div style={{ marginTop:4, borderRadius:10, overflow:"hidden", border:`1px solid ${T.border}` }}>
+                    <div style={{ background:"linear-gradient(90deg,#0f5a2c,#15703a)", color:"#fff", fontSize:13, padding:"10px 14px", display:"flex", gap:10, flexWrap:"wrap", alignItems:"center" }}>
+                      <strong>{norm.annMain.da}</strong><span style={{ opacity:.85 }}>{norm.annSub.da}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ ...box, background:"rgba(245,166,35,.06)", borderColor:"rgba(245,166,35,.25)" }}>
+                  <p style={{ margin:0, color:T.t2, fontSize:13, lineHeight:1.6 }}>
+                    <strong style={{ color:T.amber }}>Bemærk:</strong> Booking-e-mails (bekræftelse, påmindelse, annullering) bruger af sikkerhedshensyn stadig de oprindelige kontaktoplysninger. Skifter I telefonnummer eller e-mail, så giv besked, så de også opdateres.
+                  </p>
+                </div>
+
+                <div style={{ display:"flex", alignItems:"center", gap:12, position:"sticky", bottom: narrow ? "calc(57px + env(safe-area-inset-bottom))" : 0, background:T.bg0, padding:"14px 0", borderTop:`1px solid ${T.border}`, flexWrap:"wrap" }}>
+                  <button onClick={save} disabled={!settingsDirty || anyBad || settingsSaving}
+                    style={{ padding:"12px 28px", borderRadius:10, border:"none", background:(!settingsDirty || anyBad) ? "rgba(255,255,255,.08)" : T.accent, color:(!settingsDirty || anyBad) ? T.t4 : "#052010", fontSize:14, fontWeight:700, cursor:(!settingsDirty || anyBad) ? "not-allowed" : "pointer", fontFamily:FF, minHeight:44 }}>
+                    {settingsSaving ? "Gemmer…" : "Gem indstillinger"}
+                  </button>
+                  {settingsDirty && !settingsSaving && (
+                    <button onClick={() => setSettingsDraft(siteSettings)} style={{ padding:"12px 20px", borderRadius:10, border:`1px solid ${T.border}`, background:"transparent", color:T.t3, fontSize:13, fontWeight:600, cursor:"pointer", fontFamily:FF, minHeight:44 }}>Fortryd</button>
+                  )}
+                  <button onClick={() => setSettingsDraft(DEFAULT_SETTINGS)} style={{ marginLeft:"auto", padding:"10px 14px", borderRadius:10, border:`1px solid ${T.border}`, background:"transparent", color:T.t3, fontSize:12, fontWeight:600, cursor:"pointer", fontFamily:FF, minHeight:40 }}>Nulstil til standard</button>
                 </div>
               </div>
             );
@@ -3350,7 +3462,7 @@ export default function AdminPanel() {
               <button onClick={() => {
                   const g = navGuard;
                   setNavGuard(null);
-                  setFaqDrafts({}); setEditingExt(null); setEditingGallery(null); setEditingBA(null); setPriceEdits(pricesData); setHoursDraft(hours);
+                  setFaqDrafts({}); setEditingExt(null); setEditingGallery(null); setEditingBA(null); setPriceEdits(pricesData); setHoursDraft(hours); setSettingsDraft(siteSettings);
                   if (g.logout) { logout(); return; }
                   setTab(g.pendingTab); setMsg(null); setUrlInput(""); setCmsMsg(null); setExpandedFaqId(null); setAddFaqOpen(false);
                 }}

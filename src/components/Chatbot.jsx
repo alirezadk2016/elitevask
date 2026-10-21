@@ -1,3 +1,5 @@
+import { getSettings } from "@/lib/getSettings";
+import { applySettings, DEFAULT_SETTINGS } from "@/lib/settings";
 
 const HTML = `<!-- CHATBOT -->
 <div id="chatbot" class="chatbot">
@@ -45,6 +47,7 @@ const HTML = `<!-- CHATBOT -->
     <div class="chat-foot" data-i18n="chat_foot">Svar med det samme · Ring +45 24 44 03 21</div>
   </div>
 </div>`;
-export default function Chatbot() {
-  return <div dangerouslySetInnerHTML={{ __html: HTML }} />;
+export default async function Chatbot() {
+  const s = await getSettings();
+  return <div dangerouslySetInnerHTML={{ __html: applySettings(HTML, s) }} />;
 }

@@ -1,3 +1,5 @@
+import { getSettings } from "@/lib/getSettings";
+import { applySettings, DEFAULT_SETTINGS } from "@/lib/settings";
 import { lastModified } from "@/lib/pageDates";
 const HTML = `<!-- FOOTER -->
 <footer class="footer"><div class="wrap">
@@ -25,9 +27,10 @@ const HTML = `<!-- FOOTER -->
 /* Visible byline + machine-readable update date (the same date the sitemap and
    the WebPage schema use). Answer engines read provenance and freshness from
    the page itself, not only from JSON-LD. */
-export default function Footer() {
+export default async function Footer() {
+  const settings = await getSettings();
   const iso = lastModified("/") || "2026-10-10";
   const [y, m, d] = iso.split("-").map(Number);
   const html = HTML.replace("__UPDATED__", `<time datetime="${iso}">${String(d).padStart(2, "0")}.${String(m).padStart(2, "0")}.${y}</time>`);
-  return <div dangerouslySetInnerHTML={{ __html: html }} />;
+  return <div dangerouslySetInnerHTML={{ __html: applySettings(html, settings) }} />;
 }

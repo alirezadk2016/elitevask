@@ -53,6 +53,7 @@ All styles are in `src/app/globals.css` using plain CSS variables (`--green`, `-
 | `content:extras` | array | `{id, name:{da,en}, desc:{da,en}, price}` |
 | `content:prices` | object | `{lille:{hele,udv,indv,guld}, mellem:{...}, stor:{...}, varebil:{...}}` |
 | `content:hours` | object | `{slotMinutes:30, closedDates:[], days:[7× {closed, open, close}] (0=Sun..6=Sat), open, close, closedDays}` — per-weekday booking hours (admin → Åbningstider). `open`/`close` are the union of open days (shared slot grid used by `/api/book`); a day's slots = `buildSlotTimes(hours, date)`. Helpers in `src/lib/hours.js` |
+| `content:settings` | object | `{phone, email, instagram, facebook, annMain:{da,en}, annSub:{da,en}}` — admin → Indstillinger. Helpers `src/lib/settings.js` (`applySettings` swaps the original hard-coded values), server read `src/lib/getSettings.js`, site-wide display swap `components/SettingsSync.jsx`. NOT applied to `/api/book` or e-mails (`mailer.js`) on purpose |
 | `session:<hash>` | object | customer portal sessions |
 
 ### Package and car type IDs

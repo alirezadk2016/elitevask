@@ -1,3 +1,5 @@
+import { getSettings } from "@/lib/getSettings";
+import { applySettings, DEFAULT_SETTINGS } from "@/lib/settings";
 const HTML = `<!-- CONTACT -->
 <section class="sec contact" id="kontakt"><div class="wrap">
   <div class="contact-grid">
@@ -20,6 +22,7 @@ const HTML = `<!-- CONTACT -->
     </div>
   </div>
 </div></section>`;
-export default function Contact() {
-  return <div dangerouslySetInnerHTML={{ __html: HTML }} />;
+export default async function Contact() {
+  const s = await getSettings();
+  return <div dangerouslySetInnerHTML={{ __html: applySettings(HTML, s) }} />;
 }

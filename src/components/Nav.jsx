@@ -1,3 +1,5 @@
+import { getSettings } from "@/lib/getSettings";
+import { applySettings, DEFAULT_SETTINGS } from "@/lib/settings";
 const HTML = `<!-- NAV -->
 <nav class="nav" id="siteNav"><div class="nav-inner">
   <a href="#top" class="logo" aria-label="Elite Vask – mobil bil dampvask, til forsiden">
@@ -45,6 +47,7 @@ const HTML = `<!-- NAV -->
   <span class="mgs-divider"></span>
   <span class="mgs-label">Se anmeldelser</span>
 </a>`;
-export default function Nav() {
-  return <div className="nav-wrap" id="navWrap" dangerouslySetInnerHTML={{ __html: HTML }} />;
+export default async function Nav() {
+  const s = await getSettings();
+  return <div className="nav-wrap" id="navWrap" dangerouslySetInnerHTML={{ __html: applySettings(HTML, s) }} />;
 }

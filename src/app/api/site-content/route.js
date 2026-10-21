@@ -1,15 +1,17 @@
 import { kv } from '@vercel/kv';
 import { normalizeHours } from '@/lib/hours';
+import { normalizeSettings } from '@/lib/settings';
 
 export const revalidate = 60;
 
 export async function GET() {
   try {
-    const [faq, prices, extras, hours] = await Promise.all([
+    const [faq, prices, extras, hours, settings] = await Promise.all([
       kv.get('content:faq'),
       kv.get('content:prices'),
       kv.get('content:extras'),
       kv.get('content:hours'),
+      kv.get('content:settings'),
     ]);
 
     const result = {};
@@ -19,6 +21,7 @@ export async function GET() {
     // Always return a valid hours object (normalized) so the client never has
     // to know the defaults — hours drives the booking slot grid.
     result.hours = normalizeHours(hours);
+    result.settings = normalizeSettings(settings);
 
     return Response.json(result, {
       headers: { 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300' },

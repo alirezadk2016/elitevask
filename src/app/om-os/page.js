@@ -4,6 +4,8 @@ import RelatedLinks from "@/components/RelatedLinks";
 import JsonLd from "@/components/JsonLd";
 import { breadcrumbLd, webPageLd, SITE } from "@/lib/seo";
 import { getHours, hoursDisplay } from "@/lib/getHours";
+import { getSettings } from "@/lib/getSettings";
+import { phoneTel } from "@/lib/settings";
 
 export const metadata = {
   title: "Om Elite Vask – mobil bil dampvask i hele Sjælland",
@@ -36,6 +38,8 @@ const H2 = { fontSize: 22, fontWeight: 800, color: "#fff", margin: "36px 0 14px"
    "Hvem er Elite Vask?", /kontakt, /handelsbetingelser, layout JSON-LD).
    Nothing about people or history is included until the owner supplies it. */
 export default async function OmOs() {
+  const st = await getSettings();
+  const tel = phoneTel(st.phone);
   const hd = hoursDisplay(await getHours(), "da");
   return (
     <div className="legal-page">
@@ -77,7 +81,7 @@ export default async function OmOs() {
               <tr><th scope="row">Åbningstider</th><td>{hd.text.charAt(0).toUpperCase() + hd.text.slice(1)}, eller efter aftale</td></tr>
               <tr><th scope="row">Udstyr</th><td>Optima Steamer XD2 – professionel damprenser med kontinuerlig damp</td></tr>
               <tr><th scope="row">Betaling</th><td>MobilePay, bankoverførsel eller kontant – efter vasken</td></tr>
-              <tr><th scope="row">Kontakt</th><td><a href="tel:+4524440321" style={{ color: "var(--green)", display: "inline-flex", alignItems: "center", minHeight: 44 }}>+45 24 44 03 21</a> · <a href="mailto:info@elite-vask.dk" style={{ color: "var(--green)", display: "inline-flex", alignItems: "center", minHeight: 44 }}>info@elite-vask.dk</a></td></tr>
+              <tr><th scope="row">Kontakt</th><td><a href={`tel:${tel}`} style={{ color: "var(--green)", display: "inline-flex", alignItems: "center", minHeight: 44 }}>{st.phone}</a> · <a href={`mailto:${st.email}`} style={{ color: "var(--green)", display: "inline-flex", alignItems: "center", minHeight: 44 }}>{st.email}</a></td></tr>
             </tbody>
           </table>
         </div>
