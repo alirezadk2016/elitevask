@@ -1192,6 +1192,79 @@ export default function AdminPanel() {
           })()}
 
           {/* ── BOOKINGS WEEKLY CALENDAR ── */}
+          {/* ── STATISTIK (under Oversigt) ── */}
+          {tab === "oversigt" && (() => {
+            const kr = (p) => { const n = parseInt(String(p||"").replace(/[^\d]/g,""),10); return Number.isFinite(n)?n:0; };
+            const fmt = (n) => `${Math.round(n).toLocaleString("da-DK")} kr`;
+            const isoOf = (d) => new Intl.DateTimeFormat("sv-SE", { timeZone:"Europe/Copenhagen" }).format(d);
+            const today = new Date();
+            // Monday of the current week, then the 8 weeks back from it.
+            const mon = new Date(today); mon.setHours(12,0,0,0); mon.setDate(mon.getDate() - ((mon.getDay() + 6) % 7));
+            const weeks = Array.from({ length: 8 }, (_, k) => {
+              // 5 weeks back, this week, and the 2 weeks ahead (already booked).
+              const start = new Date(mon); start.setDate(start.getDate() + (k - 5) * 7);
+              const end = new Date(start); end.setDate(end.getDate() + 6);
+              const a = isoOf(start), z = isoOf(end);
+              const list = bookings.filter(b => b.status !== "cancelled" && b.date >= a && b.date <= z);
+              return { label: `${start.getDate()}/${start.getMonth()+1}`, rev: list.reduce((s2,b)=>s2+kr(b.price),0), n: list.length, cur: k === 5, future: k > 5 };
+            });
+            const maxRev = Math.max(1, ...weeks.map(w => w.rev));
+            const all = bookings.filter(b => b.status !== "cancelled");
+            const cancelled = bookings.filter(b => b.status === "cancelled").length;
+            const total = all.reduce((s2,b)=>s2+kr(b.price),0);
+            const avg = all.length ? total / all.length : 0;
+            const cancelRate = bookings.length ? Math.round(cancelled / bookings.length * 100) : 0;
+            const top = (keyFn) => {
+              const m = new Map();
+              all.forEach(b => { const k = keyFn(b); if (!k) return; m.set(k, (m.get(k)||0) + 1); });
+              return [...m.entries()].sort((x,y)=>y[1]-x[1]).slice(0,5);
+            };
+            const topCity = top(b => (b.city || "").trim() ? `${(b.zip||"").trim()} ${(b.city||"").trim()}`.trim() : "");
+            const topPkg = top(b => b.pkg || "");
+            const topCar = top(b => b.car || "");
+            const box = { background:T.bg1, border:`1px solid ${T.border}`, borderRadius:16, padding:"18px 20px" };
+            const h = (t) => <p style={{ fontSize:10, letterSpacing:1.6, fontWeight:700, color:T.t3, textTransform:"uppercase", margin:"0 0 12px" }}>{t}</p>;
+            const rank = (rows) => rows.length ? rows.map(([k,v]) => (
+              <div key={k} style={{ display:"flex", alignItems:"center", gap:10, marginBottom:8 }}>
+                <span style={{ flex:1, fontSize:13, color:T.t2, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{k}</span>
+                <span style={{ width:90, height:6, borderRadius:99, background:"rgba(255,255,255,.06)", overflow:"hidden", flexShrink:0 }}>
+                  <span style={{ display:"block", height:"100%", width:`${Math.round(v / rows[0][1] * 100)}%`, background:T.accent, borderRadius:99 }} />
+                </span>
+                <span style={{ width:26, textAlign:"right", fontSize:12.5, fontWeight:700, color:T.t1, fontVariantNumeric:"tabular-nums" }}>{v}</span>
+              </div>
+            )) : <p style={{ fontSize:12.5, color:T.t3, margin:0 }}>Ingen data endnu.</p>;
+            return (
+              <div style={{ marginTop:28 }}>
+                <h2 style={{ fontSize:18, fontWeight:800, color:T.t1, margin:"0 0 14px", letterSpacing:"-.3px" }}>Statistik</h2>
+                <div style={{ display:"grid", gridTemplateColumns: narrow ? "1fr 1fr" : "repeat(4,1fr)", gap:12, marginBottom:12 }}>
+                  {[["Omsætning i alt", fmt(total)], ["Bookinger i alt", String(all.length)], ["Gns. ordre", all.length ? fmt(avg) : "–"], ["Annulleringer", `${cancelRate}%`]].map(([l,v]) => (
+                    <div key={l} style={box}>
+                      <p style={{ fontSize:10, letterSpacing:1.4, fontWeight:700, color:T.t3, textTransform:"uppercase", margin:"0 0 8px" }}>{l}</p>
+                      <p style={{ fontSize:22, fontWeight:800, color:T.t1, margin:0, fontVariantNumeric:"tabular-nums", letterSpacing:"-.5px" }}>{v}</p>
+                    </div>
+                  ))}
+                </div>
+                <div style={{ ...box, marginBottom:12 }}>
+                  {h("Omsætning pr. uge · 5 uger tilbage, denne uge og 2 frem")}
+                  <div style={{ display:"flex", alignItems:"flex-end", gap: narrow ? 6 : 12, height:150 }}>
+                    {weeks.map(w => (
+                      <div key={w.label} style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", gap:6, height:"100%", justifyContent:"flex-end" }} title={`${w.n} bookinger · ${fmt(w.rev)}`}>
+                        <span style={{ fontSize:10.5, color:T.t3, fontVariantNumeric:"tabular-nums", whiteSpace:"nowrap" }}>{w.rev ? `${Math.round(w.rev/100)/10}k` : ""}</span>
+                        <div style={{ width:"100%", maxWidth:46, height:`${Math.max(w.rev ? 6 : 2, w.rev / maxRev * 100)}%`, borderRadius:"8px 8px 3px 3px", background: w.cur ? `linear-gradient(180deg,${T.accent},rgba(55,210,120,.55))` : w.future ? "repeating-linear-gradient(135deg,rgba(55,210,120,.22) 0 6px,rgba(55,210,120,.08) 6px 12px)" : "rgba(55,210,120,.28)", border: w.cur ? "none" : `1px solid ${T.accentBorder}` }} />
+                        <span style={{ fontSize:10.5, color: w.cur ? T.accent : T.t3, fontWeight: w.cur ? 700 : 500, fontVariantNumeric:"tabular-nums" }}>{w.label}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div style={{ display:"grid", gridTemplateColumns: narrow ? "1fr" : "repeat(3,1fr)", gap:12 }}>
+                  <div style={box}>{h("Top områder")}{rank(topCity)}</div>
+                  <div style={box}>{h("Populære pakker")}{rank(topPkg)}</div>
+                  <div style={box}>{h("Biltyper")}{rank(topCar)}</div>
+                </div>
+              </div>
+            );
+          })()}
+
           {tab === "bookings" && (() => {
             const weekStart = getWeekStart(weekOffset);
             const weekDays = Array.from({length:7}, (_,i) => {
