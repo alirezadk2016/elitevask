@@ -296,7 +296,12 @@ export async function POST(request) {
 
   // Current opening hours (manager-configurable) drive the slot grid + duration.
   const hours = await loadHours();
-  const SLOT_TIMES = buildSlotTimes(hours);
+  // That weekday's own window (or a date's special hours), so a crafted request
+  // can't book outside e.g. Saturday's shorter hours. A closed day keeps the
+  // shared grid here so it still gets the clear 'closed_day' message below.
+  const SLOT_TIMES = (typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date) && !isClosedDay(hours, date))
+    ? buildSlotTimes(hours, date)
+    : buildSlotTimes(hours);
   const slotsNeeded = carSlotCount(hours, carId);
   const L = lang !== 'en';
 
