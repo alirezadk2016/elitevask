@@ -59,6 +59,7 @@ const JSONLD = [
   "@type":"AutoWash",
   "@id":"https://www.elite-vask.dk/#business",
   "name":"Elite Vask",
+  "alternateName":"Elitevask",
   "url":"https://www.elite-vask.dk",
   "image":"https://www.elite-vask.dk/og-cover.jpg",
   "logo":"https://www.elite-vask.dk/logo-192.png",
@@ -79,6 +80,7 @@ const JSONLD = [
   "@id":"https://www.elite-vask.dk/#website",
   "url":"https://www.elite-vask.dk",
   "name":"Elite Vask",
+  "alternateName":"Elitevask",
   "inLanguage":"da-DK",
   "publisher":{"@id":"https://www.elite-vask.dk/#business"}
 }

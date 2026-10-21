@@ -6,7 +6,7 @@ import JsonLd from "@/components/JsonLd";
 import { breadcrumbLd, cityServiceLd, webPageLd } from "@/lib/seo";
 import { getHours, hoursDisplay } from "@/lib/getHours";
 export const metadata = {
-  title: "Mobil bilvask i Roskilde – dampvask hos dig | Elite Vask",
+  title: "Bilvask i Roskilde – mobil dampvask og bilpleje | Elite Vask",
   description: "Professionel mobil dampvask i Roskilde. Vi kører til din adresse – hjemme eller på arbejdet. Gratis kørsel, betal efter vask. Book online.",
   alternates: { canonical: "/bilvask/roskilde" },
   openGraph: {
@@ -42,7 +42,7 @@ export default async function BilvaskRoskilde() {
           Roskilde er en af Sjællands travleste byer, og de fleste bilvaskanlæg kræver at du selv kører derhen og venter. Med Elite Vask er det anderledes: vi aftaler et tidspunkt der passer dig, møder op til din adresse og vasker bilen, mens du er hjemme, på arbejdet eller passer dit.
         </p>
         <p>
-          Vi betjener hele Roskilde by og kommunen, herunder Jyllinge, Gundsømagle, Viby og Gadstrup. Kørsel er altid <strong>gratis</strong>.
+          Vi betjener hele Roskilde by og kommunen, herunder Jyllinge, Gundsømagle, Viby Sjælland og Gadstrup. Kørsel er altid <strong>gratis</strong>.
         </p>
 
         <h2>Professionel dampvask – skånsom og effektiv</h2>
@@ -70,7 +70,7 @@ export default async function BilvaskRoskilde() {
 
         <h2>Ofte stillede spørgsmål</h2>
         <p><strong>Vasker I i hele Roskilde Kommune?</strong><br/>
-        Ja, vi dækker hele kommunen inklusiv Jyllinge, Gundsømagle, Viby og Gadstrup.</p>
+        Ja, vi dækker hele kommunen inklusiv Jyllinge, Gundsømagle, Viby Sjælland og Gadstrup.</p>
         <p><strong>Hvad koster kørsel til Roskilde?</strong><br/>
         Kørsel er gratis til alle adresser i Roskilde og omegn.</p>
         <p><strong>Kan I vaske min bil på weekenden?</strong><br/>

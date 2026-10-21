@@ -5,7 +5,7 @@ import CityProcess from "@/components/CityProcess";
 import JsonLd from "@/components/JsonLd";
 import { breadcrumbLd, cityServiceLd, webPageLd } from "@/lib/seo";
 export const metadata = {
-  title: "Mobil bilvask i Næstved – dampvask hos dig | Elite Vask",
+  title: "Bilvask i Næstved – mobil dampvask og bilpleje | Elite Vask",
   description: "Professionel mobil dampvask i Næstved og omegn. Vi kører til din adresse – gratis kørsel, betal efter vask. Book online eller ring til os.",
   alternates: { canonical: "/bilvask/naestved" },
   openGraph: {

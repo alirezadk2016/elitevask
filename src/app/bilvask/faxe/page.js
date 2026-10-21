@@ -6,7 +6,7 @@ import JsonLd from "@/components/JsonLd";
 import { breadcrumbLd, cityServiceLd, webPageLd } from "@/lib/seo";
 import { getHours, hoursDisplay } from "@/lib/getHours";
 export const metadata = {
-  title: 'Mobil bilvask i Faxe – dampvask hos dig | Elite Vask',
+  title: 'Bilvask i Faxe – mobil dampvask og bilpleje | Elite Vask',
   description: 'Professionel mobil dampvask i Faxe og Haslev. Vi kører til din adresse i hele Faxe Kommune – gratis kørsel, ingen forudbetaling, betal efter vask.',
   alternates: { canonical: "/bilvask/faxe" },
   openGraph: {

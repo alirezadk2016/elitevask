@@ -77,3 +77,4 @@ and one per car type (elbil, varebil). Until then: "to check".
   580/920 px; titles keyword-first with the brand last; H1s on home, FAQ,
   guide and gallery carry the primary keyword; city `RelatedLinks` cut to
   neighbours with varied anchors.
+- 2026-10-21 — First Search Console read (last 3 months: 76 clicks, 3.54k impressions, CTR 2.1 %, avg. position 17.2). People type **"bilvask <by>"**, not "mobil bilvask <by>": bilvask køge 197 impr. @20, ringsted 152 @27, københavn 147 @28, hillerød 109 @11, roskilde 79 @21, helsingør 56 @10. Also "vaskehal <by>" (køge 56, hillerød 48, sjælland 76) and "elitevask" 52 @12. Changes: city titles now lead with "Bilvask i <by>" + bilpleje; city pages name the vaskehal alternative; "Viby Sjælland" on Roskilde; `alternateName: Elitevask` in schema. Re-read in 2–4 weeks: did position/CTR move for these rows? Open question for the owner: "klargøring af bil køge" (69 impr.) — only a page if Elite Vask really offers klargøring.

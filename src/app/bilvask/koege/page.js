@@ -6,7 +6,7 @@ import JsonLd from "@/components/JsonLd";
 import { breadcrumbLd, cityServiceLd, webPageLd } from "@/lib/seo";
 import { getHours, hoursDisplay } from "@/lib/getHours";
 export const metadata = {
-  title: "Mobil bilvask i Køge – dampvask hos dig | Elite Vask",
+  title: "Bilvask i Køge – mobil dampvask og bilpleje | Elite Vask",
   description: "Mobil dampvask i Køge og omegn. Vi kører til dig – gratis kørsel, betal efter vask. Skånsom dampvask uden ridser og med minimal miljøpåvirkning.",
   alternates: { canonical: "/bilvask/koege" },
   openGraph: {

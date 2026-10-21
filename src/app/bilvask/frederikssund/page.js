@@ -6,7 +6,7 @@ import JsonLd from "@/components/JsonLd";
 import { breadcrumbLd, cityServiceLd, webPageLd } from "@/lib/seo";
 import { getHours, hoursDisplay } from "@/lib/getHours";
 export const metadata = {
-  title: 'Mobil bilvask i Frederikssund – dampvask hos dig | Elite Vask',
+  title: 'Bilvask i Frederikssund – mobil dampvask | Elite Vask',
   description: 'Professionel mobil dampvask i Frederikssund, Slangerup, Skibby og Jægerspris. Vi kører til dig – gratis kørsel, dampvask uden ridser.',
   alternates: { canonical: "/bilvask/frederikssund" },
   openGraph: {

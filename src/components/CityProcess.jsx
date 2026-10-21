@@ -5,6 +5,9 @@ export default function CityProcess({ city }) {
   return (
     <>
       <h2>Sådan foregår mobil bilvask i {city}</h2>
+      <p>
+        Et alternativ til vaskehallen i {city}: i stedet for at køre til en vaskehal og vente i kø, kommer vi til bilen og vasker den, hvor den holder.
+      </p>
       <ol>
         <li><strong>Vælg og book.</strong> Vælg biltype og pakke, og book en ledig tid online på få minutter.</li>
         <li><strong>Vi kører ud.</strong> Vi kommer til din adresse i {city} med alt udstyr – kørslen er gratis.</li>
