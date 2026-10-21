@@ -1,5 +1,5 @@
 import Link from "next/link";
-import DanishOnlyNotice from "@/components/DanishOnlyNotice";
+import Bi from "@/components/Bi";
 import RelatedLinks from "@/components/RelatedLinks";
 import CityProcess from "@/components/CityProcess";
 import JsonLd from "@/components/JsonLd";
@@ -21,13 +21,16 @@ export const metadata = {
 };
 
 export default async function BilvaskHilleroed() {
-  const hd = hoursDisplay(await getHours(), "da");
+  const hours = await getHours();
+  const hd = hoursDisplay(hours, "da");
+  const hdEn = hoursDisplay(hours, "en");
   return (
     <div className="legal-page">
       <JsonLd items={[breadcrumbLd([{name:"Forside",path:"/"},{name:'Mobil bilvask i Hillerød',path:"/bilvask/hilleroed"}]),cityServiceLd({city:'Hillerød',path:"/bilvask/hilleroed"}),webPageLd({path:"/bilvask/hilleroed",name:"Mobil bilvask i Hillerød – Elite Vask",description:"Mobil bil dampvask i Hillerød. Vi kører til din adresse."})]} />
       <div className="legal-wrap">
-        <Link href="/" className="legal-back">← Tilbage til forsiden</Link>
-        <DanishOnlyNotice />
+        <Link href="/" className="legal-back"><Bi da="← Tilbage til forsiden" en="← Back to the home page" /></Link>
+        <Bi
+          da={<>
 
         <div className="guide-eyebrow">Serviceområde</div>
         <h1>Mobil bilvask i Hillerød</h1>
@@ -77,6 +80,58 @@ export default async function BilvaskHilleroed() {
           <p style={{margin:'0 0 1rem',fontWeight:700,fontSize:'1.1rem',color:'#fff'}}>Book mobil bilvask i Hillerød i dag</p>
           <Link href="/#vaelg" className="btn btn-green guide-cta-btn">Se priser og book nu</Link>
         </div>
+          </>}
+          en={<>
+        <div className="guide-eyebrow">Service area</div>
+        <h1>Mobile car wash in Hillerød</h1>
+        <p className="legal-updated">Elite Vask · Steam wash at your door in Hillerød and North Zealand</p>
+
+        <p className="guide-lead">
+          Do you commute from Hillerød, or do you simply have better things to do with your Saturday than visit an automatic car wash? Elite Vask steam washes your car while it is parked in the driveway or in the car park at work – in Hillerød town, Skævinge, Gørløse and Nødebo.
+        </p>
+
+        <h2>Get the car washed while you are at work</h2>
+        <p>
+          Hillerød is a commuter town, and many of our customers here book the wash during the day in their workplace car park – the car is clean when it is time to go home. All we need is an appointment and free space around the car.
+        </p>
+        <p>
+          We work discreetly and bring everything ourselves: power, water and professional steam equipment.
+        </p>
+
+        <h2>Forest, damp and green deposits</h2>
+        <p>
+          The area around Gribskov and Store Dyrehave means that many cars in Hillerød are parked under trees: resin, bird droppings and green algae deposits on the roof edge and trim are typical. The steam loosens all three without rubbing them into the paint.
+        </p>
+
+
+        <h2>Car wash prices in Hillerød</h2>
+        <ul>
+          <li><strong>Exterior wash</strong> – complete exterior steam wash incl. rims and tyres. From 500 kr.</li>
+          <li><strong>Whole car (inside &amp; out)</strong> – exterior and interior cleaning in one visit. From 800 kr.</li>
+          <li><strong>Gold package</strong> – complete treatment incl. engine cleaning and paint sealant. From 2,000 kr.</li>
+        </ul>
+        <p>
+          All prices include free travel. You pay <strong>after</strong> the wash, once you are satisfied.
+        </p>
+
+        <CityProcess city="Hillerød" />
+
+        <h2>Frequently asked questions</h2>
+        <p><strong>Can you wash the car at my workplace?</strong><br/>
+        Yes, it is one of our most booked options in Hillerød – we just need free access to the car and space around it.</p>
+        <p><strong>Do you remove resin and bird droppings?</strong><br/>
+        Yes, hot steam gently dissolves resin and dried-on droppings, without aggressive products or scrubbing.</p>
+        <p><strong>Can you come at the weekend?</strong><br/>
+        {hdEn.weekendOpen
+          ? <>Yes, we work {hdEn.days.toLowerCase()}, {hdEn.time.replace(" – ", "–")}.</>
+          : <>Unfortunately we are closed at weekends, but we work {hdEn.days.toLowerCase()}, {hdEn.time.replace(" – ", "–")} – call us and we will find a time.</>}</p>
+
+        <div className="guide-cta-box">
+          <p style={{margin:'0 0 1rem',fontWeight:700,fontSize:'1.1rem',color:'#fff'}}>Book a mobile car wash in Hillerød today</p>
+          <Link href="/#vaelg" className="btn btn-green guide-cta-btn">See prices and book now</Link>
+        </div>
+          </>}
+        />
         <RelatedLinks city="hilleroed" />
       </div>
     </div>

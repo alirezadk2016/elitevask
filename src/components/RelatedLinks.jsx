@@ -1,4 +1,6 @@
+"use client";
 import Link from "next/link";
+import { useLang } from "@/lib/useLang";
 // Internal-links block for the standalone pages (city/guide/kontakt/legal),
 // which otherwise only link back to the homepage.
 //
@@ -7,6 +9,7 @@ import Link from "next/link";
 // about which pages belong together. A city page now links to the core pages
 // and its geographic neighbours only; the hub pages (priser, kontakt) still
 // list every city, because there the list is the structure itself.
+const EN = { koebenhavn: "Copenhagen", helsingoer: "Helsingør (Elsinore)" };
 const CITIES = {
   koebenhavn:    ["København",     ["roskilde", "koege", "hilleroed", "helsingoer"]],
   roskilde:      ["Roskilde",      ["koebenhavn", "koege", "ringsted", "frederikssund"]],
@@ -21,20 +24,22 @@ const CITIES = {
 };
 
 export default function RelatedLinks({ city }) {
+  const en = useLang() === "en";
+  const name = (c) => (en && EN[c]) || CITIES[c][0];
   const near = city && CITIES[city] ? CITIES[city][1] : Object.keys(CITIES);
   return (
-    <nav aria-label="Relaterede sider" className="related-links">
-      <h2 className="related-links-title">{city ? "Se også" : "Udforsk Elite Vask"}</h2>
+    <nav aria-label={en ? "Related pages" : "Relaterede sider"} className="related-links">
+      <h2 className="related-links-title">{city ? (en ? "See also" : "Se også") : (en ? "Explore Elite Vask" : "Udforsk Elite Vask")}</h2>
       <div className="local-chips" style={{ justifyContent: "flex-start" }}>
-        <Link href="/" className="chip">Forside</Link>
-        <a href="/priser" className="chip">{city ? "Priser på mobil bilvask" : "Priser"}</a>
-        <a href="/faq" className="chip">{city ? "Spørgsmål om dampvask" : "FAQ"}</a>
-        <a href="/guide" className="chip">Bilpleje guide</a>
-        {!city && <a href="/galleri" className="chip">Galleri</a>}
-        {!city && <a href="/kontakt" className="chip">Kontakt</a>}
+        <Link href="/" className="chip">{en ? "Home" : "Forside"}</Link>
+        <a href="/priser" className="chip">{city ? (en ? "Mobile car wash prices" : "Priser på mobil bilvask") : (en ? "Prices" : "Priser")}</a>
+        <a href="/faq" className="chip">{city ? (en ? "Questions about steam washing" : "Spørgsmål om dampvask") : "FAQ"}</a>
+        <a href="/guide" className="chip">{en ? "Car care guide" : "Bilpleje guide"}</a>
+        {!city && <a href="/galleri" className="chip">{en ? "Gallery" : "Galleri"}</a>}
+        {!city && <a href="/kontakt" className="chip">{en ? "Contact" : "Kontakt"}</a>}
         {near.map((c) => (
           <a key={c} href={`/bilvask/${c}`} className="chip">
-            {city ? `Mobil bilvask i ${CITIES[c][0]}` : `Bilvask ${CITIES[c][0]}`}
+            {city ? (en ? `Mobile car wash in ${name(c)}` : `Mobil bilvask i ${name(c)}`) : (en ? `Car wash ${name(c)}` : `Bilvask ${name(c)}`)}
           </a>
         ))}
       </div>

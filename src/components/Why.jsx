@@ -52,19 +52,19 @@ const HTML = `<!-- WHY -->
     </div>
     <div class="steam-table-wrap">
       <table class="steam-table">
-        <caption>Dampvask hos dig sammenlignet med en vaskehal</caption>
-        <thead><tr><th scope="col"></th><th scope="col">Elite Vask dampvask</th><th scope="col">Typisk vaskehal</th></tr></thead>
+        <caption data-i18n="stt_cap">Dampvask hos dig sammenlignet med en vaskehal</caption>
+        <thead><tr><th scope="col"></th><th scope="col" data-i18n="stt_h1">Elite Vask dampvask</th><th scope="col" data-i18n="stt_h2">Typisk vaskehal</th></tr></thead>
         <tbody>
-          <tr><th scope="row">Vand pr. bil</th><td>1–3 liter</td><td>ca. 140 liter spildevand*</td></tr>
-          <tr><th scope="row">Børster og højtryk</th><td>Nej</td><td>Ofte</td></tr>
-          <tr><th scope="row">Kemikalier</th><td>Ingen skrappe kemikalier</td><td>Vaskemidler i spildevandet*</td></tr>
-          <tr><th scope="row">Hvor</th><td>Der hvor bilen holder</td><td>Du kører derhen</td></tr>
+          <tr><th scope="row" data-i18n="stt_r1">Vand pr. bil</th><td data-i18n="stt_r1a">1–3 liter</td><td data-i18n="stt_r1b">ca. 140 liter spildevand*</td></tr>
+          <tr><th scope="row" data-i18n="stt_r2">Børster og højtryk</th><td data-i18n="stt_r2a">Nej</td><td data-i18n="stt_r2b">Ofte</td></tr>
+          <tr><th scope="row" data-i18n="stt_r3">Kemikalier</th><td data-i18n="stt_r3a">Ingen skrappe kemikalier</td><td data-i18n="stt_r3b">Vaskemidler i spildevandet*</td></tr>
+          <tr><th scope="row" data-i18n="stt_r4">Hvor</th><td data-i18n="stt_r4a">Der hvor bilen holder</td><td data-i18n="stt_r4b">Du kører derhen</td></tr>
         </tbody>
       </table>
     </div>
     <figure class="steam-cite">
       <blockquote cite="https://www2.mst.dk/udgiv/publikationer/2004/87-7614-047-4/html/helepubl.htm">
-        <p>»En typisk vaskehal afleder omkring 140 liter spildevand pr. bil.« Spildevandet indeholder ifølge rapporten en række tungmetaller og miljøfremmede stoffer.</p>
+        <p data-i18n="stt_quote">»En typisk vaskehal afleder omkring 140 liter spildevand pr. bil.« Spildevandet indeholder ifølge rapporten en række tungmetaller og miljøfremmede stoffer.</p>
       </blockquote>
       <figcaption>* <span data-i18n="steam_src">Kilde</span>: <a href="https://www2.mst.dk/udgiv/publikationer/2004/87-7614-047-4/html/helepubl.htm" target="_blank" rel="noopener noreferrer">Miljøstyrelsen, Miljøprojekt nr. 876 – Bilvask (2004)</a></figcaption>
     </figure>

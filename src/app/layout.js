@@ -6,6 +6,7 @@ import GoogleAnalytics from "@/components/GoogleAnalytics";
 import { getHours, openingHoursSpec } from "@/lib/getHours";
 import { jsonLdString } from "@/lib/jsonLd";
 import TrustpilotInvite from "@/components/TrustpilotInvite";
+import Bi from "@/components/Bi";
 
 const manrope = Manrope({
   subsets: ["latin"],
@@ -110,7 +111,7 @@ export default async function RootLayout({ children }) {
         ))}
       </head>
       <body>
-        <a href="#indhold" className="skip-link">Spring til indhold</a>
+        <a href="#indhold" className="skip-link"><Bi da="Spring til indhold" en="Skip to content" /></a>
         {/* Screen-reader users navigate by landmark. Without a <main> there was
             no way to jump past the nav to the content on any page. Nothing in
             the CSS or in siteInit.js selects body's direct children, so the

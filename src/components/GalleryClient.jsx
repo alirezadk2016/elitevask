@@ -2,10 +2,13 @@
 import Link from "next/link";
 import DanishOnlyNotice from "@/components/DanishOnlyNotice";
 import { useEffect, useRef, useState, useCallback } from "react";
+import { useLang } from "@/lib/useLang";
 import { DEFAULT_BEFORE_AFTER, DEFAULT_ALBUM } from "@/lib/galleryData";
 
 /* ─── Interactive BA slider ──────────────────────────────────────────────── */
 function BaSlider({ item }) {
+  const en = useLang() === "en";
+  const T = (da, eng) => (en ? eng : da);
   const ref = useRef(null);
   const dragging = useRef(false);
   const [pos, setPos] = useState(50);
@@ -46,11 +49,11 @@ function BaSlider({ item }) {
       onPointerUp={endDrag}
       onPointerCancel={endDrag}
     >
-      <img className="ba-before" src={item.before} alt={`${item.caption || "Før & efter"} – før`} />
-      <img className="ba-after"  src={item.after}  alt={`${item.caption || "Før & efter"} – efter`}
+      <img className="ba-before" src={item.before} alt={`${item.caption || T("Før & efter", "Before & after")} – ${T("før", "before")}`} />
+      <img className="ba-after"  src={item.after}  alt={`${item.caption || T("Før & efter", "Before & after")} – ${T("efter", "after")}`}
         style={{ clipPath: `inset(0 0 0 ${pos}%)` }} />
-      <span className="ba-lab l" data-i18n="ba_before">Før</span>
-      <span className="ba-lab r" data-i18n="ba_after">Efter</span>
+      <span className="ba-lab l">{T("Før", "Before")}</span>
+      <span className="ba-lab r">{T("Efter", "After")}</span>
       <div className="ba-handle" style={{ left: `${pos}%` }}>
         <div className="ba-knob">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"
@@ -65,13 +68,15 @@ function BaSlider({ item }) {
 
 /* ─── Grid card — draggable slider in-place (no click needed) ────────────── */
 function BaThumb({ item, onExpand }) {
+  const en = useLang() === "en";
+  const T = (da, eng) => (en ? eng : da);
   return (
     <figure className="ba-thumb-live">
       <BaSlider key={item.id} item={item} />
       <button
         type="button"
         className="ba-thumb-expand"
-        aria-label={`Åbn ${item.caption || "billede"} i fuld størrelse`}
+        aria-label={en ? `Open ${item.caption || "image"} in full size` : `Åbn ${item.caption || "billede"} i fuld størrelse`}
         onPointerDown={(e) => e.stopPropagation()}
         onClick={onExpand}
       >
@@ -87,6 +92,8 @@ function BaThumb({ item, onExpand }) {
 
 /* ─── BA lightbox (full-screen slider + nav) ─────────────────────────────── */
 function BaLightbox({ items, index, onClose, onPrev, onNext }) {
+  const en = useLang() === "en";
+  const T = (da, eng) => (en ? eng : da);
   const item = items[index];
   const touchStart = useRef(null);
   const touchOnSlider = useRef(false);
@@ -135,14 +142,14 @@ function BaLightbox({ items, index, onClose, onPrev, onNext }) {
       onTouchEnd={onTouchEnd}
     >
       {/* close */}
-      <button className="ba-lb-close" onClick={onClose} aria-label="Luk">
+      <button className="ba-lb-close" onClick={onClose} aria-label={T("Luk", "Close")}>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
           <path d="M18 6 6 18M6 6l12 12" />
         </svg>
       </button>
 
       {/* prev */}
-      <button className="ba-lb-nav l" onClick={onPrev} aria-label="Forrige"
+      <button className="ba-lb-nav l" onClick={onPrev} aria-label={T("Forrige", "Previous")}
         style={{ opacity: items.length > 1 ? 1 : 0, pointerEvents: items.length > 1 ? "auto" : "none" }}>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
           strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
@@ -155,7 +162,7 @@ function BaLightbox({ items, index, onClose, onPrev, onNext }) {
       </div>
 
       {/* next */}
-      <button className="ba-lb-nav r" onClick={onNext} aria-label="Næste"
+      <button className="ba-lb-nav r" onClick={onNext} aria-label={T("Næste", "Next")}
         style={{ opacity: items.length > 1 ? 1 : 0, pointerEvents: items.length > 1 ? "auto" : "none" }}>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
           strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
@@ -169,6 +176,8 @@ function BaLightbox({ items, index, onClose, onPrev, onNext }) {
 
 /* ─── Page ──────────────────────────────────────────────────────────────── */
 export default function GalleryClient() {
+  const en = useLang() === "en";
+  const T = (da, eng) => (en ? eng : da);
   const [ba,    setBa]    = useState(DEFAULT_BEFORE_AFTER);
   const [album, setAlbum] = useState(DEFAULT_ALBUM);
   const [albumFilter, setAlbumFilter] = useState("alle");
@@ -217,22 +226,22 @@ export default function GalleryClient() {
         <Link href="/" className="gal-back">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
             strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
-          <span>Forside</span>
+          <span>{T("Forside", "Home")}</span>
         </Link>
         <Link href="/" className="gal-brand"><span className="gal-brand-mark" />Elite Vask</Link>
-        <Link href="/#vaelg" className="gal-book">Book nu</Link>
+        <Link href="/#vaelg" className="gal-book">{T("Book nu", "Book now")}</Link>
       </header>
       <div style={{ maxWidth: 1100, margin: "14px auto 0", padding: "0 20px" }}><DanishOnlyNotice /></div>
 
       <section className="gal-hero">
-        <div className="eyebrow">Galleri</div>
-        <h1 className="gal-hero-title">Før &amp; efter bilvask — vores arbejde</h1>
-        <p className="gal-hero-sub">Ægte resultater fra professionel mobil bilpleje på Sjælland. Klik på et billede for at åbne sammenligningen i fuld størrelse.</p>
+        <div className="eyebrow">{T("Galleri", "Gallery")}</div>
+        <h1 className="gal-hero-title">{T("Før & efter bilvask — vores arbejde", "Before & after car wash — our work")}</h1>
+        <p className="gal-hero-sub">{T("Ægte resultater fra professionel mobil bilpleje på Sjælland. Klik på et billede for at åbne sammenligningen i fuld størrelse.", "Real results from professional mobile car care on Zealand. Click an image to open the comparison in full size.")}</p>
       </section>
 
       <section className="gal-section" id="foer-efter">
         <div className="gal-section-head">
-          <h2 className="sec-title">Før &amp; efter</h2>
+          <h2 className="sec-title">{T("Før & efter", "Before & after")}</h2>
           <span className="gal-count">{ba.length}</span>
         </div>
         <div className="ba-grid">
@@ -244,11 +253,11 @@ export default function GalleryClient() {
 
       <section className="gal-section" id="galleri">
         <div className="gal-section-head">
-          <h2 className="sec-title">Galleri</h2>
+          <h2 className="sec-title">{T("Galleri", "Gallery")}</h2>
           <span className="gal-count">{shown.length}</span>
         </div>
         {albumNames.length > 1 && (
-          <div className="gal-albums" role="group" aria-label="Filtrer galleri">
+          <div className="gal-albums" role="group" aria-label={T("Filtrer galleri", "Filter gallery")}>
             {["alle", ...albumNames].map((name) => (
               <button
                 key={name}
@@ -257,7 +266,7 @@ export default function GalleryClient() {
                 aria-pressed={albumFilter === name}
                 onClick={() => { setAlbumFilter(name); setLb(-1); }}
               >
-                {name === "alle" ? "Alle" : name}
+                {name === "alle" ? T("Alle", "All") : name}
               </button>
             ))}
           </div>
@@ -273,7 +282,7 @@ export default function GalleryClient() {
       </section>
 
       <div className="gal-foot-cta">
-        <Link href="/#vaelg" className="btn btn-green btn-lg">Find pris &amp; book din vask</Link>
+        <Link href="/#vaelg" className="btn btn-green btn-lg">{T("Find pris & book din vask", "Find your price & book your wash")}</Link>
       </div>
 
       {/* BA lightbox */}
@@ -284,12 +293,12 @@ export default function GalleryClient() {
       {/* Album lightbox */}
       {lb >= 0 && shown[lb] && (
         <div className="gal-lb" onClick={(e) => { if (e.target === e.currentTarget) closeAlbum(); }}>
-          <button className="gal-lb-close" onClick={closeAlbum} aria-label="Luk">
+          <button className="gal-lb-close" onClick={closeAlbum} aria-label={T("Luk", "Close")}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
               <path d="M18 6 6 18M6 6l12 12" />
             </svg>
           </button>
-          <button className="gal-lb-nav l" onClick={prevAlbum} aria-label="Forrige">
+          <button className="gal-lb-nav l" onClick={prevAlbum} aria-label={T("Forrige", "Previous")}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
               strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
           </button>
@@ -297,7 +306,7 @@ export default function GalleryClient() {
             <img src={shown[lb].url} alt={shown[lb].caption || "Galleri"} />
             {shown[lb].caption ? <figcaption>{shown[lb].caption}</figcaption> : null}
           </figure>
-          <button className="gal-lb-nav r" onClick={nextAlbum} aria-label="Næste">
+          <button className="gal-lb-nav r" onClick={nextAlbum} aria-label={T("Næste", "Next")}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
               strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
           </button>

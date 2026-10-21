@@ -1,5 +1,5 @@
 import Link from "next/link";
-import DanishOnlyNotice from "@/components/DanishOnlyNotice";
+import Bi from "@/components/Bi";
 import RelatedLinks from "@/components/RelatedLinks";
 import CityProcess from "@/components/CityProcess";
 import JsonLd from "@/components/JsonLd";
@@ -24,8 +24,9 @@ export default function BilvaskNaestved() {
     <div className="legal-page">
       <JsonLd items={[breadcrumbLd([{name:"Forside",path:"/"},{name:"Mobil bilvask i Næstved",path:"/bilvask/naestved"}]),cityServiceLd({city:"Næstved",path:"/bilvask/naestved"}),webPageLd({path:"/bilvask/naestved",name:"Mobil bilvask i Næstved – Elite Vask",description:"Mobil bil dampvask i Næstved. Vi kører til din adresse."})]} />
       <div className="legal-wrap">
-        <Link href="/" className="legal-back">← Tilbage til forsiden</Link>
-        <DanishOnlyNotice />
+        <Link href="/" className="legal-back"><Bi da="← Tilbage til forsiden" en="← Back to the home page" /></Link>
+        <Bi
+          da={<>
 
         <div className="guide-eyebrow">Serviceområde</div>
         <h1>Mobil bilvask i Næstved</h1>
@@ -95,6 +96,78 @@ export default function BilvaskNaestved() {
           <p style={{margin:'0 0 1rem',fontWeight:700,fontSize:'1.1rem',color:'#fff'}}>Book mobil bilvask i Næstved i dag</p>
           <Link href="/#vaelg" className="btn btn-green guide-cta-btn">Se priser og book nu</Link>
         </div>
+          </>}
+          en={<>
+        <div className="guide-eyebrow">Service area</div>
+        <h1>Mobile car wash in Næstved</h1>
+        <p className="legal-updated">Elite Vask · Steam wash at your door in and around Næstved</p>
+
+        <p className="guide-lead">
+          Elite Vask offers mobile steam washing in Næstved and across Næstved Municipality. We come to you with professional equipment and wash your car on the spot – you don't need to drive anywhere or wait in a queue.
+        </p>
+
+        <h2>Car wash in Næstved – we come to you</h2>
+        <p>
+          Næstved is the largest town in South Zealand, and many drivers want a professional car wash without the hassle of finding a free wash bay. Elite Vask offers an easy solution: we agree a time, drive to your address and deliver a thorough steam wash right on the spot.
+        </p>
+        <p>
+          We cover all of Næstved town and the municipality, including Fensmark, Glumsø, Rønnede, Holme-Olstrup and Toksværd. Travel is <strong>free</strong>.
+        </p>
+
+        <h2>Why steam washing is the right choice</h2>
+        <p>
+          Traditional tunnel car washes use rotating brushes and large amounts of water with chemicals. Over time this can scratch the paint and break down wax treatments. Steam washing is a far gentler method:
+        </p>
+        <ul>
+          <li>No rotating brushes – no scratches in the paint</li>
+          <li>Up to 90% less water use than a tunnel wash</li>
+          <li>pH-neutral, eco-friendly products</li>
+          <li>Effectively disinfects the cabin and seats</li>
+          <li>Removes road salt, insects and ingrained dirt</li>
+        </ul>
+
+        <h2>Packages and prices</h2>
+        <ul>
+          <li><strong>Exterior wash</strong> – bodywork, rims, tyres and windows. From 500 kr.</li>
+          <li><strong>Whole car (inside & out)</strong> – complete interior and exterior treatment. From 800 kr.</li>
+          <li><strong>Gold package</strong> – all-inclusive: engine cleaning, paint sealant and deep treatment. From 2,000 kr.</li>
+        </ul>
+        <p>
+          You only pay once you are satisfied. No prepayment. Free travel to Næstved and the surrounding area.
+        </p>
+
+        <h2>Add-ons and extra services</h2>
+        <p>
+          You can add extra services to any package:
+        </p>
+        <ul>
+          <li><strong>Engine cleaning</strong> – thorough cleaning of the engine bay. 400 kr.</li>
+          <li><strong>Paint & gloss protection</strong> – long-lasting extra shine. 300 kr.</li>
+          <li><strong>Pet hair removal</strong> – effective removal of hair and lint. 300 kr.</li>
+          <li><strong>Seat cleaning (fabric)</strong> – deep cleaning of fabric seats. 400 kr.</li>
+        </ul>
+
+        <h2>Electric cars in Næstved</h2>
+        <p>
+          Steam washing is the ideal method for electric cars. We use minimal water and avoid high pressure near the battery pack and charging ports. Many owners of Tesla, VW ID, Hyundai Ioniq and other electric cars prefer steam washing precisely to protect electronics and seals.
+        </p>
+
+        <CityProcess city="Næstved" />
+
+        <h2>Frequently asked questions</h2>
+        <p><strong>Do you travel to the whole of Næstved Municipality?</strong><br/>
+        Yes, we cover all postcodes in the municipality – 4700 and the surrounding area.</p>
+        <p><strong>Do I need to be at home during the wash?</strong><br/>
+        No. The car just needs to be accessible. Many customers are at work during the wash.</p>
+        <p><strong>What if the weather is bad?</strong><br/>
+        We will contact you if the weather is unsuitable and rebook you free of charge for the nearest available time.</p>
+
+        <div className="guide-cta-box">
+          <p style={{margin:'0 0 1rem',fontWeight:700,fontSize:'1.1rem',color:'#fff'}}>Book a mobile car wash in Næstved today</p>
+          <Link href="/#vaelg" className="btn btn-green guide-cta-btn">See prices and book now</Link>
+        </div>
+          </>}
+        />
         <RelatedLinks city="naestved" />
       </div>
     </div>

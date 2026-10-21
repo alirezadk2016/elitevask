@@ -27,7 +27,7 @@ const HEAD = `<!-- REVIEWS -->
   <div class="center">
     <div class="eyebrow" data-i18n="rev_eyebrow">Kundeanmeldelser</div>
     <h2 class="sec-title" data-i18n="rev_title">Det siger vores kunder</h2>
-    <p class="sec-sub" data-i18n="rev_sub">Vores kunder giver os 5,0 ud af 5 stjerner på Google. Her er, hvad de skriver.</p>
+    <p class="sec-sub" data-i18n="rev_intro">Vores kunder giver os 5,0 ud af 5 stjerner på Google. Her er, hvad de skriver.</p>
   </div>
 `;
 

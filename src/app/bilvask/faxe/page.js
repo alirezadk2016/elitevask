@@ -1,5 +1,5 @@
 import Link from "next/link";
-import DanishOnlyNotice from "@/components/DanishOnlyNotice";
+import Bi from "@/components/Bi";
 import RelatedLinks from "@/components/RelatedLinks";
 import CityProcess from "@/components/CityProcess";
 import JsonLd from "@/components/JsonLd";
@@ -21,13 +21,16 @@ export const metadata = {
 };
 
 export default async function BilvaskFaxe() {
-  const hd = hoursDisplay(await getHours(), "da");
+  const hours = await getHours();
+  const hd = hoursDisplay(hours, "da");
+  const hdEn = hoursDisplay(hours, "en");
   return (
     <div className="legal-page">
       <JsonLd items={[breadcrumbLd([{name:"Forside",path:"/"},{name:'Mobil bilvask i Faxe',path:"/bilvask/faxe"}]),cityServiceLd({city:'Faxe',path:"/bilvask/faxe"}),webPageLd({path:"/bilvask/faxe",name:"Mobil bilvask i Faxe – Elite Vask",description:"Mobil bil dampvask i Faxe. Vi kører til din adresse."})]} />
       <div className="legal-wrap">
-        <Link href="/" className="legal-back">← Tilbage til forsiden</Link>
-        <DanishOnlyNotice />
+        <Link href="/" className="legal-back"><Bi da="← Tilbage til forsiden" en="← Back to the home page" /></Link>
+        <Bi
+          da={<>
 
         <div className="guide-eyebrow">Serviceområde</div>
         <h1>Mobil bilvask i Faxe Kommune</h1>
@@ -77,6 +80,58 @@ export default async function BilvaskFaxe() {
           <p style={{margin:'0 0 1rem',fontWeight:700,fontSize:'1.1rem',color:'#fff'}}>Book mobil bilvask i Faxe i dag</p>
           <Link href="/#vaelg" className="btn btn-green guide-cta-btn">Se priser og book nu</Link>
         </div>
+          </>}
+          en={<>
+        <div className="guide-eyebrow">Service area</div>
+        <h1>Mobile car wash in Faxe Municipality</h1>
+        <p className="legal-updated">Elite Vask · Steam wash at your door in Faxe, Haslev and the surrounding area</p>
+
+        <p className="guide-lead">
+          In Faxe Municipality, the nearest quality car wash is often a long way off. Elite Vask turns that around: we drive to you – in Faxe, Haslev, Faxe Ladeplads, Karise and Rønnede – and deliver a professional steam wash at your address while you get on with something else.
+        </p>
+
+        <h2>Country roads, gravel and farm dust</h2>
+        <p>
+          Many cars in the Faxe area drive daily on country roads and past fields. That creates a particular kind of dirt: baked-on insects, road film, dust and organic matter that settles on the front and along the panels.
+        </p>
+        <p>
+          Our steam loosens these deposits thermally, so they can be wiped off without rubbing the dirt around in the paint. The result lasts longer because the surface is left completely clean – not just rinsed.
+        </p>
+
+        <h2>From Haslev to Faxe Ladeplads</h2>
+        <p>
+          We cover the whole municipality: Faxe, Haslev, Faxe Ladeplads, Karise, Rønnede and Dalby. Travel is <strong>free</strong>, and you only pay once the car is clean.
+        </p>
+
+
+        <h2>Car wash prices in Faxe</h2>
+        <ul>
+          <li><strong>Exterior wash</strong> – complete exterior steam wash incl. rims and tyres. From 500 kr.</li>
+          <li><strong>Whole car (inside &amp; out)</strong> – exterior and interior cleaning in one visit. From 800 kr.</li>
+          <li><strong>Gold package</strong> – complete treatment incl. engine cleaning and paint sealant. From 2,000 kr.</li>
+        </ul>
+        <p>
+          All prices include free travel. You pay <strong>after</strong> the wash, once you are satisfied.
+        </p>
+
+        <CityProcess city="Faxe" />
+
+        <h2>Frequently asked questions</h2>
+        <p><strong>Do you also come to Haslev?</strong><br/>
+        Yes, Haslev is a regular part of our route – just like the rest of the municipality. Free travel.</p>
+        <p><strong>Can you take a very dirty car that has been driven on gravel roads?</strong><br/>
+        Yes. Heavy soiling may require a little extra time, which we agree in advance – but this is exactly the kind of job steam is best at.</p>
+        <p><strong>Can you come at the weekend?</strong><br/>
+        {hdEn.weekendOpen
+          ? <>Yes, we work {hdEn.days.toLowerCase()}, {hdEn.time.replace(" – ", "–")}.</>
+          : <>Unfortunately we are closed at weekends, but we work {hdEn.days.toLowerCase()}, {hdEn.time.replace(" – ", "–")} – call us and we will find a time.</>}</p>
+
+        <div className="guide-cta-box">
+          <p style={{margin:'0 0 1rem',fontWeight:700,fontSize:'1.1rem',color:'#fff'}}>Book a mobile car wash in Faxe today</p>
+          <Link href="/#vaelg" className="btn btn-green guide-cta-btn">See prices and book now</Link>
+        </div>
+          </>}
+        />
         <RelatedLinks city="faxe" />
       </div>
     </div>

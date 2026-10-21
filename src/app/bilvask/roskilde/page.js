@@ -1,5 +1,5 @@
 import Link from "next/link";
-import DanishOnlyNotice from "@/components/DanishOnlyNotice";
+import Bi from "@/components/Bi";
 import RelatedLinks from "@/components/RelatedLinks";
 import CityProcess from "@/components/CityProcess";
 import JsonLd from "@/components/JsonLd";
@@ -21,13 +21,16 @@ export const metadata = {
 };
 
 export default async function BilvaskRoskilde() {
-  const hd = hoursDisplay(await getHours(), "da");
+  const hours = await getHours();
+  const hd = hoursDisplay(hours, "da");
+  const hdEn = hoursDisplay(hours, "en");
   return (
     <div className="legal-page">
       <JsonLd items={[breadcrumbLd([{name:"Forside",path:"/"},{name:"Mobil bilvask i Roskilde",path:"/bilvask/roskilde"}]),cityServiceLd({city:"Roskilde",path:"/bilvask/roskilde"}),webPageLd({path:"/bilvask/roskilde",name:"Mobil bilvask i Roskilde – Elite Vask",description:"Mobil bil dampvask i Roskilde. Vi kører til din adresse."})]} />
       <div className="legal-wrap">
-        <Link href="/" className="legal-back">← Tilbage til forsiden</Link>
-        <DanishOnlyNotice />
+        <Link href="/" className="legal-back"><Bi da="← Tilbage til forsiden" en="← Back to the home page" /></Link>
+        <Bi
+          da={<>
 
         <div className="guide-eyebrow">Serviceområde</div>
         <h1>Mobil bilvask i Roskilde</h1>
@@ -82,6 +85,63 @@ export default async function BilvaskRoskilde() {
           <p style={{margin:'0 0 1rem',fontWeight:700,fontSize:'1.1rem',color:'#fff'}}>Book mobil bilvask i Roskilde i dag</p>
           <Link href="/#vaelg" className="btn btn-green guide-cta-btn">Se priser og book nu</Link>
         </div>
+          </>}
+          en={<>
+        <div className="guide-eyebrow">Service area</div>
+        <h1>Mobile car wash in Roskilde</h1>
+        <p className="legal-updated">Elite Vask · Steam wash at your door in and around Roskilde</p>
+
+        <p className="guide-lead">
+          Elite Vask offers professional mobile steam washing in Roskilde and across Roskilde Municipality. We drive straight to your address with all the equipment and deliver a thorough car wash – without you having to go anywhere.
+        </p>
+
+        <h2>Car wash in Roskilde – we come to you</h2>
+        <p>
+          Roskilde is one of Zealand's busiest towns, and most car wash facilities require you to drive there yourself and wait. With Elite Vask it is different: we agree a time that suits you, turn up at your address and wash the car while you are at home, at work or getting on with your day.
+        </p>
+        <p>
+          We cover all of Roskilde town and the municipality, including Jyllinge, Gundsømagle, Viby Sjælland and Gadstrup. Travel is always <strong>free</strong>.
+        </p>
+
+        <h2>Professional steam washing – gentle and effective</h2>
+        <p>
+          Our mobile steam wash uses hot steam to loosen dirt, road salt, insects and grease from the bodywork, rims and cabin. Unlike an automatic car wash with rotating brushes, steam washing leaves no scratches in the paint and uses minimal water – <strong>up to 90% less water</strong> than a traditional car wash.
+        </p>
+        <p>
+          For the cabin we use steam treatment that disinfects seats, mats and surfaces and removes bad odours – without soaking the fabric with water.
+        </p>
+
+        <h2>Packages and prices in Roskilde</h2>
+        <ul>
+          <li><strong>Exterior wash</strong> – bodywork, rims, tyres and windows. From 500 kr.</li>
+          <li><strong>Whole car (inside & out)</strong> – complete cleaning inside and out. From 800 kr.</li>
+          <li><strong>Gold package</strong> – engine cleaning, paint sealant and full deep treatment. From 2,000 kr.</li>
+        </ul>
+        <p>You only pay once you are satisfied. No prepayment.</p>
+
+        <h2>Electric cars and lease cars in Roskilde</h2>
+        <p>
+          Many people in Roskilde drive an electric car or a lease car. Steam washing is the gentlest method for electric cars – we avoid high pressure near the battery pack and charging ports. For lease cars we ensure a professional result that meets the requirements on return.
+        </p>
+
+        <CityProcess city="Roskilde" />
+
+        <h2>Frequently asked questions</h2>
+        <p><strong>Do you wash cars throughout Roskilde Municipality?</strong><br/>
+        Yes, we cover the whole municipality, including Jyllinge, Gundsømagle, Viby Sjælland and Gadstrup.</p>
+        <p><strong>How much does travel to Roskilde cost?</strong><br/>
+        Travel is free to all addresses in and around Roskilde.</p>
+        <p><strong>Can you wash my car at the weekend?</strong><br/>
+        {hdEn.weekendOpen
+          ? <>Yes, we work {hdEn.days.toLowerCase()}, {hdEn.time.replace(" – ", "–")}.</>
+          : <>Unfortunately we are closed at weekends, but we work {hdEn.days.toLowerCase()}, {hdEn.time.replace(" – ", "–")} – call us and we will find a time.</>}</p>
+
+        <div className="guide-cta-box">
+          <p style={{margin:'0 0 1rem',fontWeight:700,fontSize:'1.1rem',color:'#fff'}}>Book a mobile car wash in Roskilde today</p>
+          <Link href="/#vaelg" className="btn btn-green guide-cta-btn">See prices and book now</Link>
+        </div>
+          </>}
+        />
         <RelatedLinks city="roskilde" />
       </div>
     </div>

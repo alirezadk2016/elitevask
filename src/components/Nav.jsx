@@ -2,7 +2,7 @@ const HTML = `<!-- NAV -->
 <nav class="nav" id="siteNav"><div class="nav-inner">
   <a href="#top" class="logo" aria-label="Elite Vask – mobil bil dampvask, til forsiden">
     <span class="logo-mark"><picture><source type="image/webp" srcset="/logo-96.webp 96w, /logo-192.webp 192w" sizes="44px"><img src="/logo-96.png" width="96" height="96" alt="" decoding="async"></picture></span>
-    <span class="logo-text"><span class="a">ELITE VASK</span><span class="b">MOBIL BIL DAMPVASK</span></span>
+    <span class="logo-text"><span class="a">ELITE VASK</span><span class="b" data-i18n="logo_sub">MOBIL BIL DAMPVASK</span></span>
   </a>
   <div class="nav-links">
     <a href="/priser" data-i18n="nav_choose">Priser</a>

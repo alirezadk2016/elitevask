@@ -1,5 +1,5 @@
 import Link from "next/link";
-import DanishOnlyNotice from "@/components/DanishOnlyNotice";
+import Bi from "@/components/Bi";
 import RelatedLinks from "@/components/RelatedLinks";
 import CityProcess from "@/components/CityProcess";
 import JsonLd from "@/components/JsonLd";
@@ -21,13 +21,16 @@ export const metadata = {
 };
 
 export default async function BilvaskHelsingoer() {
-  const hd = hoursDisplay(await getHours(), "da");
+  const hours = await getHours();
+  const hd = hoursDisplay(hours, "da");
+  const hdEn = hoursDisplay(hours, "en");
   return (
     <div className="legal-page">
       <JsonLd items={[breadcrumbLd([{name:"Forside",path:"/"},{name:'Mobil bilvask i Helsingør',path:"/bilvask/helsingoer"}]),cityServiceLd({city:'Helsingør',path:"/bilvask/helsingoer"}),webPageLd({path:"/bilvask/helsingoer",name:"Mobil bilvask i Helsingør – Elite Vask",description:"Mobil bil dampvask i Helsingør. Vi kører til din adresse."})]} />
       <div className="legal-wrap">
-        <Link href="/" className="legal-back">← Tilbage til forsiden</Link>
-        <DanishOnlyNotice />
+        <Link href="/" className="legal-back"><Bi da="← Tilbage til forsiden" en="← Back to the home page" /></Link>
+        <Bi
+          da={<>
 
         <div className="guide-eyebrow">Serviceområde</div>
         <h1>Mobil bilvask i Helsingør</h1>
@@ -77,6 +80,58 @@ export default async function BilvaskHelsingoer() {
           <p style={{margin:'0 0 1rem',fontWeight:700,fontSize:'1.1rem',color:'#fff'}}>Book mobil bilvask i Helsingør i dag</p>
           <Link href="/#vaelg" className="btn btn-green guide-cta-btn">Se priser og book nu</Link>
         </div>
+          </>}
+          en={<>
+        <div className="guide-eyebrow">Service area</div>
+        <h1>Mobile car wash in Helsingør (Elsinore)</h1>
+        <p className="legal-updated">Elite Vask · Steam wash at your door in Helsingør and on the North Coast</p>
+
+        <p className="guide-lead">
+          Elite Vask offers mobile steam washing throughout Helsingør Municipality – from Espergærde and Snekkersten in the south to Hornbæk and Ålsgårde on the North Coast. We come to your address with all the equipment and leave the car sparkling clean.
+        </p>
+
+        <h2>Sea air and salt from the Øresund wear down the paint</h2>
+        <p>
+          Cars in Helsingør are parked closer to salt water than most in the country – the Øresund on one side, the North Coast on the other. Salty air leaves a thin film on paint and chrome that slowly dulls the surface and attacks exposed edges.
+        </p>
+        <p>
+          Regular steam washing gently removes the salt film and keeps the paint sealed. Combine it with paint sealant (included in the Gold package) so the surface repels salt and dirt for months.
+        </p>
+
+        <h2>The whole municipality – no charge for travel</h2>
+        <p>
+          We drive to Helsingør town, Espergærde, Snekkersten, Ålsgårde, Hellebæk and Hornbæk. Travel is <strong>free</strong> throughout the municipality.
+        </p>
+
+
+        <h2>Car wash prices in Helsingør</h2>
+        <ul>
+          <li><strong>Exterior wash</strong> – complete exterior steam wash incl. rims and tyres. From 500 kr.</li>
+          <li><strong>Whole car (inside &amp; out)</strong> – exterior and interior cleaning in one visit. From 800 kr.</li>
+          <li><strong>Gold package</strong> – complete treatment incl. engine cleaning and paint sealant. From 2,000 kr.</li>
+        </ul>
+        <p>
+          All prices include free travel. You pay <strong>after</strong> the wash, once you are satisfied.
+        </p>
+
+        <CityProcess city="Helsingør" cityEn="Helsingør (Elsinore)" />
+
+        <h2>Frequently asked questions</h2>
+        <p><strong>Do you also cover Hornbæk and the North Coast?</strong><br/>
+        Yes, the whole municipality, including Hornbæk, Ålsgårde and Hellebæk. Travel is free.</p>
+        <p><strong>What does salt from the Øresund do to the car?</strong><br/>
+        Over time the salt film dulls paint and chrome and accelerates rust at edges and joints. Steam washing dissolves and removes the film without wearing the surface.</p>
+        <p><strong>Can you come at the weekend?</strong><br/>
+        {hdEn.weekendOpen
+          ? <>Yes, we work {hdEn.days.toLowerCase()}, {hdEn.time.replace(" – ", "–")}.</>
+          : <>Unfortunately we are closed at weekends, but we work {hdEn.days.toLowerCase()}, {hdEn.time.replace(" – ", "–")} – call us and we will find a time.</>}</p>
+
+        <div className="guide-cta-box">
+          <p style={{margin:'0 0 1rem',fontWeight:700,fontSize:'1.1rem',color:'#fff'}}>Book a mobile car wash in Helsingør today</p>
+          <Link href="/#vaelg" className="btn btn-green guide-cta-btn">See prices and book now</Link>
+        </div>
+          </>}
+        />
         <RelatedLinks city="helsingoer" />
       </div>
     </div>

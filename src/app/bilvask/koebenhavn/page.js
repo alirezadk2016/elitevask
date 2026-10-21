@@ -1,5 +1,5 @@
 import Link from "next/link";
-import DanishOnlyNotice from "@/components/DanishOnlyNotice";
+import Bi from "@/components/Bi";
 import RelatedLinks from "@/components/RelatedLinks";
 import CityProcess from "@/components/CityProcess";
 import JsonLd from "@/components/JsonLd";
@@ -21,13 +21,16 @@ export const metadata = {
 };
 
 export default async function BilvaskKoebenhavn() {
-  const hd = hoursDisplay(await getHours(), "da");
+  const hours = await getHours();
+  const hd = hoursDisplay(hours, "da");
+  const hdEn = hoursDisplay(hours, "en");
   return (
     <div className="legal-page">
       <JsonLd items={[breadcrumbLd([{name:"Forside",path:"/"},{name:"Mobil bilvask i København",path:"/bilvask/koebenhavn"}]),cityServiceLd({city:"København",path:"/bilvask/koebenhavn"}),webPageLd({path:"/bilvask/koebenhavn",name:"Mobil bilvask i København – Elite Vask",description:"Mobil bil dampvask i København. Vi kører til din adresse."})]} />
       <div className="legal-wrap">
-        <Link href="/" className="legal-back">← Tilbage til forsiden</Link>
-        <DanishOnlyNotice />
+        <Link href="/" className="legal-back"><Bi da="← Tilbage til forsiden" en="← Back to the home page" /></Link>
+        <Bi
+          da={<>
 
         <div className="guide-eyebrow">Serviceområde</div>
         <h1>Mobil bilvask i København</h1>
@@ -101,6 +104,82 @@ export default async function BilvaskKoebenhavn() {
           <p style={{margin:'0 0 1rem',fontWeight:700,fontSize:'1.1rem',color:'#fff'}}>Klar til en skinnende ren bil i København?</p>
           <Link href="/#vaelg" className="btn btn-green guide-cta-btn">Se priser og book nu</Link>
         </div>
+          </>}
+          en={<>
+        <div className="guide-eyebrow">Service area</div>
+        <h1>Mobile car wash in Copenhagen</h1>
+        <p className="legal-updated">Elite Vask · Steam wash at your door across Greater Copenhagen</p>
+
+        <p className="guide-lead">
+          Need a professional car wash in Copenhagen but don't have time to queue at a tunnel wash? Elite Vask drives straight to your address – at home, at work or in the car park – and delivers a thorough mobile steam wash while you get on with your day.
+        </p>
+
+        <h2>Why choose a mobile car wash in Copenhagen?</h2>
+        <p>
+          Copenhagen is a busy city. Parking spaces are scarce and time is in short supply. With Elite Vask you no longer have to drive to a car wash and wait. We turn up with all the equipment and wash the car while you are at home, at the office or having a cup of coffee.
+        </p>
+        <p>
+          We cover all of Greater Copenhagen – from Østerbro and Nørrebro to Vesterbro, Frederiksberg, Valby, Brønshøj and surrounding municipalities such as Gentofte, Gladsaxe, Herlev, Rødovre and Brøndby.
+        </p>
+
+        <h2>Steam washing – better than a tunnel wash</h2>
+        <p>
+          Traditional tunnel washes use rotating brushes that, over time, can leave microscopic scratches in the paint. Our professional steam wash uses hot, high-temperature steam to loosen dirt, grease and road salt – without brushes and without aggressive chemicals.
+        </p>
+        <p>
+          The result is a deeper clean, a better shine and paintwork that keeps its quality for longer. And with up to <strong>90% less water use</strong>, steam washing is also the environmentally sound choice in a city like Copenhagen.
+        </p>
+
+        <h2>What is included in a car wash in Copenhagen?</h2>
+        <p>We offer three packages tailored to your needs:</p>
+        <ul>
+          <li><strong>Exterior wash</strong> – steam wash of the bodywork, rims, tyres and windows. From 500 kr.</li>
+          <li><strong>Whole car (inside & out)</strong> – complete treatment inside and out. From 800 kr.</li>
+          <li><strong>Gold package</strong> – all-inclusive: engine cleaning, paint sealant and deep treatment. From 2,000 kr.</li>
+        </ul>
+        <p>
+          Travel to your address in Greater Copenhagen is <strong>free</strong>. You know the price in advance and only pay once the car is clean and you are satisfied.
+        </p>
+
+        <h2>Popular areas we serve in Copenhagen</h2>
+        <p>
+          We wash cars all over Greater Copenhagen, including:
+        </p>
+        <ul>
+          <li>Østerbro, Nørrebro, Vesterbro, Indre By</li>
+          <li>Frederiksberg and Valby</li>
+          <li>Amager – Sundby and Kastrup</li>
+          <li>Brønshøj, Vanløse and Bispebjerg</li>
+          <li>Gentofte, Hellerup and Charlottenlund</li>
+          <li>Gladsaxe, Herlev, Rødovre and Brøndby</li>
+          <li>Lyngby, Virum and Sorgenfri</li>
+        </ul>
+
+        <CityProcess city="København" cityEn="Copenhagen" />
+
+        <p>
+          You can also call us on <a href="tel:+4524440321">+45 24 44 03 21</a> – we are ready to help {hdEn.days.toLowerCase()}, {hdEn.time.replace(" – ", "–")}.
+        </p>
+
+        <h2>Electric cars and lease cars in Copenhagen</h2>
+        <p>
+          Many Copenhageners drive an electric car or a lease car, and steam washing is the ideal solution for both. On electric cars we avoid high pressure near the battery pack and charging ports, and on lease cars we make sure the car looks clean and well kept for return – so you avoid extra charges.
+        </p>
+
+        <h2>Frequently asked questions about car washing in Copenhagen</h2>
+        <p><strong>Does it cost extra for you to drive to my address in Copenhagen?</strong><br/>
+        No. Travel is free to all addresses in Greater Copenhagen.</p>
+        <p><strong>Can you wash the car at my workplace?</strong><br/>
+        Yes. We wash the car while you are at work. Just make sure the car is accessible.</p>
+        <p><strong>What if there is no parking at my address?</strong><br/>
+        Contact us and we will find a solution. We are used to working in a busy urban environment.</p>
+
+        <div className="guide-cta-box">
+          <p style={{margin:'0 0 1rem',fontWeight:700,fontSize:'1.1rem',color:'#fff'}}>Ready for a sparkling clean car in Copenhagen?</p>
+          <Link href="/#vaelg" className="btn btn-green guide-cta-btn">See prices and book now</Link>
+        </div>
+          </>}
+        />
         <RelatedLinks city="koebenhavn" />
       </div>
     </div>
