@@ -44,6 +44,13 @@ export const metadata = {
     description: "Vi kører til dig og vasker din bil. Rent, effektivt og miljøvenligt.",
     images: ["/og-cover.jpg"],
   },
+  // Search Console / Bing Webmaster verification by meta tag: set the value
+  // from the verification screen as an env var in Vercel and redeploy. No tag
+  // is rendered while the variable is unset.
+  verification: {
+    ...(process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION && { google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION }),
+    ...(process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION && { other: { "msvalidate.01": process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION } }),
+  },
 };
 
 const JSONLD = [
