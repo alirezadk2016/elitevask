@@ -200,6 +200,7 @@ export default function AdminPanel() {
   const [hours, setHours]                 = useState(DEFAULT_HOURS);
   const [hoursDraft, setHoursDraft]       = useState(DEFAULT_HOURS);
   const [hoursPreviewDay, setHoursPreviewDay] = useState(6);
+  const [moreOpen, setMoreOpen] = useState(false);
   const [hoursLoading, setHoursLoading]   = useState(false);
   const [hoursSaving, setHoursSaving]     = useState(false);
   const [hoursIsDefault, setHoursIsDefault] = useState(true);
@@ -858,23 +859,53 @@ export default function AdminPanel() {
             <div style={{ height:1, background:T.border, margin:"14px 4px" }}/>
             <p style={{ fontSize:11, color:T.t4, padding:"0 10px", margin:0 }}>Session aktiv</p>
           </aside>
-        ) : (
-          <div style={{ display:"flex", gap:8, padding:"16px 16px 0", overflowX:"auto" }}>
-            {[["oversigt","Oversigt",icons.dashboard],["bookings","Bookinger",icons.bookings],["kunder","Kunder",icons.customers],["hours","Åbningstider",icons.hours],["gallery","Galleri",icons.gallery],["videos","Videoer",icons.videos],["beforeafter","Før & efter",icons.beforeafter],["reviews","Anmeldelser",icons.reviews],["faq","FAQ",icons.faq],["priser","Priser",icons.priser],["extras","Ekstra",icons.extras]].map(([id,label,icon]) => (
-              <button key={id} onClick={() => {
-                  if (tab === id) return; // never wipe edits on same-tab click
-                  if (hasUnsaved) { setNavGuard({ pendingTab: id }); return; }
-                  setTab(id); setMsg(null); setUrlInput(""); setCmsMsg(null); setExpandedFaqId(null); setFaqDrafts({}); setAddFaqOpen(false); setEditingExt(null); setEditingGallery(null);
-                }}
-                style={{ display:"flex", alignItems:"center", gap:6, padding:"8px 16px", minHeight:44, borderRadius:8, border:`1px solid ${tab===id?T.accentBorder:T.border}`, background:tab===id?T.accentDim:"transparent", color:tab===id?T.accent:T.t3, fontSize:13, fontWeight:600, cursor:"pointer", fontFamily:FF, whiteSpace:"nowrap" }}>
-                {icon}{label}
-              </button>
-            ))}
-          </div>
-        )}
+        ) : (() => {
+          // Phone: a fixed bottom tab bar with the four daily jobs + "Mere",
+          // instead of a sideways-scrolling strip where half the sections
+          // were off-screen.
+          const goTab = (id) => {
+            setMoreOpen(false);
+            if (tab === id) return; // never wipe edits on same-tab click
+            if (hasUnsaved) { setNavGuard({ pendingTab: id }); return; }
+            setTab(id); setMsg(null); setUrlInput(""); setCmsMsg(null); setExpandedFaqId(null); setFaqDrafts({}); setAddFaqOpen(false); setEditingExt(null); setEditingGallery(null);
+          };
+          const MAIN = [["oversigt","Oversigt",icons.dashboard],["bookings","Bookinger",icons.bookings],["kunder","Kunder",icons.customers],["hours","Tider",icons.hours]];
+          const MORE = [["gallery","Galleri",icons.gallery],["videos","Videoer",icons.videos],["beforeafter","Før & efter",icons.beforeafter],["reviews","Anmeldelser",icons.reviews],["faq","FAQ",icons.faq],["priser","Priser",icons.priser],["extras","Ekstra",icons.extras]];
+          const inMore = MORE.some(([id]) => id === tab);
+          const tabBtn = (id, label, icon, on, onClick) => (
+            <button key={id} type="button" onClick={onClick} aria-current={on ? "page" : undefined}
+              style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:3, minHeight:56, background:"transparent", border:"none", color:on?T.accent:T.t3, fontSize:10.5, fontWeight:700, cursor:"pointer", fontFamily:FF, position:"relative" }}>
+              {on && <span style={{ position:"absolute", top:0, left:"28%", right:"28%", height:2.5, borderRadius:2, background:T.accent }} />}
+              <span style={{ display:"flex" }}>{icon}</span>{label}
+            </button>
+          );
+          return (
+            <>
+              <nav aria-label="Admin" style={{ position:"fixed", left:0, right:0, bottom:0, zIndex:400, display:"flex", background:"rgba(8,17,10,.92)", WebkitBackdropFilter:"blur(18px)", backdropFilter:"blur(18px)", borderTop:`1px solid ${T.border}`, paddingBottom:"env(safe-area-inset-bottom)" }}>
+                {MAIN.map(([id,label,icon]) => tabBtn(id, label, icon, tab === id && !moreOpen, () => goTab(id)))}
+                {tabBtn("more", "Mere", <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><circle cx="5" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="19" cy="12" r="1.3"/></svg>, inMore || moreOpen, () => setMoreOpen(o => !o))}
+              </nav>
+              {moreOpen && (
+                <div onClick={() => setMoreOpen(false)} style={{ position:"fixed", inset:0, zIndex:390, background:"rgba(0,0,0,.55)" }}>
+                  <div onClick={e => e.stopPropagation()} style={{ position:"absolute", left:10, right:10, bottom:"calc(66px + env(safe-area-inset-bottom))", background:T.bg1, border:`1px solid ${T.border}`, borderRadius:18, padding:14, boxShadow:T.shadowL }}>
+                    <p style={{ fontSize:10, letterSpacing:1.6, fontWeight:700, color:T.t3, textTransform:"uppercase", margin:"2px 4px 10px" }}>Indhold & hjemmeside</p>
+                    <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:8 }}>
+                      {MORE.map(([id,label,icon]) => (
+                        <button key={id} type="button" onClick={() => goTab(id)}
+                          style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:6, padding:"14px 6px", minHeight:72, borderRadius:12, border:`1px solid ${tab===id?T.accentBorder:T.border}`, background:tab===id?T.accentDim:T.bg0, color:tab===id?T.accent:T.t2, fontSize:12, fontWeight:700, cursor:"pointer", fontFamily:FF }}>
+                          <span style={{ display:"flex" }}>{icon}</span>{label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </>
+          );
+        })()}
 
         {/* MAIN CONTENT */}
-        <div style={{ padding: narrow ? "16px 12px" : "28px 28px", boxSizing:"border-box", minWidth:0, overflow:"hidden" }}>
+        <div style={{ padding: narrow ? "16px 12px calc(84px + env(safe-area-inset-bottom))" : "28px 28px", boxSizing:"border-box", minWidth:0, overflow:"hidden" }}>
 
           {/* Page title + badge */}
           <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:28, flexWrap:"wrap" }}>
@@ -1876,7 +1907,7 @@ export default function AdminPanel() {
                 )}
 
                 {/* Save bar */}
-                <div style={{ display:"flex", alignItems:"center", gap:12, position:"sticky", bottom:0, background:T.bg0, padding:"14px 0", borderTop:`1px solid ${T.border}` }}>
+                <div style={{ display:"flex", alignItems:"center", gap:12, position:"sticky", bottom: narrow ? "calc(57px + env(safe-area-inset-bottom))" : 0, background:T.bg0, padding:"14px 0", borderTop:`1px solid ${T.border}` }}>
                   <button onClick={saveHours} disabled={!hoursDirty || invalid || hoursSaving}
                     style={{ padding:"12px 28px", borderRadius:10, border:"none", background: (!hoursDirty || invalid) ? "rgba(255,255,255,.08)" : T.accent, color:(!hoursDirty || invalid) ? T.t4 : "#052010", fontSize:14, fontWeight:700, cursor:(!hoursDirty || invalid || hoursSaving) ? "default" : "pointer", fontFamily:FF }}>
                     {hoursSaving ? "Gemmer…" : "Gem åbningstider"}
