@@ -1,0 +1,24 @@
+{
+  "_about": "Mak rule 12: the concepts each page type should cover, built only from what Elite Vask offers and states. A missing node is a question, not a gap to fill: it goes on a page only if there is something true to say.",
+  "city": {
+    "main": ["mobil bilvask", "dampvask"],
+    "service": ["udvendig", "indvendig", "hele bilen", "guld", "fælge", "motorrens", "lakforsegling"],
+    "method": ["damp", "mikrofiber", "børster", "kemikalier", "1–3 liter"],
+    "cars": ["elbil", "varebil", "lille", "stor"],
+    "money": ["pris", "kr", "gratis kørsel", "forudbetaling", "betal"],
+    "season": ["vejsalt", "vinter", "insekter"],
+    "process": ["book", "adresse", "1–3 timer", "hjemme"],
+    "local": ["kommune"]
+  },
+  "guide": {
+    "main": ["bilvask", "bilpleje"],
+    "method": ["dampvask", "vaskehal", "lak", "vejsalt"],
+    "process": ["hvor ofte", "vinter", "sommer"]
+  },
+  "priser": {
+    "main": ["priser", "mobil bilvask"],
+    "service": ["hele bilen", "udvendig", "indvendig", "guld", "ekstra"],
+    "cars": ["lille", "mellem", "stor", "varebil"],
+    "money": ["kr", "gratis kørsel", "forudbetaling"]
+  }
+}

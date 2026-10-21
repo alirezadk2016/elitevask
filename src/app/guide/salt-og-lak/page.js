@@ -1,6 +1,7 @@
 import Link from "next/link";
 import DanishOnlyNotice from "@/components/DanishOnlyNotice";
 import RelatedLinks from "@/components/RelatedLinks";
+import GuideMore from "@/components/GuideMore";
 import JsonLd from "@/components/JsonLd";
 import { breadcrumbLd, articleLd } from "@/lib/seo";
 export const metadata = {
@@ -97,6 +98,8 @@ export default function SaltOgLak() {
           <li>Påfør voks inden saltperioden for at beskytte lakken</li>
           <li>Dampvask er særlig effektiv til at fjerne salt fra svært tilgængelige områder</li>
         </ul>
+
+        <GuideMore current="/guide/salt-og-lak" />
 
         <div className="guide-cta-box">
           <p><strong>Har du brug for en grundig vintervask?</strong><br />Elite Vask tilbyder mobil dampvask på hele Sjælland – vi kører til dig og renser bilen grundigt for vejsalt, også undervognen.</p>

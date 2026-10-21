@@ -72,6 +72,7 @@ and one per car type (elbil, varebil). Until then: "to check".
 
 ## Log
 
+- 2026-10-21 — Rule 11/12 pass: shared "Sådan foregår" section on every city page, guide "Læs også" links, docs/seo-knowledge-graph.json (city pages now cover 29–31 of 31 nodes).
 - 2026-10-21 — First Mak pass: every title/description measured and inside
   580/920 px; titles keyword-first with the brand last; H1s on home, FAQ,
   guide and gallery carry the primary keyword; city `RelatedLinks` cut to

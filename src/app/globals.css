@@ -1063,8 +1063,8 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 .legal-wrap h2{font-size:18px;font-weight:700;color:var(--green);margin:36px 0 10px;letter-spacing:-.3px}
 .legal-wrap h3{font-size:15px;font-weight:600;color:var(--txt);margin:24px 0 8px}
 .legal-wrap p{color:var(--muted);font-size:15px;line-height:1.75;margin-bottom:14px}
-.legal-wrap ul{color:var(--muted);font-size:15px;line-height:1.8;padding-left:20px;margin-bottom:14px}
-.legal-wrap ul li{margin-bottom:4px}
+.legal-wrap ul,.legal-wrap ol{color:var(--muted);font-size:15px;line-height:1.8;padding-left:20px;margin-bottom:14px}
+.legal-wrap ul li,.legal-wrap ol li{margin-bottom:4px}
 .legal-wrap a{color:var(--green);text-decoration:underline;text-decoration-color:rgba(55,210,120,.4)}
 .legal-wrap a:hover{text-decoration-color:var(--green)}
 .legal-wrap a.btn{color:#062313;text-decoration:none}

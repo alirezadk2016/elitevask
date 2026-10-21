@@ -1,10 +1,11 @@
 import Link from "next/link";
 import DanishOnlyNotice from "@/components/DanishOnlyNotice";
 import RelatedLinks from "@/components/RelatedLinks";
+import CityProcess from "@/components/CityProcess";
 import JsonLd from "@/components/JsonLd";
 import { breadcrumbLd, cityServiceLd, webPageLd } from "@/lib/seo";
 export const metadata = {
-  title: "Mobil bilvask i Næstved – dampvask ved din dør | Elite Vask",
+  title: "Mobil bilvask i Næstved – dampvask hos dig | Elite Vask",
   description: "Professionel mobil dampvask i Næstved og omegn. Vi kører til din adresse – gratis kørsel, betal efter vask. Book online eller ring til os.",
   alternates: { canonical: "/bilvask/naestved" },
   openGraph: {
@@ -79,6 +80,8 @@ export default function BilvaskNaestved() {
         <p>
           Dampvask er den ideelle metode til elbiler. Vi bruger minimalt vand og undgår højtryk nær batteripakke og ladeporte. Mange ejere af Tesla, VW ID, Hyundai Ioniq og andre elbiler foretrækker netop dampvask for at beskytte elektronik og tætninger.
         </p>
+
+        <CityProcess city="Næstved" />
 
         <h2>Ofte stillede spørgsmål</h2>
         <p><strong>Kører I til hele Næstved Kommune?</strong><br/>

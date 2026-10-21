@@ -1,11 +1,12 @@
 import Link from "next/link";
 import DanishOnlyNotice from "@/components/DanishOnlyNotice";
 import RelatedLinks from "@/components/RelatedLinks";
+import CityProcess from "@/components/CityProcess";
 import JsonLd from "@/components/JsonLd";
 import { breadcrumbLd, cityServiceLd, webPageLd } from "@/lib/seo";
 import { getHours, hoursDisplay } from "@/lib/getHours";
 export const metadata = {
-  title: 'Mobil bilvask i Helsingør – dampvask ved din dør | Elite Vask',
+  title: 'Mobil bilvask i Helsingør – dampvask hos dig | Elite Vask',
   description: 'Professionel mobil dampvask i Helsingør, Espergærde, Snekkersten og Hornbæk. Vi kører til dig – gratis kørsel, skånsom dampvask uden ridser.',
   alternates: { canonical: "/bilvask/helsingoer" },
   openGraph: {
@@ -59,6 +60,8 @@ export default async function BilvaskHelsingoer() {
         <p>
           Alle priser er inkl. gratis kørsel. Du betaler <strong>efter</strong> vasken, når du er tilfreds.
         </p>
+
+        <CityProcess city="Helsingør" />
 
         <h2>Ofte stillede spørgsmål</h2>
         <p><strong>Dækker I også Hornbæk og Nordkysten?</strong><br/>

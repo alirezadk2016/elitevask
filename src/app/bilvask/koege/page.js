@@ -1,11 +1,12 @@
 import Link from "next/link";
 import DanishOnlyNotice from "@/components/DanishOnlyNotice";
 import RelatedLinks from "@/components/RelatedLinks";
+import CityProcess from "@/components/CityProcess";
 import JsonLd from "@/components/JsonLd";
 import { breadcrumbLd, cityServiceLd, webPageLd } from "@/lib/seo";
 import { getHours, hoursDisplay } from "@/lib/getHours";
 export const metadata = {
-  title: "Mobil bilvask i Køge – dampvask ved din dør | Elite Vask",
+  title: "Mobil bilvask i Køge – dampvask hos dig | Elite Vask",
   description: "Mobil dampvask i Køge og omegn. Vi kører til dig – gratis kørsel, betal efter vask. Skånsom dampvask uden ridser og med minimal miljøpåvirkning.",
   alternates: { canonical: "/bilvask/koege" },
   openGraph: {
@@ -66,6 +67,8 @@ export default async function BilvaskKoege() {
         <p>
           Vejsalt er en af de største trusler mod bilens karosseri og undervogn. Efter vintermånederne er det vigtigt at få fjernet salt fra skjulte steder under bilen, i hjulkasser og i sprækker. Vores dampvask inkluderer i Hel Bil og Guld pakken en grundig undervognsbehandling, der fjerner salt og forhindrer rust.
         </p>
+
+        <CityProcess city="Køge" />
 
         <h2>Ofte stillede spørgsmål</h2>
         <p><strong>Koster det noget at I kører til Køge?</strong><br/>

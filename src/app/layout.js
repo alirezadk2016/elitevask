@@ -26,11 +26,11 @@ export const viewport = {
 
 export const metadata = {
   metadataBase: new URL("https://www.elite-vask.dk"),
-  title: "Mobil bilvask på Sjælland – dampvask ved din dør | Elite Vask",
+  title: "Mobil bilvask på Sjælland – dampvask hos dig | Elite Vask",
   description: "Mobil bilvask med damp på hele Sjælland: vi kommer til din adresse og vasker bilen ind og ud. Fra 500 kr., gratis kørsel og betaling efter vask.",
   alternates: { canonical: "/" },
   openGraph: {
-    title: "Mobil bilvask på Sjælland – dampvask ved din dør | Elite Vask",
+    title: "Mobil bilvask på Sjælland – dampvask hos dig | Elite Vask",
     description: "Vi kører til dig og vasker din bil. Rent, effektivt og miljøvenligt.",
     type: "website",
     locale: "da_DK",
@@ -40,7 +40,7 @@ export const metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Mobil bilvask på Sjælland – dampvask ved din dør | Elite Vask",
+    title: "Mobil bilvask på Sjælland – dampvask hos dig | Elite Vask",
     description: "Vi kører til dig og vasker din bil. Rent, effektivt og miljøvenligt.",
     images: ["/og-cover.jpg"],
   },

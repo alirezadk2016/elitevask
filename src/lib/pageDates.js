@@ -13,20 +13,20 @@ export const PAGES = [
   ['/privatpolitik',                  '2026-09-03', 'yearly',  0.4],
   ['/cookies',                        '2026-09-03', 'yearly',  0.3],
 
-  ['/guide/hvor-ofte',                '2026-06-01', 'yearly',  0.7],
-  ['/guide/salt-og-lak',              '2026-06-01', 'yearly',  0.7],
-  ['/guide/dampvask-vs-traditionel',  '2026-10-11', 'yearly',  0.7],
+  ['/guide/hvor-ofte',                '2026-10-21', 'yearly',  0.7],
+  ['/guide/salt-og-lak',              '2026-10-21', 'yearly',  0.7],
+  ['/guide/dampvask-vs-traditionel',  '2026-10-21', 'yearly',  0.7],
 
-  ['/bilvask/koebenhavn',             '2026-09-25', 'monthly', 0.9],
-  ['/bilvask/roskilde',               '2026-09-25', 'monthly', 0.9],
-  ['/bilvask/koege',                  '2026-09-25', 'monthly', 0.9],
-  ['/bilvask/naestved',               '2026-09-25', 'monthly', 0.9],
-  ['/bilvask/ringsted',               '2026-09-25', 'monthly', 0.9],
-  ['/bilvask/stevns',                 '2026-09-25', 'monthly', 0.9],
-  ['/bilvask/faxe',                   '2026-09-25', 'monthly', 0.9],
-  ['/bilvask/helsingoer',             '2026-09-25', 'monthly', 0.9],
-  ['/bilvask/hilleroed',              '2026-09-25', 'monthly', 0.9],
-  ['/bilvask/frederikssund',          '2026-09-25', 'monthly', 0.9],
+  ['/bilvask/koebenhavn',             '2026-10-21', 'monthly', 0.9],
+  ['/bilvask/roskilde',               '2026-10-21', 'monthly', 0.9],
+  ['/bilvask/koege',                  '2026-10-21', 'monthly', 0.9],
+  ['/bilvask/naestved',               '2026-10-21', 'monthly', 0.9],
+  ['/bilvask/ringsted',               '2026-10-21', 'monthly', 0.9],
+  ['/bilvask/stevns',                 '2026-10-21', 'monthly', 0.9],
+  ['/bilvask/faxe',                   '2026-10-21', 'monthly', 0.9],
+  ['/bilvask/helsingoer',             '2026-10-21', 'monthly', 0.9],
+  ['/bilvask/hilleroed',              '2026-10-21', 'monthly', 0.9],
+  ['/bilvask/frederikssund',          '2026-10-21', 'monthly', 0.9],
 ];
 
 export function lastModified(path) {

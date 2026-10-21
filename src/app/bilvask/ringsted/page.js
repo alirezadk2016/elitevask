@@ -1,10 +1,11 @@
 import Link from "next/link";
 import DanishOnlyNotice from "@/components/DanishOnlyNotice";
 import RelatedLinks from "@/components/RelatedLinks";
+import CityProcess from "@/components/CityProcess";
 import JsonLd from "@/components/JsonLd";
 import { breadcrumbLd, cityServiceLd, webPageLd } from "@/lib/seo";
 export const metadata = {
-  title: "Mobil bilvask i Ringsted – dampvask ved din dør | Elite Vask",
+  title: "Mobil bilvask i Ringsted – dampvask hos dig | Elite Vask",
   description: "Professionel mobil dampvask i Ringsted. Vi kører til din adresse – gratis kørsel, betal efter vask. Skånsom dampvask uden ridser. Book online.",
   alternates: { canonical: "/bilvask/ringsted" },
   openGraph: {
@@ -75,6 +76,8 @@ export default function BilvaskRingsted() {
         <p>
           Vi vasker alle typer køretøjer, herunder varebiler, kassevogne og større erhvervskøretøjer. Varebil-pakken starter fra 1.400 kr. for hel bil og inkluderer grundig indvendig og udvendig rens.
         </p>
+
+        <CityProcess city="Ringsted" />
 
         <h2>Ofte stillede spørgsmål</h2>
         <p><strong>Koster det noget at I kører til Ringsted?</strong><br/>

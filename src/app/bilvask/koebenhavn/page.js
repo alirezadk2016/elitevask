@@ -1,11 +1,12 @@
 import Link from "next/link";
 import DanishOnlyNotice from "@/components/DanishOnlyNotice";
 import RelatedLinks from "@/components/RelatedLinks";
+import CityProcess from "@/components/CityProcess";
 import JsonLd from "@/components/JsonLd";
 import { breadcrumbLd, cityServiceLd, webPageLd } from "@/lib/seo";
 import { getHours, hoursDisplay } from "@/lib/getHours";
 export const metadata = {
-  title: "Mobil bilvask i København – dampvask ved din dør | Elite Vask",
+  title: "Mobil bilvask i København – dampvask hos dig | Elite Vask",
   description: "Professionel mobil dampvask i København. Vi kører til din adresse i hele Storkøbenhavn – ingen ventetid, ingen kø. Book online i dag.",
   alternates: { canonical: "/bilvask/koebenhavn" },
   openGraph: {
@@ -77,10 +78,8 @@ export default async function BilvaskKoebenhavn() {
           <li>Lyngby, Virum og Sorgenfri</li>
         </ul>
 
-        <h2>Sådan booker du mobil bilvask i København</h2>
-        <p>
-          Det tager under to minutter at booke din bilvask online. Vælg din biltype, den pakke du ønsker, og en dato der passer dig. Vi bekræfter inden for få timer og møder op til aftalt tid.
-        </p>
+        <CityProcess city="København" />
+
         <p>
           Du kan også ringe til os på <a href="tel:+4524440321">+45 24 44 03 21</a> – vi er klar til at hjælpe {hd.days.toLowerCase()} kl. {hd.time.replace(" – ", "–")}.
         </p>

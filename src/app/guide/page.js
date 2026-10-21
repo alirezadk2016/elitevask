@@ -7,7 +7,7 @@ const GUIDES = [
 ];
 
 export const metadata = {
-  title: "Bilpleje-guide: råd om bilvask, vejsalt og dampvask | Elite Vask",
+  title: "Bilpleje-guide: bilvask, vejsalt og dampvask | Elite Vask",
   description: "Bilpleje Guide fra Elite Vask: hvor ofte du bør vaske bilen, beskyttelse mod vejsalt og dampvask vs. traditionel bilvask. Ekspertråd om mobil bilpleje.",
   alternates: { canonical: "/guide" },
   openGraph: {

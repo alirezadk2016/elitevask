@@ -1,6 +1,7 @@
 import Link from "next/link";
 import DanishOnlyNotice from "@/components/DanishOnlyNotice";
 import RelatedLinks from "@/components/RelatedLinks";
+import GuideMore from "@/components/GuideMore";
 import JsonLd from "@/components/JsonLd";
 import { breadcrumbLd, articleLd } from "@/lib/seo";
 export const metadata = {
@@ -164,6 +165,8 @@ export default function DampvaskVsTraditionel() {
             </tbody>
           </table>
         </div>
+
+        <GuideMore current="/guide/dampvask-vs-traditionel" />
 
         <div className="guide-cta-box">
           <p><strong>Prøv mobil dampvask på Sjælland</strong><br />Elite Vask kører til dig – ingen kø, ingen bilvask, ingen kompromis på kvalitet.</p>

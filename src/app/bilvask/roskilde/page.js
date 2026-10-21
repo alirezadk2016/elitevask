@@ -1,11 +1,12 @@
 import Link from "next/link";
 import DanishOnlyNotice from "@/components/DanishOnlyNotice";
 import RelatedLinks from "@/components/RelatedLinks";
+import CityProcess from "@/components/CityProcess";
 import JsonLd from "@/components/JsonLd";
 import { breadcrumbLd, cityServiceLd, webPageLd } from "@/lib/seo";
 import { getHours, hoursDisplay } from "@/lib/getHours";
 export const metadata = {
-  title: "Mobil bilvask i Roskilde – dampvask ved din dør | Elite Vask",
+  title: "Mobil bilvask i Roskilde – dampvask hos dig | Elite Vask",
   description: "Professionel mobil dampvask i Roskilde. Vi kører til din adresse – hjemme eller på arbejdet. Gratis kørsel, betal efter vask. Book online.",
   alternates: { canonical: "/bilvask/roskilde" },
   openGraph: {
@@ -64,6 +65,8 @@ export default async function BilvaskRoskilde() {
         <p>
           Mange i Roskilde kører i elbil eller leasingbil. Dampvask er den skånsomste metode til elbiler – vi undgår højtryk nær batteripakke og ladeporte. Til leasingbiler sikrer vi et professionelt resultat, der lever op til kravene ved aflevering.
         </p>
+
+        <CityProcess city="Roskilde" />
 
         <h2>Ofte stillede spørgsmål</h2>
         <p><strong>Vasker I i hele Roskilde Kommune?</strong><br/>

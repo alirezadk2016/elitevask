@@ -1,10 +1,11 @@
 import Link from "next/link";
 import DanishOnlyNotice from "@/components/DanishOnlyNotice";
 import RelatedLinks from "@/components/RelatedLinks";
+import GuideMore from "@/components/GuideMore";
 import JsonLd from "@/components/JsonLd";
 import { breadcrumbLd, articleLd } from "@/lib/seo";
 export const metadata = {
-  title: "Hvor ofte bør man vaske sin bil? Råd efter årstid | Elite Vask",
+  title: "Hvor ofte bør man vaske bilen? Råd efter årstid | Elite Vask",
   description: "Hvor tit skal bilen vaskes? Svaret afhænger af årstid, brug og parkeringsforhold. Her er en konkret guide til, hvornår det er nødvendigt.",
   alternates: { canonical: "/guide/hvor-ofte" },
   openGraph: {
@@ -109,6 +110,8 @@ export default function HvorOfte() {
             </tbody>
           </table>
         </div>
+
+        <GuideMore current="/guide/hvor-ofte" />
 
         <div className="guide-cta-box">
           <p><strong>Mobil dampvask på hele Sjælland</strong><br />Elite Vask kører ud til dig, uanset om du er hjemme eller på arbejdet. Book en tid direkte her på siden.</p>
