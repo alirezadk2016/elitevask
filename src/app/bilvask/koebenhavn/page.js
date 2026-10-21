@@ -111,7 +111,7 @@ export default async function BilvaskKoebenhavn() {
         <p className="legal-updated">Elite Vask · Steam wash at your door across Greater Copenhagen</p>
 
         <p className="guide-lead">
-          Need a professional car wash in Copenhagen but don't have time to queue at a tunnel wash? Elite Vask drives straight to your address – at home, at work or in the car park – and delivers a thorough mobile steam wash while you get on with your day.
+          Need a professional car wash in Copenhagen but don&apos;t have time to queue at a tunnel wash? Elite Vask drives straight to your address – at home, at work or in the car park – and delivers a thorough mobile steam wash while you get on with your day.
         </p>
 
         <h2>Why choose a mobile car wash in Copenhagen?</h2>

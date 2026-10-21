@@ -18,7 +18,7 @@ export default function CityProcess({ city, cityEn }) {
         <ol>
           <li><strong>Choose and book.</strong> Pick your car type and package, and book an available time online in a few minutes.</li>
           <li><strong>We drive out.</strong> We come to your address in {c} with all the equipment – travel is free.</li>
-          <li><strong>The car is steam-cleaned.</strong> We work with steam and soft microfibre cloths – no brushes and no harsh chemicals – and use only 1–3 litres of water. Depending on the package it takes 1–3 hours. You don't need to be home, as long as we can reach the car.</li>
+          <li><strong>The car is steam-cleaned.</strong> We work with steam and soft microfibre cloths – no brushes and no harsh chemicals – and use only 1–3 litres of water. Depending on the package it takes 1–3 hours. You don&apos;t need to be home, as long as we can reach the car.</li>
           <li><strong>You pay afterwards.</strong> No prepayment – you only pay once the car is clean.</li>
         </ol>
         <p>

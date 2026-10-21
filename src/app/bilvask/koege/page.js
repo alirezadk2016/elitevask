@@ -125,7 +125,7 @@ export default async function BilvaskKoege() {
 
         <h2>Winter and salt damage – protect your car in Køge</h2>
         <p>
-          Road salt is one of the biggest threats to a car's body and underside. After the winter months it is important to remove salt from hidden places under the car, in the wheel arches and in gaps. In the Whole car and Gold packages, our steam wash includes a thorough underbody treatment that removes salt and helps prevent rust.
+          Road salt is one of the biggest threats to a car&apos;s body and underside. After the winter months it is important to remove salt from hidden places under the car, in the wheel arches and in gaps. In the Whole car and Gold packages, our steam wash includes a thorough underbody treatment that removes salt and helps prevent rust.
         </p>
 
         <CityProcess city="Køge" />
