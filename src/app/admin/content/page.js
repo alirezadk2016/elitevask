@@ -882,7 +882,7 @@ export default function AdminPanel() {
               {tab === "oversigt" ? "Oversigt" : tab === "bookings" ? "Bookinger" : tab === "kunder" ? "Kunder" : tab === "reviews" ? "Anmeldelser" : tab === "hours" ? "Åbningstider" : tab === "gallery" ? "Galleri" : tab === "videos" ? "Videoer" : tab === "beforeafter" ? "Før & efter" : tab === "faq" ? "FAQ" : tab === "priser" ? "Priser" : "Ekstra ydelser"}
             </h1>
             <span style={{ background:T.accentDim, color:T.accent, borderRadius:20, padding:"3px 12px", fontSize:12, fontWeight:700 }}>
-              {tab === "oversigt" ? new Intl.DateTimeFormat("da-DK",{ weekday:"long", day:"numeric", month:"long", timeZone:"Europe/Copenhagen" }).format(new Date()) : tab === "bookings" ? `${activeBookings} aktive` : tab === "kunder" ? "Kundekartotek" : tab === "reviews" ? "Kundecitater" : tab === "hours" ? hoursSummary(hours, "da") : tab === "gallery" ? `${gallery.length} ${gallery.length===1?"billede":"billeder"}` : tab === "videos" ? `${videos.length} ${videos.length===1?"video":"videoer"}` : tab === "beforeafter" ? `${beforeAfter.length} ${beforeAfter.length===1?"par":"par"}` : tab === "faq" ? `${faqItems.length} spørgsmål` : tab === "priser" ? "Prismatrix" : `${extrasItems.length} ydelser`}
+              {tab === "oversigt" ? new Intl.DateTimeFormat("da-DK",{ weekday:"long", day:"numeric", month:"long", timeZone:"Europe/Copenhagen" }).format(new Date()) : tab === "bookings" ? `${activeBookings} aktive` : tab === "kunder" ? "Kundekartotek" : tab === "reviews" ? "Kundecitater" : tab === "hours" ? hoursSummary(hours, "da") : tab === "gallery" ? `${gallery.length + DEFAULT_ALBUM.length} billeder på siden` : tab === "videos" ? `${videos.length} ${videos.length===1?"video":"videoer"}` : tab === "beforeafter" ? `${beforeAfter.length + DEFAULT_BEFORE_AFTER.length} par på siden` : tab === "faq" ? (faqItems.length ? `${faqItems.length} spørgsmål` : `${DEFAULT_FAQ.length} standardspørgsmål`) : tab === "priser" ? "Prismatrix" : (extrasItems.length ? `${extrasItems.length} ydelser` : `${DEFAULT_EXTRAS.length} standardydelser`)}
             </span>
             {(tab === "oversigt" || tab === "bookings") && (
               <>
@@ -2123,7 +2123,7 @@ export default function AdminPanel() {
                 })}
               </div>
               {gallery.length === 0 && (
-                <p style={{ fontSize:12, color:T.t4, marginTop:12, textAlign:"center" }}>Tilføj dit første billede ovenfor</p>
+                <p style={{ fontSize:12, color:T.t3, marginTop:12, textAlign:"center" }}>De {DEFAULT_ALBUM.length} faste billeder vises altid på siden. Tilføj dine egne billeder ovenfor.</p>
               )}
             </>
           )}
@@ -2510,10 +2510,10 @@ export default function AdminPanel() {
                 {faqItems.length === 0 && (
                   <>
                     <div style={{ marginBottom:12, background:"rgba(55,210,120,.06)", border:`1px solid ${T.accentBorder}`, borderRadius:10, padding:"12px 16px", display:"flex", alignItems:"center", justifyContent:"space-between", gap:12, flexWrap:"wrap" }}>
-                      <span style={{ fontSize:13, color:T.accent, fontWeight:600 }}>Viser standarddata — gem enkeltvis eller alle på én gang</span>
+                      <span style={{ fontSize:13, color:T.accent, fontWeight:600, lineHeight:1.5 }}>Disse {DEFAULT_FAQ.length} standardspørgsmål vises på siden lige nu. Klik én gang på &quot;Gør redigerbare&quot; for at kunne rette, slette og tilføje.</span>
                       <button onClick={seedAllFaq} disabled={cmsLoading}
                         style={{ padding:"8px 18px", minHeight:44, background:T.accent, color:T.bg0, border:"none", borderRadius:8, fontWeight:700, fontSize:13, cursor:cmsLoading?"not-allowed":"pointer", opacity:cmsLoading?.6:1, fontFamily:FF, whiteSpace:"nowrap" }}>
-                        {cmsLoading ? "Gemmer…" : "Gem alle"}
+                        {cmsLoading ? "Gemmer…" : "Gør redigerbare"}
                       </button>
                     </div>
                     <div style={{ display:"flex", flexDirection:"column", gap:5 }}>
@@ -2521,8 +2521,7 @@ export default function AdminPanel() {
                         <div key={idx} style={{ background:T.bg1, border:`1px solid ${T.border}`, borderRadius:11, display:"flex", alignItems:"center", padding:"12px 16px", gap:10 }}>
                           <span style={{ fontSize:11, fontWeight:700, color:T.t4, minWidth:22, flexShrink:0 }}>#{idx+1}</span>
                           <span style={{ flex:1, fontSize:14, color:T.t2, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{faq.q.da}</span>
-                          <button onClick={async () => { const r = await fetch("/api/admin/content", { method:"POST", headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" }, body:JSON.stringify({ type:"faq", item:{ q:faq.q, a:faq.a } }) }); if (authFailed(r.status)) return; if (!r.ok) { addToast("err", "Kunne ikke gemme — prøv igen"); return; } addToast("ok", "Gemt"); fetchContent("faq"); }}
-                            style={{ padding:"5px 12px", minHeight:40, background:T.accentDim, border:`1px solid ${T.accentBorder}`, borderRadius:7, color:T.accent, fontSize:12, fontWeight:700, cursor:"pointer", fontFamily:FF, whiteSpace:"nowrap", flexShrink:0 }}>+ Gem</button>
+                          <span style={{ fontSize:11, fontWeight:700, color:T.accent, background:T.accentDim, border:`1px solid ${T.accentBorder}`, borderRadius:99, padding:"3px 10px", flexShrink:0 }}>Vises på siden</span>
                         </div>
                       ))}
                     </div>
@@ -2807,10 +2806,10 @@ export default function AdminPanel() {
                   return (
                     <>
                       <div style={{ marginBottom:16, background:"rgba(55,210,120,.06)", border:`1px solid ${T.accentBorder}`, borderRadius:10, padding:"12px 16px", display:"flex", alignItems:"center", justifyContent:"space-between", gap:12, flexWrap:"wrap" }}>
-                        <span style={{ fontSize:13, color:T.accent, fontWeight:600 }}>Viser standardydelser — klik &apos;Gem alle&apos; for at gøre dem redigerbare</span>
+                        <span style={{ fontSize:13, color:T.accent, fontWeight:600, lineHeight:1.5 }}>Disse {DEFAULT_EXTRAS.length} standardydelser vises på siden lige nu. Klik én gang på &quot;Gør redigerbare&quot; for at kunne rette priser, slette og tilføje.</span>
                         <button onClick={seedAllExtras} disabled={cmsLoading}
                           style={{ padding:"8px 18px", minHeight:44, background:T.accent, color:T.bg0, border:"none", borderRadius:8, fontWeight:700, fontSize:13, cursor:cmsLoading?"not-allowed":"pointer", opacity:cmsLoading?.6:1, fontFamily:FF, whiteSpace:"nowrap" }}>
-                          {cmsLoading ? "Gemmer…" : "Gem alle standarddata"}
+                          {cmsLoading ? "Gemmer…" : "Gør redigerbare"}
                         </button>
                       </div>
                       <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
@@ -2824,17 +2823,7 @@ export default function AdminPanel() {
                               </div>
                               {ext.desc?.da && <p style={{ fontSize:12, color:T.t3, margin:0, lineHeight:1.5 }}>{ext.desc.da}</p>}
                             </div>
-                            <button
-                              onClick={async () => {
-                                await fetch("/api/admin/content", {
-                                  method:"POST",
-                                  headers:{ Authorization:`Bearer ${secret}`, "Content-Type":"application/json" },
-                                  body: JSON.stringify({ type:"extras", item:{ id:ext.id, name:ext.name, desc:ext.desc, price:ext.price } }),
-                                });
-                                fetchContent("extras");
-                              }}
-                              style={{ padding:"6px 14px", minHeight:40, background:T.accentDim, border:`1px solid ${T.accentBorder}`, borderRadius:7, color:T.accent, fontSize:12, fontWeight:700, cursor:"pointer", fontFamily:FF, whiteSpace:"nowrap", flexShrink:0 }}
-                            >+ Tilføj</button>
+                            <span style={{ fontSize:11, fontWeight:700, color:T.accent, background:T.accentDim, border:`1px solid ${T.accentBorder}`, borderRadius:99, padding:"3px 10px", flexShrink:0 }}>Vises på siden</span>
                           </div>
                         ))}
                       </div>
