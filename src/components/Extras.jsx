@@ -1,6 +1,6 @@
 const HTML = `<!-- EKSTRA YDELSER -->
 <section class="sec" id="ekstra"><div class="wrap">
-  <div class="center"><div class="eyebrow" data-i18n="ex_eyebrow">Tilvalg</div><h2 class="sec-title" data-i18n="ex_title">Ekstra ydelser</h2><p class="sec-sub" data-i18n="ex_sub">Kan tilføjes til enhver pakke. Indgår i Guld pakken.</p></div>
+  <div class="center"><div class="eyebrow" data-i18n="ex_eyebrow">Tilvalg</div><h2 class="sec-title" data-i18n="ex_title">Ekstra ydelser</h2><p class="sec-sub" data-i18n="ex_sub">Ekstra ydelser er tilvalg som motorrens, sæderens og fjernelse af dyrehår, der kan lægges til enhver pakke. I Guld pakken er de inkluderet.</p></div>
   <ul class="ex-grid">
     <li class="ex-item"><div class="ex-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 8h4l3 3v4h-2"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/><path d="M3 6h8v10H9M5 16H3V6"/></svg></div><div class="ex-tx"><h3 data-i18n="ex1t">Motorrens</h3><p data-i18n="ex1p">Grundig afrensning af motorrum</p></div><span class="ex-pr">400 kr</span></li>
     <li class="ex-item"><div class="ex-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg></div><div class="ex-tx"><h3 data-i18n="ex2t">Lak- & glansbeskyttelse</h3><p data-i18n="ex2p">Udvendig – langvarig ekstra glans</p></div><span class="ex-pr">300 kr</span></li>

@@ -1,6 +1,6 @@
 const HTML = `<!-- WHY -->
 <section class="sec" id="hvorfor"><div class="wrap">
-  <div class="center"><div class="eyebrow" data-i18n="why_eyebrow">Hvorfor vælge os</div><h2 class="sec-title" data-i18n="why_title">Det lover vi – hver eneste gang</h2></div>
+  <div class="center"><div class="eyebrow" data-i18n="why_eyebrow">Hvorfor vælge os</div><h2 class="sec-title" data-i18n="why_title">Det lover vi – hver eneste gang</h2><p class="sec-sub" data-i18n="why_sub">Vi lover fire ting: du kender prisen, før vi kører ud, vi vasker med damp i stedet for kemi, vi kommer til dig, og du er tilfreds – ellers finder vi en løsning.</p></div>
   <ul class="why-grid">
     <li class="why"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/></svg></div><div><h3 data-i18n="why1t">Gennemsigtige priser</h3><p data-i18n="why1p">Du kender prisen, før vi kører ud. Ingen overraskelser.</p></div></li>
     <li class="why"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/></svg></div><div><h3 data-i18n="why2t">Miljøvenlig dampvask</h3><p data-i18n="why2p">Skånsom metode med minimalt vandforbrug.</p></div></li>

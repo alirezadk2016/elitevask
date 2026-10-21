@@ -3,7 +3,7 @@ const HTML = `<!-- CONTACT -->
   <div class="contact-grid">
     <div>
       <h2 data-i18n="ct_title">Klar til en skinnende ren bil?</h2>
-      <p class="lead" data-i18n="ct_lead">Kontakt os i dag og book din mobile dampvask. Vi kører til dig – nemt, hurtigt og lokalt.</p>
+      <p class="lead" data-i18n="ct_lead">Ja – du kan booke online på få minutter, og så kører vi ud til dig med alt udstyr. Har du spørgsmål, så ring eller skriv til os.</p>
       <div class="contact-cta">
         <button type="button" class="btn btn-green btn-lg" data-book data-i18n="ct_book">Book online nu</button>
         <a href="tel:+4524440321" class="btn btn-ghost btn-lg" data-i18n="ct_call">Ring til os</a>
