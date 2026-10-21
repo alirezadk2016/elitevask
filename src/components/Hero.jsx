@@ -12,7 +12,7 @@ const HTML = `<!-- HERO -->
       <span class="htm-stars">★★★★★</span><span class="badge-g-score">5,0</span><span class="badge-g-sep">·</span><span data-i18n="tb_rating">Google anmeldelser</span>
     </a>
     <h1><span data-i18n="hero_h1a">Mobil bilvask</span><br><em data-i18n="hero_h1b">– vi kører til dig</em></h1>
-    <p data-i18n="hero_p">Elite Vask er mobil bil dampvask i hele Sjælland: vi kommer til din adresse og damprenser bilen ind og ud – fra 500 kr., gratis kørsel og ingen forudbetaling.</p>
+    <p data-i18n="hero_p">Elite Vask er mobil bil dampvask i hele Sjælland. Vi kommer til din adresse og damprenser bilen ind og ud – fra 500 kr., gratis kørsel og ingen forudbetaling.</p>
     <div class="hero-flow">
       <a href="#vaelg" class="flow-step flow-link"><span class="fn">1</span><span data-i18n="flow1">Vælg biltype</span></a>
       <span class="flow-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
