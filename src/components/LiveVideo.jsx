@@ -3,7 +3,7 @@ const HTML = `<!-- LIVE VIDEO -->
   <div class="center">
     <div class="eyebrow" data-i18n="vid_eyebrow">Live optagelse</div>
     <h2 class="sec-title" data-i18n="vid_title2">Se dampen arbejde</h2>
-    <p class="sec-sub" data-i18n="vid_sub2">Oplev vores mobile bilpleje i aktion – optaget på stedet, mens vi arbejder hjemme hos kunden.</p>
+    <p class="sec-sub" data-i18n="vid_sub2">Sådan ser dampvask ud i praksis: damp ved høj temperatur løsner snavset, og vi tørrer efter med mikrofiber – optaget hjemme hos en kunde.</p>
   </div>
   <div class="lv-stage">
     <div class="lv-frame">

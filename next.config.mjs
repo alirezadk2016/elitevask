@@ -72,6 +72,13 @@ const nextConfig = {
         destination: '/',
         permanent: false,
       },
+      // English aliases for the trust pages, so tools and visitors who type
+      // the English path land on the Danish page (URLs themselves never move).
+      { source: '/about', destination: '/om-os', permanent: true },
+      { source: '/contact', destination: '/kontakt', permanent: true },
+      { source: '/privacy', destination: '/privatpolitik', permanent: true },
+      { source: '/privacy-policy', destination: '/privatpolitik', permanent: true },
+      { source: '/terms', destination: '/handelsbetingelser', permanent: true },
     ];
   },
 };

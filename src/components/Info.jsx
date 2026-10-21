@@ -8,7 +8,7 @@ const HTML = `<!-- INFO -->
         <h3 data-i18n="info1t">Hvorfor vælge Elite Vask?</h3>
         <span class="why-toggle-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>
       </div>
-      <p class="why-teaser" data-i18n="info1p">Premium mobil bilvask — vi sætter standarden. Klik for at læse mere.</p>
+      <p class="why-teaser" data-i18n="info1p">Damp i stedet for børster, gratis kørsel og betaling efter vasken. Klik for at læse mere.</p>
       <div class="why-body" id="whyBody">
         <ul class="why-items">
           <li class="why-item"><span class="why-emoji">🚗</span><div><strong data-i18n="why_i1t">Vi kommer direkte til dig</strong><p data-i18n="why_i1p">Ingen ventetid i vaskehal. Vi møder op til din adresse i hele Sjælland — til tiden, klar til at levere.</p></div></li>

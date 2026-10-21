@@ -20,7 +20,7 @@ const HTML = `<!-- BEFORE/AFTER + GALLERY -->
   <div class="center">
     <div class="eyebrow" data-i18n="ba_eyebrow">Vores arbejde</div>
     <h2 class="sec-title" data-i18n="ba_title">Før & efter</h2>
-    <p class="sec-sub" data-i18n="ba_sub">Træk i slideren og se forskellen – ægte resultater fra professionel mobil bilvask hos vores kunder.</p>
+    <p class="sec-sub" data-i18n="ba_sub">Ægte resultater fra mobil bilvask hos vores kunder – træk i slideren og se forskellen før og efter.</p>
   </div>
 
   <div class="gcar-wrap" id="baNavWrap">
