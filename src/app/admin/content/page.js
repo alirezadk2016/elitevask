@@ -205,6 +205,7 @@ export default function AdminPanel() {
   const [hoursSaving, setHoursSaving]     = useState(false);
   const [hoursIsDefault, setHoursIsDefault] = useState(true);
   const [closedDateInput, setClosedDateInput] = useState("");
+  const [specialInput, setSpecialInput] = useState({ date:"", open:"10:00", close:"14:00" });
   // Bookings view mode + search (calendar ↔ searchable list)
   const [bookingView, setBookingView]     = useState("kalender");
   const [bookingSearch, setBookingSearch] = useState("");
@@ -1840,6 +1841,53 @@ export default function AdminPanel() {
                         );
                       })}
                     </div>
+                  </>
+                )}
+
+                {/* Særlige åbningstider for enkelte datoer */}
+                {card(
+                  <>
+                    {lbl("Særlige åbningstider")}
+                    <p style={{ color:T.t4, fontSize:12.5, margin:"0 0 14px", lineHeight:1.5 }}>Andre tider på en bestemt dato – fx juleaften 10:00–14:00. Gælder kun den dato og kan også åbne en dag, der normalt er lukket.</p>
+                    {(() => {
+                      const sp = hoursDraft.specialDates || {};
+                      const si = specialInput;
+                      const okNew = si.date && si.date >= todayISO && toMin(si.close) - toMin(si.open) >= SM;
+                      const sel = { background:T.bg0, border:`1px solid ${T.border}`, borderRadius:10, color:T.t1, fontSize:15, fontWeight:700, padding:"9px 10px", minHeight:44, fontFamily:FF, colorScheme:"dark", cursor:"pointer" };
+                      return (
+                        <>
+                          <div style={{ display:"flex", gap:8, alignItems:"center", flexWrap:"wrap", marginBottom: Object.keys(sp).length ? 14 : 0 }}>
+                            <input type="date" value={si.date} min={todayISO} aria-label="Dato" onChange={e=>setSpecialInput(v=>({ ...v, date:e.target.value }))} style={{ ...sel, fontSize:16, fontWeight:600 }} />
+                            <select aria-label="Åbner" value={si.open} onChange={e=>setSpecialInput(v=>({ ...v, open:e.target.value }))} style={sel}>
+                              {TIME_OPTS.filter(t => t !== "24:00").map(t => <option key={t} value={t}>{t}</option>)}
+                            </select>
+                            <span style={{ color:T.t4, fontWeight:700 }}>–</span>
+                            <select aria-label="Lukker" value={si.close} onChange={e=>setSpecialInput(v=>({ ...v, close:e.target.value }))} style={sel}>
+                              {TIME_OPTS.filter(t => t > si.open).map(t => <option key={t} value={t}>{t}</option>)}
+                            </select>
+                            <button type="button" disabled={!okNew}
+                              onClick={()=>{ if(!okNew) return; setHoursDraft(h=>normalizeHours({ ...h, specialDates:{ ...(h.specialDates||{}), [si.date]:{ open:si.open, close:si.close } }, closedDates:(h.closedDates||[]).filter(x=>x!==si.date) })); setSpecialInput(v=>({ ...v, date:"" })); }}
+                              style={{ padding:"10px 18px", minHeight:44, borderRadius:10, border:`1px solid ${okNew?T.accentBorder:T.border}`, background:okNew?T.accentDim:"transparent", color:okNew?T.accent:T.t4, fontSize:13, fontWeight:700, cursor:okNew?"pointer":"not-allowed", fontFamily:FF }}>
+                              + Tilføj
+                            </button>
+                          </div>
+                          {Object.keys(sp).length > 0 && (
+                            <div style={{ display:"flex", flexWrap:"wrap", gap:6 }}>
+                              {Object.keys(sp).sort().map(d => (
+                                <span key={d} style={{ display:"inline-flex", alignItems:"center", gap:8, fontSize:12.5, fontWeight:600, color:T.accent, background:T.accentDim, border:`1px solid ${T.accentBorder}`, borderRadius:8, padding:"6px 8px 6px 11px", fontVariantNumeric:"tabular-nums" }}>
+                                  {fmtDate(d)} · {sp[d].open}–{sp[d].close}
+                                  <button type="button" aria-label={`Fjern ${d}`}
+                                    onClick={()=>setHoursDraft(h=>{ const n = { ...(h.specialDates||{}) }; delete n[d]; return normalizeHours({ ...h, specialDates:n }); })}
+                                    style={{ display:"flex", alignItems:"center", justifyContent:"center", width:18, height:18, borderRadius:5, background:"rgba(255,255,255,.08)", border:"none", color:"inherit", cursor:"pointer", padding:0 }}>
+                                    <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                  </button>
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </>
+                      );
+                    })()}
                   </>
                 )}
 

@@ -89,12 +89,35 @@ export function normalizeHours(raw) {
     ? [...new Set(h.closedDates.map(String).filter(d => DATE_RE.test(d)))].sort().slice(0, 120)
     : [];
 
-  return { open: minToLabel(unionOpen), close: minToLabel(unionClose), slotMinutes: slot, closedDays, closedDates, days };
+  // Special hours for single dates (e.g. Christmas Eve 10:00–14:00), keyed
+  // "YYYY-MM-DD" → {open, close}. They override that date's weekday window
+  // and can even open a normally closed weekday. Capped like closedDates.
+  const specialDates = {};
+  if (h.specialDates && typeof h.specialDates === 'object') {
+    // Past special dates are dropped so an old Christmas Eve window doesn't
+    // keep widening the shared grid all year (one day of slack for timezones).
+    const cutoff = new Date(Date.now() - 2 * 864e5).toISOString().slice(0, 10);
+    Object.keys(h.specialDates).filter(d => DATE_RE.test(d) && d >= cutoff).sort().slice(0, 60).forEach(d => {
+      const v = h.specialDates[d];
+      if (!v || typeof v !== 'object') return;
+      const [o, c] = clampWindow(v.open, v.close, slot, minToLabel(gOpen), minToLabel(gClose));
+      specialDates[d] = { open: minToLabel(o), close: minToLabel(c) };
+    });
+  }
+  // The shared grid must cover the special windows too, otherwise their
+  // slots could not exist in /api/book's grid.
+  const specials = Object.values(specialDates);
+  const gridOpen = Math.min(unionOpen, ...specials.map(v => toMin(v.open)));
+  const gridClose = Math.max(unionClose, ...specials.map(v => toMin(v.close)));
+
+  return { open: minToLabel(gridOpen), close: minToLabel(gridClose), slotMinutes: slot, closedDays, closedDates, days, specialDates };
 }
 
 // The opening window for one date (or null when that weekday is closed).
 export function windowFor(hours, dateStr) {
   const h = normalizeHours(hours);
+  if (h.closedDates.includes(String(dateStr))) return null;
+  if (h.specialDates[dateStr]) return { ...h.specialDates[dateStr] };
   const wd = weekdayOf(dateStr);
   const d = h.days[wd];
   if (!d || d.closed) return null;
@@ -134,7 +157,9 @@ export function weekdayOf(dateStr) {
 
 export function isClosedDay(hours, dateStr) {
   const h = normalizeHours(hours);
-  return h.closedDays.includes(weekdayOf(dateStr)) || h.closedDates.includes(String(dateStr));
+  if (h.closedDates.includes(String(dateStr))) return true;
+  if (h.specialDates[dateStr]) return false; // special hours open the date
+  return h.closedDays.includes(weekdayOf(dateStr));
 }
 
 // Human summary of the weekly schedule, grouping consecutive weekdays with the
