@@ -147,7 +147,7 @@ export default async function PriserPage() {
       : []),
     {
       q: "Er mobil bilvask billig?",
-      a: "En automatisk vaskehal er som regel billigere pr. vask, men så skal du selv køre derhen og vente. Hos os er kørslen gratis, du ser prisen online, før du booker, og du betaler først bagefter. Vi bruger damp i stedet for børster, så der kommer ingen vaskeridser i lakken.",
+      a: "En automatisk vaskehal er som regel billigere pr. vask, men så skal du selv køre derhen og vente. Hos os er kørslen gratis, du ser prisen online, før du booker, og der er ingen forudbetaling – du betaler først bagefter. Vi bruger damp i stedet for børster, så der kommer ingen vaskeridser i lakken.",
     },
   ];
   const faqLd = {
