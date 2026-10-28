@@ -1,5 +1,5 @@
 import Link from "next/link";
-import DanishOnlyNotice from "@/components/DanishOnlyNotice";
+import Bi from "@/components/Bi";
 import RelatedLinks from "@/components/RelatedLinks";
 import GuideMore from "@/components/GuideMore";
 import JsonLd from "@/components/JsonLd";
@@ -24,8 +24,9 @@ export default function HvorOfte() {
     <div className="legal-page">
       <JsonLd items={[breadcrumbLd([{name:"Forside",path:"/"},{name:"Guide",path:"/guide"},{name:"Hvor ofte bør man vaske sin bil?",path:"/guide/hvor-ofte"}]),articleLd({title:"Hvor ofte bør man vaske sin bil?",description:"Hvor tit skal bilen vaskes? Svaret afhænger af årstid, brug og parkeringsforhold. Her er en konkret guide til, hvornår det er nødvendigt.",path:"/guide/hvor-ofte",datePublished:"2026-06-01"})]} />
       <div className="legal-wrap">
-        <Link href="/" className="legal-back">← Tilbage til forsiden</Link>
-        <DanishOnlyNotice />
+        <Link href="/" className="legal-back"><Bi da="← Tilbage til forsiden" en="← Back to the home page" /></Link>
+        <Bi
+          da={<>
 
         <div className="guide-eyebrow">Bilpleje Guide</div>
         <h1>Hvor ofte bør man vaske sin bil?</h1>
@@ -117,6 +118,100 @@ export default function HvorOfte() {
           <p><strong>Mobil dampvask på hele Sjælland</strong><br />Elite Vask kører ud til dig, uanset om du er hjemme eller på arbejdet. Book en tid direkte her på siden.</p>
           <Link href="/#vaelg" className="btn btn-green guide-cta-btn">Se priser og book tid</Link>
         </div>
+          </>}
+          en={<>
+        <div className="guide-eyebrow">Car Care Guide</div>
+        <h1>How often should you wash your car?</h1>
+        <p className="legal-updated">Updated: June 2026 · Reading time: approx. 3 min</p>
+
+        <p className="guide-lead">
+          There is no single answer that suits everyone. How often your car needs washing depends on the season, how much you drive and what your car is exposed to. But there are clear guidelines that help you make the right decision.
+        </p>
+
+        <h2>In winter: wash more often than you think</h2>
+        <p>
+          From November to March the car should be washed more frequently than the rest of the year. Road salt from the municipalities&apos; gritting sticks to the paintwork, the underbody and the wheel arches. Salt is not visible, but it works constantly against the metal parts beneath the paint.
+        </p>
+        <p>
+          <strong>Recommendation:</strong> Wash the car roughly every 1–2 weeks during the winter period, and always within 48 hours of driving on heavily salted roads.
+        </p>
+
+        <h2>In spring and autumn: wash as needed</h2>
+        <p>
+          In these periods the roads are often wet and dirty, but there is less salt. The car collects road grime, leaves and pollen, which can stick to the paintwork and filters.
+        </p>
+        <ul>
+          <li><strong>Spring:</strong> A thorough wash in April is important – this is when you remove the last traces of the winter months&apos; salt and road grime. The interior also typically needs attention after the winter.</li>
+          <li><strong>Autumn:</strong> Leaves and tree sap on cars parked under trees can discolour the paint. Wash the car before the salt season begins and apply wax as protection.</li>
+        </ul>
+        <p>
+          <strong>Recommendation:</strong> Wash the car roughly every 2–4 weeks in the spring and autumn seasons.
+        </p>
+
+        <h2>In summer: watch out for pollen, insects and bird droppings</h2>
+        <p>
+          In summer the risk from salt is at its lowest, but other factors affect the paintwork:
+        </p>
+        <ul>
+          <li><strong>Insects:</strong> Insect remains contain acids that can etch into the paint if they are left for days in the heat. Remove them quickly.</li>
+          <li><strong>Bird droppings:</strong> Bird droppings are alkaline and contain uric acid, which can damage the paint. They should be removed the same day, especially in direct sunlight, where the heat speeds up the process.</li>
+          <li><strong>Tree sap and pollen:</strong> Can stick and need more than a superficial rinse to remove.</li>
+        </ul>
+        <p>
+          <strong>Recommendation:</strong> Wash the car roughly every 3–4 weeks in summer, and remove insects and bird droppings as they appear.
+        </p>
+
+        <h2>Other factors that affect the need</h2>
+
+        <h3>Daily driving vs. weekend car</h3>
+        <p>
+          A car used daily on the motorway collects far more dirt and road salt than a car mainly used at weekends for shorter trips. A company car or commuter car needs washing more often than a city runabout.
+        </p>
+
+        <h3>Parking in the open vs. a garage</h3>
+        <p>
+          Cars parked outside are exposed to rain, bird droppings, tree sap and pollen. Cars in a garage are better protected. However, garages with condensation problems can actually contribute to moisture under the car during the winter period.
+        </p>
+
+        <h3>Coastal areas</h3>
+        <p>
+          If you live close to the coast, your car is exposed to salt from the sea air all year round. It is not visible, but it accelerates rust. In these cases more frequent washing than usual is recommended.
+        </p>
+
+        <h2>When should the interior be cleaned?</h2>
+        <p>
+          The interior needs a thorough clean at least twice a year – typically in spring and autumn. Signs that it is time:
+        </p>
+        <ul>
+          <li>Visible dirt on upholstery and mats</li>
+          <li>Bad smells in the cabin (cigarette smoke, food smells, pets, damp)</li>
+          <li>Dusty surfaces on the dashboard and door panels</li>
+          <li>Windows that steam up more than normal (a sign of moisture in the cabin)</li>
+        </ul>
+
+        <h2>Summary: washing frequency by season</h2>
+        <div className="guide-table-wrap">
+          <table className="guide-table">
+            <thead>
+              <tr><th>Period</th><th>Recommended frequency</th><th>Main threat</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Winter (Nov–Mar)</td><td>Every 1–2 weeks</td><td>Road salt, rust</td></tr>
+              <tr><td>Spring (Apr–May)</td><td>Every 2–3 weeks</td><td>Pollen, old salt</td></tr>
+              <tr><td>Summer (Jun–Aug)</td><td>Every 3–4 weeks</td><td>Insects, bird droppings</td></tr>
+              <tr><td>Autumn (Sep–Oct)</td><td>Every 2–3 weeks</td><td>Leaves, tree sap</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <GuideMore current="/guide/hvor-ofte" />
+
+        <div className="guide-cta-box">
+          <p><strong>Mobile steam wash across Zealand</strong><br />Elite Vask comes to you, whether you are at home or at work. Book a time directly here on the site.</p>
+          <Link href="/#vaelg" className="btn btn-green guide-cta-btn">See prices and book a time</Link>
+        </div>
+          </>}
+        />
         <RelatedLinks />
       </div>
     </div>

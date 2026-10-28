@@ -1,5 +1,5 @@
 import Link from "next/link";
-import DanishOnlyNotice from "@/components/DanishOnlyNotice";
+import Bi from "@/components/Bi";
 import RelatedLinks from "@/components/RelatedLinks";
 import GuideMore from "@/components/GuideMore";
 import JsonLd from "@/components/JsonLd";
@@ -24,8 +24,9 @@ export default function DampvaskVsTraditionel() {
     <div className="legal-page">
       <JsonLd items={[breadcrumbLd([{name:"Forside",path:"/"},{name:"Guide",path:"/guide"},{name:"Dampvask vs. traditionel bilvask: Hvad er forskellen?",path:"/guide/dampvask-vs-traditionel"}]),articleLd({title:"Dampvask vs. traditionel bilvask: Hvad er forskellen?",description:"Dampvask og traditionel bilvask har meget forskellige resultater. Se hvad forskningen viser om ridser, bakterier, vandforbrug og rengøringseffekt.",path:"/guide/dampvask-vs-traditionel",datePublished:"2026-06-19"})]} />
       <div className="legal-wrap">
-        <Link href="/" className="legal-back">← Tilbage til forsiden</Link>
-        <DanishOnlyNotice />
+        <Link href="/" className="legal-back"><Bi da="← Tilbage til forsiden" en="← Back to the home page" /></Link>
+        <Bi
+          da={<>
 
         <div className="guide-eyebrow">Bilpleje Guide</div>
         <h1>Dampvask vs. traditionel bilvask: Hvad er forskellen?</h1>
@@ -172,6 +173,155 @@ export default function DampvaskVsTraditionel() {
           <p><strong>Prøv mobil dampvask på Sjælland</strong><br />Elite Vask kører til dig – ingen kø, ingen bilvask, ingen kompromis på kvalitet.</p>
           <Link href="/#vaelg" className="btn btn-green guide-cta-btn">Se priser og book tid</Link>
         </div>
+          </>}
+          en={<>
+        <div className="guide-eyebrow">Car Care Guide</div>
+        <h1>Steam wash vs. traditional car wash: What is the difference?</h1>
+        <p className="legal-updated">Updated: June 2026 · Reading time: approx. 4 min</p>
+
+        <p className="guide-lead">
+          A steam wash and a traditional car wash are not just two variants of the same thing – they are two fundamentally different approaches to washing a car, with very different consequences for the paintwork, the level of bacteria in the cabin and your water consumption. Here is what you should know.
+        </p>
+
+        <h2>Water consumption: a huge difference</h2>
+        <p>
+          One of the most measurable differences is water consumption. A professional steam wash typically uses <strong>1–3 litres of water</strong> per treatment. An automatic tunnel wash uses <strong>50–200 litres</strong>, while hand washing with a garden hose easily adds up to <strong>100–300 litres</strong>. The Danish Environmental Protection Agency (Miljøstyrelsen) states that <em>»a typical car wash discharges around 140 litres of waste water per car«</em>, and that the waste water contains heavy metals and environmentally harmful substances (<a href="https://www2.mst.dk/udgiv/publikationer/2004/87-7614-047-4/html/helepubl.htm" target="_blank" rel="noopener noreferrer">Miljøprojekt nr. 876, 2004</a>).
+        </p>
+        <p>
+          The steam wash achieves the lower water consumption by turning water into high-pressure steam, which mechanically loosens dirt and grease without the need for large amounts of rinse water. It is not only environmentally friendly – it is also gentler on surfaces that would otherwise risk mineral deposits from hard water.
+        </p>
+
+        <h2>Bacteria and hygiene: steam&apos;s big advantage</h2>
+        <p>
+          Steam at <strong>145°C</strong> kills 99.9% of bacteria, viruses and mould. This applies not only to the car&apos;s exterior, but also to seats, air vents, door panels and footwells – places that are very hard to clean with conventional methods.
+        </p>
+        <p>
+          A traditional car wash – whether a tunnel wash or a hand wash – cleans surfaces of visible dirt, but does not disinfect. Bacteria from hands, shoes, food and pets build up in the cabin, and only steam can eliminate them effectively without aggressive chemicals.
+        </p>
+        <p>
+          This is particularly relevant for families with children, dog owners and leased cars that have had several users.
+        </p>
+
+        <h2>Scratches and paint damage: the automatic car wash is the problem</h2>
+        <p>
+          Rotating brushes in automatic car washes are a well-known source of <strong>swirl marks</strong> – micro-scratches in the paint that occur because the brushes forcefully drag dirt and grains of sand across the paint surface. Over time this gives the paint a dull, smeared look that is visible in direct light.
+        </p>
+        <p>
+          A steam wash uses no brushes. The steam loosens dirt thermally and mechanically, and the surface is wiped with soft microfibre cloths that do not scratch. The result is glossy paint without micro-scratches – even after many washes.
+        </p>
+        <p>
+          Hand washing with the correct technique (the two-bucket method, suitable mitts) has a low risk of scratching, but requires discipline and the right equipment to avoid damage.
+        </p>
+
+        <h2>Chemical use: a steam wash is almost chemical-free</h2>
+        <p>
+          Traditional car washes – especially automatic car washes – use strong alkaline cleaning agents to loosen grease and dirt quickly. Over time these chemicals can break down wax, stain rubber and damage plastic surfaces.
+        </p>
+        <p>
+          A steam wash requires minimal use of chemicals. The hot steam itself is the main cleaning agent. Any additional products are typically pH-neutral and mild. That is an advantage for protecting the paint and for the environment.
+        </p>
+
+        <h2>Reach: a steam wash gets where other methods cannot</h2>
+        <p>
+          Steam&apos;s ability to penetrate narrow crevices gives access to places that are impossible to clean any other way:
+        </p>
+        <ul>
+          <li><strong>Underbody and wheel arches:</strong> Salt and road grime collect in nooks and folds. A steam wash loosens and removes it effectively.</li>
+          <li><strong>Door seals:</strong> Dirt and mould thrive in the rubber seals around the doors. Steam cleans and disinfects without damaging the rubber.</li>
+          <li><strong>Vent grilles and air ducts:</strong> Dust and allergens in the cabin&apos;s ventilation system can be steam-treated to improve air quality.</li>
+          <li><strong>The engine bay:</strong> Oil film and dirt in the engine bay are removed gently with steam without risk of moisture damage to electrical components.</li>
+        </ul>
+
+        <h2>Pressure washer: mind the distance</h2>
+        <p>
+          An ordinary pressure washer can be effective at removing coarse dirt, but it is not without risks. If high pressure is used too close to the paint – typically under 30 cm – it can get under the edges of decals, loosen seals and, at worst, cause scratches if there is sand or grit on the surface.
+        </p>
+        <p>
+          Professional car detailers generally recommend a minimum distance of 30–40 cm and a lower pressure than consumer pressure washers typically deliver.
+        </p>
+
+        <h2>Steam washing and leased cars: the obvious solution</h2>
+        <p>
+          When a leased car is returned, it is assessed on its paintwork, interior and general appearance. Automatic car washes leave swirl marks, which the leasing company can charge you for. A professional steam wash ensures:
+        </p>
+        <ul>
+          <li>Paint without scratches and swirl marks</li>
+          <li>A thoroughly cleaned interior (seats, mats, dashboard)</li>
+          <li>A disinfected cabin – no smell, no bacteria</li>
+          <li>A clean underbody without old salt and road grime</li>
+        </ul>
+        <p>
+          It can save you extra costs when you return the car.
+        </p>
+
+        <h2>When is a traditional wash the better solution?</h2>
+        <p>
+          A traditional exterior wash – for example a quick automatic car wash – is faster if you only need to remove surface dirt from the bodywork and do not have time for a thorough treatment. It can be practical when you just want the car to look presentable before a meeting or a trip.
+        </p>
+        <p>
+          But for a thorough clean – especially of the interior, the underbody and hygiene – a steam wash is superior on every parameter except speed for a simple exterior.
+        </p>
+
+        <h2>Comparison: steam wash vs. automatic car wash vs. hand wash</h2>
+        <div className="guide-table-wrap">
+          <table className="guide-table">
+            <thead>
+              <tr>
+                <th></th>
+                <th>Steam wash</th>
+                <th>Automatic car wash</th>
+                <th>Hand wash with hose</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Water consumption</td>
+                <td>1–3 litres</td>
+                <td>50–200 litres</td>
+                <td>100–300 litres</td>
+              </tr>
+              <tr>
+                <td>Risk of scratches</td>
+                <td>None</td>
+                <td>Yes (rotating brushes)</td>
+                <td>Low (with correct technique)</td>
+              </tr>
+              <tr>
+                <td>Interior cleaning</td>
+                <td>Yes</td>
+                <td>No</td>
+                <td>Limited</td>
+              </tr>
+              <tr>
+                <td>Underbody</td>
+                <td>Yes</td>
+                <td>Partly</td>
+                <td>Partly</td>
+              </tr>
+              <tr>
+                <td>Chemical use</td>
+                <td>Minimal</td>
+                <td>High</td>
+                <td>Varies</td>
+              </tr>
+              <tr>
+                <td>Kills bacteria</td>
+                <td>Yes (145°C)</td>
+                <td>No</td>
+                <td>No</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <GuideMore current="/guide/dampvask-vs-traditionel" />
+
+        <div className="guide-cta-box">
+          <p><strong>Try mobile steam washing on Zealand</strong><br />Elite Vask comes to you – no queue, no car wash, no compromise on quality.</p>
+          <Link href="/#vaelg" className="btn btn-green guide-cta-btn">See prices and book a time</Link>
+        </div>
+          </>}
+        />
         <RelatedLinks />
       </div>
     </div>

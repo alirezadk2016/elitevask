@@ -1,5 +1,5 @@
 import Link from "next/link";
-import DanishOnlyNotice from "@/components/DanishOnlyNotice";
+import Bi from "@/components/Bi";
 import JsonLd from "@/components/JsonLd";
 import RelatedLinks from "@/components/RelatedLinks";
 import { breadcrumbLd, SITE } from "@/lib/seo";
@@ -36,8 +36,25 @@ const EXTRAS = [
   { id: "barnesaede", name: "Barnesæde rens", desc: "Grundig og sikker rengøring", price: 100 },
 ];
 
+// English labels for the visitor who picked English (Danish stays canonical).
+const CAR_EN = { lille: "Small car", mellem: "Medium car", stor: "Large car / SUV", varebil: "Van" };
+const EXTRAS_EN = {
+  motor: { name: "Engine cleaning", desc: "Thorough cleaning of the engine bay" },
+  lak: { name: "Paint & gloss protection", desc: "Exterior – long-lasting extra gloss" },
+  pleje: { name: "Interior care & protection", desc: "Protects and renews the interior" },
+  haar: { name: "Pet hair removal", desc: "Effective removal of hair and lint" },
+  saede: { name: "Seat cleaning (fabric)", desc: "Deep cleaning of fabric seats" },
+  barnesaede: { name: "Child seat cleaning", desc: "Thorough and safe cleaning" },
+};
+const carEn = (row) => CAR_EN[row.id] || row.car;
+const exEn = (s) => s.replace("stationcar", "estate car");
+
 function fmtKr(n) {
   return n.toLocaleString("da-DK") + " kr";
+}
+
+function fmtKrEn(n) {
+  return n.toLocaleString("en-GB") + " kr";
 }
 
 export const revalidate = 60;
@@ -78,16 +95,19 @@ async function getExtras() {
         if (v && typeof v === "object") return v.da || v.en || "";
         return "";
       };
+      const strEn = (v) => (v && typeof v === "object" && typeof v.en === "string" && v.en) || str(v);
       return arr
         .map((e) => ({
           name: str(e.name),
           desc: str(e.desc),
+          nameEn: strEn(e.name),
+          descEn: strEn(e.desc),
           price: Number(e.price) || 0,
         }))
         .filter((e) => e.name);
     }
   } catch (e) {}
-  return EXTRAS;
+  return EXTRAS.map((e) => ({ ...e, nameEn: EXTRAS_EN[e.id].name, descEn: EXTRAS_EN[e.id].desc }));
 }
 
 export default async function PriserPage() {
@@ -150,6 +170,30 @@ export default async function PriserPage() {
       a: "En automatisk vaskehal er som regel billigere pr. vask, men så skal du selv køre derhen og vente. Hos os er kørslen gratis, du ser prisen online, før du booker, og der er ingen forudbetaling – du betaler først bagefter. Vi bruger damp i stedet for børster, så der kommer ingen vaskeridser i lakken.",
     },
   ];
+  const QA_EN = [
+    {
+      q: "How much does a car wash cost?",
+      a: `At Elite Vask an exterior car wash costs from ${fmtKrEn(min("udv"))}, interior cleaning from ${fmtKrEn(min("indv"))} and the whole car – inside and out – from ${fmtKrEn(min("hele"))}. Travel is free across all of Zealand, and you only pay once the car is clean.`,
+    },
+    {
+      q: "How much does interior car cleaning cost?",
+      a: `Interior cleaning costs from ${fmtKrEn(min("indv"))}. ${prices.map((r) => `${carEn(r)}: ${fmtKrEn(r.indv)}`).join(", ")}.`,
+    },
+    {
+      q: "How much does it cost to wash a car inside and out?",
+      a: `The Whole car package (inside and out) costs from ${fmtKrEn(min("hele"))}. ${prices.map((r) => `${carEn(r)}: ${fmtKrEn(r.hele)}`).join(", ")}.`,
+    },
+    ...(seat || hair
+      ? [{
+          q: "How much does seat cleaning and pet hair removal cost?",
+          a: [seat && `${seat.nameEn || seat.name} costs ${fmtKrEn(seat.price)}`, hair && `${seat ? (hair.nameEn || hair.name).charAt(0).toLowerCase() + (hair.nameEn || hair.name).slice(1) : hair.nameEn || hair.name} costs ${fmtKrEn(hair.price)}`].filter(Boolean).join(", and ") + " as an extra to your package.",
+        }]
+      : []),
+    {
+      q: "Is mobile car washing cheap?",
+      a: "An automatic car wash is usually cheaper per wash, but then you have to drive there yourself and wait. With us travel is free, you see the price online before you book, and there is no prepayment – you only pay afterwards. We use steam instead of brushes, so there are no wash scratches in the paintwork.",
+    },
+  ];
   const faqLd = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
@@ -170,12 +214,11 @@ export default async function PriserPage() {
       />
       <div style={{ maxWidth: 900, margin: "0 auto", padding: "48px 24px 80px" }}>
         <Link href="/" style={{ display: "inline-flex", alignItems: "center", gap: 6, minHeight: 44, color: "#37d278", fontSize: 14, fontWeight: 600, textDecoration: "none", marginBottom: 32, opacity: 0.9 }}>
-          ← Tilbage til forsiden
+          <Bi da="← Tilbage til forsiden" en="← Back to the home page" />
         </Link>
 
-        <DanishOnlyNotice />
-
-        <p style={{ fontSize: 12, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", color: "#37d278", marginBottom: 12 }}>
+        <Bi da={<>
+<p style={{ fontSize: 12, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", color: "#37d278", marginBottom: 12 }}>
           Priser
         </p>
         <h1 style={{ fontSize: "clamp(28px,4vw,44px)", fontWeight: 800, letterSpacing: -1, color: "#fff", lineHeight: 1.1, marginBottom: 16 }}>
@@ -298,6 +341,133 @@ export default async function PriserPage() {
             Kontakt os
           </Link>
         </div>
+
+        </>} en={<>
+<p style={{ fontSize: 12, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", color: "#37d278", marginBottom: 12 }}>
+          Prices
+        </p>
+        <h1 style={{ fontSize: "clamp(28px,4vw,44px)", fontWeight: 800, letterSpacing: -1, color: "#fff", lineHeight: 1.1, marginBottom: 16 }}>
+          Mobile car wash prices
+        </h1>
+        <p style={{ fontSize: 16, color: "#94a89c", maxWidth: 600, lineHeight: 1.65, marginBottom: 40 }}>
+          Elite Vask offers professional mobile car steam washing directly at your address on Zealand.
+          Choose the package that suits your car and your needs. <strong style={{ color: "#fff" }}>Travel is free</strong> across all of Zealand.
+        </p>
+
+        {/* Phones get one card per car type instead of the table. At 390px the
+            table scrolled sideways and cut off "Hele bilen" and "Guld pakke" —
+            the most-booked package and the most expensive one — leaving a
+            clipped "8" as the only hint they existed. Only one of the two
+            layouts is ever displayed, so assistive tech never reads it twice. */}
+        <div className="price-cards">
+          {prices.map((row) => (
+            <div key={row.id} className="price-card">
+              <div className="price-card-head">
+                <span className="price-card-car">{carEn(row)}</span>
+                <span className="price-card-ex">{exEn(row.ex)}</span>
+              </div>
+              <dl className="price-card-grid">
+                <div><dt>Exterior</dt><dd>{fmtKrEn(row.udv)}</dd></div>
+                <div><dt>Interior</dt><dd>{fmtKrEn(row.indv)}</dd></div>
+                <div className="is-hele"><dt>Whole car</dt><dd>{fmtKrEn(row.hele)}</dd></div>
+                <div className="is-guld"><dt>Gold package</dt><dd>{fmtKrEn(row.guld)}</dd></div>
+              </dl>
+            </div>
+          ))}
+        </div>
+
+        <div className="price-table-wrap" style={{ overflowX: "auto", marginBottom: 40, borderRadius: 14, border: "1px solid rgba(255,255,255,.07)" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14, minWidth: 480 }}>
+            <thead>
+              <tr style={{ borderBottom: "2px solid rgba(55,210,120,.25)" }}>
+                <th style={{ textAlign: "left", padding: "13px 16px", color: "#94a89c", fontWeight: 600 }}>Car type</th>
+                <th style={{ textAlign: "right", padding: "13px 16px", color: "#94a89c", fontWeight: 600 }}>Exterior</th>
+                <th style={{ textAlign: "right", padding: "13px 16px", color: "#94a89c", fontWeight: 600 }}>Interior</th>
+                <th style={{ textAlign: "right", padding: "13px 16px", color: "#94a89c", fontWeight: 600 }}>Whole car</th>
+                <th style={{ textAlign: "right", padding: "13px 16px", color: "#d4af37", fontWeight: 600 }}>Gold package</th>
+              </tr>
+            </thead>
+            <tbody>
+              {prices.map((row, i) => (
+                <tr key={i} style={{ borderBottom: "1px solid rgba(255,255,255,.07)", background: i % 2 === 0 ? "rgba(255,255,255,.02)" : "transparent" }}>
+                  <td style={{ padding: "14px 16px" }}>
+                    <span style={{ display: "block", fontWeight: 700, color: "#fff" }}>{carEn(row)}</span>
+                    <span style={{ fontSize: 12, color: "var(--muted-2)" }}>{exEn(row.ex)}</span>
+                  </td>
+                  <td style={{ textAlign: "right", padding: "14px 16px", color: "#37d278", fontWeight: 700 }}>{fmtKrEn(row.udv)}</td>
+                  <td style={{ textAlign: "right", padding: "14px 16px", color: "#37d278", fontWeight: 700 }}>{fmtKrEn(row.indv)}</td>
+                  <td style={{ textAlign: "right", padding: "14px 16px", color: "#37d278", fontWeight: 700 }}>{fmtKrEn(row.hele)}</td>
+                  <td style={{ textAlign: "right", padding: "14px 16px", color: "#d4af37", fontWeight: 700 }}>{fmtKrEn(row.guld)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <div style={{ background: "rgba(55,210,120,.06)", border: "1px solid rgba(55,210,120,.18)", borderRadius: 14, padding: "20px 24px", marginBottom: 48, fontSize: 13.5, color: "#94a89c", lineHeight: 1.65 }}>
+          All prices are indicative and include VAT. Free travel to all addresses on Zealand (postcodes 1000–4799).
+          The final price is confirmed when you book.
+        </div>
+
+        <div style={{ marginBottom: 48 }}>
+          <h2 style={{ fontSize: 22, fontWeight: 800, color: "#fff", marginBottom: 16 }}>What is included?</h2>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(200px,1fr))", gap: 14 }}>
+            {[
+              { name: "Exterior", desc: "Bodywork, wheels, tyres, exterior windows & wax finish" },
+              { name: "Interior", desc: "Vacuuming, mats, seats, dashboard & interior windows" },
+              { name: "Whole car", desc: "Complete inside & out treatment in one visit" },
+              { name: "Gold package", desc: "Everything incl. engine cleaning, paint sealant & interior protection" },
+            ].map((pkg) => (
+              <div key={pkg.name} style={{ background: "#15211b", border: "1px solid rgba(255,255,255,.08)", borderRadius: 12, padding: "18px 16px" }}>
+                <div style={{ fontSize: 15, fontWeight: 700, color: "#fff", marginBottom: 6 }}>{pkg.name}</div>
+                <div style={{ fontSize: 13, color: "#94a89c", lineHeight: 1.55 }}>{pkg.desc}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {extras.length > 0 && (
+          <div style={{ marginBottom: 48 }}>
+            <h2 style={{ fontSize: 22, fontWeight: 800, color: "#fff", marginBottom: 6 }}>Extras</h2>
+            <p style={{ fontSize: 14, color: "#94a89c", lineHeight: 1.6, marginBottom: 18 }}>
+              Add-ons you can add to your package – easy to choose when booking.
+            </p>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(240px,1fr))", gap: 12 }}>
+              {extras.map((ex, i) => (
+                <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12, background: "#15211b", border: "1px solid rgba(255,255,255,.08)", borderRadius: 12, padding: "16px 16px" }}>
+                  <div>
+                    <div style={{ fontSize: 14.5, fontWeight: 700, color: "#fff", marginBottom: 4 }}>{ex.nameEn || ex.name}</div>
+                    <div style={{ fontSize: 12.5, color: "#94a89c", lineHeight: 1.5 }}>{ex.descEn || ex.desc}</div>
+                  </div>
+                  {ex.price > 0 && (
+                    <span style={{ flexShrink: 0, fontSize: 14, fontWeight: 800, color: "#37d278", whiteSpace: "nowrap" }}>+{fmtKrEn(ex.price)}</span>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div style={{ marginBottom: 48 }}>
+          <h2 style={{ fontSize: 22, fontWeight: 800, color: "#fff", marginBottom: 16 }}>Questions about car wash prices</h2>
+          {QA_EN.map(({ q, a }) => (
+            <div key={q} style={{ marginBottom: 18 }}>
+              <h3 style={{ fontSize: 16.5, fontWeight: 700, color: "#fff", marginBottom: 6 }}>{q}</h3>
+              <p style={{ fontSize: 15, color: "#94a89c", lineHeight: 1.7, margin: 0 }}>{a}</p>
+            </div>
+          ))}
+        </div>
+
+        <div style={{ display: "flex", gap: 14, flexWrap: "wrap", marginBottom: 56 }}>
+          <Link href="/#vaelg" style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "#37d278", color: "#062313", borderRadius: 10, padding: "13px 26px", fontWeight: 700, fontSize: 15, textDecoration: "none" }}>
+            Calculate your price & book →
+          </Link>
+          <Link href="/kontakt" style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(255,255,255,.06)", border: "1px solid rgba(255,255,255,.14)", color: "#fff", borderRadius: 10, padding: "13px 26px", fontWeight: 600, fontSize: 15, textDecoration: "none" }}>
+            Contact us
+          </Link>
+        </div>
+
+        </>} />
 
         <RelatedLinks />
       </div>

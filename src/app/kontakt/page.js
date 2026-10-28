@@ -1,5 +1,5 @@
 import Link from "next/link";
-import DanishOnlyNotice from "@/components/DanishOnlyNotice";
+import Bi from "@/components/Bi";
 import RelatedLinks from "@/components/RelatedLinks";
 import JsonLd from "@/components/JsonLd";
 import { breadcrumbLd, SITE } from "@/lib/seo";
@@ -55,7 +55,9 @@ const contactPageLd = {
 };
 
 export default async function Kontakt() {
-  const hd = hoursDisplay(await getHours(), "da");
+  const hours = await getHours();
+  const hd = hoursDisplay(hours, "da");
+  const hdEn = hoursDisplay(hours, "en");
   const st = await getSettings();
   const tel = phoneTel(st.phone);
   return (
@@ -70,10 +72,10 @@ export default async function Kontakt() {
         ]}
       />
       <div className="legal-wrap">
-        <Link href="/" className="legal-back">← Tilbage til forsiden</Link>
-        <DanishOnlyNotice />
+        <Link href="/" className="legal-back"><Bi da="← Tilbage til forsiden" en="← Back to the home page" /></Link>
 
-        <div className="guide-eyebrow">Kontakt</div>
+        <Bi da={<>
+<div className="guide-eyebrow">Kontakt</div>
         <h1 id="contact">Kontakt Elite Vask</h1>
         <p className="guide-lead">
           Har du spørgsmål om mobil dampvask, priser eller booking? Vi sidder klar til at hjælpe – ring, skriv eller book online. Vi kører til dig i hele Sjælland, og kørsel er altid gratis.
@@ -153,6 +155,90 @@ export default async function Kontakt() {
           at ringe på <a href={`tel:${tel}`} style={{ color: "var(--green)" }}>{st.phone}</a>.
           Vi giver hellere et realistisk bud i telefonen end en overraskelse på dagen.
         </p>
+
+        </>} en={<>
+<div className="guide-eyebrow">Contact</div>
+        <h1 id="contact">Contact Elite Vask</h1>
+        <p className="guide-lead">
+          Do you have questions about mobile steam washing, prices or booking? We are ready to help – call, write or book online. We come to you anywhere on Zealand, and travel is always free.
+        </p>
+
+        <div className="contact-cta" style={{ margin: "8px 0 36px" }}>
+          <Link href="/#vaelg" className="btn btn-green btn-lg">See prices &amp; book now</Link>
+          <a href={`tel:${tel}`} className="btn btn-ghost btn-lg">Call us</a>
+        </div>
+
+        <div className="contact-list">
+          <a href={`tel:${tel}`} className="cl-item">
+            <span className="cl-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92Z" /></svg></span>
+            <span><span className="lab">Phone</span><br /><span className="val">{st.phone}</span></span>
+          </a>
+          <a href={`mailto:${st.email}`} className="cl-item">
+            <span className="cl-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"><rect x="2" y="4" width="20" height="16" rx="2" /><path d="m22 7-10 5L2 7" /></svg></span>
+            <span><span className="lab">E-mail</span><br /><span className="val">{st.email}</span></span>
+          </a>
+          <div className="cl-item cl-item-hours">
+            <span className="cl-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" /></svg></span>
+            <span><span className="lab">Opening hours</span>
+              <div className="hours-grid">
+                {hdEn.rows.map(([d, tm]) => <div className="hrow" key={d}><span className="hday">{d}</span><span className="htime">{tm}</span></div>)}
+                <div className="hrow hrow-note"><span>or by appointment</span></div>
+              </div>
+            </span>
+          </div>
+          <div className="cl-item">
+            <span className="cl-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" /><circle cx="12" cy="10" r="3" /></svg></span>
+            <span><span className="lab">Address</span><br /><span className="val">Copenhagen · Zealand · Denmark</span></span>
+          </div>
+          <a href="https://www.facebook.com/share/14ciFraNT4M/" target="_blank" rel="noopener noreferrer" className="cl-item">
+            <span className="cl-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" /></svg></span>
+            <span><span className="lab">Facebook</span><br /><span className="val">Elite Vask</span></span>
+          </a>
+          <a href="https://instagram.com/elitevasksjaelland" target="_blank" rel="noopener noreferrer" className="cl-item">
+            <span className="cl-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" /><circle cx="12" cy="12" r="4" /><path d="M17.5 6.5h.01" /></svg></span>
+            <span><span className="lab">Instagram</span><br /><span className="val">@elitevasksjaelland</span></span>
+          </a>
+          <div className="cl-item">
+            <span className="cl-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><path d="M2 12h20" /></svg></span>
+            <span><span className="lab">CVR</span><br /><span className="val">46392264</span></span>
+          </div>
+        </div>
+
+        {/* The page was 121 words: a phone number, an address block and links.
+            Nothing told a visitor whether we actually drive to them, which is
+            the one question a contact page for a mobile service has to answer —
+            and it is what a local search is looking for too. */}
+        <h2 style={{ fontSize: 22, fontWeight: 800, color: "#fff", margin: "40px 0 14px" }}>
+          Where do we go?
+        </h2>
+        <p style={{ color: "var(--muted)", fontSize: 15.5, lineHeight: 1.75, marginBottom: 14 }}>
+          We are a mobile car care business – there is no car wash to drive to.
+          We pack the equipment in the van and meet you wherever the car is parked: on
+          your driveway at home, in the car park at work or outside the office. We
+          bring our own water and power, so you do not need to provide anything.
+        </p>
+        <p style={{ color: "var(--muted)", fontSize: 15.5, lineHeight: 1.75, marginBottom: 14 }}>
+          We cover Zealand with postcodes from 1000 to 4799 – including
+          Copenhagen, Roskilde, Køge, Næstved, Ringsted, Helsingør, Hillerød,
+          Frederikssund as well as Stevns and Faxe Municipality. If you live on the edge of the area,
+          call anyway: we will tell you honestly if the trip is not possible.
+        </p>
+        <h2 style={{ fontSize: 22, fontWeight: 800, color: "#fff", margin: "32px 0 14px" }}>
+          What happens after you get in touch?
+        </h2>
+        <p style={{ color: "var(--muted)", fontSize: 15.5, lineHeight: 1.75, marginBottom: 14 }}>
+          If you book online, you get a confirmation by e-mail straight away, and a
+          reminder the day before. If you write or call instead, we will get back to you
+          as soon as possible within opening hours. You can always change or cancel
+          your appointment via the link in the confirmation – no later than 24 hours before.
+        </p>
+        <p style={{ color: "var(--muted)", fontSize: 15.5, lineHeight: 1.75, marginBottom: 8 }}>
+          If you have questions about price or packages before you book, you are welcome
+          to call us on <a href={`tel:${tel}`} style={{ color: "var(--green)" }}>{st.phone}</a>.
+          We would rather give you a realistic quote on the phone than a surprise on the day.
+        </p>
+
+        </>} />
 
         <RelatedLinks />
       </div>

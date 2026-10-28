@@ -1,5 +1,5 @@
 import Link from "next/link";
-import DanishOnlyNotice from "@/components/DanishOnlyNotice";
+import Bi from "@/components/Bi";
 import RelatedLinks from "@/components/RelatedLinks";
 import GuideMore from "@/components/GuideMore";
 import JsonLd from "@/components/JsonLd";
@@ -24,8 +24,9 @@ export default function SaltOgLak() {
     <div className="legal-page">
       <JsonLd items={[breadcrumbLd([{name:"Forside",path:"/"},{name:"Guide",path:"/guide"},{name:"Beskyt bilens lak mod vejsalt i Danmark",path:"/guide/salt-og-lak"}]),articleLd({title:"Beskyt bilens lak mod vejsalt i Danmark",description:"Vejsalt er den største trussel mod bilens lak og undervogn i den danske vinter. Læs hvad salt gør ved din bil, og hvordan du beskytter den effektivt.",path:"/guide/salt-og-lak",datePublished:"2026-06-01"})]} />
       <div className="legal-wrap">
-        <Link href="/" className="legal-back">← Tilbage til forsiden</Link>
-        <DanishOnlyNotice />
+        <Link href="/" className="legal-back"><Bi da="← Tilbage til forsiden" en="← Back to the home page" /></Link>
+        <Bi
+          da={<>
 
         <div className="guide-eyebrow">Bilpleje Guide</div>
         <h1>Hvordan beskytter du bilens lak mod salt i Danmark?</h1>
@@ -105,6 +106,88 @@ export default function SaltOgLak() {
           <p><strong>Har du brug for en grundig vintervask?</strong><br />Elite Vask tilbyder mobil dampvask på hele Sjælland – vi kører til dig og renser bilen grundigt for vejsalt, også undervognen.</p>
           <Link href="/#vaelg" className="btn btn-green guide-cta-btn">Se priser og book tid</Link>
         </div>
+          </>}
+          en={<>
+        <div className="guide-eyebrow">Car Care Guide</div>
+        <h1>How do you protect your car&apos;s paint from salt in Denmark?</h1>
+        <p className="legal-updated">Updated: June 2026 · Reading time: approx. 4 min</p>
+
+        <p className="guide-lead">
+          Every year from November to March, Danish roads are gritted with road salt. It is necessary for road safety, but it is your car&apos;s worst enemy. Salt attacks the paintwork, the underbody and metal parts – and the damage happens slowly and unnoticed, until it becomes visible as rust.
+        </p>
+
+        <h2>What does road salt do to your car?</h2>
+        <p>
+          Road salt (sodium chloride) dissolves in water and penetrates even very fine scratches and damage in the paint. When salt water comes into contact with metal, an electrochemical reaction starts – what we call rust or oxidation. It happens in hidden areas such as:
+        </p>
+        <ul>
+          <li>The underbody and wheel arches, where dirt and salt collect</li>
+          <li>Door bottoms and sills, which are rarely cleaned thoroughly</li>
+          <li>Bumpers and number plate brackets</li>
+          <li>Cracks and stone chips in the paint that are not visible</li>
+        </ul>
+        <p>
+          Rust that starts from the inside is particularly dangerous because it stays invisible for a long time. When it finally shows as bubbles under the paint or as orange discolouration, the damage is already serious and expensive to repair.
+        </p>
+
+        <h2>When is the salt season in Denmark?</h2>
+        <p>
+          The municipalities typically grit from mid-October to the end of March, depending on the weather. In mild winters the period can be shorter, but even a single trip on a salted road is enough to start the process if the car is not washed afterwards.
+        </p>
+        <p>
+          A common misconception is that you only need to wash the car after visible winter slush. But salt can sit in hidden crevices for days, even when the weather is dry and the car looks clean.
+        </p>
+
+        <h2>How to protect your car from road salt – step by step</h2>
+
+        <h3>1. Wash the car within 48 hours of driving on a salted road</h3>
+        <p>
+          This is the most important advice. The longer the salt stays on the car, the more time it has to work its way under the paint. A thorough wash that removes salt from the underbody, wheel arches and every crevice is far more effective than waiting until the weekend.
+        </p>
+
+        <h3>2. Pay particular attention to the underbody</h3>
+        <p>
+          Most automatic car washes do not wash the underbody properly. Salt collects in the wheel arches and underside, and this is where rust starts. A professional steam wash can reach into narrow areas and remove salt, road grime and old grease from the underbody.
+        </p>
+
+        <h3>3. Check and repair stone chips quickly</h3>
+        <p>
+          Even a small stone chip that exposes the metal beneath the paint is enough for rust to start. Stone chips should be repaired before the winter period begins – either with touch-up paint from the car dealer or at a paint shop.
+        </p>
+
+        <h3>4. Apply wax protection before winter</h3>
+        <p>
+          Wax creates a hydrophobic surface that makes it harder for salt to stick to the paint. Apply a good wax treatment at the end of October, before the salt season starts, and repeat it in spring after a thorough wash.
+        </p>
+
+        <h3>5. Avoid washing in slush during hard frost</h3>
+        <p>
+          When the temperature is well below zero, a traditional car wash is ineffective – the water freezes before it can rinse the salt away. Instead, a steam wash can be used, as the hot steam (over 100°C) dissolves ice and salt even at sub-zero temperatures.
+        </p>
+
+        <h2>What is a steam wash better at than a traditional car wash in winter?</h2>
+        <p>
+          Hot steam penetrates crevices and hard-to-reach places where salt often hides. It dissolves salt and road grime without aggressive chemicals, which can themselves damage the paint. A steam wash is also gentle on the paint surface and does not leave the micro-scratches that rotating brushes in automatic car washes can cause over time.
+        </p>
+
+        <h2>Quick summary</h2>
+        <ul>
+          <li>Road salt starts the rusting process in cracks and damage in the paint</li>
+          <li>Wash the car within 48 hours of driving on a salted road</li>
+          <li>The underbody is the most exposed area – wash it thoroughly</li>
+          <li>Repair stone chips before winter begins</li>
+          <li>Apply wax before the salt season to protect the paint</li>
+          <li>A steam wash is particularly effective at removing salt from hard-to-reach areas</li>
+        </ul>
+
+        <GuideMore current="/guide/salt-og-lak" />
+
+        <div className="guide-cta-box">
+          <p><strong>Need a thorough winter wash?</strong><br />Elite Vask offers mobile steam washing across Zealand – we come to you and thoroughly clean road salt off the car, including the underbody.</p>
+          <Link href="/#vaelg" className="btn btn-green guide-cta-btn">See prices and book a time</Link>
+        </div>
+          </>}
+        />
         <RelatedLinks />
       </div>
     </div>
