@@ -87,7 +87,7 @@ export default function KlargoeringAfBil() {
             <h3>Klargør I også leasingbiler til aflevering?</h3>
             <p>Ja, vi klargør leasingbiler til aflevering, så bilen fremstår ren og velholdt.</p>
             <h3>Kommer I i hele Sjælland?</h3>
-            <p>Ja, vi kører ud i hele Sjælland, fx <a href="/bilvask/koege">Køge</a>, <a href="/bilvask/roskilde">Roskilde</a> og <a href="/bilvask/koebenhavn">København</a>, og kørslen er altid gratis.</p>
+            <p>Ja, vi kører ud i hele Sjælland, fx <a href="/bilvask/koege">Køge</a>, <a href="/bilvask/ringsted">Ringsted</a>, <a href="/bilvask/roskilde">Roskilde</a> og <a href="/bilvask/koebenhavn">København</a>, og kørslen er altid gratis.</p>
             <h3>Kan I fjerne dyrehår før salget?</h3>
             <p>Ja, fjernelse af dyrehår kan lægges til enhver pakke.</p>
 
@@ -139,7 +139,7 @@ export default function KlargoeringAfBil() {
             <h3>Do you also prepare lease cars for return?</h3>
             <p>Yes, we prepare lease cars for return, so the car looks clean and well kept.</p>
             <h3>Do you cover all of Zealand?</h3>
-            <p>Yes, we drive out across Zealand, e.g. <a href="/bilvask/koege">Køge</a>, <a href="/bilvask/roskilde">Roskilde</a> and <a href="/bilvask/koebenhavn">Copenhagen</a>, and travel is always free.</p>
+            <p>Yes, we drive out across Zealand, e.g. <a href="/bilvask/koege">Køge</a>, <a href="/bilvask/ringsted">Ringsted</a>, <a href="/bilvask/roskilde">Roskilde</a> and <a href="/bilvask/koebenhavn">Copenhagen</a>, and travel is always free.</p>
             <h3>Can you remove pet hair before the sale?</h3>
             <p>Yes, pet hair removal can be added to any package.</p>
 
