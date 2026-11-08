@@ -7,7 +7,7 @@ import { breadcrumbLd, cityServiceLd, webPageLd } from "@/lib/seo";
 import { getHours, hoursDisplay } from "@/lib/getHours";
 export const metadata = {
   title: 'Bilvask i Helsingør – mobil dampvask og bilpleje | Elite Vask',
-  description: 'Bilvask i Helsingør fra 500 kr. – vi kommer til din adresse i Helsingør, Espergærde, Snekkersten og Hornbæk. Gratis kørsel, dampvask uden ridser. Book online.',
+  description: 'Bilvask i Helsingør fra 500 kr. – vi kommer til dig i Helsingør, Espergærde, Snekkersten og Hornbæk. Gratis kørsel, ingen ridser. Book online.',
   alternates: { canonical: "/bilvask/helsingoer" },
   openGraph: {
     // Next merges page metadata over the layout SHALLOWLY, so a page that

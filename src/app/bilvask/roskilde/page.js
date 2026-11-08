@@ -7,7 +7,7 @@ import { breadcrumbLd, cityServiceLd, webPageLd } from "@/lib/seo";
 import { getHours, hoursDisplay } from "@/lib/getHours";
 export const metadata = {
   title: "Bilvask i Roskilde – mobil dampvask og bilpleje | Elite Vask",
-  description: "Professionel mobil dampvask i Roskilde. Vi kører til din adresse – hjemme eller på arbejdet. Gratis kørsel, betal efter vask. Book online.",
+  description: "Bilvask i Roskilde fra 500 kr. – også Viby Sjælland. Vi dampvasker bilen hjemme eller på arbejdet. Gratis kørsel, betal efter vask. Book online.",
   alternates: { canonical: "/bilvask/roskilde" },
   openGraph: {
     // Next merges page metadata over the layout SHALLOWLY, so a page that

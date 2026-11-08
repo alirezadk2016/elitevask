@@ -6,7 +6,7 @@ import JsonLd from "@/components/JsonLd";
 import { breadcrumbLd, cityServiceLd, webPageLd } from "@/lib/seo";
 export const metadata = {
   title: "Bilvask i Ringsted – mobil dampvask og bilpleje | Elite Vask",
-  description: "Professionel mobil dampvask i Ringsted. Vi kører til din adresse – gratis kørsel, betal efter vask. Skånsom dampvask uden ridser. Book online.",
+  description: "Bilvask i Ringsted fra 500 kr. – vi dampvasker bilen hjemme hos dig eller på jobbet. Gratis kørsel, betal efter vask, ingen ridser. Book online.",
   alternates: { canonical: "/bilvask/ringsted" },
   openGraph: {
     // Next merges page metadata over the layout SHALLOWLY, so a page that
