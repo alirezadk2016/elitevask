@@ -1,9 +1,8 @@
 "use client";
 import Link from "next/link";
-import DanishOnlyNotice from "@/components/DanishOnlyNotice";
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback , useMemo } from "react";
 import { useLang } from "@/lib/useLang";
-import { DEFAULT_BEFORE_AFTER, DEFAULT_ALBUM } from "@/lib/galleryData";
+import { DEFAULT_BEFORE_AFTER, DEFAULT_ALBUM , CAPTION_EN } from "@/lib/galleryData";
 
 /* ─── Interactive BA slider ──────────────────────────────────────────────── */
 function BaSlider({ item }) {
@@ -175,11 +174,19 @@ function BaLightbox({ items, index, onClose, onPrev, onNext }) {
 }
 
 /* ─── Page ──────────────────────────────────────────────────────────────── */
+function translateCaptions(arr, en) {
+  if (!en) return arr;
+  return arr.map((it) => (CAPTION_EN[it.caption] ? { ...it, caption: CAPTION_EN[it.caption] } : it));
+}
+
 export default function GalleryClient() {
   const en = useLang() === "en";
   const T = (da, eng) => (en ? eng : da);
-  const [ba,    setBa]    = useState(DEFAULT_BEFORE_AFTER);
-  const [album, setAlbum] = useState(DEFAULT_ALBUM);
+  const [baRaw,    setBa]    = useState(DEFAULT_BEFORE_AFTER);
+  const [albumRaw, setAlbum] = useState(DEFAULT_ALBUM);
+  // Built-in captions are Danish; show the English text when EN is chosen.
+  const ba = useMemo(() => translateCaptions(baRaw, en), [baRaw, en]);
+  const album = useMemo(() => translateCaptions(albumRaw, en), [albumRaw, en]);
   const [albumFilter, setAlbumFilter] = useState("alle");
   const [lb,    setLb]    = useState(-1);
   const [baLb,  setBaLb]  = useState(-1);
@@ -231,7 +238,6 @@ export default function GalleryClient() {
         <Link href="/" className="gal-brand"><span className="gal-brand-mark" />Elite Vask</Link>
         <Link href="/#vaelg" className="gal-book">{T("Book nu", "Book now")}</Link>
       </header>
-      <div style={{ maxWidth: 1100, margin: "14px auto 0", padding: "0 20px" }}><DanishOnlyNotice /></div>
 
       <section className="gal-hero">
         <div className="eyebrow">{T("Galleri", "Gallery")}</div>

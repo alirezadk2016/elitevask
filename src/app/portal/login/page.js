@@ -3,20 +3,23 @@ import Link from "next/link";
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
+import { useLang } from "@/lib/useLang";
 
 export const dynamic = 'force-dynamic';
 
 function LoginContent() {
   const params = useSearchParams();
+  const en = useLang() === "en";
+  const T = (da, eng) => (en ? eng : da);
   const error = params.get("error");
   const [email, setEmail] = useState("");
   const [state, setState] = useState("idle"); // idle | loading | sent | error
   // Message for a ?error= in the URL is derived, not state — computing it
   // during render avoids an effect and the extra render it caused.
   const urlErrMsg =
-    error === "expired" ? "Loginlinket er udløbet eller allerede brugt. Anmod om et nyt."
-    : error === "invalid" ? "Ugyldigt loginlink."
-    : error === "unavailable" ? "Tjenesten er midlertidigt utilgængelig. Prøv igen."
+    error === "expired" ? T("Loginlinket er udløbet eller allerede brugt. Anmod om et nyt.", "The login link has expired or was already used. Request a new one.")
+    : error === "invalid" ? T("Ugyldigt loginlink.", "Invalid login link.")
+    : error === "unavailable" ? T("Tjenesten er midlertidigt utilgængelig. Prøv igen.", "The service is temporarily unavailable. Please try again.")
     : "";
   const [submitErr, setSubmitErr] = useState("");
   const errMsg = submitErr || urlErrMsg;
@@ -33,13 +36,13 @@ function LoginContent() {
       });
       const data = await r.json();
       if (!r.ok) {
-        setSubmitErr(data.message || "Noget gik galt. Prøv igen.");
+        setSubmitErr((en ? "" : data.message) || T("Noget gik galt. Prøv igen.", "Something went wrong. Please try again."));
         setState("error");
         return;
       }
       setState("sent");
     } catch {
-      setSubmitErr("Netværksfejl. Tjek din forbindelse og prøv igen.");
+      setSubmitErr(T("Netværksfejl. Tjek din forbindelse og prøv igen.", "Network error. Check your connection and try again."));
       setState("error");
     }
   }
@@ -55,18 +58,18 @@ function LoginContent() {
         {state === "sent" ? (
           <div className="portal-sent">
             <div className="portal-sent-icon">📧</div>
-            <h1>Tjek din e-mail</h1>
-            <p>Vi har sendt et loginlink til <strong>{email}</strong>.<br />Linket er gyldigt i 15 minutter.</p>
-            <p className="portal-sent-hint">Kan du ikke finde mailen? Tjek din spam-mappe.</p>
+            <h1>{T("Tjek din e-mail", "Check your e-mail")}</h1>
+            <p>{T("Vi har sendt et loginlink til", "We have sent a login link to")} <strong>{email}</strong>.<br />{T("Linket er gyldigt i 15 minutter.", "The link is valid for 15 minutes.")}</p>
+            <p className="portal-sent-hint">{T("Kan du ikke finde mailen? Tjek din spam-mappe.", "Can't find the e-mail? Check your spam folder.")}</p>
             <button className="portal-btn-ghost" onClick={() => { setState("idle"); setEmail(""); }}>
-              Brug anden e-mail
+              {T("Brug anden e-mail", "Use another e-mail")}
             </button>
           </div>
         ) : (
           <>
             <div className="portal-auth-header">
-              <h1>Log ind</h1>
-              <p>Indtast din e-mail og vi sender dig et sikkert loginlink. Ingen adgangskode nødvendig.</p>
+              <h1>{T("Log ind", "Log in")}</h1>
+              <p>{T("Indtast din e-mail og vi sender dig et sikkert loginlink. Ingen adgangskode nødvendig.", "Enter your e-mail and we will send you a secure login link. No password needed.")}</p>
             </div>
 
             {errMsg && (
@@ -75,25 +78,25 @@ function LoginContent() {
 
             <form onSubmit={handleSubmit} className="portal-auth-form">
               <div className="portal-field">
-                <label htmlFor="email">E-mailadresse</label>
+                <label htmlFor="email">{T("E-mailadresse", "E-mail address")}</label>
                 <input
                   id="email"
                   type="email"
                   value={email}
                   onChange={e => setEmail(e.target.value)}
-                  placeholder="din@email.dk"
+                  placeholder={T("din@email.dk", "you@email.com")}
                   required
                   autoFocus
                   disabled={state === "loading"}
                 />
               </div>
               <button type="submit" className="portal-btn-primary" disabled={state === "loading" || !email}>
-                {state === "loading" ? "Sender…" : "Send loginlink →"}
+                {state === "loading" ? T("Sender…", "Sending…") : T("Send loginlink →", "Send login link →")}
               </button>
             </form>
 
             <p className="portal-auth-footer">
-              <Link href="/">← Tilbage til forsiden</Link>
+              <Link href="/">{T("← Tilbage til forsiden", "← Back to home")}</Link>
             </p>
           </>
         )}

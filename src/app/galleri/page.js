@@ -1,4 +1,5 @@
 import GalleryClient from "@/components/GalleryClient";
+import Bi from "@/components/Bi";
 
 export const metadata = {
   title: "Før og efter bilvask – billeder af dampvask | Elite Vask",
@@ -25,6 +26,7 @@ export default function GalleriPage() {
           the before/after shots need a caption explaining what is actually
           being looked at. */}
       <section className="gal-section" style={{ maxWidth: 780, margin: "0 auto", padding: "8px 20px 56px" }}>
+        <Bi da={<>
         <h2 style={{ fontSize: 22, fontWeight: 800, color: "#fff", margin: "0 0 14px" }}>
           Hvad er det, du kigger på?
         </h2>
@@ -49,6 +51,33 @@ export default function GalleriPage() {
             dampvask vs. traditionel bilvask
           </a>.
         </p>
+        </>} en={<>
+        <h2 style={{ fontSize: 22, fontWeight: 800, color: "#fff", margin: "0 0 14px" }}>
+          What are you looking at?
+        </h2>
+        <p style={{ color: "var(--muted)", fontSize: 15.5, lineHeight: 1.75, marginBottom: 14 }}>
+          Every photo on this page is from a real job at a customer&apos;s home on
+          Zealand – not showroom cars and not borrowed press photos. The before photo
+          is taken when we arrive, the after photo the same day before we leave. That
+          is why the light and angle are not always perfect: they are taken in a
+          driveway, not in a studio.
+        </p>
+        <p style={{ color: "var(--muted)", fontSize: 15.5, lineHeight: 1.75, marginBottom: 14 }}>
+          Most of the interior photos show seats, mats and headliners treated with
+          steam at around 145 °C. Steam loosens dirt and grease without harsh
+          chemicals, and because it uses 1–3 litres of water against around 140 litres
+          in a typical car wash (Danish Environmental Protection Agency), it can be done
+          where the car is parked – no drain and no puddles.
+        </p>
+        <p style={{ color: "var(--muted)", fontSize: 15.5, lineHeight: 1.75, margin: 0 }}>
+          On the outside it is mostly about removing road salt, insects and traffic
+          film without scratching the paint. If you want to know why that difference
+          matters, we explain it in{" "}
+          <a href="/guide/dampvask-vs-traditionel" style={{ color: "var(--green)" }}>
+            steam wash vs. traditional car wash
+          </a>.
+        </p>
+        </>} />
       </section>
     </>
   );

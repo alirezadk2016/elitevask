@@ -18,3 +18,15 @@ export const DEFAULT_ALBUM = [
 // Homepage shows at most this many before/after sliders; the rest live on /galleri.
 export const HOME_BA_LIMIT = 6;
 export const HOME_ALBUM_LIMIT = 6;
+
+// English text for the built-in captions above (shown when the visitor picks EN).
+export const CAPTION_EN = {
+  "Motorrens · Peugeot": "Engine clean · Peugeot",
+  "Sæderens · stofsæder": "Seat clean · fabric seats",
+  "Interiør · kabine": "Interior · cabin",
+  "Fodrum · måtter": "Footwells · mats",
+  "Tagkant · algerens": "Roof edge · algae removal",
+  "Dampvask · BMW": "Steam wash · BMW",
+  "Motorhjelm · damp": "Bonnet · steam",
+  "Mobil dampvask · på stedet": "Mobile steam wash · on site",
+};
