@@ -48,7 +48,7 @@ export default async function BilvaskHilleroed() {
           Vi arbejder diskret og medbringer alt selv: strøm, vand og professionelt dampudstyr.
         </p>
 
-        <h2>Skov, fugt og grønne belægninger</h2>
+        <h2>Bilpleje i Nordsjælland: skov, fugt og grønne belægninger</h2>
         <p>
           Området omkring Gribskov og Store Dyrehave betyder, at mange biler i Hillerød står under træer: harpiks, fuglespots og grønne algebelægninger på tagkant og lister er typiske. Dampen løsner alle tre uden at gnide dem ned i lakken.
         </p>
@@ -98,7 +98,7 @@ export default async function BilvaskHilleroed() {
           We work discreetly and bring everything ourselves: power, water and professional steam equipment.
         </p>
 
-        <h2>Forest, damp and green deposits</h2>
+        <h2>Car care in North Zealand: forest, damp and green deposits</h2>
         <p>
           The area around Gribskov and Store Dyrehave means that many cars in Hillerød are parked under trees: resin, bird droppings and green algae deposits on the roof edge and trim are typical. The steam loosens all three without rubbing them into the paint.
         </p>
