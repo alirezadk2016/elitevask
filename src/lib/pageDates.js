@@ -3,7 +3,7 @@
  * never disagree. When you edit a page, bump its date here. */
 export const PAGES = [
   ['',                                '2026-10-21', 'weekly',  1.0],
-  ['/priser',                         '2026-10-28', 'monthly', 0.8],
+  ['/priser',                         '2026-11-15', 'monthly', 0.8],
   ['/klargoering-af-bil',             '2026-11-05', 'monthly', 0.8],
   ['/galleri',                        '2026-11-11', 'weekly',  0.8],
   ['/faq',                            '2026-10-21', 'monthly', 0.7],

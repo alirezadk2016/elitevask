@@ -225,6 +225,7 @@ export default async function PriserPage() {
           Priser på mobil bilvask
         </h1>
         <p style={{ fontSize: 16, color: "#94a89c", maxWidth: 600, lineHeight: 1.65, marginBottom: 40 }}>
+          <strong style={{ color: "#fff" }}>Mobil bilvask koster fra {Math.min(...PRICES.map((p) => p.udv))} kr.</strong> for en udvendig vask af en lille bil og fra {Math.min(...PRICES.map((p) => p.hele))} kr. for hele bilen ind og ud.
           Elite Vask tilbyder professionel mobil bil dampvask direkte til din adresse på Sjælland.
           Vælg den pakke der passer til din bil og dine behov. <strong style={{ color: "#fff" }}>Kørsel er gratis</strong> til hele Sjælland.
         </p>
@@ -350,6 +351,7 @@ export default async function PriserPage() {
           Mobile car wash prices
         </h1>
         <p style={{ fontSize: 16, color: "#94a89c", maxWidth: 600, lineHeight: 1.65, marginBottom: 40 }}>
+          <strong style={{ color: "#fff" }}>A mobile car wash costs from {Math.min(...PRICES.map((p) => p.udv))} kr.</strong> for an exterior wash of a small car and from {Math.min(...PRICES.map((p) => p.hele))} kr. for the whole car inside and out.
           Elite Vask offers professional mobile car steam washing directly at your address on Zealand.
           Choose the package that suits your car and your needs. <strong style={{ color: "#fff" }}>Travel is free</strong> across all of Zealand.
         </p>
