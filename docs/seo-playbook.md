@@ -100,3 +100,9 @@ and one per car type (elbil, varebil). Until then: "to check".
   - Top queries (clicks/impr.): elite vask 13/24, bilvask hillerød 4/287, elitevask 4/62, mobil bilvask københavn 3/99, dampvask bil 2/22, bilvask næstved 1/46, bilpleje hillerød 1/30, dampvask 1/27, mobil vask 1/24.
   - The biggest lever is still "bilvask hillerød": 287 impr. at a 1.4 % CTR, around position 9–10. Moving to top 5 needs links and reviews (GBP), not more on-page text.
   - Next: request the Pages tab filtered on /bilvask/hilleroed and /bilvask/naestved, and the 28-day vs previous comparison.
+- 2026-11-20 (pass 2) — Deep technical review of all 24 pages: JSON-LD parses on every page, no images without alt text, and robots.txt and the sitemap are OK. Changes:
+  - (1) Hillerød, our biggest query at 287 impr. @~9.5, went from 475 to 613 words. New H2 "Bilvask i Hillerød uden vaskehal" targets "vaskehal hillerød", using the Miljøstyrelsen 140 L figure already cited on the site. Two FAQs added: price (from 500/800 kr.) and duration (1–3 hours). Both are site facts, translated to EN.
+  - (2) The shared city section now links /guide/hvor-ofte, so its inbound links rise from 3 to 13.
+  - (3) BreadcrumbList added to /galleri and /guide; every indexable page except the legal ones now has breadcrumbs.
+  - sitemap lastmod is bumped for these pages. The Mak audit still finds 0 issues and the EN scan is clean.
+  - Off-site levers left for the owner: Google reviews, especially from Hillerød and Næstved customers, and local citations (Krak, De Gule Sider).

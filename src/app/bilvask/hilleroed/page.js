@@ -53,6 +53,10 @@ export default async function BilvaskHilleroed() {
           Området omkring Gribskov og Store Dyrehave betyder, at mange biler i Hillerød står under træer: harpiks, fuglespots og grønne algebelægninger på tagkant og lister er typiske. Dampen løsner alle tre uden at gnide dem ned i lakken.
         </p>
 
+        <h2>Bilvask i Hillerød uden vaskehal</h2>
+        <p>
+          Søger du efter en vaskehal i Hillerød, er mobil dampvask et alternativ: du kører ingen steder og står ikke i kø. Vi vasker bilen i hånden med damp og mikrofiber – ingen roterende børster – og bruger 1–3 liter vand, hvor en typisk vaskehal ifølge Miljøstyrelsen afleder omkring 140 liter spildevand pr. bil. Derfor kan vi vaske, hvor bilen holder, også uden afløb.
+        </p>
 
         <h2>Priser på bilvask i Hillerød</h2>
         <ul>
@@ -71,6 +75,10 @@ export default async function BilvaskHilleroed() {
         Ja, det er en af vores mest bookede løsninger i Hillerød – vi skal blot bruge fri adgang til bilen og plads omkring den.</p>
         <p><strong>Fjerner I harpiks og fuglespots?</strong><br/>
         Ja, varm damp opløser harpiks og indtørrede spots skånsomt, uden aggressive midler eller skrubning.</p>
+        <p><strong>Hvad koster bilvask i Hillerød?</strong><br/>
+        En udvendig vask koster fra 500 kr. og hele bilen ind og ud fra 800 kr. for en lille bil. Prisen for større biler og varebiler står under <a href="/priser">priser</a>, og kørslen til Hillerød er gratis.</p>
+        <p><strong>Hvor lang tid tager en bilvask?</strong><br/>
+        Afhængigt af pakken 1–3 timer. Du behøver ikke være hjemme, så længe vi kan komme til bilen.</p>
         <p><strong>Kan I komme i weekenden?</strong><br/>
         {hd.weekendOpen
           ? <>Ja, vi arbejder {hd.text}.</>
@@ -104,6 +112,11 @@ export default async function BilvaskHilleroed() {
         </p>
 
 
+        <h2>Car wash in Hillerød without a car wash hall</h2>
+        <p>
+          Looking for a car wash hall in Hillerød? Mobile steam washing is an alternative: you don&apos;t drive anywhere or queue. We wash the car by hand with steam and microfibre – no rotating brushes – and use 1–3 litres of water, where a typical car wash discharges around 140 litres of waste water per car according to the Danish Environmental Protection Agency. That is why we can wash wherever the car is parked, even without a drain.
+        </p>
+
         <h2>Car wash prices in Hillerød</h2>
         <ul>
           <li><strong>Exterior wash</strong> – complete exterior steam wash incl. rims and tyres. From 500 kr.</li>
@@ -121,6 +134,10 @@ export default async function BilvaskHilleroed() {
         Yes, it is one of our most booked options in Hillerød – we just need free access to the car and space around it.</p>
         <p><strong>Do you remove resin and bird droppings?</strong><br/>
         Yes, hot steam gently dissolves resin and dried-on droppings, without aggressive products or scrubbing.</p>
+        <p><strong>How much does a car wash in Hillerød cost?</strong><br/>
+        An exterior wash costs from 500 kr. and the whole car inside and out from 800 kr. for a small car. Prices for larger cars and vans are under <a href="/priser">prices</a>, and travel to Hillerød is free.</p>
+        <p><strong>How long does a car wash take?</strong><br/>
+        Depending on the package, 1–3 hours. You don&apos;t need to be home, as long as we can reach the car.</p>
         <p><strong>Can you come at the weekend?</strong><br/>
         {hdEn.weekendOpen
           ? <>Yes, we work {hdEn.text}.</>

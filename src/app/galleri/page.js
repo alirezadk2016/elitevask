@@ -1,5 +1,7 @@
 import GalleryClient from "@/components/GalleryClient";
 import Bi from "@/components/Bi";
+import JsonLd from "@/components/JsonLd";
+import { breadcrumbLd } from "@/lib/seo";
 
 export const metadata = {
   title: "Før og efter bilvask – billeder af dampvask | Elite Vask",
@@ -20,6 +22,7 @@ export const metadata = {
 export default function GalleriPage() {
   return (
     <>
+      <JsonLd items={[breadcrumbLd([{ name: "Forside", path: "/" }, { name: "Galleri", path: "/galleri" }])]} />
       <GalleryClient />
       {/* Server-rendered, below the gallery. The page was 91 words: the photos
           are the content for a human, but a crawler sees almost nothing, and

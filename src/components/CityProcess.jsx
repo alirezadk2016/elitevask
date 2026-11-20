@@ -25,7 +25,8 @@ export default function CityProcess({ city, cityEn }) {
           The price depends on the car type – small car, medium car, large car or van – and we wash electric cars too. All packages and prices are on the page with{" "}
           <a href="/priser">mobile car wash prices</a>. Want to know why we use steam instead of brushes? Read about{" "}
           <a href="/guide/dampvask-vs-traditionel">the difference between steam washing and a traditional car wash</a>. In winter,{" "}
-          <a href="/guide/salt-og-lak">protecting the paint from road salt</a> matters most.
+          <a href="/guide/salt-og-lak">protecting the paint from road salt</a> matters most, and our guide shows{" "}
+          <a href="/guide/hvor-ofte">how often you should wash your car</a> through the year.
         </p>
       </>
     );
@@ -46,7 +47,8 @@ export default function CityProcess({ city, cityEn }) {
         Prisen afhænger af biltypen – lille bil, mellemstor bil, stor bil eller varebil – og elbiler vasker vi også. Alle pakker og priser står på siden med{" "}
         <a href="/priser">priser på mobil bilvask</a>. Vil du vide, hvorfor vi bruger damp i stedet for
         børster, så læs om <a href="/guide/dampvask-vs-traditionel">forskellen på dampvask og traditionel bilvask</a>.
-        Om vinteren er <a href="/guide/salt-og-lak">beskyttelse af lakken mod vejsalt</a> det vigtigste.
+        Om vinteren er <a href="/guide/salt-og-lak">beskyttelse af lakken mod vejsalt</a> det vigtigste, og i vores guide
+        kan du se <a href="/guide/hvor-ofte">hvor ofte du bør vaske bilen</a> året rundt.
       </p>
     </>
   );
