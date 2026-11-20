@@ -2,7 +2,7 @@ import Link from "next/link";
 import Bi from "@/components/Bi";
 export const metadata = {
   title: "Handelsbetingelser – Elite Vask",
-  description: "Læs Elite Vaskes handelsbetingelser for mobil bil dampvask på Sjælland.",
+  description: "Handelsbetingelser for Elite Vask: bestilling, priser, betaling efter vask, aflysning, tilfredshedsgaranti og ansvar ved mobil dampvask på Sjælland.",
   alternates: { canonical: "/handelsbetingelser" },
 };
 

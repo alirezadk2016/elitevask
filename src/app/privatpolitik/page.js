@@ -2,7 +2,7 @@ import Link from "next/link";
 import Bi from "@/components/Bi";
 export const metadata = {
   title: "Privatlivspolitik – Elite Vask",
-  description: "Læs Elite Vaskes privatlivspolitik og se, hvordan vi behandler dine personoplysninger.",
+  description: "Privatlivspolitik for Elite Vask: hvilke oplysninger vi gemmer, når du booker en bilvask, hvorfor, hvor længe, og hvordan du får indsigt eller sletning.",
   alternates: { canonical: "/privatpolitik" },
 };
 

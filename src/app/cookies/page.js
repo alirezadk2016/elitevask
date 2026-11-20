@@ -2,7 +2,7 @@ import Link from "next/link";
 import Bi from "@/components/Bi";
 export const metadata = {
   title: "Cookiepolitik – Elite Vask",
-  description: "Læs Elite Vaskes cookiepolitik og se, hvilke cookies vi bruger på vores hjemmeside.",
+  description: "Cookiepolitik for Elite Vask: hvilke cookies elite-vask.dk bruger, hvad de gør, hvor længe de gemmes, og hvordan du sletter eller blokerer dem.",
   alternates: { canonical: "/cookies" },
 };
 

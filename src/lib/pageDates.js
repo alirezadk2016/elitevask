@@ -10,9 +10,9 @@ export const PAGES = [
   ['/guide',                          '2026-10-21', 'monthly', 0.7],
   ['/om-os',                          '2026-10-11', 'yearly',  0.6],
   ['/kontakt',                        '2026-09-14', 'yearly',  0.6],
-  ['/handelsbetingelser',             '2026-11-11', 'yearly',  0.4],
-  ['/privatpolitik',                  '2026-11-11', 'yearly',  0.4],
-  ['/cookies',                        '2026-11-11', 'yearly',  0.3],
+  ['/handelsbetingelser',             '2026-11-20', 'yearly',  0.4],
+  ['/privatpolitik',                  '2026-11-20', 'yearly',  0.4],
+  ['/cookies',                        '2026-11-20', 'yearly',  0.3],
 
   ['/guide/hvor-ofte',                '2026-10-21', 'yearly',  0.7],
   ['/guide/salt-og-lak',              '2026-10-21', 'yearly',  0.7],
