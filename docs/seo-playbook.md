@@ -95,3 +95,8 @@ and one per car type (elbil, varebil). Until then: "to check".
   - Fixed: the descriptions for /handelsbetingelser, /privatpolitik and /cookies were too short (71–86 chars) and are now 140–155 chars. /api/content/gallery and /api/content/beforeafter now return an empty list instead of a 500 when KV fails.
   - EN scan: only proper names remain in Danish. The booking wizard renders.
   - Search Console was not read: Windsor.ai paused reads because the free plan allows 1 account and 5 Search Console accounts are connected. Disconnect 4, or read GSC directly, then re-read the city CTR rows from 5–8 Nov.
+- 2026-11-20 — GSC screenshot from the owner (last 3 months, web):
+  - Totals: 90 clicks, 4.7k impressions, CTR 1.9 %, average position 16.7. Daily impressions are rising: about 40/day in Aug–Sep, with peaks of 80–110/day in mid-Nov.
+  - Top queries (clicks/impr.): elite vask 13/24, bilvask hillerød 4/287, elitevask 4/62, mobil bilvask københavn 3/99, dampvask bil 2/22, bilvask næstved 1/46, bilpleje hillerød 1/30, dampvask 1/27, mobil vask 1/24.
+  - The biggest lever is still "bilvask hillerød": 287 impr. at a 1.4 % CTR, around position 9–10. Moving to top 5 needs links and reviews (GBP), not more on-page text.
+  - Next: request the Pages tab filtered on /bilvask/hilleroed and /bilvask/naestved, and the 28-day vs previous comparison.
