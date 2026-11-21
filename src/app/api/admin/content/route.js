@@ -27,6 +27,8 @@ function revalidateContent(type) {
     revalidatePath('/api/site-content');
     if (type === 'gallery' || type === 'beforeafter') revalidatePath('/galleri');
     if (type === 'faq') revalidatePath('/faq');
+    // /priser renders the KV price matrix and add-ons.
+    if (type === 'packages' || type === 'extras') revalidatePath('/priser');
     if (type === 'reviews') revalidateTag('reviews');
   } catch {}
 }
@@ -80,6 +82,7 @@ export async function POST(req) {
       };
       const existingBa = await kv.get('content:beforeafter') || [];
       await kv.set('content:beforeafter', [baItem, ...existingBa]);
+      revalidateContent('beforeafter');
       return Response.json({ ok: true, item: baItem });
     }
 
@@ -105,6 +108,7 @@ export async function POST(req) {
 
     const existing = await kv.get(`content:${type}`) || [];
     await kv.set(`content:${type}`, [item, ...existing]);
+    revalidateContent(type);
     return Response.json({ ok: true, item });
 
   } else {
@@ -133,6 +137,7 @@ export async function POST(req) {
         if (Object.keys(cleanRow).length) clean[car] = cleanRow;
       }
       await kv.set('content:prices', clean);
+      revalidateContent('packages');
       return Response.json({ ok: true, prices: clean });
     }
 
@@ -163,6 +168,7 @@ export async function POST(req) {
       const newItem = { id: randomUUID(), ...faqItem };
       const existing = await kv.get('content:faq') || [];
       await kv.set('content:faq', [...existing, newItem]);
+      revalidateContent('faq');
       return Response.json({ ok: true, item: newItem });
     }
 
@@ -182,6 +188,7 @@ export async function POST(req) {
         ? extItem.id : randomUUID();
       const newItem = { ...extItem, id: wanted };
       await kv.set('content:extras', [...existing, newItem]);
+      revalidateContent('extras');
       return Response.json({ ok: true, item: newItem });
     }
 
@@ -215,6 +222,7 @@ export async function POST(req) {
       const baItem = { id: randomUUID(), before, after, caption, source: 'url', uploadedAt: new Date().toISOString() };
       const existingBa = await kv.get('content:beforeafter') || [];
       await kv.set('content:beforeafter', [baItem, ...existingBa]);
+      revalidateContent('beforeafter');
       return Response.json({ ok: true, item: baItem });
     }
 
@@ -253,6 +261,7 @@ export async function POST(req) {
 
     const existing = await kv.get(`content:${type}`) || [];
     await kv.set(`content:${type}`, [item, ...existing]);
+    revalidateContent(type);
     return Response.json({ ok: true, item });
   }
 }
@@ -284,6 +293,7 @@ export async function DELETE(req) {
 
   if (type === 'packages') {
     await kv.del('content:prices');
+    revalidateContent('packages');
     return Response.json({ ok: true });
   }
 

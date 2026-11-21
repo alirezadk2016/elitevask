@@ -162,6 +162,9 @@ export async function PATCH(request) {
     const booking = await kv.get(`booking:${token}`);
     if (!booking) return Response.json({ error: 'not_found' }, { status: 404 });
     const data = typeof booking === 'string' ? JSON.parse(booking) : booking;
+    // Already cancelled (double click, two tabs): nothing to do — and above
+    // all, don't send the customer a second cancellation email.
+    if (data.status === 'cancelled') return Response.json({ ok: true, alreadyCancelled: true });
     data.status = 'cancelled';
     // Persist first, then free slots: a failed write must never leave slots
     // released for a booking that still reads as confirmed.
