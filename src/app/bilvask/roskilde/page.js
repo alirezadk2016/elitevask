@@ -72,6 +72,8 @@ export default async function BilvaskRoskilde() {
         <CityProcess city="Roskilde" />
 
         <h2>Ofte stillede spørgsmål</h2>
+        <p><strong>Hvorfor ikke bare en vaskehal i Roskilde?</strong><br/>
+        Med os slipper du for at køre ud og stå i kø: vi vasker bilen i hånden med damp, hvor den holder. Vi bruger 1–3 liter vand, mens en typisk vaskehal ifølge Miljøstyrelsen afleder omkring 140 liter spildevand pr. bil.</p>
         <p><strong>Vasker I i hele Roskilde Kommune?</strong><br/>
         Ja, vi dækker hele kommunen inklusiv Jyllinge, Gundsømagle, Viby Sjælland og Gadstrup.</p>
         <p><strong>Hvad koster kørsel til Roskilde?</strong><br/>
@@ -127,6 +129,8 @@ export default async function BilvaskRoskilde() {
         <CityProcess city="Roskilde" />
 
         <h2>Frequently asked questions</h2>
+        <p><strong>Why not just a car wash hall in Roskilde?</strong><br/>
+        With us you skip the drive and the queue: we wash the car by hand with steam where it is parked. We use 1–3 litres of water, while a typical car wash discharges around 140 litres of waste water per car according to the Danish Environmental Protection Agency.</p>
         <p><strong>Do you wash cars throughout Roskilde Municipality?</strong><br/>
         Yes, we cover the whole municipality, including Jyllinge, Gundsømagle, Viby Sjælland and Gadstrup.</p>
         <p><strong>How much does travel to Roskilde cost?</strong><br/>

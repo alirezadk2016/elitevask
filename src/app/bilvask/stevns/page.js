@@ -67,6 +67,8 @@ export default async function BilvaskStevns() {
         <CityProcess city="Stevns" />
 
         <h2>Ofte stillede spørgsmål</h2>
+        <p><strong>Hvad koster bilvask i Stevns?</strong><br/>
+        En udvendig vask koster fra 500 kr. og hele bilen ind og ud fra 800 kr. for en lille bil. Prisen for din biltype står under <a href="/priser">priser</a>, og kørslen til Stevns er gratis.</p>
         <p><strong>Kører I helt ud til Rødvig og Stevns Klint-området?</strong><br/>
         Ja, vi dækker hele kommunen – også Rødvig, Lund og området omkring Stevns Klint. Kørsel er gratis.</p>
         <p><strong>Kan I fjerne saltbelægninger fra kystluften?</strong><br/>
@@ -117,6 +119,8 @@ export default async function BilvaskStevns() {
         <CityProcess city="Stevns" />
 
         <h2>Frequently asked questions</h2>
+        <p><strong>How much does a car wash in Stevns cost?</strong><br/>
+        An exterior wash costs from 500 kr. and the whole car inside and out from 800 kr. for a small car. The price for your car type is under <a href="/priser">prices</a>, and travel to Stevns is free.</p>
         <p><strong>Do you drive all the way out to Rødvig and the Stevns Klint (Stevns Cliff) area?</strong><br/>
         Yes, we cover the whole municipality – including Rødvig, Lund and the area around Stevns Klint. Travel is free.</p>
         <p><strong>Can you remove salt deposits from the coastal air?</strong><br/>

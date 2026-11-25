@@ -67,6 +67,10 @@ export default async function BilvaskFrederikssund() {
         <CityProcess city="Frederikssund" />
 
         <h2>Ofte stillede spørgsmål</h2>
+        <p><strong>Hvad koster bilvask i Frederikssund?</strong><br/>
+        En udvendig vask koster fra 500 kr. og hele bilen ind og ud fra 800 kr. for en lille bil. Prisen for din biltype står under <a href="/priser">priser</a>, og kørslen til Frederikssund er gratis.</p>
+        <p><strong>Hvorfor ikke bare en vaskehal i Frederikssund?</strong><br/>
+        Med os slipper du for at køre ud og stå i kø: vi vasker bilen i hånden med damp, hvor den holder. Vi bruger 1–3 liter vand, mens en typisk vaskehal ifølge Miljøstyrelsen afleder omkring 140 liter spildevand pr. bil.</p>
         <p><strong>Kører I over broen til Hornsherred?</strong><br/>
         Ja, Skibby, Jægerspris og hele Hornsherred er en del af vores faste område. Kørsel er gratis.</p>
         <p><strong>Hvor lang tid tager en vask?</strong><br/>
@@ -117,6 +121,10 @@ export default async function BilvaskFrederikssund() {
         <CityProcess city="Frederikssund" />
 
         <h2>Frequently asked questions</h2>
+        <p><strong>How much does a car wash in Frederikssund cost?</strong><br/>
+        An exterior wash costs from 500 kr. and the whole car inside and out from 800 kr. for a small car. The price for your car type is under <a href="/priser">prices</a>, and travel to Frederikssund is free.</p>
+        <p><strong>Why not just a car wash hall in Frederikssund?</strong><br/>
+        With us you skip the drive and the queue: we wash the car by hand with steam where it is parked. We use 1–3 litres of water, while a typical car wash discharges around 140 litres of waste water per car according to the Danish Environmental Protection Agency.</p>
         <p><strong>Do you drive over the bridge to Hornsherred?</strong><br/>
         Yes, Skibby, Jægerspris and all of Hornsherred are part of our regular area. Travel is free.</p>
         <p><strong>How long does a wash take?</strong><br/>

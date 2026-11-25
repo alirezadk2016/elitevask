@@ -81,6 +81,10 @@ export default function BilvaskRingsted() {
         <CityProcess city="Ringsted" />
 
         <h2>Ofte stillede spørgsmål</h2>
+        <p><strong>Hvad koster bilvask i Ringsted?</strong><br/>
+        En udvendig vask koster fra 500 kr. og hele bilen ind og ud fra 800 kr. for en lille bil. Prisen for din biltype står under <a href="/priser">priser</a>, og kørslen til Ringsted er gratis.</p>
+        <p><strong>Hvorfor ikke bare en vaskehal i Ringsted?</strong><br/>
+        Med os slipper du for at køre ud og stå i kø: vi vasker bilen i hånden med damp, hvor den holder. Vi bruger 1–3 liter vand, mens en typisk vaskehal ifølge Miljøstyrelsen afleder omkring 140 liter spildevand pr. bil.</p>
         <p><strong>Koster det noget at I kører til Ringsted?</strong><br/>
         Nej, kørsel til Ringsted og alle adresser i kommunen er gratis.</p>
         <p><strong>Kan I vaske varebiler?</strong><br/>
@@ -147,6 +151,10 @@ export default function BilvaskRingsted() {
         <CityProcess city="Ringsted" />
 
         <h2>Frequently asked questions</h2>
+        <p><strong>How much does a car wash in Ringsted cost?</strong><br/>
+        An exterior wash costs from 500 kr. and the whole car inside and out from 800 kr. for a small car. The price for your car type is under <a href="/priser">prices</a>, and travel to Ringsted is free.</p>
+        <p><strong>Why not just a car wash hall in Ringsted?</strong><br/>
+        With us you skip the drive and the queue: we wash the car by hand with steam where it is parked. We use 1–3 litres of water, while a typical car wash discharges around 140 litres of waste water per car according to the Danish Environmental Protection Agency.</p>
         <p><strong>Does it cost anything for you to drive to Ringsted?</strong><br/>
         No, travel to Ringsted and all addresses in the municipality is free.</p>
         <p><strong>Can you wash vans?</strong><br/>

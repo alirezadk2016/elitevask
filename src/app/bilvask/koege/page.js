@@ -74,6 +74,8 @@ export default async function BilvaskKoege() {
         <CityProcess city="Køge" />
 
         <h2>Ofte stillede spørgsmål</h2>
+        <p><strong>Hvad koster bilvask i Køge?</strong><br/>
+        En udvendig vask koster fra 500 kr. og hele bilen ind og ud fra 800 kr. for en lille bil. Prisen for din biltype står under <a href="/priser">priser</a>, og kørslen til Køge er gratis.</p>
         <p><strong>Koster det noget at I kører til Køge?</strong><br/>
         Nej, kørsel til Køge og hele kommunen er gratis.</p>
         <p><strong>Vasker I leasingbiler inden aflevering?</strong><br/>
@@ -131,6 +133,8 @@ export default async function BilvaskKoege() {
         <CityProcess city="Køge" />
 
         <h2>Frequently asked questions</h2>
+        <p><strong>How much does a car wash in Køge cost?</strong><br/>
+        An exterior wash costs from 500 kr. and the whole car inside and out from 800 kr. for a small car. The price for your car type is under <a href="/priser">prices</a>, and travel to Køge is free.</p>
         <p><strong>Does it cost anything for you to drive to Køge?</strong><br/>
         No, travel to Køge and the whole municipality is free.</p>
         <p><strong>Do you wash lease cars before they are returned?</strong><br/>

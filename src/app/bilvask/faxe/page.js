@@ -67,6 +67,8 @@ export default async function BilvaskFaxe() {
         <CityProcess city="Faxe" />
 
         <h2>Ofte stillede spørgsmål</h2>
+        <p><strong>Hvad koster bilvask i Faxe?</strong><br/>
+        En udvendig vask koster fra 500 kr. og hele bilen ind og ud fra 800 kr. for en lille bil. Prisen for din biltype står under <a href="/priser">priser</a>, og kørslen til Faxe er gratis.</p>
         <p><strong>Kommer I også til Haslev?</strong><br/>
         Ja, Haslev er en fast del af vores rute – ligesom resten af kommunen. Gratis kørsel.</p>
         <p><strong>Kan I tage en meget beskidt bil, der har kørt på grusvej?</strong><br/>
@@ -117,6 +119,8 @@ export default async function BilvaskFaxe() {
         <CityProcess city="Faxe" />
 
         <h2>Frequently asked questions</h2>
+        <p><strong>How much does a car wash in Faxe cost?</strong><br/>
+        An exterior wash costs from 500 kr. and the whole car inside and out from 800 kr. for a small car. The price for your car type is under <a href="/priser">prices</a>, and travel to Faxe is free.</p>
         <p><strong>Do you also come to Haslev?</strong><br/>
         Yes, Haslev is a regular part of our route – just like the rest of the municipality. Free travel.</p>
         <p><strong>Can you take a very dirty car that has been driven on gravel roads?</strong><br/>
