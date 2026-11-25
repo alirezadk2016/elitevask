@@ -85,6 +85,10 @@ export default function BilvaskNaestved() {
         <CityProcess city="Næstved" />
 
         <h2>Ofte stillede spørgsmål</h2>
+        <p><strong>Hvad koster bilvask i Næstved?</strong><br/>
+        En udvendig vask koster fra 500 kr. og hele bilen ind og ud fra 800 kr. for en lille bil. Prisen for din biltype står under <a href="/priser">priser</a>, og kørslen er gratis.</p>
+        <p><strong>Er der et alternativ til vaskehallen i Næstved?</strong><br/>
+        Ja. I stedet for at køre til en vaskehal og vente i kø kommer vi til bilen og vasker den i hånden med damp – hjemme eller på arbejdet. Vi bruger 1–3 liter vand, hvor en typisk vaskehal ifølge Miljøstyrelsen afleder omkring 140 liter spildevand pr. bil.</p>
         <p><strong>Kører I til hele Næstved Kommune?</strong><br/>
         Ja, vi dækker alle postnumre i kommunen – 4700 og omliggende.</p>
         <p><strong>Skal jeg være hjemme under vasken?</strong><br/>
@@ -155,6 +159,10 @@ export default function BilvaskNaestved() {
         <CityProcess city="Næstved" />
 
         <h2>Frequently asked questions</h2>
+        <p><strong>How much does a car wash in Næstved cost?</strong><br/>
+        An exterior wash costs from 500 kr. and the whole car inside and out from 800 kr. for a small car. The price for your car type is under <a href="/priser">prices</a>, and travel is free.</p>
+        <p><strong>Is there an alternative to the car wash hall in Næstved?</strong><br/>
+        Yes. Instead of driving to a car wash and queuing, we come to the car and wash it by hand with steam – at home or at work. We use 1–3 litres of water, where a typical car wash discharges around 140 litres of waste water per car according to the Danish Environmental Protection Agency.</p>
         <p><strong>Do you travel to the whole of Næstved Municipality?</strong><br/>
         Yes, we cover all postcodes in the municipality – 4700 and the surrounding area.</p>
         <p><strong>Do I need to be at home during the wash?</strong><br/>

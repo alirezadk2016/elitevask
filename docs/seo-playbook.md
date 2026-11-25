@@ -106,3 +106,7 @@ and one per car type (elbil, varebil). Until then: "to check".
   - (3) BreadcrumbList added to /galleri and /guide; every indexable page except the legal ones now has breadcrumbs.
   - sitemap lastmod is bumped for these pages. The Mak audit still finds 0 issues and the EN scan is clean.
   - Off-site levers left for the owner: Google reviews, especially from Hillerød and Næstved customers, and local citations (Krak, De Gule Sider).
+- 2026-11-25 — Full bug check:
+  - Results: build OK, lint 0 errors. Booking API: double-booking, area, past-date, invalid-slot and cross-site guards all hold. Admin API: create, move, cancel, delete, FAQ, hours, settings and customers all pass. Admin UI: 12 tabs, desktop and mobile, no errors. Mak audit: 24 pages, 0 issues. EN scan clean.
+  - SEO: the Næstved page went from 577 to 676 words with two FAQs ("Hvad koster bilvask i Næstved?" and "Er der et alternativ til vaskehallen i Næstved?"), using site facts only. The aim is for /bilvask/naestved, not the home page, to own "bilvask næstved" (46 impr.).
+  - Windsor.ai is still paused (free plan allows 1 Search Console account, 5 connected).

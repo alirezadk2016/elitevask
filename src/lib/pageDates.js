@@ -21,7 +21,7 @@ export const PAGES = [
   ['/bilvask/koebenhavn',             '2026-11-20', 'monthly', 0.9],
   ['/bilvask/roskilde',               '2026-11-20', 'monthly', 0.9],
   ['/bilvask/koege',                  '2026-11-20', 'monthly', 0.9],
-  ['/bilvask/naestved',               '2026-11-20', 'monthly', 0.9],
+  ['/bilvask/naestved',               '2026-11-25', 'monthly', 0.9],
   ['/bilvask/ringsted',               '2026-11-20', 'monthly', 0.9],
   ['/bilvask/stevns',                 '2026-11-20', 'monthly', 0.9],
   ['/bilvask/faxe',                   '2026-11-20', 'monthly', 0.9],
